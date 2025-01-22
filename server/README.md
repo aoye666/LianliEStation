@@ -2,7 +2,7 @@
  * @Author: ourEDA MaMing
  * @Date: 2025-01-22 13:20:55
  * @LastEditors: ourEDA MaMing
- * @LastEditTime: 2025-01-22 16:15:02
+ * @LastEditTime: 2025-01-22 23:19:06
  * @FilePath: \server\README.md
  * @Description: 李猴啊
  * 
@@ -41,20 +41,24 @@ PORT=
 ```sql
 use marketplace;
 CREATE TABLE `users` (
-    `id` int(11) NOT NULL AUTO_INCREMENT,
-    `nickname` varchar(50)    NOT NULL,--nickname,昵称
-    `email` varchar(100),              --email,邮箱
-    `password` varchar(255) NOT NULL,
-    `qq_id` varchar(100) NOT NULL,
-    `role` enum('user', 'admin') DEFAULT 'user',--role,管理员？普通用户？
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `nickname` VARCHAR(50) NOT NULL DEFAULT 'DUTers',  -- 昵称，默认为 "DUTers"
+    `username` VARCHAR(100) NOT NULL,                 -- 用户名，非空且不得重复
+    `email` VARCHAR(100),                             -- 邮箱
+    `password` VARCHAR(255) NOT NULL,                 -- 密码
+    `qq_id` VARCHAR(100) NOT NULL,                    -- QQ 号
+    `campus` VARCHAR(255) NOT NULL,                   -- 校区
+    `credit` INT NOT NULL DEFAULT 100,                -- 信誉分，默认为 100
     PRIMARY KEY (`id`),
-    UNIQUE KEY `email_unique` (`email`)
-);
+    UNIQUE KEY `email_unique` (`email`),              -- 邮箱唯一
+    UNIQUE KEY `username_unique` (`username`)         -- 用户名唯一
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO users (nickname, email, password, qq_id, role) VALUES
-('Alice', 'alice@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '123456789', 'user'),
-('Bob', 'bob@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '987654321', 'admin'),
-('Charlie', 'charlie@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '111223344', 'user');
+
+INSERT INTO users (nickname, username, email, password, qq_id, campus, credit) VALUES
+('Alice', 'alice001', 'alice@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '123456789', '开发区校区', 100),
+('Bob', 'bob001', 'bob@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '987654321', '开发区校区', 100),
+('Charlie', 'charlie001', 'charlie@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '111223344', '开发区校区', 100);
 
 ```
 
@@ -68,52 +72,48 @@ INSERT INTO users (nickname, email, password, qq_id, role) VALUES
 ## 获取所有用户信息
 
 - **方法:** GET
-- **路径:** `/`
+- **路径:** `/api/users/`
 - **功能:** 获取数据库中所有用户的基本信息，仅用于测试目的。
 - **请求参数:** 无
 - **成功响应:**
   - **状态码:** 200
-  - **内容:** 用户信息列表，包含 `id`, `nickname`, `email`, `role`。
+  - **内容:** 用户信息列表，包含 `id`, `nickname`, `email`。
 - **错误响应:**
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
-- **示例**
-  - `fetch('http://localhost:5000/api/users/', {
-  method: 'GET'
-}).then(response => response.json())
-  .then(data => console.log(data))
-  .catch(error => console.error('Error:', error));`
 
 ## 用户注册
 
 - **方法:** POST
-- **路径:** `/register`
-- **功能:** 允许新用户注册。检查邮箱是否已注册，未注册则将新用户信息插入数据库。
+- **路径:** `/api/users/register`
+- **功能:** 允许新用户注册。检查邮箱和用户名是否已被注册，未注册则将新用户信息插入数据库。
 - **请求参数:**
-  - `nickname`: 用户昵称，字符串，必需。
+  - `nickname`: 用户昵称，字符串，可选，默认为 'DUTers'。
   - `email`: 用户邮箱，字符串，必需。
   - `password`: 用户密码，字符串，必需。
   - `qq_id`: 用户的 QQ 号码，字符串，必需。
+  - `username`: 用户名，字符串，必需。
+  - `campus`: 用户所在校区，字符串，必需。
 - **成功响应:**
   - **状态码:** 201
   - **内容:** `{ "message": "注册成功" }`
 - **错误响应:**
   - **状态码:** 400
-  - **内容:** `{ "message": "缺少必要参数" }` 或 `{ "message": "邮箱已被注册" }`
+  - **内容:** `{ "message": "缺少必要参数" }` 或 `{ "message": "邮箱已被注册" }` 或 `{ "message": "用户名已被注册" }`
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
 ## 用户登录
 
 - **方法:** POST
-- **路径:** `/login`
-- **功能:** 验证用户的邮箱和密码。如果验证通过，返回用户信息。
+- **路径:** `/api/users/login`
+- **功能:** 验证用户的用户名和密码。如果验证通过，返回用户信息。
 - **请求参数:**
-  - `email`: 用户邮箱，字符串，必需。
+  - `username`: 用户名，字符串，必需。
   - `password`: 用户密码，字符串，必需。
 - **成功响应:**
   - **状态码:** 200
-  - **内容:** 用户信息，包含 `id`, `nickname`, `email`, `role`。
+  - **内容:** 用户信息，包含 `id`, `nickname`, `username`, `role`。
 - **错误响应:**
   - **状态码:** 400
   - **内容:** `{ "message": "缺少必要参数" }`
@@ -126,13 +126,13 @@ INSERT INTO users (nickname, email, password, qq_id, role) VALUES
 
 ## 获取当前用户信息
 
-- **方法:** GET
-- **路径:** `/profile`
-- **功能:** 获取指定用户的详细信息，此例中使用模拟的用户 ID。
-- **请求参数:** 无
+- **方法:** POST
+- **路径:** `/api/users/profile`
+- **功能:** 获取指定用户的详细信息，使用用户名查找。
+- **请求参数:** username
 - **成功响应:**
   - **状态码:** 200
-  - **内容:** 用户信息，包含 `id`, `nickname`, `email`, `role`。
+  - **内容:** 用户信息，包含 `id`, `nickname`, `email`, `campus`,`qq_id`,`credit`。
 - **错误响应:**
   - **状态码:** 404
   - **内容:** `{ "message": "用户不存在" }`
@@ -142,9 +142,9 @@ INSERT INTO users (nickname, email, password, qq_id, role) VALUES
 ## 删除当前用户账户
 
 - **方法:** DELETE
-- **路径:** `/profile`
-- **功能:** 删除指定的用户账户，此例中使用模拟的用户 ID。
-- **请求参数:** 无
+- **路径:** `/api/users/profile`
+- **功能:** 删除指定的用户账户，使用用户名查找。
+- **请求参数:** username
 - **成功响应:**
   - **状态码:** 200
   - **内容:** `{ "message": "账户已删除" }`

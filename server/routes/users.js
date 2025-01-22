@@ -5,7 +5,7 @@ let router = Router();
 
 // 获取所有用户信息（仅供测试使用）
 router.get("/", (req, res) => {
-  db.query("SELECT id, nickname, email, role FROM users")
+  db.query("SELECT id, nickname, email FROM users")
     .then(([rows]) => {
       res.json(rows); // 返回用户列表
     })
@@ -17,23 +17,38 @@ router.get("/", (req, res) => {
 
 // 用户注册
 router.post("/register", (req, res) => {
-  const { nickname, email, password, qq_id } = req.body;
+  let { nickname, email, password, qq_id, username, campus } = req.body;
 
-  if (!nickname || !email || !password || !qq_id) {
+  // 如果没有提供昵称，设置默认昵称为 'DUTers'
+  if (!nickname) {
+    nickname = 'DUTers';
+  }
+
+  if (!email || !password || !qq_id || !username || !campus) {
     return res.status(400).json({ message: "缺少必要参数" });
   }
 
-  // 检查邮箱是否已注册
-  db.query("SELECT * FROM users WHERE email = ?", [email])
+  // 检查邮箱和用户名是否已注册
+  db.query("SELECT * FROM users WHERE email = ? OR username = ?", [email, username])
     .then(([rows]) => {
       if (rows.length > 0) {
-        return res.status(400).json({ message: "邮箱已被注册" });
+        // 检查具体是哪个字段导致的冲突
+        const emailRegistered = rows.some(row => row.email === email);
+        const usernameRegistered = rows.some(row => row.username === username);
+        
+        if (emailRegistered && usernameRegistered) {
+          return res.status(400).json({ message: "邮箱和用户名都已被注册" });
+        } else if (emailRegistered) {
+          return res.status(400).json({ message: "邮箱已被注册" });
+        } else {
+          return res.status(400).json({ message: "用户名已被注册" });
+        }
       }
 
-      // 插入新用户
+      // 插入新用户，包括处理后的昵称
       return db.query(
-        "INSERT INTO users (nickname, email, password, qq_id, role) VALUES (?, ?, ?, ?, 'user')",
-        [nickname, email, password, qq_id]
+        "INSERT INTO users (nickname, email, password, qq_id, username, campus) VALUES (?, ?, ?, ?, ?, ?)",
+        [nickname, email, password, qq_id, username, campus]
       );
     })
     .then(() => {
@@ -45,16 +60,17 @@ router.post("/register", (req, res) => {
     });
 });
 
+
 // 用户登录
 router.post("/login", (req, res) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!email || !password) {
+  if (!username || !password) {
     return res.status(400).json({ message: "缺少必要参数" });
   }
 
-  // 检查用户是否存在
-  db.query("SELECT * FROM users WHERE email = ?", [email])
+  // 检查用户是否存在并验证密码
+  db.query("SELECT * FROM users WHERE username = ?", [username])
     .then(([rows]) => {
       if (rows.length === 0) {
         return res.status(404).json({ message: "用户不存在" });
@@ -62,16 +78,15 @@ router.post("/login", (req, res) => {
 
       const user = rows[0];
 
-      // 验证密码（简单字符串比较）
+      // 检查密码，暂时简单比较
       if (user.password !== password) {
         return res.status(401).json({ message: "密码错误" });
       }
 
-      // 返回用户信息（暂不生成JWT）
       res.status(200).json({
         id: user.id,
         nickname: user.nickname,
-        email: user.email,
+        username: user.username,
         role: user.role,
       });
     })
@@ -81,40 +96,56 @@ router.post("/login", (req, res) => {
     });
 });
 
-// 获取当前用户信息（模拟当前用户 ID 为 1）
-router.get("/profile", (req, res) => {
-  const userId = 1; // 模拟用户 ID
+// 查找当前用户
+router.post("/profile", (req, res) => {
+  const { username } = req.body;
 
-  db.query("SELECT id, nickname, email, role FROM users WHERE id = ?", [userId])
+  // 检查必要参数是否存在
+  if (!username) {
+    return res.status(400).json({ message: "缺少必要参数" });
+  }
+
+  // 根据用户名查找用户
+  db.query("SELECT id, nickname, email, campus, qq_id, credit FROM users WHERE username = ?", [username])
     .then(([rows]) => {
       if (rows.length === 0) {
         return res.status(404).json({ message: "用户不存在" });
       }
 
-      res.json(rows[0]);
+      // 返回用户信息
+      return res.status(200).json(rows[0]);
     })
     .catch((err) => {
-      console.error(err);
+      console.error("Database error:", err);
       res.status(500).json({ message: "服务器错误" });
     });
 });
 
-// 删除当前用户账户（模拟当前用户 ID 为 1）
-router.delete("/profile", (req, res) => {
-  const userId = 1; // 模拟用户 ID
 
-  db.query("DELETE FROM users WHERE id = ?", [userId])
+// 删除当前用户
+router.delete("/profile", (req, res) => {
+  const { username } = req.body;
+
+  // 检查必要参数是否存在
+  if (!username) {
+    return res.status(400).json({ message: "缺少必要参数" });
+  }
+
+  // 根据用户名删除用户
+  db.query("DELETE FROM users WHERE username = ?", [username])
     .then((result) => {
       if (result.affectedRows === 0) {
         return res.status(404).json({ message: "用户不存在" });
       }
 
-      res.json({ message: "账户已删除" });
+      // 返回删除成功消息
+      return res.status(200).json({ message: "账户已删除" });
     })
     .catch((err) => {
-      console.error(err);
+      console.error("Database error:", err);
       res.status(500).json({ message: "服务器错误" });
     });
 });
+
 
 export default router;
