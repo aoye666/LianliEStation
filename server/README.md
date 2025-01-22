@@ -30,18 +30,27 @@ PORT=
 
 ```sql
 use marketplace;
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,  -- 用户ID，自增主键
-    username VARCHAR(50) NOT NULL,      -- 用户名
-    email VARCHAR(100) NOT NULL,        -- 邮箱
-    password_hash VARCHAR(255) NOT NULL, -- 密码哈希值
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 创建时间
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- 更新时间
+CREATE TABLE `users` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `nickname` varchar(50)    NOT NULL,
+    `email` varchar(100),
+    `password` varchar(255) NOT NULL,
+    `qq_id` varchar(100) NOT NULL,
+    `role` enum('user', 'admin') DEFAULT 'user',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `email_unique` (`email`)
 );
-INSERT INTO user (username, email, password_hash) VALUES
-('alice', 'alice@example.com', '5f4dcc3b5aa765d61d8327deb882cf99'), -- 密码: password
-('bob', 'bob@example.com', '5f4dcc3b5aa765d61d8327deb882cf99'),     -- 密码: password
-('charlie', 'charlie@example.com', '5f4dcc3b5aa765d61d8327deb882cf99'); -- 密码: password
+
+--id,自动增加
+--nickname,昵称
+--email,邮箱
+--role,管理员？普通用户？
+
+INSERT INTO users (nickname, email, password, qq_id, role) VALUES
+('Alice', 'alice@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '123456789', 'user'),
+('Bob', 'bob@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '987654321', 'admin'),
+('Charlie', 'charlie@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '111223344', 'user');
+
 ```
 
 ##
@@ -51,4 +60,8 @@ INSERT INTO user (username, email, password_hash) VALUES
 
 # api 文档
 
-- GET /api/user 请求所有用户的信息 （仅供测试使用）
+- GET /api/users：请求所有用户的信息（仅供测试使用）。
+- POST /api/users/register：用户注册。
+- POST /api/users/login：用户登录。
+- GET /api/users/me：获取当前登录用户的信息。
+- DELETE /api/users/me：删除当前登录用户的账户。
