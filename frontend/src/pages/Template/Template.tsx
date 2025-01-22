@@ -1,9 +1,8 @@
 import React from 'react'
-import "./Market.scss"
 import Navbar from '../../components/Navbar/Navbar'
 import Tabbar from '../../components/Tabbar/User/Tabbar'
 
-const Market = () => {
+const Template = () => {
   return (
     <div>
       <Navbar />
@@ -13,4 +12,4 @@ const Market = () => {
   )
 }
 
-export default Market
+export default Template

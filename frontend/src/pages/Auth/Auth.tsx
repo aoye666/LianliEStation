@@ -1,6 +1,7 @@
 import React from 'react'
-import './Login.scss'
+import './Auth.scss'
 
+//注册登录页
 const Login = () => {
   return (
     <div>
