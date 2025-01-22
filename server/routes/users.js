@@ -100,21 +100,21 @@ router.get("/profile", (req, res) => {
 });
 
 // 删除当前用户账户（模拟当前用户 ID 为 1）
-// router.delete("/profile", (req, res) => {
-//   const userId = 1; // 模拟用户 ID
+router.delete("/profile", (req, res) => {
+  const userId = 1; // 模拟用户 ID
 
-//   db.query("DELETE FROM users WHERE id = ?", [userId])
-//     .then((result) => {
-//       if (result.affectedRows === 0) {
-//         return res.status(404).json({ message: "用户不存在" });
-//       }
+  db.query("DELETE FROM users WHERE id = ?", [userId])
+    .then((result) => {
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "用户不存在" });
+      }
 
-//       res.json({ message: "账户已删除" });
-//     })
-//     .catch((err) => {
-//       console.error(err);
-//       res.status(500).json({ message: "服务器错误" });
-//     });
-// });
+      res.json({ message: "账户已删除" });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ message: "服务器错误" });
+    });
+});
 
 export default router;
