@@ -54,24 +54,26 @@ INSERT INTO users (nickname, username, email, password, qq_id, campus, credit) V
 
 ```sql
 CREATE TABLE `posts` (
-    `id` INT(11) NOT NULL AUTO_INCREMENT,              -- 帖子ID
-    `user_id` INT(11) NOT NULL,                        -- 发布者
-    `title` VARCHAR(100) NOT NULL,                     -- 标题
-    `content` TEXT NOT NULL,                           -- 详情
-    `price` DECIMAL(10,2) CHECK (`price` >= 0),        -- 价格
-    `campus` VARCHAR(255) NOT NULL,                    -- 校区
+  `id` INT AUTO_INCREMENT PRIMARY KEY,  -- 帖子ID，自动增加并设置为主键
+  `title` VARCHAR(255) NOT NULL,  -- 帖子标题，不能为空
+  `content` TEXT,  -- 帖子内容，可以为空
+  `author_id` INT NOT NULL,  -- 帖子作者的 ID，不能为空
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,  -- 帖子创建时间，默认当前时间
+  `status` ENUM('active', 'inactive', 'deleted') DEFAULT 'active',  -- 帖子状态，默认是 'active'
+  `price` DECIMAL(10, 2) DEFAULT 0.00,  -- 帖子价格，默认 0.00
+  `campus_id` INT NOT NULL,  -- 校区 ID，不能为空
+  FOREIGN KEY (`author_id`) REFERENCES `users`(`id`) ON DELETE CASCADE  -- 外键约束，删除用户时，相关帖子也会被删除
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
 
-    PRIMARY KEY (`id`),
-    CONSTRAINT `fk_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 测试帖子数据（开发区校区ID=1）
-INSERT INTO `posts` (`user_id`, `title`, `content`, `price`, `campus_id`) VALUES
+
+INSERT INTO `posts` (`author_id`, `title`, `content`, `price`, `campus_id`) VALUES
 (1, '二手数学分析教材', '浙江大学版教材，无字迹破损，附习题解答', 35.50, 1),
 (2, '九成新机械键盘', 'Cherry MX红轴，RGB背光，包装齐全', 299.00, 1),
 (3, '开发区校区代取快递', '大件3元/件，小件2元/件（20:00前可预约）', 2.00, 1),
 (1, '免费赠送考研英语资料', '近10年真题及解析电子版，联系QQ发送', 0.00, 1),
 (2, '电竞椅转让', '人体工学设计，使用半年，因毕业急出', 150.00, 1);
+
 ```
 
 ##
