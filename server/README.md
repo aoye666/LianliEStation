@@ -50,6 +50,9 @@ INSERT INTO users (nickname, username, email, password, qq_id, campus, credit) V
 ('Bob', 'bob001', 'bob@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '987654321', '开发区校区', 100),
 ('Charlie', 'charlie001', 'charlie@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '111223344', '开发区校区', 100);
 
+
+
+
 ```
 
 ```sql
@@ -172,33 +175,166 @@ INSERT INTO `posts` (`author_id`, `title`, `content`, `price`, `campus_id`) VALU
 
 ## posts
 
-### 获取所有帖子信息
+### 获取帖子列表
 
 - **方法:** GET
-- **路径:** `/api/posts/`
-- **功能:** 获取数据库中所有帖子的基本信息，仅用于测试目的。
+- **路径:** `/api/posts`
+- **功能:** 获取所有未删除的帖子。
 - **请求参数:** 无
 - **成功响应:**
   - **状态码:** 200
-  - **内容:** 帖子信息列表，包含 `id`, `user_id`, `title`, `content`, `price`, `campus` 。
+  - **内容:** 返回帖子列表，包含字段 `id`, `title`, `content`, `author_id`, `created_at`, `status`, `price`, `campus_id` 等。
 - **错误响应:**
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
+  
 
-### 新增帖子
+
+### 发布新帖子
 
 - **方法:** POST
 - **路径:** `/api/posts/publish`
-- **功能:** 允许当前用户发布一条新的帖子信息
+- **功能:** 发布新帖子。
 - **请求参数:**
-  - `user_id`: 用户 id，INT，必需。
-  - `title`: 帖子标题，字符串，必需。
-  - `content`: 帖子描述，字符串，必需。
-  - `price`: 帖子物品价格，高精度十进制浮点数(最多两位小数)或对应字符串，必需。
-  - `campus`: 帖子所在校区，字符串，必需。
+  - `author_id`: 帖子作者的 ID，整数，必填。
+  - `title`: 帖子标题，字符串，必填。
+  - `content`: 帖子内容，字符串，可选。
+  - `price`: 帖子价格，浮动数值，可选，默认为 0。
+  - `campus_id`: 校区 ID，整数，必填。
 - **成功响应:**
   - **状态码:** 201
-  - **内容:** `{ message: "发布成功" }`
+  - **内容:** `{ "message": "发布成功" }`
+- **错误响应:**
+  - **状态码:** 400
+  - **内容:** `{ "message": "缺少必要参数" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 示例：
+```bash
+POST http://localhost:5000/api/posts/publish
+Content-Type: application/json
+
+{
+  "author_id": 1,
+  "title": "二手数学分析教材",
+  "content": "浙江大学版教材，无字迹破损，附习题解答",
+  "price": 35.50,
+  "campus_id": 1
+}
+```
+
+### 删除帖子
+
+- **方法:** DELETE
+- **路径:** `/api/posts/:post_id`
+- **功能:** 软删除帖子，将帖子 `status` 设置为 `deleted`。
+- **请求参数:**
+  - `post_id`: 帖子的 ID，整数，必填。
+  - `author_id`: 用户的 ID，整数，必填，用于验证用户是否是该帖子的作者。
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** `{ "message": "帖子已标记为删除" }`
+- **错误响应:**
+  - **状态码:** 400
+  - **内容:** `{ "message": "缺少必要参数" }`
+  - **状态码:** 404
+  - **内容:** `{ "message": "帖子未找到或用户无权删除" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 示例：
+```bash
+DELETE http://localhost:5000/api/posts/1
+Content-Type: application/json
+
+{
+  "author_id": 1
+}
+```
+
+### 获取帖子详情
+
+- **方法:** GET
+- **路径:** `/api/posts/byID/:post_id`
+- **功能:** 获取指定帖子的详细信息。
+- **请求参数:**
+  - `post_id`: 帖子的 ID，整数，必填。
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 返回帖子信息，包含 `id`, `title`, `content`, `author_id`, `created_at`, `status`, `price`, `campus_id` 等字段。
+- **错误响应:**
+  - **状态码:** 400
+  - **内容:** `{ "message": "缺少帖子 ID" }`
+  - **状态码:** 404
+  - **内容:** `{ "message": "帖子未找到或已被删除" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 示例：
+```bash
+GET http://localhost:5000/api/posts/byID/1
+```
+
+### 查询帖子（按条件）
+
+- **方法:** GET
+- **路径:** `/api/posts/search`
+- **功能:** 根据查询条件搜索帖子。
+- **请求参数:**
+  - `title`: 帖子标题，字符串，可选。
+  - `status`: 帖子的状态（`active`, `deleted`），字符串，可选。
+  - `campus_id`: 校区 ID，整数，可选。
+  - `min_price`: 最低价格，浮动数值，可选。
+  - `max_price`: 最高价格，浮动数值，可选。
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 返回符合条件的帖子列表。
 - **错误响应:**
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
+
+### 示例：
+```bash
+GET http://localhost:5000/api/posts/search?title=数学&status=active&min_price=10&max_price=100
+```
+
+### 修改帖子
+
+- **方法:** PUT
+- **路径:** `/api/posts/:post_id`
+- **功能:** 修改帖子信息，用户可以修改标题、内容、价格、校区等信息。
+- **请求参数:**
+  - `post_id`: 帖子的 ID，整数，必填。
+  - `author_id`: 帖子的作者 ID，整数，必填。
+  - `title`: 帖子标题，字符串，必填。
+  - `content`: 帖子内容，字符串，可选。
+  - `price`: 帖子价格，浮动数值，必填。
+  - `campus_id`: 校区 ID，整数，必填。
+  - `status`: 帖子状态（`active`, `deleted`），字符串，可选。
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** `{ "message": "帖子更新成功" }`
+- **错误响应:**
+  - **状态码:** 400
+  - **内容:** `{ "message": "缺少必要参数" }`
+  - **状态码:** 404
+  - **内容:** `{ "message": "帖子未找到或用户无权修改" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 示例：
+```bash
+PUT http://localhost:5000/api/posts/1
+Content-Type: application/json
+
+{
+  "author_id": 1,
+  "title": "二手数学分析教材 - 更新版",
+  "content": "浙江大学版教材，无字迹破损，附习题解答，更新版",
+  "price": 45.50,
+  "campus_id": 1,
+  "status": "active"
+}
+```
+
