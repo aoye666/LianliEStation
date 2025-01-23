@@ -5,9 +5,10 @@
  * @LastEditTime: 2025-01-22 23:19:06
  * @FilePath: \server\README.md
  * @Description: 李猴啊
- * 
- * Copyright (c) 2025 by FanZDStar , All Rights Reserved. 
+ *
+ * Copyright (c) 2025 by FanZDStar , All Rights Reserved.
 -->
+
 # 启动说明
 
 ## 环境变量
@@ -62,6 +63,28 @@ INSERT INTO users (nickname, username, email, password, qq_id, campus, credit) V
 
 ```
 
+```sql
+CREATE TABLE `posts` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT,              -- 帖子ID
+    `user_id` INT(11) NOT NULL,                        -- 发布者
+    `title` VARCHAR(100) NOT NULL,                     -- 标题
+    `content` TEXT NOT NULL,                           -- 详情
+    `price` DECIMAL(10,2) CHECK (`price` >= 0),        -- 价格
+    `campus` VARCHAR(255) NOT NULL,                    -- 校区
+
+    PRIMARY KEY (`id`),
+    CONSTRAINT `fk_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 测试帖子数据（开发区校区ID=1）
+INSERT INTO `posts` (`user_id`, `title`, `content`, `price`, `campus_id`) VALUES
+(1, '二手数学分析教材', '浙江大学版教材，无字迹破损，附习题解答', 35.50, 1),
+(2, '九成新机械键盘', 'Cherry MX红轴，RGB背光，包装齐全', 299.00, 1),
+(3, '开发区校区代取快递', '大件3元/件，小件2元/件（20:00前可预约）', 2.00, 1),
+(1, '免费赠送考研英语资料', '近10年真题及解析电子版，联系QQ发送', 0.00, 1),
+(2, '电竞椅转让', '人体工学设计，使用半年，因毕业急出', 150.00, 1);
+```
+
 ##
 
 使用`node app.js` 或者 `npm start`启动后端
@@ -69,7 +92,9 @@ INSERT INTO users (nickname, username, email, password, qq_id, campus, credit) V
 
 # API 文档
 
-## 获取所有用户信息
+## users
+
+### 获取所有用户信息
 
 - **方法:** GET
 - **路径:** `/api/users/`
@@ -82,7 +107,7 @@ INSERT INTO users (nickname, username, email, password, qq_id, campus, credit) V
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
-## 用户注册
+### 用户注册
 
 - **方法:** POST
 - **路径:** `/api/users/register`
@@ -103,7 +128,7 @@ INSERT INTO users (nickname, username, email, password, qq_id, campus, credit) V
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
-## 用户登录
+### 用户登录
 
 - **方法:** POST
 - **路径:** `/api/users/login`
@@ -124,7 +149,7 @@ INSERT INTO users (nickname, username, email, password, qq_id, campus, credit) V
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
-## 获取当前用户信息
+### 获取当前用户信息
 
 - **方法:** POST
 - **路径:** `/api/users/profile`
@@ -139,7 +164,7 @@ INSERT INTO users (nickname, username, email, password, qq_id, campus, credit) V
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
-## 删除当前用户账户
+### 删除当前用户账户
 
 - **方法:** DELETE
 - **路径:** `/api/users/profile`
@@ -151,5 +176,38 @@ INSERT INTO users (nickname, username, email, password, qq_id, campus, credit) V
 - **错误响应:**
   - **状态码:** 404
   - **内容:** `{ "message": "用户不存在" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+## posts
+
+### 获取所有帖子信息
+
+- **方法:** GET
+- **路径:** `/api/posts/`
+- **功能:** 获取数据库中所有帖子的基本信息，仅用于测试目的。
+- **请求参数:** 无
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 帖子信息列表，包含 `id`, `user_id`, `title`, `content`, `price`, `campus` 。
+- **错误响应:**
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 新增帖子
+
+- **方法:** POST
+- **路径:** `/api/posts/publish`
+- **功能:** 允许当前用户发布一条新的帖子信息
+- **请求参数:**
+  - `user_id`: 用户 id，INT，必需。
+  - `title`: 帖子标题，字符串，必需。
+  - `content`: 帖子描述，字符串，必需。
+  - `price`: 帖子物品价格，高精度十进制浮点数(最多两位小数)或对应字符串，必需。
+  - `campus`: 帖子所在校区，字符串，必需。
+- **成功响应:**
+  - **状态码:** 201
+  - **内容:** `{ message: "发布成功" }`
+- **错误响应:**
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
