@@ -1,14 +1,3 @@
-<!--
- * @Author: ourEDA MaMing
- * @Date: 2025-01-22 13:20:55
- * @LastEditors: ourEDA MaMing
- * @LastEditTime: 2025-01-22 23:19:06
- * @FilePath: \server\README.md
- * @Description: 李猴啊
- *
- * Copyright (c) 2025 by FanZDStar , All Rights Reserved.
--->
-
 # 启动说明
 
 ## 环境变量
