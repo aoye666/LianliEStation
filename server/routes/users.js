@@ -17,14 +17,14 @@ router.get("/", (req, res) => {
 
 // 用户注册
 router.post("/register", (req, res) => {
-  let { nickname, email, password, qq_id, username, campus } = req.body;
+  let { nickname, email, password, qq_id, username, campus_id } = req.body;
 
   // 如果没有提供昵称，设置默认昵称为 'DUTers'
   if (!nickname) {
-    nickname = 'DUTers';
+    nickname = "DUTers";
   }
 
-  if (!email || !password || !qq_id || !username || !campus) {
+  if (!email || !password || !qq_id || !username || !campus_id) {
     return res.status(400).json({ message: "缺少必要参数" });
   }
 
@@ -33,9 +33,9 @@ router.post("/register", (req, res) => {
     .then(([rows]) => {
       if (rows.length > 0) {
         // 检查具体是哪个字段导致的冲突
-        const emailRegistered = rows.some(row => row.email === email);
-        const usernameRegistered = rows.some(row => row.username === username);
-        
+        const emailRegistered = rows.some((row) => row.email === email);
+        const usernameRegistered = rows.some((row) => row.username === username);
+
         if (emailRegistered && usernameRegistered) {
           return res.status(400).json({ message: "邮箱和用户名都已被注册" });
         } else if (emailRegistered) {
@@ -46,10 +46,7 @@ router.post("/register", (req, res) => {
       }
 
       // 插入新用户，包括处理后的昵称
-      return db.query(
-        "INSERT INTO users (nickname, email, password, qq_id, username, campus) VALUES (?, ?, ?, ?, ?, ?)",
-        [nickname, email, password, qq_id, username, campus]
-      );
+      return db.query("INSERT INTO users (nickname, email, password, qq_id, username, campus_id) VALUES (?, ?, ?, ?, ?, ?)", [nickname, email, password, qq_id, username, campus_id]);
     })
     .then(() => {
       res.status(201).json({ message: "注册成功" });
@@ -59,7 +56,6 @@ router.post("/register", (req, res) => {
       res.status(500).json({ message: "服务器错误" });
     });
 });
-
 
 // 用户登录
 router.post("/login", (req, res) => {
@@ -106,7 +102,7 @@ router.post("/profile", (req, res) => {
   }
 
   // 根据用户名查找用户
-  db.query("SELECT id, nickname, email, campus, qq_id, credit FROM users WHERE username = ?", [username])
+  db.query("SELECT id, nickname, email, campus_id, qq_id, credit FROM users WHERE username = ?", [username])
     .then(([rows]) => {
       if (rows.length === 0) {
         return res.status(404).json({ message: "用户不存在" });
@@ -120,7 +116,6 @@ router.post("/profile", (req, res) => {
       res.status(500).json({ message: "服务器错误" });
     });
 });
-
 
 // 删除当前用户
 router.delete("/profile", (req, res) => {
@@ -146,6 +141,5 @@ router.delete("/profile", (req, res) => {
       res.status(500).json({ message: "服务器错误" });
     });
 });
-
 
 export default router;
