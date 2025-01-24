@@ -1,7 +1,7 @@
 import React from 'react'
 import "./Market.scss"
 import Navbar from '../../components/Navbar/Navbar'
-import Tabbar from '../../components/Tabbar/User/Tabbar'
+import Tabbar from '../../components/Tabbar/Tabbar'
 
 const Market = () => {
   return (

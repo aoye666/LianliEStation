@@ -3,14 +3,24 @@ import './App.scss';
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Market from './pages/Market/Market';
 import Template from './pages/Template/Template';
-import Auth from "./pages/Auth/Auth";//注册登录页
+import Login from "./pages/Login/Login";
+import Register from "./pages/Register/Register"
+
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
       <div>
-        <Auth />
+        <Login />
+      </div>
+    ),
+  },
+  {
+    path: "/register",
+    element: (
+      <div>
+        <Login />
       </div>
     ),
   },
