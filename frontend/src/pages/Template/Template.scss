@@ -1,0 +1,137 @@
+
+.container {
+    display: flex;
+    flex-direction: column;
+    transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0.5s;
+
+    input:focus {
+        border-color: #007bff; /* 聚焦时的边框颜色 */
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* 聚焦时的阴影效果 */
+    }
+
+    input{
+        outline: none;
+    }
+    
+    .navbar{
+        display: flex;
+        height: 15vh;
+    }
+
+    .tabbar{
+        display: flex;
+        height: 15vh;
+    }
+
+    .content{
+        height: 70vh;
+        margin-left:10px ;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        justify-content: center;
+        align-items: center;
+        .title{
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+
+            .title-text{
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            input{
+                border: 1px solid #ccc;
+                height: 20px;
+                width: 200px;
+                border-radius: 10px;
+            }
+        }
+
+        .price{
+            display: flex;
+            flex-direction: column;
+            width: 200px;
+            gap: 5px;
+
+            .price-text{
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            .price-unit{
+                display: flex;
+                gap: 10px;
+                input{
+                    border: 1px solid #ccc;
+                    height: 20px;
+                    width: 100px;
+                    border-radius: 10px;
+                }
+
+            }
+        }
+
+        .sort{
+            display: flex;
+            flex-direction: column;
+            width: 200px;
+            gap: 5px;
+
+            .sort-text{
+                font-size: 16px;
+                font-weight: bold;
+            }
+        }
+
+        .img-upload{
+            display: flex;
+            flex-direction: column;
+
+            .img-upload-up{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                .img-upload-text{
+                    font-size: 16px;
+                    font-weight: bold;
+                }
+                img{
+                    width: 30px;
+                }
+            }
+
+            .img-upload-down{
+                display: flex;
+                gap: 10px;
+
+                img{
+                    width: 80px;
+                }
+            }
+        }
+
+        .detail{
+            display: flex;
+            flex-direction: column;
+
+            .detail-text{
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            .detail-input{
+                input{
+                    border: 1px solid #ccc;
+                    height: 180px;
+                    width: 250px;
+                    border-radius: 10px;
+                }
+                
+            }
+        }
+        
+    }
+}

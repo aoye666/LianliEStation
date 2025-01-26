@@ -1,0 +1,207 @@
+    .button-basic {
+    border: none;
+    border-radius: 8px; /* 增加圆角 */
+    font-size: 16px; /* 调整字体大小 */
+    font-weight: 380;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.4s ease-out; /* 按钮的过渡效果 */
+    width: 40px;
+   
+    // &:hover {
+    //     background-color: #0056b3; /* 悬停时变为深蓝色 */
+    //     transform: translateY(-2px); /* 悬停时按钮稍微上移 */
+    //     box-shadow: 0 4px 10px rgba(0, 0, 255, 0.2); /* 增加阴影效果 */
+    //    }
+
+    &:active {
+        background-color: #003366; /* 按下时的颜色 */
+        transform: scale(0.9); /* 按下时取消上移效果 */
+    }
+   }
+   
+   .container {
+        background-color: #f5f5f5;
+        border: 2px solid #302f2f;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        width: 100vw;
+
+        input:focus {
+            border-color: #007bff; /* 聚焦时的边框颜色 */
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* 聚焦时的阴影效果 */
+        }
+
+        .navbar{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 25px 0 25px;
+
+            .logo{
+                display: flex;
+                width: 40px;
+                height: 40px;
+                margin-right: 10px;
+            }
+
+            .search{
+                input{
+                    border: 1px solid #acacac;
+                    width: 220px;
+                    height: 20px;
+                    border-radius: 10px;
+                    outline: none;
+                }
+            }
+
+            .search-btn{
+                display: flex;
+                width: 30px;
+                height: 30px;
+            }
+        }
+        
+
+        .body {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+
+            .un-content{
+                display: flex;
+                flex-direction: column;
+                border-bottom: 1px solid #302f2f;
+                padding-bottom: 10px;
+
+                .img{
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    img{
+                        width: 220px;
+                    }
+                }
+
+                .tag{
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 10px;
+
+                    .more{
+                        img{
+                            width: 25px;
+                        }
+                    }
+                    
+                    .market-type{
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        gap: 10px;
+                        padding-right: 10px;
+                        border-right:2px solid #302f2f;
+
+                        .sell{
+                            button{
+                                background-color: #28a0b5e7;
+                                @extend.button-basic;
+                            }
+                        }
+
+                        .buy{
+                            button{
+                                background-color: #edeb82;
+                                @extend.button-basic;
+                            }
+                        }
+                    }
+
+                    .commodity-type{
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        gap: 10px;
+
+                        .detail{
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            gap: 10px;
+
+                            button{
+                                @extend.button-basic;
+                            }
+                        }
+
+
+                    }
+                }
+            }
+
+            .content::-webkit-scrollbar {
+                display: none; /* 隐藏滚动条 */
+              }
+              
+            .content{
+                display: flex;
+                flex-direction: row;
+                gap: 5px;
+                flex-wrap: wrap;
+                overflow-y: scroll;
+                margin: 0 10px;
+                height: 65vh;
+
+                .commodity{
+                    display: flex;
+                    flex-direction: column;
+                    border: 1px solid #acacac;
+                    width: 150px;
+                    height: 150px;
+                    margin: 2px;
+                    border-radius: 5px;
+
+                    .commodity-img{
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        margin-top: 6px;
+                        margin-bottom: 6px;
+
+                        img{
+                            width: 85px;
+                            height: 85px;
+                        }
+
+                    }
+
+                    .commodity-title{
+                        font-size: 15px;
+                        display: flex;
+                        justify-self: start;
+                        align-items: start;
+                        margin-bottom: 5px;
+                        margin-left: 10px;
+                    }
+
+                    .commodity-bottom{
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 0 10px;
+
+                        .commodity-tag{
+                            border: 1px solid #c7c7c7;
+                            border-radius: 5px;
+                            padding: 2px;
+                        }
+                    }
+
+                }
+            }
+        }
+
+    }
+
