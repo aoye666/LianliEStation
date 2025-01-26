@@ -1,0 +1,56 @@
+.moreBar{
+    display: flex;
+    position: absolute;
+    left: 0;
+    height: 83vh;
+    width: 100vw;
+    background-color: #f9f9f9; /* 更柔和的背景色 */
+    border-radius: 10px; /* 更圆滑的边角 */
+    border: 1px solid #e0e0e0; /* 使用更柔和的灰色边框 */
+    flex-direction: column;
+    padding: 20px; /* 适当的内边距 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    input{
+        outline:none;
+    }
+
+    input:focus {
+        border-color: #007bff; /* 聚焦时的边框颜色 */
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* 聚焦时的阴影效果 */
+    }
+
+    .price{
+        display: flex;
+        flex-direction: column;
+        margin-left: 5px;
+        margin-bottom: 10px;
+        .price-title{  
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .price-unit{
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            input{
+                width: 100px;
+                height: 30px;
+                border: 1px solid #c4c2c2;
+                border-radius: 10px;
+            }
+        }
+    }
+
+    .sort{
+        display: flex;
+        margin-left: 5px;
+        .sort-title{  
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    }
+}
