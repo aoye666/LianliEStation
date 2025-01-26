@@ -1,7 +1,6 @@
 import React from 'react'
-import './Tabbar.scss'
 
-const Tabbar = () => {
+const MMessage = () => {
   return (
     <div>
       
@@ -9,4 +8,4 @@ const Tabbar = () => {
   )
 }
 
-export default Tabbar
+export default MMessage

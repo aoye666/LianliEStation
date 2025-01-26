@@ -30,18 +30,54 @@ PORT=
 
 ```sql
 use marketplace;
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,  -- 用户ID，自增主键
-    username VARCHAR(50) NOT NULL,      -- 用户名
-    email VARCHAR(100) NOT NULL,        -- 邮箱
-    password_hash VARCHAR(255) NOT NULL, -- 密码哈希值
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 创建时间
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- 更新时间
-);
-INSERT INTO user (username, email, password_hash) VALUES
-('alice', 'alice@example.com', '5f4dcc3b5aa765d61d8327deb882cf99'), -- 密码: password
-('bob', 'bob@example.com', '5f4dcc3b5aa765d61d8327deb882cf99'),     -- 密码: password
-('charlie', 'charlie@example.com', '5f4dcc3b5aa765d61d8327deb882cf99'); -- 密码: password
+CREATE TABLE `users` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `nickname` VARCHAR(50) NOT NULL DEFAULT 'DUTers', -- 昵称，默认为 "DUTers"
+    `username` VARCHAR(100) NOT NULL,                 -- 用户名，非空且不得重复
+    `email` VARCHAR(100),                             -- 邮箱
+    `password` VARCHAR(255) NOT NULL,                 -- 密码
+    `qq_id` VARCHAR(100) NOT NULL,                    -- QQ 号
+    `campus_id` INT NOT NULL,                         -- 校区 ID，不能为0，不能为空
+    `credit` INT NOT NULL DEFAULT 100,                -- 信誉分，默认为 100
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `email_unique` (`email`),              -- 邮箱唯一
+    UNIQUE KEY `username_unique` (`username`)         -- 用户名唯一
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+INSERT INTO `users` (`nickname`, `username`, `email`, `password`, `qq_id`, `campus_id`, `credit`) VALUES
+('Alice', 'alice001', 'alice@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '123456789', '1', 100),
+('Bob', 'bob001', 'bob@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '987654321', '1', 100),
+('Charlie', 'charlie001', 'charlie@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '111223344', '1', 100);
+
+
+
+
+```
+
+```sql
+CREATE TABLE `posts` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,  -- 帖子ID，自动增加并设置为主键
+  `title` VARCHAR(255) NOT NULL,  -- 帖子标题，不能为空
+  `content` TEXT,  -- 帖子内容，可以为空
+  `post_type` ENUM('receive', 'sell') NOT NULL, -- 帖子收发，不能为空
+  `tag` VARCHAR(255), -- 帖子分类，可以为空
+  `author_id` INT NOT NULL,  -- 帖子作者的 ID，不能为空
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,  -- 帖子创建时间，默认当前时间
+  `status` ENUM('active', 'inactive', 'deleted') DEFAULT 'active',  -- 帖子状态，默认是 'active'
+  `price` DECIMAL(10, 2) DEFAULT 0.00,  -- 帖子价格，默认 0.00
+  `campus_id` INT NOT NULL,  -- 校区 ID，不能为空
+  FOREIGN KEY (`author_id`) REFERENCES `users`(`id`) ON DELETE CASCADE  -- 外键约束，删除用户时，相关帖子也会被删除
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+INSERT INTO `posts` (`author_id`, `title`, `content`, `price`, `campus_id`, `post_type`, `tag`) VALUES
+(1, '二手数学分析教材', '浙江大学版教材，无字迹破损，附习题解答', 35.50, 1, 'sell', '教材'),
+(2, '九成新机械键盘', 'Cherry MX红轴，RGB背光，包装齐全', 299.00, 1, 'sell', '电子产品'),
+(3, '开发区校区代取快递', '大件3元/件，小件2元/件（20:00前可预约）', 2.00, 1, 'receive', '服务'),
+(1, '免费赠送考研英语资料', '近10年真题及解析电子版，联系QQ发送', 0.00, 1, 'sell', '资料'),
+(2, '电竞椅转让', '人体工学设计，使用半年，因毕业急出', 150.00, 1, 'sell', '家具');
 ```
 
 ##
@@ -49,6 +85,274 @@ INSERT INTO user (username, email, password_hash) VALUES
 使用`node app.js` 或者 `npm start`启动后端
 **推荐使用 nodemon app.js**启动
 
-# api 文档
+# API 文档
 
-- GET /api/user 请求所有用户的信息 （仅供测试使用）
+## users
+
+### 获取所有用户信息
+
+- **方法:** GET
+- **路径:** `/api/users/`
+- **功能:** 获取数据库中所有用户的基本信息，仅用于测试目的。
+- **请求参数:** 无
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 用户信息列表，包含 `id`, `nickname`, `email`。
+- **错误响应:**
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 用户注册
+
+- **方法:** POST
+- **路径:** `/api/users/register`
+- **功能:** 允许新用户注册。检查邮箱和用户名是否已被注册，未注册则将新用户信息插入数据库。
+- **请求参数:**
+  - `nickname`: 用户昵称，字符串，可选，默认为 'DUTers'。
+  - `email`: 用户邮箱，字符串，必需。
+  - `password`: 用户密码，字符串，必需。
+  - `qq_id`: 用户的 QQ 号码，字符串，必需。
+  - `username`: 用户名，字符串，必需。
+  - `campus_id`: 用户所在校区，整型，必需。
+- **成功响应:**
+  - **状态码:** 201
+  - **内容:** `{ "message": "注册成功" }`
+- **错误响应:**
+  - **状态码:** 400
+  - **内容:** `{ "message": "缺少必要参数" }` 或 `{ "message": "邮箱已被注册" }` 或 `{ "message": "用户名已被注册" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 用户登录
+
+- **方法:** POST
+- **路径:** `/api/users/login`
+- **功能:** 验证用户的用户名和密码。如果验证通过，返回用户信息。
+- **请求参数:**
+  - `username`: 用户名，字符串，必需。
+  - `password`: 用户密码，字符串，必需。
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 用户信息，包含 `id`, `nickname`, `username`, `role`。
+- **错误响应:**
+  - **状态码:** 400
+  - **内容:** `{ "message": "缺少必要参数" }`
+  - **状态码:** 401
+  - **内容:** `{ "message": "密码错误" }`
+  - **状态码:** 404
+  - **内容:** `{ "message": "用户不存在" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 获取当前用户信息
+
+- **方法:** POST
+- **路径:** `/api/users/profile`
+- **功能:** 获取指定用户的详细信息，使用用户名查找。
+- **请求参数:** username
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 用户信息，包含 `id`, `nickname`, `email`, `campus_id`,`qq_id`,`credit`。
+- **错误响应:**
+  - **状态码:** 404
+  - **内容:** `{ "message": "用户不存在" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 删除当前用户账户
+
+- **方法:** DELETE
+- **路径:** `/api/users/profile`
+- **功能:** 删除指定的用户账户，使用用户名查找。
+- **请求参数:** username
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** `{ "message": "账户已删除" }`
+- **错误响应:**
+  - **状态码:** 404
+  - **内容:** `{ "message": "用户不存在" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+## posts
+
+### 获取帖子列表
+
+- **方法:** GET
+- **路径:** `/api/posts`
+- **功能:** 获取所有未删除的帖子。
+- **请求参数:** 无
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 返回帖子列表，包含字段 `id`, `title`, `content`, `author_id`, `created_at`, `status`, `price`, `campus_id` 等。
+- **错误响应:**
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 发布新帖子
+
+- **方法:** POST
+- **路径:** `/api/posts/publish`
+- **功能:** 发布新帖子。
+- **请求参数:**
+  - `author_id`: 帖子作者的 ID，整数，必填。
+  - `title`: 帖子标题，字符串，必填。
+  - `content`: 帖子内容，字符串，可选。
+  - `price`: 帖子价格，浮动数值，可选，默认为 0。
+  - `campus_id`: 校区 ID，整数，必填。
+  - `post_type`: 帖子收发，"sell" or "receive"，必填。
+  - `tag`: 帖子分类，字符串，可选。
+- **成功响应:**
+  - **状态码:** 201
+  - **内容:** `{ "message": "发布成功" }`
+- **错误响应:**
+  - **状态码:** 400
+  - **内容:** `{ "message": "缺少必要参数" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 示例：
+
+```bash
+POST http://localhost:5000/api/posts/publish
+Content-Type: application/json
+
+{
+  "author_id": 1,
+  "title": "二手数学分析教材",
+  "content": "浙江大学版教材，无字迹破损，附习题解答",
+  "price": 35.50,
+  "campus_id": 1,
+  "post_type": "sell",
+  "tag": "教材"
+}
+```
+
+### 删除帖子
+
+- **方法:** DELETE
+- **路径:** `/api/posts/:post_id`
+- **功能:** 软删除帖子，将帖子 `status` 设置为 `deleted`。
+- **请求参数:**
+  - `post_id`: 帖子的 ID，整数，必填。
+  - `author_id`: 用户的 ID，整数，必填，用于验证用户是否是该帖子的作者。
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** `{ "message": "帖子已标记为删除" }`
+- **错误响应:**
+  - **状态码:** 400
+  - **内容:** `{ "message": "缺少必要参数" }`
+  - **状态码:** 404
+  - **内容:** `{ "message": "帖子未找到或用户无权删除" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 示例：
+
+```bash
+DELETE http://localhost:5000/api/posts/1
+Content-Type: application/json
+
+{
+  "author_id": 1
+}
+```
+
+### 获取帖子详情
+
+- **方法:** GET
+- **路径:** `/api/posts/byID/:post_id`
+- **功能:** 获取指定帖子的详细信息。
+- **请求参数:**
+  - `post_id`: 帖子的 ID，整数，必填。
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 返回帖子信息，包含 `id`, `title`, `content`, `author_id`, `created_at`, `status`, `price`, `campus_id` 等字段。
+- **错误响应:**
+  - **状态码:** 400
+  - **内容:** `{ "message": "缺少帖子 ID" }`
+  - **状态码:** 404
+  - **内容:** `{ "message": "帖子未找到或已被删除" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 示例：
+
+```bash
+GET http://localhost:5000/api/posts/byID/1
+```
+
+### 查询帖子（按条件）
+
+- **方法:** GET
+
+- **路径:** `/api/posts/search`
+
+- **功能:** 根据查询条件搜索帖子。
+
+- **请求参数:**
+  - `title`: 帖子标题，字符串，可选。
+  - `status`: 帖子的状态（`active`, `deleted`），字符串，可选。
+  - `campus_id`: 校区 ID，整数，可选。
+  - `post_type`: 帖子收发，"sell" or "receive"，可选。
+  - `tag`: 帖子分类，字符串，可选。
+  
+  - `min_price`: 最低价格，浮动数值，可选。
+  - `max_price`: 最高价格，浮动数值，可选。
+  
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 返回符合条件的帖子列表。
+  
+- **错误响应:**
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 示例：
+
+```bash
+GET http://localhost:5000/api/posts/search?title=数学&status=active&min_price=10&max_price=100
+```
+
+### 修改帖子
+
+- **方法:** PUT
+- **路径:** `/api/posts/:post_id`
+- **功能:** 修改帖子信息，用户可以修改标题、内容、价格、校区等信息。
+- **请求参数:**
+  - `post_id`: 帖子的 ID，整数，必填。
+  - `author_id`: 帖子的作者 ID，整数，必填。
+  - `title`: 帖子标题，字符串，必填。
+  - `content`: 帖子内容，字符串，可选。
+  - `price`: 帖子价格，浮动数值，必填。
+  - `campus_id`: 校区 ID，整数，必填。
+  - `status`: 帖子状态（`active`, `deleted`），字符串，可选。
+  - `post_type`: 帖子收发，"sell" or "receive"，必填。
+  - `tag`: 帖子分类，字符串，可选。
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** `{ "message": "帖子更新成功" }`
+- **错误响应:**
+  - **状态码:** 400
+  - **内容:** `{ "message": "缺少必要参数" }`
+  - **状态码:** 404
+  - **内容:** `{ "message": "帖子未找到或用户无权修改" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 示例：
+
+```bash
+PUT http://localhost:5000/api/posts/1
+Content-Type: application/json
+
+{
+  "author_id": 1,
+  "title": "二手数学分析教材 - 更新版",
+  "content": "浙江大学版教材，无字迹破损，附习题解答，更新版",
+  "price": 45.50,
+  "campus_id": 1,
+  "status": "active"
+  "post_type": "sell"
+}
+```

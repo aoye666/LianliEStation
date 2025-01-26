@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import "./Market.scss"
-import Tabbar from '../../components/Tabbar/User/Tabbar'
 import MoreBar from '../../components/moreBar/moreBar'
+import Navbar from '../../components/Navbar/Navbar'
+import Tabbar from '../../components/Tabbar/Tabbar'
 
 const Market = () => {
   let [marketType, setMarketType] = useState('sell');
