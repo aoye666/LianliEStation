@@ -1,7 +1,6 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { AuthContext } from "../../context/AuthContext";
+import { useAuthStore } from "../../store";
 import "../../App.scss";
 
 type LoginInputs = {
@@ -24,7 +23,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState<ErrorType | null>(null);
 
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
+  const { login } = useAuthStore();
 
   // 设置用户信息
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,11 +35,14 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await login(inputs);
-      await axios.post("http://localhost:8800/api/auth/login", inputs);
+      await login(inputs.username, inputs.password); // 调用 login 方法
       navigate("/home");
     } catch (err: any) {
-      setError(err.response.data);
+      if (err.response) {
+        setError(err.response.data);
+      } else {
+        setError({ message: "发生未知错误" });
+      }
     }
   };
 
@@ -54,6 +56,7 @@ const Login: React.FC = () => {
             type="text"
             placeholder="username"
             name="username"
+            value={inputs.username}
             onChange={handleChange}
           />
           <input
@@ -61,6 +64,7 @@ const Login: React.FC = () => {
             type="password"
             placeholder="password"
             name="password"
+            value={inputs.password}
             onChange={handleChange}
           />
           <button type="submit">登录</button>

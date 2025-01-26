@@ -1,6 +1,6 @@
 import React from 'react'
 
-const MComplain = () => {
+const Star = () => {
   return (
     <div>
       
@@ -8,4 +8,4 @@ const MComplain = () => {
   )
 }
 
-export default MComplain
+export default Star

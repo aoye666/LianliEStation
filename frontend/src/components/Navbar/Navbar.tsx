@@ -18,7 +18,7 @@ const Navbar = () => {
 
   const handleSearch = async () => {
     try {
-      const response = await axios.get(`https://api.example.com/search?text=${text}`);
+      const response = await axios.get(`http://localhost:5000/api/posts/search?title=${text}`);
       console.log(response.data);
     } catch (error) {
       console.log(error);
