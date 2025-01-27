@@ -1,9 +1,9 @@
-import React from 'react'
+import MTabbar from '../../components/Tabbar/MTabbar'
 
 const MMessage = () => {
   return (
     <div>
-      
+      <MTabbar />
     </div>
   )
 }
