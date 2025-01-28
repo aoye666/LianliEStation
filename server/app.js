@@ -7,6 +7,7 @@ import cors from "cors";
 // 示例路由
 import usersRouter from "./routes/users.js";
 import postsRouter from "./routes/posts.js";
+import appealsRouter from "./routes/appeals.js";
 
 let app = express();
 
@@ -20,6 +21,7 @@ app.use(cors());
 // 示例路由
 app.use("/api/users", usersRouter);
 app.use("/api/posts", postsRouter);
+app.use("/api/appeals", appealsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

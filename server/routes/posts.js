@@ -3,7 +3,7 @@ import db from "../db.js";
 
 let router = Router();
 
-// 获取帖子列表(测试用)
+// 获取帖子列表
 router.get("/", (req, res) => {
   db.query("SELECT * FROM posts WHERE status != 'deleted'") // 排除已删除的帖子
     .then(([rows]) => {

@@ -31,17 +31,17 @@ PORT=
 ```sql
 use marketplace;
 CREATE TABLE `users` (
-    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `id` INT NOT NULL AUTO_INCREMENT, -- 统一id格式，统一注释风格😋
     `nickname` VARCHAR(50) NOT NULL DEFAULT 'DUTers', -- 昵称，默认为 "DUTers"
-    `username` VARCHAR(100) NOT NULL,                 -- 用户名，非空且不得重复
-    `email` VARCHAR(100),                             -- 邮箱
-    `password` VARCHAR(255) NOT NULL,                 -- 密码
-    `qq_id` VARCHAR(100) NOT NULL,                    -- QQ 号
-    `campus_id` INT NOT NULL,                         -- 校区 ID，不能为0，不能为空
-    `credit` INT NOT NULL DEFAULT 100,                -- 信誉分，默认为 100
+    `username` VARCHAR(100) NOT NULL, -- 用户名，非空且不得重复
+    `email` VARCHAR(100), -- 邮箱
+    `password` VARCHAR(255) NOT NULL, -- 密码
+    `qq_id` VARCHAR(100) NOT NULL, -- QQ 号
+    `campus_id` INT NOT NULL, -- 校区 ID，不能为0，不能为空
+    `credit` INT NOT NULL DEFAULT 100, -- 信誉分，默认为 100
     PRIMARY KEY (`id`),
-    UNIQUE KEY `email_unique` (`email`),              -- 邮箱唯一
-    UNIQUE KEY `username_unique` (`username`)         -- 用户名唯一
+    UNIQUE KEY `email_unique` (`email`), -- 邮箱唯一
+    UNIQUE KEY `username_unique` (`username`) -- 用户名唯一
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -78,6 +78,22 @@ INSERT INTO `posts` (`author_id`, `title`, `content`, `price`, `campus_id`, `pos
 (3, '开发区校区代取快递', '大件3元/件，小件2元/件（20:00前可预约）', 2.00, 1, 'receive', '服务'),
 (1, '免费赠送考研英语资料', '近10年真题及解析电子版，联系QQ发送', 0.00, 1, 'sell', '资料'),
 (2, '电竞椅转让', '人体工学设计，使用半年，因毕业急出', 150.00, 1, 'sell', '家具');
+```
+
+```sql
+CREATE TABLE `appeals` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY, -- 申诉ID，自动增加并设置为主键
+    `author_id` INT NOT NULL, -- 申诉人ID，不能为空
+    `post_id` INT NOT NULL, -- 帖子ID，不能为空
+    `content` TEXT NOT NULL, -- 申诉内容，不能为空
+    `status` ENUM ('pending', 'resolved', 'deleted') DEFAULT 'pending', -- 申诉状态, 默认为 'pending'
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP -- 创建时间，默认当前时间
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+
+INSERT INTO `appeals` (`author_id`, `post_id`, `content`, `status`, `created_at`) VALUES
+(1, 5, '帖子内容不符合事实，请求审核', 'pending', '2024-03-01 14:30:00'), -- 待处理申诉
+(2, 8, '已与发布者协商解决', 'resolved', CURRENT_TIMESTAMP), -- 已解决申诉
+(3, 12, '误删帖子，申请恢复', 'pending', DEFAULT);-- 使用默认时间戳
 ```
 
 ##
@@ -291,19 +307,19 @@ GET http://localhost:5000/api/posts/byID/1
 - **功能:** 根据查询条件搜索帖子。
 
 - **请求参数:**
+
   - `title`: 帖子标题，字符串，可选。
   - `status`: 帖子的状态（`active`, `deleted`），字符串，可选。
   - `campus_id`: 校区 ID，整数，可选。
   - `post_type`: 帖子收发，"sell" or "receive"，可选。
   - `tag`: 帖子分类，字符串，可选。
-  
+
   - `min_price`: 最低价格，浮动数值，可选。
   - `max_price`: 最高价格，浮动数值，可选。
-  
+
 - **成功响应:**
   - **状态码:** 200
   - **内容:** 返回符合条件的帖子列表。
-  
 - **错误响应:**
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
@@ -355,4 +371,115 @@ Content-Type: application/json
   "status": "active"
   "post_type": "sell"
 }
+```
+
+## appeals
+
+### 获取所有申诉
+
+- **方法:** GET
+- **路径:** `/api/appeals`
+- **功能:** 获取所有申诉记录（含已删除数据）。
+- **请求参数:** 无。
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 返回申诉列表，包含字段 `id`, `author_id`, `post_id`, `content`, `status`, `created_at`
+- **错误响应:**
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 提交申诉
+
+- **方法:** POST
+- **路径:** `/api/appeals/publish`
+- **功能:** 创建新的申诉记录。
+- **请求参数:**
+  - `author_id`: 用户 id，整型，必填。
+  - `post_id`：关联帖子 ID，整型，必填。
+  - `content`：申诉内容，字符串，必填。
+- **成功响应:**
+  - **状态码:** 201
+  - **内容:** `{ "message": "提交成功" }`
+- **错误响应:**
+  - **状态码:** 400
+  - **内容:** `{ "message": "缺少参数" }`
+  - **状态码:** 404
+  - **内容:** `{ "message": "帖子不存在" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 查询申诉
+
+- **方法:** GET
+- **路径:** `/api/appeals/search`
+- **功能:** 按条件筛选申诉记录
+- **请求参数:**
+  - `author_id`: 用户 id，整型，可选。
+  - `post_id`：关联帖子 ID，整型，可选。
+  - `status`：状态筛选，字符串，可选。
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 返回符合条件的申诉列表（默认排除已删除记录）。
+- **错误响应:**
+  - **状态码:** 500
+  - **内容:** `{ "message": "查询失败" }`
+
+### 示例
+
+```
+GET http://localhost:5000/api/appeals/search?author_id=1&status=pending
+```
+
+### 修改申诉状态
+
+- **方法:** PUT
+- **路径:** `/api/appeals/:appeal_id`
+- **功能:** 更新申诉处理状态
+- **路径参数:**
+  - `appeal_id`: 用户 id，整型，必填。
+- **请求参数:**
+  - `status`: 新状态，字符串，必填。
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** `{ "message": "修改成功" }`
+- **错误响应:**
+  - **状态码:** 400
+  - **内容:** `{ "message": "缺少参数" }`
+  - **状态码:** 404
+  - **内容:** `{ "message": "申诉不存在" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 示例
+
+```
+PUT http://localhost:5000/api/appeals/456
+Content-Type: application/json
+
+{
+  "status": "processing"
+}
+```
+
+### 删除申诉
+
+- **方法:** DELETE
+- **路径:** `/api/appeals/:appeal_id`
+- **功能:** 软删除申诉记录
+- **路径参数:**
+  - `appeal_id`: 用户 id，整型，必填。
+- **请求参数:** 无
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** `{ "message": "修改成功" }`
+- **错误响应:**
+  - **状态码:** 400
+  - **内容:** `{ "message": "缺少参数" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 示例
+
+```
+DELETE http://localhost:5000/api/appeals/456
 ```
