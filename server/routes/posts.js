@@ -1,5 +1,9 @@
 import { Router } from "express";
 import db from "../db.js";
+import upload from "../routes/uploadImg.js";  // 引入图片上传中间件
+
+
+
 
 let router = Router();
 
@@ -16,18 +20,37 @@ router.get("/", (req, res) => {
 });
 
 // 新增帖子
-router.post("/publish", (req, res) => {
+router.post("/publish", upload.array("images", 5), (req, res) => {
   const { author_id, title, content, price, campus_id, post_type, tag } = req.body;
+  const files = req.files; // 获取上传的文件
 
   // 确保必需的字段存在
   if (!author_id || !title || !campus_id || !post_type) {
     return res.status(400).json({ message: "缺少必要参数" });
   }
 
+  // 插入帖子数据到 posts 表
   return db
     .query("INSERT INTO posts (author_id, title, content, price, campus_id, post_type, tag) VALUES (?, ?, ?, ?, ?, ?, ?)", [author_id, title, content, price, campus_id, post_type, tag])
-    .then(() => {
-      res.status(201).json({ message: "发布成功" });
+    .then((result) => {
+      const postId = result.insertId; // 获取刚插入的帖子 ID
+
+      // 获取所有上传的图片文件路径
+      const imageUrls = files.map((file) => `/uploads/${file.filename}`);
+
+      // 将图片链接存入 post_images 表
+      const imagePromises = imageUrls.map((url) =>
+        db.query("INSERT INTO post_images (post_id, image_url) VALUES (?, ?)", [postId, url])
+      );
+
+      Promise.all(imagePromises)
+        .then(() => {
+          res.status(201).json({ message: "发布成功", image_urls: imageUrls });
+        })
+        .catch((err) => {
+          console.error(err);
+          res.status(500).json({ message: "图片保存失败" });
+        });
     })
     .catch((err) => {
       console.error(err);
@@ -76,19 +99,45 @@ router.get("/byID/:post_id", (req, res) => {
     return res.status(400).json({ message: "缺少帖子 ID" });
   }
 
-  db.query("SELECT id, title, content, author_id, created_at, status, price, campus_id, post_type, tag FROM posts WHERE id = ? AND status != 'deleted'", [post_id]) // 排除已删除的帖子
+  // 查询帖子信息，并且获取与该帖子相关的图片
+  db.query(
+    "SELECT id, title, content, author_id, created_at, status, price, campus_id, post_type, tag FROM posts WHERE id = ? AND status != 'deleted'", 
+    [post_id]
+  )
     .then(([rows]) => {
       if (rows.length === 0) {
         return res.status(404).json({ message: "帖子未找到或已被删除" });
       }
 
-      res.status(200).json(rows[0]);
+      const post = rows[0]; // 获取帖子信息
+
+      // 查询与该帖子关联的图片信息
+      db.query(
+        "SELECT image_url FROM post_images WHERE post_id = ?", 
+        [post_id]
+      )
+        .then(([imageRows]) => {
+          // 获取图片链接数组
+          const images = imageRows.map(row => row.image_url);
+
+          // 返回帖子信息以及相关图片的 URL 列表
+          res.status(200).json({
+            post: post,
+            images: images
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+          res.status(500).json({ message: "查询帖子图片失败" });
+        });
     })
     .catch((err) => {
       console.error(err);
       res.status(500).json({ message: "服务器错误" });
     });
 });
+
+
 
 // 查询帖子（按条件）
 router.get("/search", (req, res) => {
@@ -133,15 +182,46 @@ router.get("/search", (req, res) => {
     }
   }
 
+  // 执行查询帖子
   db.query(query, params)
     .then(([rows]) => {
-      res.status(200).json(rows);
+      if (rows.length === 0) {
+        return res.status(404).json({ message: "未找到符合条件的帖子" });
+      }
+
+      // 查询与帖子相关的图片
+      const postIds = rows.map(post => post.id);
+      
+      db.query("SELECT post_id, image_url FROM post_images WHERE post_id IN (?)", [postIds])
+        .then(([imageRows]) => {
+          // 创建一个帖子 ID 到图片 URL 的映射
+          const imagesMap = imageRows.reduce((map, row) => {
+            if (!map[row.post_id]) {
+              map[row.post_id] = [];
+            }
+            map[row.post_id].push(row.image_url);
+            return map;
+          }, {});
+
+          // 将图片信息添加到帖子中
+          const postsWithImages = rows.map(post => {
+            post.images = imagesMap[post.id] || [];
+            return post;
+          });
+
+          res.status(200).json(postsWithImages);
+        })
+        .catch((err) => {
+          console.error(err);
+          res.status(500).json({ message: "获取图片信息失败" });
+        });
     })
     .catch((err) => {
       console.error(err);
       res.status(500).json({ message: "服务器错误" });
     });
 });
+
 
 // 修改帖子
 router.put("/:post_id", (req, res) => {

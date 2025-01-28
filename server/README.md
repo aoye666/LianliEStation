@@ -96,6 +96,29 @@ INSERT INTO `appeals` (`author_id`, `post_id`, `content`, `status`, `created_at`
 (3, 12, '误删帖子，申请恢复', 'pending', DEFAULT);-- 使用默认时间戳
 ```
 
+
+```sql
+CREATE TABLE `post_images` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,  -- 图片 ID，自动增长并设置为主键
+  `post_id` INT NOT NULL,  -- 关联的帖子 ID
+  `image_url` VARCHAR(255) NOT NULL,  -- 图片 URL，不能为空
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,  -- 图片上传时间，默认当前时间
+  FOREIGN KEY (`post_id`) REFERENCES `posts`(`id`) ON DELETE CASCADE  -- 外键关联，删除帖子时，相关图片也会删除
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+INSERT INTO `post_images` (`post_id`, `image_url`) 
+VALUES 
+(1, '/uploads/images/image1.jpg');
+
+INSERT INTO `post_images` (`post_id`, `image_url`) 
+VALUES 
+(4, '/uploads/images/image4.jpg'),
+(4, '/uploads/images/image5.jpg');
+```
+
+
+
 ##
 
 使用`node app.js` 或者 `npm start`启动后端
@@ -218,6 +241,7 @@ INSERT INTO `appeals` (`author_id`, `post_id`, `content`, `status`, `created_at`
   - `campus_id`: 校区 ID，整数，必填。
   - `post_type`: 帖子收发，"sell" or "receive"，必填。
   - `tag`: 帖子分类，字符串，可选。
+  - `images`: [file1, file2]  
 - **成功响应:**
   - **状态码:** 201
   - **内容:** `{ "message": "发布成功" }`
@@ -231,7 +255,7 @@ INSERT INTO `appeals` (`author_id`, `post_id`, `content`, `status`, `created_at`
 
 ```bash
 POST http://localhost:5000/api/posts/publish
-Content-Type: application/json
+Content-Type: multipart/form-data
 
 {
   "author_id": 1,
@@ -239,9 +263,11 @@ Content-Type: application/json
   "content": "浙江大学版教材，无字迹破损，附习题解答",
   "price": 35.50,
   "campus_id": 1,
-  "post_type": "sell",
-  "tag": "教材"
+  "post_type": "出售",
+  "tag": "教材",
+  "images":[file1, file2]  // 上传的图片文件
 }
+
 ```
 
 ### 删除帖子
