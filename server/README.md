@@ -119,6 +119,30 @@ VALUES
 
 
 
+```sql
+CREATE TABLE `user_favorites` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,  -- 收藏记录 ID，自动增长并设置为主键
+  `user_id` INT NOT NULL,  -- 用户 ID，关联到用户表的主键
+  `post_id` INT NOT NULL,  -- 帖子 ID，关联到帖子表的主键
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,  -- 收藏时间，默认当前时间
+  UNIQUE KEY `unique_user_post` (`user_id`, `post_id`),  -- 确保用户只能收藏一个帖子一次
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,  -- 外键关联到用户表，用户删除时级联删除收藏记录
+  FOREIGN KEY (`post_id`) REFERENCES `posts`(`id`) ON DELETE CASCADE  -- 外键关联到帖子表，帖子删除时级联删除收藏记录
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+-- 用户 1 收藏帖子 1
+INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 1);
+-- 用户 2 收藏帖子 3
+INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (2, 3);
+-- 用户 1 收藏帖子 4
+INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
+
+```
+
+
+
 ##
 
 使用`node app.js` 或者 `npm start`启动后端
@@ -241,15 +265,15 @@ VALUES
   - `campus_id`: 校区 ID，整数，必填。
   - `post_type`: 帖子收发，"sell" or "receive"，必填。
   - `tag`: 帖子分类，字符串，可选。
-  - `images`: [file1, file2]  
-- **成功响应:**
-  - **状态码:** 201
-  - **内容:** `{ "message": "发布成功" }`
-- **错误响应:**
-  - **状态码:** 400
-  - **内容:** `{ "message": "缺少必要参数" }`
-  - **状态码:** 500
-  - **内容:** `{ "message": "服务器错误" }`
+  - `images`: [file1, file2]  ,文件数组，可选，上传的图片文件。
+- **成功响应：**
+  - 状态码：201
+  - 内容：{ "message": "发布成功", "image_urls": ["图片URL1", "图片URL2", ...] }，返回帖子发布成功信息及图片链接列表。
+- **错误响应：**
+  - 状态码：400
+  - 内容：{ "message": "缺少必要参数" }
+  - 状态码：500
+  - 内容：{ "message": "服务器错误" }
 
 ### 示例：
 
@@ -508,4 +532,80 @@ Content-Type: application/json
 
 ```
 DELETE http://localhost:5000/api/appeals/456
+```
+
+## favorites
+### 添加收藏
+- 方法：POST
+- 路径：/api/favorites/add
+- 功能：收藏指定的帖子
+- 请求参数：
+  - user_id：用户的 ID，整数，必填。
+  - post_id：帖子的 ID，整数，必填。
+- 成功响应：
+  - 状态码：201
+  - 内容：{ "message": "收藏成功" }
+- 错误响应：
+  - 状态码：400
+  - 内容：{ "message": "缺少必要参数" }
+  - 状态码：404
+  - 内容：{ "message": "帖子未找到或已被删除" }
+  - 状态码：500
+  - 内容：{ "message": "服务器错误" }
+```
+POST /api/favorites/add
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "post_id": 1
+}
+
+```
+
+### 取消收藏
+- 方法：DELETE
+- 路径：/api/favorites/remove
+- 功能：取消对指定帖子的收藏
+- 请求参数：
+  - user_id：用户的 ID，整数，必填。
+  - post_id：帖子的 ID，整数，必填。
+- 成功响应：
+  - 状态码：200
+  - 内容：{ "message": "取消收藏成功" }
+- 错误响应：
+  - 状态码：400
+  - 内容：{ "message": "缺少必要参数" }
+  - 状态码：404
+  - 内容：{ "message": "未找到收藏记录" }
+  - 状态码：500
+  - 内容：{ "message": "服务器错误" }
+```
+DELETE /api/favorites/remove
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "post_id": 1
+}
+
+```
+
+
+
+### 获取用户收藏的所有帖子
+- 方法：GET
+- 路径：/api/favorites/user/:user_id
+- 功能：获取指定用户收藏的所有帖子
+- 请求参数：
+- user_id：用户的 ID，整数，路径参数，必填。
+- 成功响应：
+  - 状态码：200
+  - 内容：返回帖子列表，包含字段 id, title, content, author_id, created_at, status, price, campus_id, post_type, tag。
+- 错误响应：
+- 状态码：500
+- 内容：{ "message": "服务器错误" }
+
+```
+GET /api/favorites/user/1
 ```
