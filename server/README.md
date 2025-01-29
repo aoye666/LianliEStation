@@ -13,8 +13,7 @@ password: root,
 database: makertplace,
 ```
 
-使用 `dotenv` 开发依赖进行环境变量管理，如以上环境有改动，请自行在 `server` 根目录下新建`.env`文件，用以下格式修改
-
+使用 `dotenv` 开发依赖进行环境变量管理，如以上环境有改动，请自行在 `server` 根目录下新建`.env`文件，用以下格式修改(SECRET_KEY随你修改，也可以问fanzdstar设的是啥)
 ```
 DB_HOST=
 DB_PORT=
@@ -22,6 +21,7 @@ DB_USER=
 DB_PASSWORD=
 DB_NAME=
 PORT=
+SECRET_KEY=
 ```
 
 ## 数据库环境
@@ -151,7 +151,6 @@ INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
 # API 文档
 
 ## users
-
 ### 获取所有用户信息
 
 - **方法:** GET
@@ -190,35 +189,32 @@ INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
 
 - **方法:** POST
 - **路径:** `/api/users/login`
-- **功能:** 验证用户的用户名和密码。如果验证通过，返回用户信息。
+- **功能:** 验证用户的用户名和密码。如果验证通过，返回 JWT 令牌。
 - **请求参数:**
   - `username`: 用户名，字符串，必需。
   - `password`: 用户密码，字符串，必需。
 - **成功响应:**
   - **状态码:** 200
-  - **内容:** 用户信息，包含 `id`, `nickname`, `username`, `role`。
+  - **内容:** `{ "message": "登录成功", "token": "<JWT_TOKEN>" }`
 - **错误响应:**
   - **状态码:** 400
-  - **内容:** `{ "message": "缺少必要参数" }`
-  - **状态码:** 401
-  - **内容:** `{ "message": "密码错误" }`
-  - **状态码:** 404
-  - **内容:** `{ "message": "用户不存在" }`
+  - **内容:** `{ "message": "用户名或密码错误" }`
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
 ### 获取当前用户信息
 
-- **方法:** POST
+- **方法:** GET
 - **路径:** `/api/users/profile`
-- **功能:** 获取指定用户的详细信息，使用用户名查找。
-- **请求参数:** username
+- **功能:** 获取当前登录用户的详细信息，需提供 `Authorization` 头部。
+- **请求头:**
+  - `Authorization`: `Bearer <JWT_TOKEN>`
 - **成功响应:**
   - **状态码:** 200
-  - **内容:** 用户信息，包含 `id`, `nickname`, `email`, `campus_id`,`qq_id`,`credit`。
+  - **内容:** `{ "nickname": "DUTers", "username": "testuser", "campus_id": 1, "qq": "12345678", "credit": 100 }`
 - **错误响应:**
-  - **状态码:** 404
-  - **内容:** `{ "message": "用户不存在" }`
+  - **状态码:** 401
+  - **内容:** `{ "message": "Token 无效" }`
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
@@ -226,16 +222,20 @@ INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
 
 - **方法:** DELETE
 - **路径:** `/api/users/profile`
-- **功能:** 删除指定的用户账户，使用用户名查找。
-- **请求参数:** username
+- **功能:** 删除当前登录用户的账户，需提供 `Authorization` 头部。
+- **请求头:**
+  - `Authorization`: `Bearer <JWT_TOKEN>`
 - **成功响应:**
   - **状态码:** 200
   - **内容:** `{ "message": "账户已删除" }`
 - **错误响应:**
+  - **状态码:** 401
+  - **内容:** `{ "message": "Token 无效" }`
   - **状态码:** 404
   - **内容:** `{ "message": "用户不存在" }`
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
+
 
 ## posts
 

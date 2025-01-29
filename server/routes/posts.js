@@ -2,9 +2,6 @@ import { Router } from "express";
 import db from "../db.js";
 import upload from "../routes/uploadImg.js";  // 引入图片上传中间件
 
-
-
-
 let router = Router();
 
 // 获取帖子列表
