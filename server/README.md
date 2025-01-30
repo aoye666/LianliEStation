@@ -257,74 +257,75 @@ INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
 ## posts
 
 ### 获取帖子列表
-
 - **方法:** GET
-- **路径:** `/api/posts`
-- **功能:** 获取所有未删除的帖子。
+- **路径:** `/api/posts/`
+- **功能:** 获取数据库中所有未删除的帖子及其图片。
 - **请求参数:** 无
 - **成功响应:**
   - **状态码:** 200
-  - **内容:** 返回帖子列表，包含字段 `id`, `title`, `content`, `author_id`, `created_at`, `status`, `price`, `campus_id` 等。
+  - **内容:** 返回所有未删除的帖子列表，包含每个帖子的详细信息和相关的图片 URL。
+  - **示例:**
+    ```json
+    [
+      {
+        "id": 1,
+        "title": "二手书转让",
+        "content": "出售二手书籍，八成新。",
+        "author_id": 1,
+        "created_at": "2023-01-01T12:00:00",
+        "status": "active",
+        "price": 50,
+        "campus_id": 1,
+        "post_type": "sale",
+        "tag": "书籍",
+        "images": [
+          "/uploads/1738204953485-tios2b1p2dl.png",
+          "/uploads/1738204953486-tios2b1p2dl.jpg"
+        ]
+      }
+    ]
+    ```
 - **错误响应:**
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
-### 发布新帖子
+### 新增帖子
 
 - **方法:** POST
 - **路径:** `/api/posts/publish`
-- **功能:** 发布新帖子。
+- **功能:** 发布新帖子，支持上传最多 5 张图片。
 - **请求参数:**
-  - `author_id`: 帖子作者的 ID，整数，必填。
   - `title`: 帖子标题，字符串，必填。
-  - `content`: 帖子内容，字符串，可选。
-  - `price`: 帖子价格，浮动数值，可选，默认为 0。
-  - `campus_id`: 校区 ID，整数，必填。
-  - `post_type`: 帖子收发，"sell" or "receive"，必填。
-  - `tag`: 帖子分类，字符串，可选。
-  - `images`: [file1, file2] ,文件数组，可选，上传的图片文件。
-- **成功响应：**
-  - 状态码：201
-  - 内容：{ "message": "发布成功", "image_urls": ["图片 URL1", "图片 URL2", ...] }，返回帖子发布成功信息及图片链接列表。
-- **错误响应：**
-  - 状态码：400
-  - 内容：{ "message": "缺少必要参数" }
-  - 状态码：500
-  - 内容：{ "message": "服务器错误" }
-
-### 示例：
-
-```bash
-POST http://localhost:5000/api/posts/publish
-Content-Type: multipart/form-data
-
-{
-  "author_id": 1,
-  "title": "二手数学分析教材",
-  "content": "浙江大学版教材，无字迹破损，附习题解答",
-  "price": 35.50,
-  "campus_id": 1,
-  "post_type": "出售",
-  "tag": "教材",
-  "images":[file1, file2]  // 上传的图片文件
-}
-
-```
+  - `content`: 帖子内容，字符串，必填。
+  - `price`: 帖子价格，浮动数值，必填。
+  - `campus_id`: 校区 ID，整型，必填。
+  - `post_type`: 帖子类型，字符串，必填（如：`sale`, `exchange`）。
+  - `tag`: 帖子标签，字符串，可选。
+  - `images`: 帖子图片，文件，最多支持 5 张图片。
+- **成功响应:**
+  - **状态码:** 201
+  - **内容:** `{ "message": "发布成功", "image_urls": ["/uploads/1738204953485-tios2b1p2dl.png", "/uploads/1738204953486-tios2b1p2dl.jpg"] }`
+- **错误响应:**
+  - **状态码:** 400
+  - **内容:** `{ "message": "缺少必要参数" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
 
 ### 删除帖子
-
 - **方法:** DELETE
 - **路径:** `/api/posts/:post_id`
-- **功能:** 软删除帖子，将帖子 `status` 设置为 `deleted`。
+- **功能:** 删除指定帖子（软删除，将 `status` 字段设置为 `'deleted'`），使用 `Token` 验证用户身份，确保只有帖子的作者可以删除帖子。
 - **请求参数:**
-  - `post_id`: 帖子的 ID，整数，必填。
-  - `author_id`: 用户的 ID，整数，必填，用于验证用户是否是该帖子的作者。
+  - `post_id`: 帖子的 ID，整数，必填（作为 URL 参数传递）。
+  - `Authorization`: 请求头中的 `Token`，字符串，必填，格式为 `Bearer <token>`，用于验证用户身份。
 - **成功响应:**
   - **状态码:** 200
   - **内容:** `{ "message": "帖子已标记为删除" }`
 - **错误响应:**
   - **状态码:** 400
   - **内容:** `{ "message": "缺少必要参数" }`
+  - **状态码:** 401
+  - **内容:** `{ "message": "未提供 Token" }` 或 `{ "message": "无效的 Token" }`
   - **状态码:** 404
   - **内容:** `{ "message": "帖子未找到或用户无权删除" }`
   - **状态码:** 500
@@ -332,25 +333,43 @@ Content-Type: multipart/form-data
 
 ### 示例：
 
-```bash
+#### 请求：
+```http
 DELETE http://localhost:5000/api/posts/1
-Content-Type: application/json
-
-{
-  "author_id": 1
-}
+Authorization: Bearer <your_token_here>
 ```
 
 ### 获取帖子详情
 
 - **方法:** GET
 - **路径:** `/api/posts/byID/:post_id`
-- **功能:** 获取指定帖子的详细信息。
+- **功能:** 获取指定帖子的详细信息及相关的图片 URL。
 - **请求参数:**
-  - `post_id`: 帖子的 ID，整数，必填。
+  - `post_id`: 帖子 ID，整型，必填。
 - **成功响应:**
   - **状态码:** 200
-  - **内容:** 返回帖子信息，包含 `id`, `title`, `content`, `author_id`, `created_at`, `status`, `price`, `campus_id` 等字段。
+  - **内容:** 返回指定帖子及相关图片信息。
+  - **示例:**
+    ```json
+    {
+      "post": {
+        "id": 1,
+        "title": "二手书转让",
+        "content": "出售二手书籍，八成新。",
+        "author_id": 1,
+        "created_at": "2023-01-01T12:00:00",
+        "status": "active",
+        "price": 50,
+        "campus_id": 1,
+        "post_type": "sale",
+        "tag": "书籍"
+      },
+      "images": [
+        "/uploads/1738204953485-tios2b1p2dl.png",
+        "/uploads/1738204953486-tios2b1p2dl.jpg"
+      ]
+    }
+    ```
 - **错误响应:**
   - **状态码:** 400
   - **内容:** `{ "message": "缺少帖子 ID" }`
@@ -359,84 +378,94 @@ Content-Type: application/json
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
-### 示例：
 
-```bash
-GET http://localhost:5000/api/posts/byID/1
-```
+
+### 注意事项
+
+1. **图片上传**：上传的图片存储在服务器的 `public/uploads/` 文件夹中，并且会返回图片的 URL。前端可以通过`http://localhost:5000/uploads/xxx`访问图片，xxx文件存储在images数组里。
+2. **Token 验证**：需要使用 JWT Token 验证用户身份。在发送请求时，需要在请求头中提供有效的 Token（`Authorization: Bearer <token>`）。
+3. **软删除**：删除帖子时并不从数据库中删除数据，而是通过更新 `status` 字段为 `'deleted'` 来实现软删除。
+
 
 ### 查询帖子（按条件）
 
 - **方法:** GET
-
 - **路径:** `/api/posts/search`
-
-- **功能:** 根据查询条件搜索帖子。
-
+- **功能:** 根据指定条件查询帖子，并返回相关的图片信息。支持根据标题、状态、校区 ID、帖子类型、标签、价格等进行筛选。
 - **请求参数:**
-
   - `title`: 帖子标题，字符串，可选。
-  - `status`: 帖子的状态（`active`, `deleted`），字符串，可选。
+  - `status`: 帖子的状态（'active', 'inactive', 'deleted'），字符串，可选。
   - `campus_id`: 校区 ID，整数，可选。
-  - `post_type`: 帖子收发，"sell" or "receive"，可选。
-  - `tag`: 帖子分类，字符串，可选。
-
+  - `post_type`: 帖子类型，字符串，可选。
+  - `tag`: 帖子的标签，字符串，可选。
   - `min_price`: 最低价格，浮动数值，可选。
   - `max_price`: 最高价格，浮动数值，可选。
-
 - **成功响应:**
   - **状态码:** 200
-  - **内容:** 返回符合条件的帖子列表。
+  - **内容:** 帖子信息列表，包含 `id`, `title`, `content`, `author_id`, `created_at`, `status`, `price`, `campus_id`, `post_type`, `tag`，并附带与帖子相关的图片 URL 列表。
 - **错误响应:**
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
+  - **状态码:** 404
+  - **内容:** `{ "message": "未找到符合条件的帖子" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "获取图片信息失败" }`
 
 ### 示例：
 
-```bash
-GET http://localhost:5000/api/posts/search?title=数学&status=active&min_price=10&max_price=100
+#### 请求：
+```http
+GET http://localhost:5000/api/posts/search?title=二手&status=active&min_price=10&max_price=100
 ```
 
 ### 修改帖子
 
 - **方法:** PUT
 - **路径:** `/api/posts/:post_id`
-- **功能:** 修改帖子信息，用户可以修改标题、内容、价格、校区等信息。
+- **功能:** 修改指定帖子的内容。用户必须提供有效的 `token`，并且只能修改自己发布的帖子。
 - **请求参数:**
-  - `post_id`: 帖子的 ID，整数，必填。
-  - `author_id`: 帖子的作者 ID，整数，必填。
-  - `title`: 帖子标题，字符串，必填。
-  - `content`: 帖子内容，字符串，可选。
-  - `price`: 帖子价格，浮动数值，必填。
-  - `campus_id`: 校区 ID，整数，必填。
-  - `status`: 帖子状态（`active`, `deleted`），字符串，可选。
-  - `post_type`: 帖子收发，"sell" or "receive"，必填。
-  - `tag`: 帖子分类，字符串，可选。
+  - **路径参数:**
+    - `post_id`: 帖子的 ID，整数，必填。
+  - **请求体:**
+    - `title`: 帖子标题，字符串，必填。
+    - `content`: 帖子内容，字符串，可选。
+    - `price`: 帖子价格，浮动数值，可选。
+    - `campus_id`: 校区 ID，整数，必填。
+    - `status`: 帖子的状态（active, deleted），字符串，可选。
+    - `post_type`: 帖子类型（如：sale，求购等），字符串，必填。
+    - `tag`: 帖子标签，字符串，可选。
+- **请求头:**
+  - `Authorization`: Bearer <token>，必填，用于身份验证。
+  
 - **成功响应:**
   - **状态码:** 200
   - **内容:** `{ "message": "帖子更新成功" }`
+  
 - **错误响应:**
   - **状态码:** 400
   - **内容:** `{ "message": "缺少必要参数" }`
+  - **状态码:** 401
+  - **内容:** `{ "message": "未提供 Token" }` 或 `{ "message": "无效的 Token" }`
   - **状态码:** 404
   - **内容:** `{ "message": "帖子未找到或用户无权修改" }`
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
-
+  
 ### 示例：
 
-```bash
+#### 请求：
+```http
 PUT http://localhost:5000/api/posts/1
 Content-Type: application/json
+Authorization: Bearer <your_token_here>
 
 {
-  "author_id": 1,
-  "title": "二手数学分析教材 - 更新版",
-  "content": "浙江大学版教材，无字迹破损，附习题解答，更新版",
-  "price": 45.50,
+  "title": "二手数学分析教材",
+  "price": 50.00,
   "campus_id": 1,
+  "post_type": "sale",
+  "tag": "教材",
   "status": "active"
-  "post_type": "sell"
 }
 ```
 
