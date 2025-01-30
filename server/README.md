@@ -13,7 +13,8 @@ password: root,
 database: makertplace,
 ```
 
-使用 `dotenv` 开发依赖进行环境变量管理，如以上环境有改动，请自行在 `server` 根目录下新建`.env`文件，用以下格式修改(SECRET_KEY随你修改，也可以问fanzdstar设的是啥)
+使用 `dotenv` 开发依赖进行环境变量管理，如以上环境有改动，请自行在 `server` 根目录下新建`.env`文件，用以下格式修改(SECRET_KEY 随你修改，也可以问 fanzdstar 设的是啥)
+
 ```
 DB_HOST=
 DB_PORT=
@@ -39,16 +40,18 @@ CREATE TABLE `users` (
     `qq_id` VARCHAR(100) NOT NULL, -- QQ 号
     `campus_id` INT NOT NULL, -- 校区 ID，不能为0，不能为空
     `credit` INT NOT NULL DEFAULT 100, -- 信誉分，默认为 100
+    `avatar` VARCHAR(255) NOT NULL DEFAULT 'default.png' -- 用户头像存储路径
     PRIMARY KEY (`id`),
     UNIQUE KEY `email_unique` (`email`), -- 邮箱唯一
     UNIQUE KEY `username_unique` (`username`) -- 用户名唯一
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-INSERT INTO `users` (`nickname`, `username`, `email`, `password`, `qq_id`, `campus_id`, `credit`) VALUES
-('Alice', 'alice001', 'alice@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '123456789', '1', 100),
-('Bob', 'bob001', 'bob@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '987654321', '1', 100),
-('Charlie', 'charlie001', 'charlie@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '111223344', '1', 100);
+INSERT INTO `users` (`nickname`, `username`, `email`, `password`, `qq_id`, `campus_id`, `avatar`, `credit`)
+VALUES
+('Alice', 'alice001', 'alice@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '123456789', '1', 'default.png', 100),
+('Bob', 'bob001', 'bob@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '987654321', '1', 'default.png', 100),
+('Charlie', 'charlie001', 'charlie@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '111223344', '1', 'default.png', 100);
 
 
 
@@ -86,7 +89,7 @@ CREATE TABLE `appeals` (
     `author_id` INT NOT NULL, -- 申诉人ID，不能为空
     `post_id` INT NOT NULL, -- 帖子ID，不能为空
     `content` TEXT NOT NULL, -- 申诉内容，不能为空
-    `status` ENUM ('pending', 'resolved', 'deleted') DEFAULT 'pending', -- 申诉状态, 默认为 'pending'
+    `status` ENUM ('pending', 'resolved','', 'deleted') DEFAULT 'pending', -- 申诉状态, 默认为 'pending'
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP -- 创建时间，默认当前时间
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
@@ -95,7 +98,6 @@ INSERT INTO `appeals` (`author_id`, `post_id`, `content`, `status`, `created_at`
 (2, 8, '已与发布者协商解决', 'resolved', CURRENT_TIMESTAMP), -- 已解决申诉
 (3, 12, '误删帖子，申请恢复', 'pending', DEFAULT);-- 使用默认时间戳
 ```
-
 
 ```sql
 CREATE TABLE `post_images` (
@@ -107,17 +109,15 @@ CREATE TABLE `post_images` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-INSERT INTO `post_images` (`post_id`, `image_url`) 
-VALUES 
+INSERT INTO `post_images` (`post_id`, `image_url`)
+VALUES
 (1, '/uploads/images/image1.jpg');
 
-INSERT INTO `post_images` (`post_id`, `image_url`) 
-VALUES 
+INSERT INTO `post_images` (`post_id`, `image_url`)
+VALUES
 (4, '/uploads/images/image4.jpg'),
 (4, '/uploads/images/image5.jpg');
 ```
-
-
 
 ```sql
 CREATE TABLE `user_favorites` (
@@ -141,8 +141,6 @@ INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
 
 ```
 
-
-
 ##
 
 使用`node app.js` 或者 `npm start`启动后端
@@ -151,6 +149,7 @@ INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
 # API 文档
 
 ## users
+
 ### 获取所有用户信息
 
 - **方法:** GET
@@ -211,7 +210,7 @@ INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
   - `Authorization`: `Bearer <JWT_TOKEN>`
 - **成功响应:**
   - **状态码:** 200
-  - **内容:** `{ "nickname": "DUTers", "username": "testuser", "campus_id": 1, "qq": "12345678", "credit": 100 }`
+  - **内容:** `{ "nickname": "DUTers", "username": "testuser", "campus_id": 1, "qq": "12345678", "credit": 100 ，'avater': "default.png"}`
 - **错误响应:**
   - **状态码:** 401
   - **内容:** `{ "message": "Token 无效" }`
@@ -236,6 +235,24 @@ INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
+### 更改当前用户信息
+
+**方法:** PUT
+**路径:** `/api/users/profile`
+**功能:** 更新当前登录用户的基本信息（昵称、QQ 号、用户名、校区 ID）及头像，需提供 `Authorization` 头部。
+
+- **请求头:**
+  - `Authorization`: `Bearer <JWT_TOKEN>`
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** `{ "message": "用户信息已更新" }`
+- **错误响应:**
+  - **状态码:** 401
+  - **内容:** `{ "message": "Token 无效" }`
+  - **状态码:** 404
+  - **内容:** `{ "message": "用户不存在" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
 
 ## posts
 
@@ -265,10 +282,10 @@ INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
   - `campus_id`: 校区 ID，整数，必填。
   - `post_type`: 帖子收发，"sell" or "receive"，必填。
   - `tag`: 帖子分类，字符串，可选。
-  - `images`: [file1, file2]  ,文件数组，可选，上传的图片文件。
+  - `images`: [file1, file2] ,文件数组，可选，上传的图片文件。
 - **成功响应：**
   - 状态码：201
-  - 内容：{ "message": "发布成功", "image_urls": ["图片URL1", "图片URL2", ...] }，返回帖子发布成功信息及图片链接列表。
+  - 内容：{ "message": "发布成功", "image_urls": ["图片 URL1", "图片 URL2", ...] }，返回帖子发布成功信息及图片链接列表。
 - **错误响应：**
   - 状态码：400
   - 内容：{ "message": "缺少必要参数" }
@@ -535,7 +552,9 @@ DELETE http://localhost:5000/api/appeals/456
 ```
 
 ## favorites
+
 ### 添加收藏
+
 - 方法：POST
 - 路径：/api/favorites/add
 - 功能：收藏指定的帖子
@@ -552,6 +571,7 @@ DELETE http://localhost:5000/api/appeals/456
   - 内容：{ "message": "帖子未找到或已被删除" }
   - 状态码：500
   - 内容：{ "message": "服务器错误" }
+
 ```
 POST /api/favorites/add
 Content-Type: application/json
@@ -564,6 +584,7 @@ Content-Type: application/json
 ```
 
 ### 取消收藏
+
 - 方法：DELETE
 - 路径：/api/favorites/remove
 - 功能：取消对指定帖子的收藏
@@ -580,6 +601,7 @@ Content-Type: application/json
   - 内容：{ "message": "未找到收藏记录" }
   - 状态码：500
   - 内容：{ "message": "服务器错误" }
+
 ```
 DELETE /api/favorites/remove
 Content-Type: application/json
@@ -591,9 +613,8 @@ Content-Type: application/json
 
 ```
 
-
-
 ### 获取用户收藏的所有帖子
+
 - 方法：GET
 - 路径：/api/favorites/user/:user_id
 - 功能：获取指定用户收藏的所有帖子
