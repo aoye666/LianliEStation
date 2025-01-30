@@ -584,78 +584,70 @@ DELETE http://localhost:5000/api/appeals/456
 
 ### 添加收藏
 
-- 方法：POST
-- 路径：/api/favorites/add
-- 功能：收藏指定的帖子
-- 请求参数：
-  - user_id：用户的 ID，整数，必填。
-  - post_id：帖子的 ID，整数，必填。
-- 成功响应：
-  - 状态码：201
-  - 内容：{ "message": "收藏成功" }
-- 错误响应：
-  - 状态码：400
-  - 内容：{ "message": "缺少必要参数" }
-  - 状态码：404
-  - 内容：{ "message": "帖子未找到或已被删除" }
-  - 状态码：500
-  - 内容：{ "message": "服务器错误" }
+- **方法:** POST
+- **路径:** `/api/favorites/add`
+- **功能:** 用户可以收藏指定的帖子。如果帖子已被收藏，则返回错误。
+- **请求参数:**
+  - `post_id`: 帖子的 ID，整数，必填。
+  - **Headers:**
+    - `Authorization`: 必填，包含 `Bearer token` 格式的认证信息。
+- **成功响应:**
+  - **状态码:** 201
+  - **内容:** `{ "message": "收藏成功" }`
+- **错误响应:**
+  - **状态码:** 401
+  - **内容:** `{ "message": "Token 无效或已过期" }`
+  - **状态码:** 404
+  - **内容:** `{ "message": "帖子未找到或已被删除" }`
+  - **状态码:** 400
+  - **内容:** `{ "message": "已经收藏过该帖子" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
 
-```
-POST /api/favorites/add
-Content-Type: application/json
-
-{
-  "user_id": 1,
-  "post_id": 1
-}
-
-```
+---
 
 ### 取消收藏
 
-- 方法：DELETE
-- 路径：/api/favorites/remove
-- 功能：取消对指定帖子的收藏
-- 请求参数：
-  - user_id：用户的 ID，整数，必填。
-  - post_id：帖子的 ID，整数，必填。
-- 成功响应：
-  - 状态码：200
-  - 内容：{ "message": "取消收藏成功" }
-- 错误响应：
-  - 状态码：400
-  - 内容：{ "message": "缺少必要参数" }
-  - 状态码：404
-  - 内容：{ "message": "未找到收藏记录" }
-  - 状态码：500
-  - 内容：{ "message": "服务器错误" }
+- **方法:** DELETE
+- **路径:** `/api/favorites/remove`
+- **功能:** 用户取消对指定帖子的收藏。
+- **请求参数:**
+  - `post_id`: 帖子的 ID，整数，必填。
+  - **Headers:**
+    - `Authorization`: 必填，包含 `Bearer token` 格式的认证信息。
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** `{ "message": "取消收藏成功" }`
+- **错误响应:**
+  - **状态码:** 401
+  - **内容:** `{ "message": "无效的 token" }`
+  - **状态码:** 404
+  - **内容:** `{ "message": "未找到收藏记录" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
 
-```
-DELETE /api/favorites/remove
-Content-Type: application/json
+---
 
-{
-  "user_id": 1,
-  "post_id": 1
-}
+### 查询用户的所有收藏
 
-```
+- **方法:** GET
+- **路径:** `/api/favorites/user/favorites`
+- **功能:** 获取用户收藏的所有帖子信息，已删除的帖子不会显示。
+- **请求参数:** 无
+- **Headers:**
+  - `Authorization`: 必填，包含 `Bearer token` 格式的认证信息。
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 返回用户所有收藏的帖子，包含 `id`, `title`, `content`, `author_id`, `created_at`, `status`, `price`, `campus_id`, `post_type`, `tag` 等字段。
+- **错误响应:**
+  - **状态码:** 401
+  - **内容:** `{ "message": "无效的 token" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
 
-### 获取用户收藏的所有帖子
+---
 
-- 方法：GET
-- 路径：/api/favorites/user/:user_id
-- 功能：获取指定用户收藏的所有帖子
-- 请求参数：
-- user_id：用户的 ID，整数，路径参数，必填。
-- 成功响应：
-  - 状态码：200
-  - 内容：返回帖子列表，包含字段 id, title, content, author_id, created_at, status, price, campus_id, post_type, tag。
-- 错误响应：
-- 状态码：500
-- 内容：{ "message": "服务器错误" }
+### 错误处理
 
-```
-GET /api/favorites/user/1
-```
+- **状态码:** 500
+- **内容:** `{ "message": "服务器错误" }`
