@@ -22,7 +22,7 @@ type ErrorType = {
 const Register: React.FC = () => {
   // 输入的用户信息
   const [inputs, setInputs] = useState<RegisterInputs>({
-    nickname: "DUTers",
+    nickname: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -90,7 +90,6 @@ const Register: React.FC = () => {
             <input
               required
               type="text"
-              placeholder="nickname"
               name="nickname"
               id="nickname"
               value={inputs.nickname}
@@ -102,7 +101,6 @@ const Register: React.FC = () => {
             <input
               required
               type="text"
-              placeholder="email"
               name="email"
               id="email"
               value={inputs.email}
@@ -114,7 +112,6 @@ const Register: React.FC = () => {
             <input
               required
               type="text"
-              placeholder="qq_id"
               name="qq_id"
               id="qq_id"
               value={inputs.qq_id}
@@ -126,7 +123,6 @@ const Register: React.FC = () => {
             <input
               required
               type="text"
-              placeholder="username"
               name="username"
               id="username"
               value={inputs.username}
@@ -138,7 +134,6 @@ const Register: React.FC = () => {
             <input
               required
               type="number"
-              placeholder="campus_id"
               name="campus_id"
               id="campus_id"
               value={inputs.campus_id.toString()}
@@ -150,7 +145,6 @@ const Register: React.FC = () => {
             <input
               required
               type="password"
-              placeholder="password"
               name="password"
               id="password"
               value={inputs.password}
@@ -162,7 +156,6 @@ const Register: React.FC = () => {
             <input
               required
               type="password"
-              placeholder="confirm password"
               name="confirmPassword"
               id="confirmPassword"
               value={inputs.confirmPassword}

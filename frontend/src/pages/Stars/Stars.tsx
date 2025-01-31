@@ -1,9 +1,9 @@
-import Tabbar from "../../components/Tabbar/Tabbar"
+import Navbar from "../../components/Navbar/Navbar"
 
 const Stars = () => {
   return (
     <div>
-      <Tabbar />
+      <Navbar title="收藏" />
     </div>
   )
 }

@@ -1,7 +1,7 @@
-// src/store/authStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import axios from 'axios';
+import Cookies from 'js-cookie'; // 使用cookie存储token
 
 interface User {
   id: number;
@@ -39,8 +39,10 @@ const useAuthStore = create<AuthState>()(
       currentUser: null,
       login: async (username: string, password: string) => {
         try {
-          const res = await axios.post('/api/users/login', { username, password });
-          set({ isAuthenticated: true, token: res.data.token, currentUser: res.data });
+          const res = await axios.post('http://localhost:5000/api/users/login', { username, password });
+          const token = res.data.token;
+          Cookies.set('auth-token', token, { expires: 7 }); // 存储 token 到 cookie
+          set({ isAuthenticated: true, token, currentUser: res.data });
           // 可以在这里设置其他用户信息
         } catch (error: any) {
           if (error.response && error.response.status === 400) {
@@ -65,7 +67,7 @@ const useAuthStore = create<AuthState>()(
         campus_id: number;
       }) => {
         try {
-          const res = await axios.post('/api/users/register', userData);
+          const res = await axios.post('http://localhost:5000/api/users/register', userData);
           console.log(res.data.message); // 注册成功
         } catch (error: any) {
           if (error.response && error.response.status === 400) {
@@ -78,12 +80,14 @@ const useAuthStore = create<AuthState>()(
         }
       },
       logout: () => {
+        Cookies.remove('auth-token'); // 登出时移除 cookie
         set({ isAuthenticated: false, token: null, currentUser: null });
       },
       deleteUser: async (username: string) => {
         try {
-          const res = await axios.delete('/api/users/profile', { data: { username } });
+          const res = await axios.delete('http://localhost:5000/api/users/profile', { data: { username } });
           console.log(res.data.message); // 账户已删除
+          Cookies.remove('auth-token'); // 删除用户时移除 cookie
           set({ isAuthenticated: false, token: null, currentUser: null });
         } catch (error: any) {
           if (error.response && error.response.status === 404) {

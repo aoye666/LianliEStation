@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import "./Market.scss"
 import MoreBar from '../../components/moreBar/moreBar'
-import Navbar from '../../components/Navbar/Navbar'
 import Tabbar from '../../components/Tabbar/Tabbar'
 import more from '../../assets/more.png'
 import close from '../../assets/close.png'
@@ -17,8 +16,7 @@ const Market = () => {
     <div className='market-container'>
 
       <div className='market-navbar'>   
-        <Navbar />
-        {/* <div className='logo'>
+        <div className='logo'>
           <img src="logo.png" alt="" />
         </div>
         <div className='search'>
@@ -26,7 +24,7 @@ const Market = () => {
         </div>
         <div className='search-btn'>
           <img src="search.png" alt="" />
-        </div> */}
+        </div>
       </div>
     
 

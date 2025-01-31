@@ -3,6 +3,11 @@ import "./User.scss"
 import user from "../../assets/user.png"
 import { useUserStore } from "../../store"
 import { useNavigate } from "react-router-dom"
+import stars from "../../assets/stars.png"
+import history from "../../assets/history.png"
+import messages from "../../assets/messages.png"
+import settings from "../../assets/settings.png"
+import right from "../../assets/right.png"
 
 const User = () => {
   const { currentUser } = useUserStore();
@@ -18,18 +23,18 @@ const User = () => {
       </div>
       <div className="user-settings">
         <div className="user-item" onClick={() => navigate('/stars')}>
-          收藏
+          <img src={stars} alt="收藏" className="item-icon"></img><div className="item-text">收藏</div><img src={right} alt="右箭头" className="right-icon"></img>
         </div> 
         <div className="user-item" onClick={() => navigate('/history')}>
-          历史
-          </div>
+          <img src={history} alt="历史" className="item-icon"></img><div className="item-text">历史</div><img src={right} alt="右箭头" className="right-icon"></img>
+        </div>
         <div className="user-item" onClick={() => navigate('/messages')}>
-          信箱
+          <img src={messages} alt="信箱" className="item-icon"></img><div className="item-text">信箱 </div><img src={right} alt="右箭头" className="right-icon"></img>
         </div>
       </div>
       <div className="user-settings" onClick={() => navigate('/settings')}>
         <div className="user-item">
-          设置
+          <img src={settings} alt="设置" className="item-icon"></img><div className="item-text">设置</div><img src={right} alt="右箭头" className="right-icon"></img>
         </div>
       </div>
       <Tabbar />

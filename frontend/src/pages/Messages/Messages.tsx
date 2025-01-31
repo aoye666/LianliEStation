@@ -1,9 +1,9 @@
-import Tabbar from '../../components/Tabbar/Tabbar'
+import Navbar from '../../components/Navbar/Navbar'
 
 const Messages = () => {
   return (
     <div>
-      <Tabbar />
+      <Navbar title="信箱" />
     </div>
   )
 }

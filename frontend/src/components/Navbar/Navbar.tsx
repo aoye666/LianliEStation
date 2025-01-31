@@ -1,37 +1,26 @@
 import "./Navbar.scss";
-import logo from '../../assets/logo.png';
-import search from '../../assets/search.png';
-import React, { useState } from 'react';
-import axios from "axios";
+import left from '../../assets/left.png';
+import { useNavigate } from "react-router-dom";
 
-type SearchInputs = {
-  text: string;
+interface NavbarProps {
+  title: string;
 }
 
-const Navbar = () => {
+const Navbar: React.FC<NavbarProps> = ({ title }) => {
+  const navigate = useNavigate();
 
-  const [text, setText] = useState<SearchInputs["text"]>("");
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setText(event.target.value);
-  }
-
-  const handleSearch = async () => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/posts/search?title=${text}`);
-      console.log(response.data);
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  const handleBack = () => {
+    navigate("/user");
+  };
 
   return (
     <div className='navbar-container'>
-      <div className='logo'><img src={logo} alt='logo' /></div>
-      <input type="text" placeholder="搜好物" value={text} onChange={handleChange} />
-      <div className="icon" onClick={handleSearch}><img src={search} alt='search' /></div>
+      <div className='left' onClick={handleBack}>
+        <img src={left} alt='返回' />
+      </div>
+      <div className="navbar-title">{title}</div>
     </div>
-  )
-}
+  );
+};
 
 export default Navbar;

@@ -60,7 +60,6 @@ const Login: React.FC = () => {
             <input
               required
               type="text"
-              placeholder="请输入用户名"
               name="username"
               id="username"
               value={inputs.username}
@@ -72,7 +71,6 @@ const Login: React.FC = () => {
             <input
               required
               type="password"
-              placeholder="请输入密码"
               name="password"
               id="password"
               value={inputs.password}

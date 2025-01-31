@@ -1,9 +1,9 @@
-import Tabbar from '../../components/Tabbar/Tabbar'
+import Navbar from '../../components/Navbar/Navbar'
 
 const History = () => {
   return (
     <div>
-      <Tabbar />
+      <Navbar title="历史" />
     </div>
   )
 }

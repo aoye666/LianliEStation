@@ -17,7 +17,7 @@
     position: relative;
     top: -20px;
     width: 270px;
-    height: 450px;
+    height: 500px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -41,42 +41,41 @@
 
     .register-form {
       width: 100%;
-      height: 350px;
+      height: 400px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 7px;
+      gap: 5px;
+      //border: 1px solid white;//供测试定位使用
       .form-item {
         display: flex;
-        flex-direction: row;
-        align-self: end;
-        margin-right: 30px;
+        flex-direction: column;
+        align-items: start;
+        justify-content: center;
         label {
           display: flex;
           align-items: center;
-          justify-content: center;
-          width: 60px;
+          justify-content: start;
+          width: 100px;
           font-size: 13px;
+          height: 20px;
           color: white;
         }
         input {
           border: 1px solid white;
           outline: none;
           border-radius: 5px;
-          width: 150px;
-          height: 23px;
+          width: 180px;
+          height: 15px;
           background: transparent;
           padding: 3px;
           color: white;
         }
-        input::placeholder {
-          color: white;
-        }
       }
       button {
-        margin-top: 5px;
-        width: 210px;
+        margin-top: 10px;
+        width: 190px;
         height: 30px;
         border-radius: 5px;
         background-color: #d97f35;

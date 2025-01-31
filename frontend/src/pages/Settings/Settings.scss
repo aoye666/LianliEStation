@@ -1,0 +1,49 @@
+.settings-container {
+    width: 100%;
+    height: 100vh;
+    background: #ccc;
+    .settings-item {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        height: 45px;
+        background: white;
+        border-top: 1px solid #ccc;
+        .item-icon {
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+        .right-icon {
+            position: absolute;
+            right: 0;
+        }
+    }
+    .logout-container {
+        position: absolute;
+        bottom: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        height: 45px;
+        border: 2px solid #ccc;
+        background: white;
+        .logout-icon {
+            width: 32px;
+            height: 32px;
+            margin-left: 140px;
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+        .logout-text {
+            margin-left: 5px;
+            width: 50px;
+            height: 38px;
+            align-content: center;
+        }
+    }
+}
