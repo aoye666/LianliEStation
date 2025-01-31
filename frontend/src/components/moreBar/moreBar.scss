@@ -2,14 +2,16 @@
     display: flex;
     position: absolute;
     left: 0;
-    height: 83vh;
-    width: 100vw;
+    top: 24.5vh;
+    height: 60vh;
+    width: 88vw;
     background-color: #f9f9f9; /* 更柔和的背景色 */
     border-radius: 10px; /* 更圆滑的边角 */
     border: 1px solid #e0e0e0; /* 使用更柔和的灰色边框 */
     flex-direction: column;
     padding: 20px; /* 适当的内边距 */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 
     input{
         outline:none;

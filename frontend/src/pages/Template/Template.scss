@@ -1,5 +1,5 @@
 
-.container {
+.template-container {
     display: flex;
     flex-direction: column;
     transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0.5s;
@@ -15,36 +15,44 @@
     
     .navbar{
         display: flex;
-        height: 15vh;
+        justify-content: center;
+        align-items: center;
+        height: 10vh;
+        border-bottom: 1px solid #ccc;
+        box-shadow: 0px 3px 5px #ccc;
+        img{
+            width: 40px;
+        }
     }
 
     .tabbar{
         display: flex;
-        height: 15vh;
+        height: 10vh;
     }
 
     .content{
-        height: 70vh;
-        margin-left:10px ;
         display: flex;
         flex-direction: column;
-        gap: 15px;
+        gap: 10px;
         justify-content: center;
         align-items: center;
+        margin-top: 13px;
+
+        label{
+            font-size: 16px;
+            font-weight: 500;
+        }
+
         .title{
             display: flex;
             flex-direction: column;
-            gap: 5px;
-
-            .title-text{
-                font-size: 16px;
-                font-weight: bold;
-            }
+            gap: 6px;
+            margin-top: 10px;
 
             input{
                 border: 1px solid #ccc;
                 height: 20px;
-                width: 200px;
+                width: 250px;
                 border-radius: 10px;
             }
         }
@@ -52,21 +60,16 @@
         .price{
             display: flex;
             flex-direction: column;
-            width: 200px;
-            gap: 5px;
-
-            .price-text{
-                font-size: 16px;
-                font-weight: bold;
-            }
+            width: 250px;
+            gap: 6px;
 
             .price-unit{
                 display: flex;
-                gap: 10px;
+                gap: 0 10px;
                 input{
                     border: 1px solid #ccc;
                     height: 20px;
-                    width: 100px;
+                    width: 120px;
                     border-radius: 10px;
                 }
 
@@ -76,18 +79,15 @@
         .sort{
             display: flex;
             flex-direction: column;
-            width: 200px;
-            gap: 5px;
+            width: 250px;
+            gap: 6px;
 
-            .sort-text{
-                font-size: 16px;
-                font-weight: bold;
-            }
         }
 
         .img-upload{
             display: flex;
             flex-direction: column;
+            width: 250px;
 
             .img-upload-up{
                 display: flex;
@@ -108,7 +108,7 @@
                 gap: 10px;
 
                 img{
-                    width: 80px;
+                    width: 60px;
                 }
             }
         }
@@ -125,7 +125,7 @@
             .detail-input{
                 input{
                     border: 1px solid #ccc;
-                    height: 180px;
+                    height: 120px;
                     width: 250px;
                     border-radius: 10px;
                 }
@@ -133,5 +133,28 @@
             }
         }
         
+    }
+
+    .submit{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        button{
+            margin-top: 20px;
+            width: 150px;
+            height: 30px;
+            cursor: pointer;
+            background-color: #007bff;
+            border: none;
+            border-radius: 7px;
+            box-shadow: #007bff 0px 0px 7px;
+            transition: all 0.2s ease;
+
+            &:active{
+                transform: translateY(2px);
+                background-color: #003b7b;
+            }
+        }
     }
 }
