@@ -3,6 +3,9 @@ import "./Market.scss"
 import MoreBar from '../../components/moreBar/moreBar'
 import Navbar from '../../components/Navbar/Navbar'
 import Tabbar from '../../components/Tabbar/Tabbar'
+import more from '../../assets/more.png'
+import close from '../../assets/close.png'
+import schoolLogo from '../../assets/schoolLogo.png'
 
 const Market = () => {
   let [marketType, setMarketType] = useState('sell');
@@ -11,10 +14,11 @@ const Market = () => {
 
 
   return (
-    <div className='container'>
+    <div className='market-container'>
 
-      <div className='navbar'>   
-        <div className='logo'>
+      <div className='market-navbar'>   
+        <Navbar />
+        {/* <div className='logo'>
           <img src="logo.png" alt="" />
         </div>
         <div className='search'>
@@ -22,15 +26,15 @@ const Market = () => {
         </div>
         <div className='search-btn'>
           <img src="search.png" alt="" />
-        </div>
+        </div> */}
       </div>
     
 
-      <div className='body'>
+      <div className='market-body'>
         <div className='un-content'>   
 
           <div className='img'>
-            <img src="logoft.png" alt="" />
+            <img src={schoolLogo} alt="schoolLogo" />
           </div>
 
           <div className='region'>
@@ -38,35 +42,38 @@ const Market = () => {
           </div>
           
           <div className='tag'>
-              <div className='market-type'>
-                <div className='sell'>
-                  <button onClick={() => setMarketType('sell')}>出</button>
+              <div className='tag-item'>
+                <div className='market-type'>
+                  <div className='sell'>
+                    <button onClick={() => setMarketType('sell')}>出</button>
+                  </div>
+                  <div className='buy'>
+                    <button onClick={() => setMarketType('buy')}>收</button>
+                  </div>
                 </div>
-                <div className='buy'>
-                  <button onClick={() => setMarketType('buy')}>收</button>
+                <div className='commodity-type'>
+                  <div className='detail'>
+                    <div>
+                      <button onClick={() => setCommodityType('跑腿')}>跑腿</button>
+                    </div>
+                    <div>
+                      <button onClick={() => setCommodityType('数码')}>数码</button>
+                    </div>
+                    <div>
+                      <button onClick={() => setCommodityType('服饰')}>服饰</button>
+                    </div>
+                  </div>  
                 </div>
               </div>
-              <div className='commodity-type'>
-                <div className='detail'>
-                  <div>
-                    <button onClick={() => setCommodityType('跑腿')}>跑腿</button>
-                  </div>
-                  <div>
-                    <button onClick={() => setCommodityType('数码')}>数码</button>
-                  </div>
-                  <div>
-                    <button onClick={() => setCommodityType('服饰')}>服饰</button>
-                  </div>
-                </div>  
-                <div className='more'>
-                  <img src="more.png" alt="" onClick={() => setShowMore(!showMore)}/>
+              <div className='more'>
+                <img src="" alt="" />
+                  <img src={showMore? close : more} alt="more" onClick={() => setShowMore(!showMore)}/>
                   {showMore && 
                   <div>
                     <MoreBar />
                   </div>
                   }
                 </div>
-              </div>
             </div>
 
           <div className='price'>
@@ -164,7 +171,7 @@ const Market = () => {
       </div>
 
 
-       <div className='tabbar'>   
+       <div className='market-tabbar'>   
           <Tabbar />
        </div>
 

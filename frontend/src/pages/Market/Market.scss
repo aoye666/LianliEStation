@@ -5,7 +5,7 @@
     font-weight: 380;
     text-align: center;
     cursor: pointer;
-    transition: all 0.4s ease-out; /* 按钮的过渡效果 */
+    transition: all 0.2s ; /* 按钮的过渡效果 */
     width: 40px;
    
     // &:hover {
@@ -16,71 +16,75 @@
 
     &:active {
         background-color: #003366; /* 按下时的颜色 */
-        transform: scale(0.9); /* 按下时取消上移效果 */
+        transform: scale(0.9); 
     }
    }
    
-   .container {
+   .market-container {
         background-color: #f5f5f5;
-        border: 2px solid #302f2f;
         display: flex;
         flex-direction: column;
         height: 100vh;
         width: 100vw;
+        overflow: hidden;
 
         input:focus {
             border-color: #007bff; /* 聚焦时的边框颜色 */
             box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* 聚焦时的阴影效果 */
         }
 
-        .navbar{
+        .market-navbar{
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            margin: 10px 25px 0 25px;
+            height: 10vh;
+            // justify-content: space-between;
+            // align-items: center;
+            // margin: 10px 25px 0 25px;
 
-            .logo{
-                display: flex;
-                width: 40px;
-                height: 40px;
-                margin-right: 10px;
-            }
+            // .logo{
+            //     display: flex;
+            //     width: 40px;
+            //     height: 40px;
+            //     margin-right: 10px;
+            // }
 
-            .search{
-                input{
-                    border: 1px solid #acacac;
-                    width: 220px;
-                    height: 20px;
-                    border-radius: 10px;
-                    outline: none;
-                }
-            }
+            // .search{
+            //     input{
+            //         border: 1px solid #acacac;
+            //         width: 220px;
+            //         height: 20px;
+            //         border-radius: 10px;
+            //         outline: none;
+            //     }
+            // }
 
-            .search-btn{
-                display: flex;
-                width: 30px;
-                height: 30px;
-            }
+            // .search-btn{
+            //     display: flex;
+            //     width: 30px;
+            //     height: 30px;
+            // }
         }
-        
 
-        .body {
+        .market-body {
             display: flex;
             flex-direction: column;
             flex: 1;
+            height: 80vh;
 
             .un-content{
                 display: flex;
                 flex-direction: column;
-                border-bottom: 1px solid #302f2f;
+                border-bottom: 2px solid #bfbfbf;
                 padding-bottom: 10px;
+                box-shadow: #bfbfbf 0px 3px 5px;
 
                 .img{
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     img{
-                        width: 220px;
+                        width: 200px;
                     }
                 }
 
@@ -90,53 +94,57 @@
                     align-items: center;
                     gap: 10px;
 
-                    .more{
-                        img{
-                            width: 25px;
-                        }
-                    }
-                    
-                    .market-type{
+                    .tag-item{
                         display: flex;
                         justify-content: center;
                         align-items: center;
-                        gap: 10px;
-                        padding-right: 10px;
-                        border-right:2px solid #302f2f;
-
-                        .sell{
-                            button{
-                                background-color: #28a0b5e7;
-                                @extend.button-basic;
-                            }
-                        }
-
-                        .buy{
-                            button{
-                                background-color: #edeb82;
-                                @extend.button-basic;
-                            }
-                        }
-                    }
-
-                    .commodity-type{
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        gap: 10px;
-
-                        .detail{
+                        .market-type{
                             display: flex;
                             justify-content: center;
                             align-items: center;
                             gap: 10px;
-
-                            button{
-                                @extend.button-basic;
+                            padding-right: 10px;
+                            border-right:2px solid #656565;
+    
+                            .sell{
+                                button{
+                                    background-color: #28a0b5e7;
+                                    @extend.button-basic;
+                                }
+                            }
+    
+                            .buy{
+                                button{
+                                    background-color: #edeb82;
+                                    @extend.button-basic;
+                                }
                             }
                         }
+    
+                        .commodity-type{
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            gap: 10px;
+    
+                            .detail{
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                gap: 10px;
+    
+                                button{
+                                    @extend.button-basic;
+                                }
+                            }
+                        }
+                    }
 
-
+                    .more{
+                        display: flex;
+                        img{
+                            width: 25px;
+                        }
                     }
                 }
             }
@@ -151,9 +159,9 @@
                 gap: 5px;
                 flex-wrap: wrap;
                 overflow-y: scroll;
+                justify-content: space-between;
                 margin: 0 10px;
                 height: 65vh;
-
                 .commodity{
                     display: flex;
                     flex-direction: column;
