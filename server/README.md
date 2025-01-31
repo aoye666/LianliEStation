@@ -40,21 +40,13 @@ CREATE TABLE `users` (
     `qq_id` VARCHAR(100) NOT NULL, -- QQ 号
     `campus_id` INT NOT NULL, -- 校区 ID，不能为0，不能为空
     `credit` INT NOT NULL DEFAULT 100, -- 信誉分，默认为 100
-    `avatar` VARCHAR(255) NOT NULL DEFAULT 'default.png' -- 用户头像存储路径
+    `avatar` VARCHAR(255) NOT NULL DEFAULT '\uploads\default.png', -- 用户头像存储路径
     PRIMARY KEY (`id`),
     UNIQUE KEY `email_unique` (`email`), -- 邮箱唯一
     UNIQUE KEY `username_unique` (`username`) -- 用户名唯一
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
-INSERT INTO `users` (`nickname`, `username`, `email`, `password`, `qq_id`, `campus_id`, `avatar`, `credit`)
-VALUES
-('Alice', 'alice001', 'alice@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '123456789', '1', 'default.png', 100),
-('Bob', 'bob001', 'bob@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '987654321', '1', 'default.png', 100),
-('Charlie', 'charlie001', 'charlie@example.com', '5f4dcc3b5aa765d61d8327deb882cf99', '111223344', '1', 'default.png', 100);
-
-
-
+-- 密码使用 hash 加密，请使用注册功能增加用户
 
 ```
 
@@ -175,6 +167,7 @@ INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
   - `qq_id`: 用户的 QQ 号码，字符串，必需。
   - `username`: 用户名，字符串，必需。
   - `campus_id`: 用户所在校区，整型，必需。
+  - `image`：用户头像，可选
 - **成功响应:**
   - **状态码:** 201
   - **内容:** `{ "message": "注册成功" }`
@@ -257,6 +250,7 @@ INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
 ## posts
 
 ### 获取帖子列表
+
 - **方法:** GET
 - **路径:** `/api/posts/`
 - **功能:** 获取数据库中所有未删除的帖子及其图片。
@@ -278,10 +272,7 @@ INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
         "campus_id": 1,
         "post_type": "sale",
         "tag": "书籍",
-        "images": [
-          "/uploads/1738204953485-tios2b1p2dl.png",
-          "/uploads/1738204953486-tios2b1p2dl.jpg"
-        ]
+        "images": ["/uploads/1738204953485-tios2b1p2dl.png", "/uploads/1738204953486-tios2b1p2dl.jpg"]
       }
     ]
     ```
@@ -312,6 +303,7 @@ INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
   - **内容:** `{ "message": "服务器错误" }`
 
 ### 删除帖子
+
 - **方法:** DELETE
 - **路径:** `/api/posts/:post_id`
 - **功能:** 删除指定帖子（软删除，将 `status` 字段设置为 `'deleted'`），使用 `Token` 验证用户身份，确保只有帖子的作者可以删除帖子。
@@ -334,6 +326,7 @@ INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
 ### 示例：
 
 #### 请求：
+
 ```http
 DELETE http://localhost:5000/api/posts/1
 Authorization: Bearer <your_token_here>
@@ -364,10 +357,7 @@ Authorization: Bearer <your_token_here>
         "post_type": "sale",
         "tag": "书籍"
       },
-      "images": [
-        "/uploads/1738204953485-tios2b1p2dl.png",
-        "/uploads/1738204953486-tios2b1p2dl.jpg"
-      ]
+      "images": ["/uploads/1738204953485-tios2b1p2dl.png", "/uploads/1738204953486-tios2b1p2dl.jpg"]
     }
     ```
 - **错误响应:**
@@ -378,14 +368,11 @@ Authorization: Bearer <your_token_here>
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
-
-
 ### 注意事项
 
-1. **图片上传**：上传的图片存储在服务器的 `public/uploads/` 文件夹中，并且会返回图片的 URL。前端可以通过`http://localhost:5000/uploads/xxx`访问图片，xxx文件存储在images数组里。
+1. **图片上传**：上传的图片存储在服务器的 `public/uploads/` 文件夹中，并且会返回图片的 URL。前端可以通过`http://localhost:5000/uploads/xxx`访问图片，xxx 文件存储在 images 数组里。
 2. **Token 验证**：需要使用 JWT Token 验证用户身份。在发送请求时，需要在请求头中提供有效的 Token（`Authorization: Bearer <token>`）。
 3. **软删除**：删除帖子时并不从数据库中删除数据，而是通过更新 `status` 字段为 `'deleted'` 来实现软删除。
-
 
 ### 查询帖子（按条件）
 
@@ -414,6 +401,7 @@ Authorization: Bearer <your_token_here>
 ### 示例：
 
 #### 请求：
+
 ```http
 GET http://localhost:5000/api/posts/search?title=二手&status=active&min_price=10&max_price=100
 ```
@@ -436,11 +424,9 @@ GET http://localhost:5000/api/posts/search?title=二手&status=active&min_price=
     - `tag`: 帖子标签，字符串，可选。
 - **请求头:**
   - `Authorization`: Bearer <token>，必填，用于身份验证。
-  
 - **成功响应:**
   - **状态码:** 200
   - **内容:** `{ "message": "帖子更新成功" }`
-  
 - **错误响应:**
   - **状态码:** 400
   - **内容:** `{ "message": "缺少必要参数" }`
@@ -450,10 +436,11 @@ GET http://localhost:5000/api/posts/search?title=二手&status=active&min_price=
   - **内容:** `{ "message": "帖子未找到或用户无权修改" }`
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
-  
+
 ### 示例：
 
 #### 请求：
+
 ```http
 PUT http://localhost:5000/api/posts/1
 Content-Type: application/json

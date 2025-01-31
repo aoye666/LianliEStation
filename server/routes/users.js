@@ -23,9 +23,8 @@ router.get("/", (req, res) => {
 });
 
 // 用户注册，支持头像上传
-router.post("/register", upload.single("avatar"), async (req, res) => {
+router.post("/register", upload.single("image"), async (req, res) => {
   let { nickname, email, password, qq_id, username, campus_id } = req.body;
-  const avatarFile = req.file; // 获取上传的头像文件
 
   if (!nickname) nickname = "DUTers"; // 默认昵称
   if (!email || !password || !qq_id || !username || !campus_id) {
@@ -36,8 +35,10 @@ router.post("/register", upload.single("avatar"), async (req, res) => {
     // 检查邮箱或用户名是否已存在
     const [rows] = await db.query("SELECT * FROM users WHERE email = ? OR username = ?", [email, username]);
 
+    const avatarFile = req.file; // 获取上传的头像文件
+
     // 处理头像路径
-    const avatarPath = avatarFile ? avatarFile.filename : "default.png";
+    const avatarPath = avatarFile ? "/uploads/" + avatarFile.filename : "/uploads/default.png";
 
     if (rows.length > 0) {
       const emailRegistered = rows.some((row) => row.email === email);
@@ -91,7 +92,7 @@ router.post("/login", async (req, res) => {
         nickname: user.nickname,
         campus_id: user.campus_id,
         qq: user.qq_id,
-        avatar: `/uploads/${user.avatar}`,
+        avatar: `${user.avatar}`,
       },
       SECRET_KEY,
       { expiresIn: "7d" }
@@ -168,10 +169,8 @@ router.delete("/profile", async (req, res) => {
 });
 
 // 修改用户信息，包括头像（需要身份验证）
-router.put("/profile", upload.single("avatar"), async (req, res) => {
+router.put("/profile", upload.single("image"), async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
-  const { nickname, qq_id, username, campus_id } = req.body;
-  const avatarFile = req.file; // 获取上传的头像文件
 
   if (!token) {
     return res.status(401).json({ message: "未提供 Token" });
@@ -180,8 +179,10 @@ router.put("/profile", upload.single("avatar"), async (req, res) => {
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
 
+    const { nickname, qq_id, campus_id, username } = req.body;
     // 处理头像路径
-    const avatarPath = avatarFile ? avatarFile.filename : null;
+    const avatarFile = req.file; // 获取上传的头像文件
+    const avatarPath = "/uploads/" + avatarFile.filename;
 
     // 更新用户信息
     const [result] = await db.query("UPDATE users SET nickname = ?, qq_id = ?, username = ?, campus_id = ?, avatar = ? WHERE id = ?", [nickname, qq_id, username, campus_id, avatarPath, decoded.user_id]);
@@ -190,7 +191,21 @@ router.put("/profile", upload.single("avatar"), async (req, res) => {
       return res.status(404).json({ message: "用户不存在" });
     }
 
-    res.status(200).json({ message: "用户信息已更新" });
+    // 生成新 Token
+    const newToken = jwt.sign(
+      {
+        user_id: decoded.user_id,
+        username: username,
+        nickname: nickname,
+        campus_id: campus_id,
+        qq: qq_id,
+        avatar: avatarPath,
+      },
+      SECRET_KEY,
+      { expiresIn: "7d" }
+    );
+
+    res.status(200).json({ message: "更新成功", token: newToken });
   } catch (err) {
     console.error(err);
     res.status(401).json({ message: "Token 无效" });
