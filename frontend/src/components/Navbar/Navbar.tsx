@@ -27,7 +27,7 @@ const Navbar = () => {
 
   return (
     <div className='navbar-container'>
-      <div className='icon'><img src={logo} alt='logo' /></div>
+      <div className='logo'><img src={logo} alt='logo' /></div>
       <input type="text" placeholder="搜好物" value={text} onChange={handleChange} />
       <div className="icon" onClick={handleSearch}><img src={search} alt='search' /></div>
     </div>
