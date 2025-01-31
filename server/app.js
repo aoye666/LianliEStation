@@ -7,6 +7,8 @@ import cors from "cors";
 // 示例路由
 import usersRouter from "./routes/users.js";
 import postsRouter from "./routes/posts.js";
+import appealsRouter from "./routes/appeals.js";
+import favoritesRouter from "./routes/favorites.js"
 
 let app = express();
 
@@ -17,9 +19,15 @@ app.use(urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors());
 
+// 静态文件托管，允许访问上传的图片
+app.use("/uploads", express.static("public/uploads"));
+
 // 示例路由
 app.use("/api/users", usersRouter);
 app.use("/api/posts", postsRouter);
+app.use("/api/appeals", appealsRouter);
+app.use("/api/favorites", favoritesRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -32,7 +40,7 @@ app.use(function (err, req, res, next) {
   res.json({
     status: err.status,
     message: err.message,
-    stack: req.app.get("env") === "development" ? err.stack : undefined, // 仅在开发环境中返回错误堆栈
+    stack: req.app.get("env") === "development" ? err.stack : undefined,
   });
 });
 

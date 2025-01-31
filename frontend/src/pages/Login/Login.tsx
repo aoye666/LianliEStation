@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store";
-import "../../App.scss";
+import "./Login.scss";
+import logo from "../../assets/logo.png";
+import background from "../../assets/background1.jpg";
 
 type LoginInputs = {
   username: string;
@@ -47,31 +49,41 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div>
-      <div className="login_register">
-        <div>Login</div>
-        <form onSubmit={handleSubmit}>
-          <input
-            required
-            type="text"
-            placeholder="username"
-            name="username"
-            value={inputs.username}
-            onChange={handleChange}
-          />
-          <input
-            required
-            type="password"
-            placeholder="password"
-            name="password"
-            value={inputs.password}
-            onChange={handleChange}
-          />
+    <div className="login-container">
+      <img className="login-background" src={background} alt="background"></img>
+      <div className="login-box">
+        <img className="login-logo" src={logo} alt="logo"></img>
+        <div className="login-title">连理e站</div>
+        <form className="login-form" onSubmit={handleSubmit}>
+          <div className="form-item">
+            <label htmlFor="username">用户名:</label>
+            <input
+              required
+              type="text"
+              placeholder="请输入用户名"
+              name="username"
+              id="username"
+              value={inputs.username}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-item">
+            <label htmlFor="password">密码:</label>
+            <input
+              required
+              type="password"
+              placeholder="请输入密码"
+              name="password"
+              id="password"
+              value={inputs.password}
+              onChange={handleChange}
+            />
+          </div>
           <button type="submit">登录</button>
           {error && <div>{error.message}</div>}
-          <span>
+          <div className="login-register">
             <Link to="/register">立即注册！</Link>
-          </span>
+          </div>
         </form>
       </div>
     </div>

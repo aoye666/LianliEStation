@@ -1,6 +1,6 @@
 import Tabbar from '../../components/Tabbar/Tabbar'
 
-const Settings = () => {
+const History = () => {
   return (
     <div>
       <Tabbar />
@@ -8,4 +8,4 @@ const Settings = () => {
   )
 }
 
-export default Settings
+export default History

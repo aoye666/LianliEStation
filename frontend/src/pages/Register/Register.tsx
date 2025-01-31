@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store";
-import "../../App.scss";
+import "./Register.scss";
+import logo from "../../assets/logo.png";
+import background from "../../assets/background2.jpg";
 
 type RegisterInputs = {
   nickname?: string;
@@ -20,13 +22,13 @@ type ErrorType = {
 const Register: React.FC = () => {
   // 输入的用户信息
   const [inputs, setInputs] = useState<RegisterInputs>({
-    nickname: "DUTers", 
+    nickname: "DUTers",
     email: "",
     password: "",
-    confirmPassword: "", 
+    confirmPassword: "",
     qq_id: "",
     username: "",
-    campus_id: 0, 
+    campus_id: 0,
   });
 
   // 错误信息
@@ -73,71 +75,105 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div>
-      <div className="login_register">
-        <div>Register</div>
-        <form onSubmit={handleSubmit}>
-          <input
-            required
-            type="text"
-            placeholder="nickname"
-            name="nickname"
-            value={inputs.nickname}
-            onChange={handleChange}
-          />
-          <input
-            required
-            type="text"
-            placeholder="email"
-            name="email"
-            value={inputs.email}
-            onChange={handleChange}
-          />
-          <input
-            required
-            type="password"
-            placeholder="password"
-            name="password"
-            value={inputs.password}
-            onChange={handleChange}
-          />
-          <input
-            required
-            type="password"
-            placeholder="confirm password"
-            name="confirmPassword"
-            value={inputs.confirmPassword}
-            onChange={handleChange}
-          />
-          <input
-            required
-            type="text"
-            placeholder="qq_id"
-            name="qq_id"
-            value={inputs.qq_id}
-            onChange={handleChange}
-          />
-          <input
-            required
-            type="text"
-            placeholder="username"
-            name="username"
-            value={inputs.username}
-            onChange={handleChange}
-          />
-          <input
-            required
-            type="number"
-            placeholder="campus_id"
-            name="campus_id"
-            value={inputs.campus_id.toString()}
-            onChange={handleChange}
-          />
-          <button type="submit">Register</button>
+    <div className="register-container">
+      <img
+        className="register-background"
+        src={background}
+        alt="background"
+      ></img>
+      <div className="register-box">
+        <img className="register-logo" src={logo} alt="logo"></img>
+        <div className="register-title">连理e站</div>
+        <form className="register-form" onSubmit={handleSubmit}>
+          <div className="form-item">
+            <label htmlFor="nickname">昵称:</label>
+            <input
+              required
+              type="text"
+              placeholder="nickname"
+              name="nickname"
+              id="nickname"
+              value={inputs.nickname}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-item">
+            <label htmlFor="email">邮箱:</label>
+            <input
+              required
+              type="text"
+              placeholder="email"
+              name="email"
+              id="email"
+              value={inputs.email}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-item">
+            <label htmlFor="qq_id">QQ号:</label>
+            <input
+              required
+              type="text"
+              placeholder="qq_id"
+              name="qq_id"
+              id="qq_id"
+              value={inputs.qq_id}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-item">
+            <label htmlFor="username">用户名:</label>
+            <input
+              required
+              type="text"
+              placeholder="username"
+              name="username"
+              id="username"
+              value={inputs.username}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-item">
+            <label htmlFor="campus_id">校区ID:</label>
+            <input
+              required
+              type="number"
+              placeholder="campus_id"
+              name="campus_id"
+              id="campus_id"
+              value={inputs.campus_id.toString()}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-item">
+            <label htmlFor="password">密码:</label>
+            <input
+              required
+              type="password"
+              placeholder="password"
+              name="password"
+              id="password"
+              value={inputs.password}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-item">
+            <label htmlFor="confirmPassword">确认密码:</label>
+            <input
+              required
+              type="password"
+              placeholder="confirm password"
+              name="confirmPassword"
+              id="confirmPassword"
+              value={inputs.confirmPassword}
+              onChange={handleChange}
+            />
+          </div>
+          <button type="submit">注册</button>
           {error && <div>{error.message}</div>}
-          <span>
-            <Link to="/">Login the account.</Link>
-          </span>
+          <div>
+            <Link to="/">立即登录！</Link>
+          </div>
         </form>
       </div>
     </div>

@@ -1,8 +1,7 @@
-import React from 'react'
 import "./Tabbar.scss"
 import axios from "axios"
 
-const Tabbar = () => {
+const MTabbar = () => {
   return (
     <div className='tabbar-container'>
       <div className="tabbar-icon"></div>
@@ -13,4 +12,4 @@ const Tabbar = () => {
   )
 }
 
-export default Tabbar
+export default MTabbar
