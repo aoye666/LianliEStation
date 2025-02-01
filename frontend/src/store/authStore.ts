@@ -18,7 +18,7 @@ interface AuthState {
   isAuthenticated: boolean;
   token: string | null;
   currentUser: User | null;
-  login: (username: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<void>;
   register: (userData: {
     nickname?: string;
     email: string;
@@ -37,9 +37,9 @@ const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       token: null,
       currentUser: null,
-      login: async (username: string, password: string) => {
+      login: async (identifier: string, password: string) => {
         try {
-          const res = await axios.post('http://localhost:5000/api/users/login', { username, password });
+          const res = await axios.post('http://localhost:5000/api/users/login', { identifier, password });
           const token = res.data.token;
           Cookies.set('auth-token', token, { expires: 7 }); // 存储 token 到 cookie
           set({ isAuthenticated: true, token, currentUser: res.data });
@@ -70,6 +70,7 @@ const useAuthStore = create<AuthState>()(
           const res = await axios.post('http://localhost:5000/api/users/register', userData);
           console.log(res.data.message); // 注册成功
         } catch (error: any) {
+          console.log(userData);
           if (error.response && error.response.status === 400) {
             console.error(error.response.data.message);
           } else if (error.response && error.response.status === 500) {

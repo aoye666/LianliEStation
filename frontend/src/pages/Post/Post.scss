@@ -1,19 +1,23 @@
 .post-container {
+    margin-top: 50px;
     width: 100%;
-    height: 100vh;
+    height: calc(100vh - 50px);
     .dialog-container {
+        overflow: scroll;
         display: flex;
         flex-direction: column;
-        align-items: center;
         width: 100%;
         height: 500px;
-        .dialog-item {
+        .dialog-user {
             display: flex;
-            flex-direction: row;
+            flex-direction: row-reverse;
             align-items: center;
             justify-content: center;
-            width: 70px;
+            width: 240px;
             height: auto;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            margin-left: 110px;
             .dialog-face {
                 width: 32px;
                 height: 32px;
@@ -24,32 +28,120 @@
                 }
             }
             .dialog-content {
-                width: 60px;
+                padding: 3px;
+                width: 200px;
                 white-space: pre-wrap;
+                background: #43c94a;
+                color: white;
+                border-radius: 3px;
+                margin-right: 10px;
+            }
+        }
+        .dialog-ai {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            width: 260px;
+            height: auto;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            margin-left: 10px;
+            .dialog-face {
+                width: 32px;
+                height: 32px;
+                img {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                }
+            }
+            .dialog-content {
+                margin-left: 10px;
+                padding: 5px;
+                width: 220px;
+                white-space: pre-wrap;
+                background: #46adc7;
+                color: white;
+                border-radius: 3px;
+                .dialog-item {
+
+                }
+            }
+            .dialog-control {
+                margin-top: 10px;
+                margin-bottom: 5px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                .dialog-btn {
+                    width: 100px;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 3px;
+                    background: #43c94a;
+                    .btn-icon {
+                        width: 20px;
+                        height: 20px;
+                        img {
+                            height: 100%;
+                            width: 100%;
+                        }
+                    }
+                    .btn-text {
+                        margin-left: 5px;
+                    }
+                }
+                .dialog-btn:nth-child(2) {
+                    background: #c57676;
+                }
             }
         }
     }
     .input-container {
         width: 100%;
-        height: 50px;
-        position: sticky;
+        height: auto;
+        min-height: 40px;
+        position: fixed;
+        bottom: 0;
         background-color: #f2f2f2;
-        .input-text {
-            position: absolute;
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        .input-text { 
+            font-size: 16px;
+            box-sizing: border-box;
             white-space: pre-wrap;
-            width: 100%;
-            height: 100%;
-            padding: 10px;
+            width: 260px;
+            height: auto;
+            min-height: 17px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            padding: 3px;
             border: 1px solid #ccc;
             border-radius: 5px;
             background-color: #f2f2f2;
+            resize : none;
+            overflow: hidden;
+            &:focus {
+                outline: none;
+                border: 1px solid #43c94a;
+            }
         }
         .input-btn {
             width: 40px;
             height: 30px;
-            position: absolute;
-            bottom: 0;
-            right: 0;
+            font-size: 15px;
+            align-self: center;
+            border: none;
+            border-radius: 5px;
+            background: #43c94a;
+            color: white;
         }
     }
 }

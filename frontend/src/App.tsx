@@ -32,6 +32,16 @@ const App: React.FC = () => {
       ),
     },
     {
+      path: "*",
+      element: isAuthenticated ? (
+        <ProtectedRoute>
+          <Market />
+        </ProtectedRoute>
+      ) : (
+        <Login />
+      ),
+    },
+    {
       path: "/login",
       element: <Login />,
     },

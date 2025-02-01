@@ -9,7 +9,7 @@ type RegisterInputs = {
   nickname?: string;
   email: string;
   password: string;
-  confirmPassword: string; // 添加 confirmPassword 属性
+  confirmPassword: string;
   qq_id: string;
   username: string;
   campus_id: number;
@@ -28,7 +28,7 @@ const Register: React.FC = () => {
     confirmPassword: "",
     qq_id: "",
     username: "",
-    campus_id: 0,
+    campus_id: 1,
   });
 
   // 错误信息
@@ -38,9 +38,11 @@ const Register: React.FC = () => {
   const { register } = useAuthStore();
 
   // 设置用户信息
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setInputs((prev) => ({ ...prev, [name]: value }));
+    setInputs((prev) => ({ ...prev, [name]: name === "campus_id" ? parseInt(value, 10) : value }));
   };
 
   // 提交表单
@@ -50,6 +52,29 @@ const Register: React.FC = () => {
       // 检查密码是否一致
       if (inputs.password !== inputs.confirmPassword) {
         setError({ message: "密码不一致" });
+        return;
+      }
+
+      // 格式验证
+      if (!/\S+@\S+\.\S+/.test(inputs.email)) {
+        setError({ message: "请输入有效的邮箱地址" });
+        return;
+      }
+      if (!/^\d{5,12}$/.test(inputs.qq_id)) {
+        setError({ message: "请输入有效的QQ号" });
+        return;
+      }
+      if (!/^[a-zA-Z0-9_]{3,16}$/.test(inputs.username)) {
+        setError({ message: "用户名不符合要求" });
+        return;
+      }
+      if (
+        !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}/.test(inputs.password)
+      ) {
+        setError({
+          message:
+            "密码不符合要求",
+        });
         return;
       }
 
@@ -86,7 +111,7 @@ const Register: React.FC = () => {
         <div className="register-title">连理e站</div>
         <form className="register-form" onSubmit={handleSubmit}>
           <div className="form-item">
-            <label htmlFor="nickname">昵称:</label>
+            <label htmlFor="nickname">昵称（用于应用内展示）</label>
             <input
               required
               type="text"
@@ -97,7 +122,7 @@ const Register: React.FC = () => {
             />
           </div>
           <div className="form-item">
-            <label htmlFor="email">邮箱:</label>
+            <label htmlFor="email">邮箱（用于登录及账号操作）</label>
             <input
               required
               type="text"
@@ -108,7 +133,7 @@ const Register: React.FC = () => {
             />
           </div>
           <div className="form-item">
-            <label htmlFor="qq_id">QQ号:</label>
+            <label htmlFor="qq_id">QQ号（用于交易沟通）</label>
             <input
               required
               type="text"
@@ -119,7 +144,9 @@ const Register: React.FC = () => {
             />
           </div>
           <div className="form-item">
-            <label htmlFor="username">用户名:</label>
+            <label htmlFor="username" style={{ height: "40px" }}>
+              用户名（用于登录，3~16位字母、数字或下划线）
+            </label>
             <input
               required
               type="text"
@@ -130,18 +157,24 @@ const Register: React.FC = () => {
             />
           </div>
           <div className="form-item">
-            <label htmlFor="campus_id">校区ID:</label>
-            <input
+            <label htmlFor="campus_id">请选择校区</label>
+            <select
               required
-              type="number"
               name="campus_id"
               id="campus_id"
               value={inputs.campus_id.toString()}
               onChange={handleChange}
-            />
+            >
+              <option value="1">凌水主校区</option>
+              <option value="2">开发区校区</option>
+              <option value="3">盘锦校区</option>
+            </select>
           </div>
+
           <div className="form-item">
-            <label htmlFor="password">密码:</label>
+            <label htmlFor="password" style={{ height: "40px" }}>
+              密码（至少含1个大写字母、1个数字，长度至少为8位）
+            </label>
             <input
               required
               type="password"
@@ -152,7 +185,7 @@ const Register: React.FC = () => {
             />
           </div>
           <div className="form-item">
-            <label htmlFor="confirmPassword">确认密码:</label>
+            <label htmlFor="confirmPassword">确认密码</label>
             <input
               required
               type="password"
@@ -163,10 +196,13 @@ const Register: React.FC = () => {
             />
           </div>
           <button type="submit">注册</button>
-          {error && <div>{error.message}</div>}
-          <div>
-            <Link to="/">立即登录！</Link>
-          </div>
+          {error ? (
+            <div className="error-message">{error.message}</div>
+          ) : (
+            <div>
+              <Link to="/">立即登录！</Link>
+            </div>
+          )}
         </form>
       </div>
     </div>
