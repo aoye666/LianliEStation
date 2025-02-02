@@ -57,18 +57,18 @@ router.get("/", (req, res) => {
 // 新增帖子
 router.post("/publish", upload.array("images", 5), async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
-  
+
   if (!token) {
     return res.status(401).json({ message: "未提供 Token" });
   }
 
   try {
-    const decoded = jwt.verify(token, SECRET_KEY);  
-
+    const decoded = jwt.verify(token, SECRET_KEY);
     const author_id = decoded.user_id;
     const { title, content, price, campus_id, post_type, tag } = req.body;
     const files = req.files; // 获取上传的文件
 
+    // 检查必需参数（图片为可选参数）
     if (!author_id || !title || !campus_id || !post_type) {
       return res.status(400).json({ message: "缺少必要参数" });
     }
@@ -79,22 +79,21 @@ router.post("/publish", upload.array("images", 5), async (req, res) => {
       [author_id, title, content, price, campus_id, post_type, tag]
     );
 
-    // console.log("Insert result:", result);  打印 result 以检查插入结果
-
     const postId = result.insertId; // 获取刚插入的帖子 ID
     if (!postId) {
       return res.status(500).json({ message: "帖子插入失败，无法获取 postId" });
     }
 
-    // 获取所有上传的图片文件路径
-    const imageUrls = files.map((file) => `/uploads/${file.filename}`);
-
-    // 将图片链接存入 post_images 表
-    const imagePromises = imageUrls.map((url) =>
-      db.query("INSERT INTO post_images (post_id, image_url) VALUES (?, ?)", [postId, url])
-    );
-
-    await Promise.all(imagePromises);  // 等待所有图片保存完成
+    // 初始化图片链接数组，如果有上传文件则存储，否则保持为空
+    let imageUrls = [];
+    if (files && Array.isArray(files) && files.length > 0) {
+      imageUrls = files.map((file) => `/uploads/${file.filename}`);
+      // 将图片链接存入 post_images 表
+      const imagePromises = imageUrls.map((url) =>
+        db.query("INSERT INTO post_images (post_id, image_url) VALUES (?, ?)", [postId, url])
+      );
+      await Promise.all(imagePromises);  // 等待所有图片保存完成
+    }
 
     // 返回成功信息
     res.status(201).json({ message: "发布成功", image_urls: imageUrls });
@@ -106,6 +105,7 @@ router.post("/publish", upload.array("images", 5), async (req, res) => {
     res.status(500).json({ message: "服务器错误" });
   }
 });
+
 
 
 // 删除帖子
@@ -324,8 +324,7 @@ router.put("/:post_id", async (req, res) => {
     // 更新帖子
     const updateQuery = `
       UPDATE posts
-      SET title = ?, content = ?, price = ?, campus_id = ?, status = ?, post_type = ?, tag = ?
-      WHERE id = ?`;
+      SET title = ?, content = ?, price = ?, campus_id = ?, status = ?, post_type = ?, tag = ?,status = "active"WHERE id = ?`;
 
     await db.query(updateQuery, [title, content, price, campus_id, status, post_type, tag, post_id]);
 

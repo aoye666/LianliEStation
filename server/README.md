@@ -292,26 +292,44 @@ INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
   - **内容:** `{ "message": "服务器错误" }`
 
 ### 新增帖子
-
 - **方法:** POST
 - **路径:** `/api/posts/publish`
-- **功能:** 发布新帖子，支持上传最多 5 张图片。
-- **请求参数:**
-  - `title`: 帖子标题，字符串，必填。
-  - `content`: 帖子内容，字符串，必填。
-  - `price`: 帖子价格，浮动数值，必填。
-  - `campus_id`: 校区 ID，整型，必填。
-  - `post_type`: 帖子类型，字符串，必填（如：`sale`, `exchange`）。
-  - `tag`: 帖子标签，字符串，可选。
-  - `images`: 帖子图片，文件，最多支持 5 张图片。
+- **功能:** 发布新帖子。用户必须在请求头中携带有效的 JWT Token 以验证身份，帖子数据（标题、内容、价格、校区 ID、帖子类型、标签）通过表单数据提交。图片文件（最多 5 张）可选上传，系统会将上传的图片路径保存到数据库。
+- **请求头:**
+  - `Authorization`: 必填，格式为 `Bearer <JWT_TOKEN>`
+- **请求体:** (使用 `multipart/form-data`)
+  - **必填字段:**
+    - `title` (String): 帖子标题
+    - `content` (String): 帖子内容
+    - `campus_id` (Integer): 校区 ID
+    - `post_type` (String): 帖子类型（如 "sell" 或 "receive"）
+  - **可选字段:**
+    - `price` (Number): 帖子价格（默认为 0）
+    - `tag` (String): 帖子标签
+    - `images` (File): 文件类型字段，最多可上传 5 张图片
+
 - **成功响应:**
   - **状态码:** 201
-  - **内容:** `{ "message": "发布成功", "image_urls": ["/uploads/1738204953485-tios2b1p2dl.png", "/uploads/1738204953486-tios2b1p2dl.jpg"] }`
+  - **内容:**  
+    ```json
+    {
+      "message": "发布成功",
+      "image_urls": [
+        "/uploads/1738204953485-filename1.jpg",
+        "/uploads/1738204953490-filename2.jpg"
+      ]
+    }
+    ```
+    如果没有上传图片，则返回的 `image_urls` 数组为空。
+
 - **错误响应:**
-  - **状态码:** 400
-  - **内容:** `{ "message": "缺少必要参数" }`
-  - **状态码:** 500
-  - **内容:** `{ "message": "服务器错误" }`
+  - **状态码:** 401  
+    - 内容: `{ "message": "未提供 Token" }` 或 `{ "message": "无效的 Token" }`
+  - **状态码:** 400  
+    - 内容: `{ "message": "缺少必要参数" }`
+  - **状态码:** 500  
+    - 内容: `{ "message": "服务器错误" }`
+
 
 ### 删除帖子
 
