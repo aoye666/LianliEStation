@@ -32,105 +32,89 @@ SECRET_KEY=
 ```sql
 use marketplace;
 CREATE TABLE `users` (
-    `id` INT NOT NULL AUTO_INCREMENT, -- 统一id格式，统一注释风格😋
-    `nickname` VARCHAR(50) NOT NULL DEFAULT 'DUTers', -- 昵称，默认为 "DUTers"
-    `username` VARCHAR(100) NOT NULL, -- 用户名，非空且不得重复
-    `email` VARCHAR(100), -- 邮箱
-    `password` VARCHAR(255) NOT NULL, -- 密码
-    `qq_id` VARCHAR(100) NOT NULL, -- QQ 号
-    `campus_id` INT NOT NULL, -- 校区 ID，不能为0，不能为空
-    `credit` INT NOT NULL DEFAULT 100, -- 信誉分，默认为 100
-    `avatar` VARCHAR(255) NOT NULL DEFAULT '\uploads\default.png', -- 用户头像存储路径
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `nickname` VARCHAR(50) NOT NULL DEFAULT 'DUTers',
+    `username` VARCHAR(100) NOT NULL,
+    `email` VARCHAR(100),
+    `password` VARCHAR(255) NOT NULL,
+    `qq_id` VARCHAR(100) NOT NULL,
+    `campus_id` INT NOT NULL,
+    `credit` INT NOT NULL DEFAULT 100,
+    `avatar` VARCHAR(255) NOT NULL DEFAULT '/uploads/default.png',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `email_unique` (`email`), -- 邮箱唯一
-    UNIQUE KEY `username_unique` (`username`) -- 用户名唯一
+    UNIQUE KEY `email_unique` (`email`),
+    UNIQUE KEY `username_unique` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 密码使用 hash 加密，请使用注册功能增加用户
-
-```
-
-```sql
 CREATE TABLE `posts` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,  -- 帖子ID，自动增加并设置为主键
-  `title` VARCHAR(255) NOT NULL,  -- 帖子标题，不能为空
-  `content` TEXT,  -- 帖子内容，可以为空
-  `post_type` ENUM('receive', 'sell') NOT NULL, -- 帖子收发，不能为空
-  `tag` VARCHAR(255), -- 帖子分类，可以为空
-  `author_id` INT NOT NULL,  -- 帖子作者的 ID，不能为空
-  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,  -- 帖子创建时间，默认当前时间
-  `status` ENUM('active', 'inactive', 'deleted') DEFAULT 'active',  -- 帖子状态，默认是 'active'
-  `price` DECIMAL(10, 2) DEFAULT 0.00,  -- 帖子价格，默认 0.00
-  `campus_id` INT NOT NULL,  -- 校区 ID，不能为空
-  FOREIGN KEY (`author_id`) REFERENCES `users`(`id`) ON DELETE CASCADE  -- 外键约束，删除用户时，相关帖子也会被删除
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `title` VARCHAR(255) NOT NULL,
+    `content` TEXT,
+    `post_type` ENUM('receive', 'sell') NOT NULL,
+    `tag` VARCHAR(255),
+    `author_id` INT NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `status` ENUM('active', 'inactive', 'deleted') DEFAULT 'active',
+    `price` DECIMAL(10, 2) DEFAULT 0.00,
+    `campus_id` INT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
-
-INSERT INTO `posts` (`author_id`, `title`, `content`, `price`, `campus_id`, `post_type`, `tag`) VALUES
-(1, '二手数学分析教材', '浙江大学版教材，无字迹破损，附习题解答', 35.50, 1, 'sell', '教材'),
-(2, '九成新机械键盘', 'Cherry MX红轴，RGB背光，包装齐全', 299.00, 1, 'sell', '电子产品'),
-(3, '开发区校区代取快递', '大件3元/件，小件2元/件（20:00前可预约）', 2.00, 1, 'receive', '服务'),
-(1, '免费赠送考研英语资料', '近10年真题及解析电子版，联系QQ发送', 0.00, 1, 'sell', '资料'),
-(2, '电竞椅转让', '人体工学设计，使用半年，因毕业急出', 150.00, 1, 'sell', '家具');
-```
-
-```sql
 CREATE TABLE `appeals` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY, -- 申诉ID，自动增加并设置为主键
-    `author_id` INT NOT NULL, -- 申诉人ID，不能为空
-    `post_id` INT NOT NULL, -- 帖子ID，不能为空
-    `content` TEXT NOT NULL, -- 申诉内容，不能为空
-    `status` ENUM ('pending', 'resolved','', 'deleted') DEFAULT 'pending', -- 申诉状态, 默认为 'pending'
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP -- 创建时间，默认当前时间
-  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `author_id` INT NOT NULL,
+    `post_id` INT NOT NULL,
+    `content` TEXT NOT NULL,
+    `status` ENUM ('pending', 'resolved', '', 'deleted') DEFAULT 'pending',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO `appeals` (`author_id`, `post_id`, `content`, `status`, `created_at`) VALUES
-(1, 5, '帖子内容不符合事实，请求审核', 'pending', '2024-03-01 14:30:00'), -- 待处理申诉
-(2, 8, '已与发布者协商解决', 'resolved', CURRENT_TIMESTAMP), -- 已解决申诉
-(3, 12, '误删帖子，申请恢复', 'pending', DEFAULT);-- 使用默认时间戳
-```
-
-```sql
 CREATE TABLE `post_images` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,  -- 图片 ID，自动增长并设置为主键
-  `post_id` INT NOT NULL,  -- 关联的帖子 ID
-  `image_url` VARCHAR(255) NOT NULL,  -- 图片 URL，不能为空
-  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,  -- 图片上传时间，默认当前时间
-  FOREIGN KEY (`post_id`) REFERENCES `posts`(`id`) ON DELETE CASCADE  -- 外键关联，删除帖子时，相关图片也会删除
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `post_id` INT NOT NULL,
+    `image_url` VARCHAR(255) NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
-INSERT INTO `post_images` (`post_id`, `image_url`)
-VALUES
-(1, '/uploads/images/image1.jpg');
-
-INSERT INTO `post_images` (`post_id`, `image_url`)
-VALUES
-(4, '/uploads/images/image4.jpg'),
-(4, '/uploads/images/image5.jpg');
-```
-
-```sql
 CREATE TABLE `user_favorites` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,  -- 收藏记录 ID，自动增长并设置为主键
-  `user_id` INT NOT NULL,  -- 用户 ID，关联到用户表的主键
-  `post_id` INT NOT NULL,  -- 帖子 ID，关联到帖子表的主键
-  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,  -- 收藏时间，默认当前时间
-  UNIQUE KEY `unique_user_post` (`user_id`, `post_id`),  -- 确保用户只能收藏一个帖子一次
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,  -- 外键关联到用户表，用户删除时级联删除收藏记录
-  FOREIGN KEY (`post_id`) REFERENCES `posts`(`id`) ON DELETE CASCADE  -- 外键关联到帖子表，帖子删除时级联删除收藏记录
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `post_id` INT NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_user_post` (`user_id`, `post_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+-- 用户表数据插入示例
+INSERT INTO `users` (`nickname`, `username`, `email`, `password`, `qq_id`, `campus_id`, `credit`, `avatar`)
+VALUES
+('User1', 'user1', 'user1@example.com', 'hashed_password1', '123456789', 1, 100, '/uploads/avatar1.png'),
+('User2', 'user2', 'user2@example.com', 'hashed_password2', '987654321', 2, 100, '/uploads/avatar2.png');
 
--- 用户 1 收藏帖子 1
-INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 1);
--- 用户 2 收藏帖子 3
-INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (2, 3);
--- 用户 1 收藏帖子 4
-INSERT INTO `user_favorites` (`user_id`, `post_id`) VALUES (1, 4);
+-- 帖子表数据插入示例
+INSERT INTO `posts` (`author_id`, `title`, `content`, `post_type`, `tag`, `created_at`, `status`, `price`, `campus_id`)
+VALUES
+(1, '二手数学分析教材', '浙江大学版教材，无字迹破损，附习题解答', 'sell', '教材', '2025-01-01 10:00:00', 'active', 35.50, 1),
+(2, '九成新机械键盘', 'Cherry MX红轴，RGB背光，包装齐全', 'sell', '电子产品', '2025-01-02 11:00:00', 'active', 299.00, 1),
+(3, '开发区校区代取快递', '大件3元/件，小件2元/件（20:00前可预约）', 'receive', '服务', '2025-01-03 12:00:00', 'active', 2.00, 1);
 
+-- 申诉表数据插入示例
+INSERT INTO `appeals` (`author_id`, `post_id`, `content`, `status`, `created_at`)
+VALUES
+(1, 5, '帖子内容不符合事实，请求审核', 'pending', '2024-03-01 14:30:00'),
+(2, 8, '已与发布者协商解决', 'resolved', CURRENT_TIMESTAMP),
+(3, 12, '误删帖子，申请恢复', 'pending', '2025-01-15 09:00:00');
+
+-- 帖子图片表数据插入示例
+INSERT INTO `post_images` (`post_id`, `image_url`, `created_at`)
+VALUES
+(1, '/uploads/images/image1.jpg', '2025-01-01 10:30:00'),
+
+-- 用户收藏表数据插入示例
+INSERT INTO `user_favorites` (`user_id`, `post_id`, `created_at`)
+VALUES
+(1, 1, '2025-01-01 11:00:00'),
+(2, 3, '2025-01-02 13:00:00'),
+(1, 4, '2025-01-03 14:00:00');
 ```
 
 ##
