@@ -107,7 +107,7 @@ VALUES
 -- 帖子图片表数据插入示例
 INSERT INTO `post_images` (`post_id`, `image_url`, `created_at`)
 VALUES
-(1, '/uploads/images/image1.jpg', '2025-01-01 10:30:00'),
+(1, '/uploads/images/image1.jpg', '2025-01-01 10:30:00');
 
 -- 用户收藏表数据插入示例
 INSERT INTO `user_favorites` (`user_id`, `post_id`, `created_at`)
@@ -276,12 +276,14 @@ VALUES
   - **内容:** `{ "message": "服务器错误" }`
 
 ### 新增帖子
+
 - **方法:** POST
 - **路径:** `/api/posts/publish`
 - **功能:** 发布新帖子。用户必须在请求头中携带有效的 JWT Token 以验证身份，帖子数据（标题、内容、价格、校区 ID、帖子类型、标签）通过表单数据提交。图片文件（最多 5 张）可选上传，系统会将上传的图片路径保存到数据库。
 - **请求头:**
   - `Authorization`: 必填，格式为 `Bearer <JWT_TOKEN>`
 - **请求体:** (使用 `multipart/form-data`)
+
   - **必填字段:**
     - `title` (String): 帖子标题
     - `content` (String): 帖子内容
@@ -293,27 +295,24 @@ VALUES
     - `images` (File): 文件类型字段，最多可上传 5 张图片
 
 - **成功响应:**
+
   - **状态码:** 201
-  - **内容:**  
+  - **内容:**
     ```json
     {
       "message": "发布成功",
-      "image_urls": [
-        "/uploads/1738204953485-filename1.jpg",
-        "/uploads/1738204953490-filename2.jpg"
-      ]
+      "image_urls": ["/uploads/1738204953485-filename1.jpg", "/uploads/1738204953490-filename2.jpg"]
     }
     ```
     如果没有上传图片，则返回的 `image_urls` 数组为空。
 
 - **错误响应:**
-  - **状态码:** 401  
+  - **状态码:** 401
     - 内容: `{ "message": "未提供 Token" }` 或 `{ "message": "无效的 Token" }`
-  - **状态码:** 400  
+  - **状态码:** 400
     - 内容: `{ "message": "缺少必要参数" }`
-  - **状态码:** 500  
+  - **状态码:** 500
     - 内容: `{ "message": "服务器错误" }`
-
 
 ### 删除帖子
 
@@ -435,6 +434,7 @@ GET http://localhost:5000/api/posts/search?title=二手&status=active&min_price=
     - `status`: 帖子的状态（active, deleted），字符串，可选。
     - `post_type`: 帖子类型（如：sale，求购等），字符串，必填。
     - `tag`: 帖子标签，字符串，可选。
+    - `images`: 帖子图片，文件，可选。(旧图片不会保留)
 - **请求头:**
   - `Authorization`: Bearer <token>，必填，用于身份验证。
 - **成功响应:**
@@ -472,6 +472,7 @@ Authorization: Bearer <your_token_here>
 ## appeals
 
 ### **获取所有申诉**
+
 - **方法:** `GET`
 - **路径:** `/api/appeals/`
 - **功能:** 获取所有未删除的申诉。
@@ -486,6 +487,7 @@ Authorization: Bearer <your_token_here>
 ---
 
 ### **提交申诉**
+
 - **方法:** `POST`
 - **路径:** `/api/appeals/publish`
 - **功能:** 用户提交一条申诉。
@@ -506,6 +508,7 @@ Authorization: Bearer <your_token_here>
 ---
 
 ### **查询未解决的申诉（仅限当前用户）**
+
 - **方法:** `GET`
 - **路径:** `/api/appeals/search/pending`
 - **功能:** 查询当前用户下的所有未解决的申诉（过滤已删除或已解决的申诉）。
@@ -522,6 +525,7 @@ Authorization: Bearer <your_token_here>
 ---
 
 ### **查询已解决的申诉（仅限当前用户）**
+
 - **方法:** `GET`
 - **路径:** `/api/appeals/search/resolved`
 - **功能:** 查询当前用户下的所有已解决的申诉。
@@ -538,6 +542,7 @@ Authorization: Bearer <your_token_here>
 ---
 
 ### **查询已撤销的申诉（仅限当前用户）**
+
 - **方法:** `GET`
 - **路径:** `/api/appeals/search/deleted`
 - **功能:** 查询当前用户下的所有已撤销（删除）的申诉。
@@ -554,6 +559,7 @@ Authorization: Bearer <your_token_here>
 ---
 
 ### **修改申诉状态**
+
 - **方法:** `PUT`
 - **路径:** `/api/appeals/:appeal_id`
 - **功能:** 修改申诉的状态。
@@ -576,6 +582,7 @@ Authorization: Bearer <your_token_here>
 ---
 
 ### **删除申诉（软删除）**
+
 - **方法:** `DELETE`
 - **路径:** `/api/appeals/:appeal_id`
 - **功能:** 将申诉状态修改为 `'deleted'`，即软删除申诉。
@@ -593,7 +600,9 @@ Authorization: Bearer <your_token_here>
   - **内容:** `{ "message": "申诉不存在" }`
   - **状态码:** `500`
   - **内容:** `{ "message": "服务器错误" }`
+
 ---
+
 ## favorites
 
 ### 添加收藏
