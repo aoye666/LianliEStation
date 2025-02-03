@@ -399,7 +399,7 @@ Authorization: Bearer <your_token_here>
 
 - **方法:** GET
 - **路径:** `/api/posts/search`
-- **功能:** 根据指定条件查询帖子，并返回相关的图片信息。支持根据标题、状态、校区 ID、帖子类型、标签、价格等进行筛选。
+- **功能:** 根据指定条件查询帖子，并返回相关的图片信息。支持根据标题、状态、校区 ID、帖子类型、标签、价格等进行筛选，支持使用关键字在 title 和 content 中进行模糊搜索。
 - **请求参数:**
   - `title`: 帖子标题，字符串，可选。
   - `status`: 帖子的状态（'active', 'inactive', 'deleted'），字符串，可选。
@@ -408,9 +408,45 @@ Authorization: Bearer <your_token_here>
   - `tag`: 帖子的标签，字符串，可选。
   - `min_price`: 最低价格，浮动数值，可选。
   - `max_price`: 最高价格，浮动数值，可选。
+  - `keyword`：关键字，字符串，可选。
+  - `page`：当前页码，整数，可选，默认 1。
+  - `limit`：每页的记录数，整数，可选，默认 10
 - **成功响应:**
+
   - **状态码:** 200
-  - **内容:** 帖子信息列表，包含 `id`, `title`, `content`, `author_id`, `created_at`, `status`, `price`, `campus_id`, `post_type`, `tag`，并附带与帖子相关的图片 URL 列表。
+  - **内容:**
+
+  ```
+  {
+  "total": 50, // 符合条件的总记录数
+  "page": 1, // 当前页码
+  "limit": 10, // 每页记录数
+  "posts": [
+    {
+      "id": 1, // 帖子ID
+      "title": "帖子标题", // 帖子标题
+      "content": "帖子内容", // 帖子内容
+      "status": "active", // 帖子状态
+      "campus_id": 1, // 校区ID
+      "post_type": "buy", // 帖子类型
+      "tag": "电子产品", // 标签
+      "price": 100, // 价格
+      "images": ["image_url_1", "image_url_2"] // 关联的图片URL列表
+    },
+    // 其他帖子数据
+  ]
+  }
+  ```
+
+- **无数响应**
+
+```
+{
+  "total": 0, // 符合条件的总记录数
+  "posts": [] // 空列表
+}
+```
+
 - **错误响应:**
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`

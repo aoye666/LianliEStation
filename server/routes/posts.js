@@ -206,86 +206,121 @@ router.get("/byID/:post_id", (req, res) => {
 });
 
 // 查询帖子（按条件）
-router.get("/search", (req, res) => {
-  const { title, status, campus_id, post_type, tag, min_price, max_price } = req.query;
+router.get("/search", async (req, res) => {
+  try {
+    const {
+      keyword, // 新增关键字搜索参数
+      title,
+      status,
+      campus_id,
+      post_type,
+      tag,
+      min_price,
+      max_price,
+      page = 1,
+      limit = 10,
+    } = req.query;
 
-  let query = "SELECT * FROM posts WHERE status != 'deleted'"; // 排除已删除的帖子
-  let params = [];
+    // 计算分页偏移量
+    const offset = (page - 1) * limit;
 
-  if (title) {
-    query += " AND title LIKE ?";
-    params.push(`%${title}%`);
-  }
+    let whereClause = "WHERE status != 'deleted'";
+    let params = [];
 
-  if (status) {
-    query += " AND status = ?";
-    params.push(status);
-  }
+    // 关键字搜索 - 在title和content中进行模糊匹配
+    if (keyword) {
+      whereClause += " AND (title LIKE ? OR content LIKE ?)";
+      params.push(`%${keyword}%`, `%${keyword}%`);
+    }
 
-  if (campus_id) {
-    query += " AND campus_id = ?";
-    params.push(campus_id);
-  }
+    // 其他可选条件筛选
+    if (title) {
+      whereClause += " AND title LIKE ?";
+      params.push(`%${title}%`);
+    }
 
-  if (post_type) {
-    query += " AND post_type = ?";
-    params.push(post_type);
-  }
+    if (status) {
+      whereClause += " AND status = ?";
+      params.push(status);
+    }
 
-  if (tag) {
-    query += " AND tag = ?";
-    params.push(tag);
-  }
+    if (campus_id) {
+      whereClause += " AND campus_id = ?";
+      params.push(campus_id);
+    }
 
-  if (min_price || max_price) {
+    if (post_type) {
+      whereClause += " AND post_type = ?";
+      params.push(post_type);
+    }
+
+    if (tag) {
+      whereClause += " AND tag = ?";
+      params.push(tag);
+    }
+
     if (min_price) {
-      query += " AND price >= ?";
+      whereClause += " AND price >= ?";
       params.push(min_price);
     }
+
     if (max_price) {
-      query += " AND price <= ?";
+      whereClause += " AND price <= ?";
       params.push(max_price);
     }
-  }
 
-  // 执行查询帖子
-  db.query(query, params)
-    .then(([rows]) => {
-      if (rows.length === 0) {
-        return res.status(404).json({ message: "未找到符合条件的帖子" });
+    // 统计总记录数，用于前端分页
+    const countQuery = `SELECT COUNT(*) as total FROM posts ${whereClause}`;
+    const [countRows] = await db.query(countQuery, params);
+    const total = countRows[0].total;
+
+    // 查询具体数据
+    const dataQuery = `
+      SELECT *
+      FROM posts
+      ${whereClause}
+      ORDER BY id DESC
+      LIMIT ?
+      OFFSET ?
+    `;
+    // 追加分页参数
+    params.push(Number(limit), Number(offset));
+    const [rows] = await db.query(dataQuery, params);
+
+    if (rows.length === 0) {
+      return res.status(200).json({ total, posts: [] });
+    }
+
+    // 获取已查到帖子ID列表
+    const postIds = rows.map((p) => p.id);
+    // 查询对应的图片
+    const [imageRows] = await db.query("SELECT post_id, image_url FROM post_images WHERE post_id IN (?)", [postIds]);
+
+    // 创建 post_id -> [image_url] 的映射
+    const imagesMap = imageRows.reduce((map, row) => {
+      if (!map[row.post_id]) {
+        map[row.post_id] = [];
       }
+      map[row.post_id].push(row.image_url);
+      return map;
+    }, {});
 
-      // 查询与帖子相关的图片
-      const postIds = rows.map((post) => post.id);
-
-      db.query("SELECT post_id, image_url FROM post_images WHERE post_id IN (?)", [postIds])
-        .then(([imageRows]) => {
-          // 创建一个帖子 ID 到图片 URL 的映射
-          const imagesMap = imageRows.reduce((map, row) => {
-            if (!map[row.post_id]) {
-              map[row.post_id] = [];
-            }
-            map[row.post_id].push(row.image_url);
-            return map;
-          }, {});
-
-          // 将图片信息添加到帖子中
-          const postsWithImages = rows.map((post) => {
-            post.images = imagesMap[post.id] || []; // 如果没有图片，返回空数组
-            return post;
-          });
-
-          res.status(200).json(postsWithImages);
-        })
-        .catch((err) => {
-          console.error(err);
-          res.status(500).json({ message: "获取图片信息失败" });
-        });
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).json({ message: "服务器错误" });
+    // 组装帖子与图片
+    const postsWithImages = rows.map((post) => {
+      post.images = imagesMap[post.id] || [];
+      return post;
     });
+
+    res.status(200).json({
+      total,
+      page: Number(page),
+      limit: Number(limit),
+      posts: postsWithImages,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "服务器错误" });
+  }
 });
 
 // 修改帖子
