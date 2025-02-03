@@ -83,6 +83,12 @@ CREATE TABLE `user_favorites` (
     UNIQUE KEY `unique_user_post` (`user_id`, `post_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `appeal_images` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `appeal_id` INT NOT NULL,
+    `image_url` VARCHAR(255) NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 用户表数据插入示例
 INSERT INTO `users` (`nickname`, `username`, `email`, `password`, `qq_id`, `campus_id`, `credit`, `avatar`)
@@ -144,14 +150,17 @@ VALUES
 - **方法:** POST
 - **路径:** `/api/users/register`
 - **功能:** 允许新用户注册。检查邮箱和用户名是否已被注册，未注册则将新用户信息插入数据库。
-- **请求参数:**
-  - `nickname`: 用户昵称，字符串，可选，默认为 'DUTers'。
-  - `email`: 用户邮箱，字符串，必需。
-  - `password`: 用户密码，字符串，必需。
-  - `qq_id`: 用户的 QQ 号码，字符串，必需。
-  - `username`: 用户名，字符串，必需。
-  - `campus_id`: 用户所在校区，整型，必需。
-  - `image`：用户头像，可选
+- **请求体:** (使用 `multipart/form-data`)
+
+  - **请求参数:**
+    - `nickname`: 用户昵称，字符串，可选，默认为 'DUTers'。
+    - `email`: 用户邮箱，字符串，必需。
+    - `password`: 用户密码，字符串，必需。
+    - `qq_id`: 用户的 QQ 号码，字符串，必需。
+    - `username`: 用户名，字符串，必需。
+    - `campus_id`: 用户所在校区，整型，必需。
+    - `image`：用户头像，可选
+
 - **成功响应:**
   - **状态码:** 201
   - **内容:** `{ "message": "注册成功" }`
@@ -491,9 +500,11 @@ Authorization: Bearer <your_token_here>
 - **方法:** `POST`
 - **路径:** `/api/appeals/publish`
 - **功能:** 用户提交一条申诉。
-- **请求参数:**
-  - `post_id`: 帖子的 ID，整数类型，必填。
-  - `content`: 申诉内容，字符串类型，必填。
+- **请求体:** (使用 `multipart/form-data`)
+  - **请求参数:**
+    - `post_id`: 帖子的 ID，整数类型，必填。
+    - `content`: 申诉内容，字符串类型，必填。
+    - `images`: 申诉图片，图片类型，可选。
 - **成功响应:**
   - **状态码:** `201`
   - **内容:** `{ "message": "申诉提交成功" }`
