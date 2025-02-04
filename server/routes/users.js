@@ -5,11 +5,25 @@ import db from "../db.js";
 import dotenv from "dotenv";
 import upload from "../middlewares/uploadImg.js"; // 引入图片上传中间件
 import fs from "fs";
+import rateLimit from "express-rate-limit"; // 限流中间件
+import logIP from "../middlewares/logIP.js";  // 记录IP的中间件
 
 let router = Router();
 
 dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY;
+
+
+
+// 设置注册限流，防止恶意注册：每个 IP 在 24 小时内最多允许 1 次注册请求
+const registerLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000, // 24小时
+  max: 1, // 每个 IP 最多允许 1 次请求
+  message: { message: "您今天已经注册过了，请明天再试" },
+});
+
+
+
 
 // 获取所有用户信息（仅供测试使用）
 router.get("/", (req, res) => {
@@ -23,15 +37,15 @@ router.get("/", (req, res) => {
     });
 });
 
-// 用户注册，支持头像上传
-router.post("/register", upload.single("image"), async (req, res) => {
-  let { nickname, email, password, qq_id, username, campus_id } = req.body;
 
+
+// 用户注册，支持头像上传，同时使用 IP 限流和打印 IP 功能
+router.post("/register", registerLimiter, logIP, upload.single("image"), async (req, res) => {
+  let { nickname, email, password, qq_id, username, campus_id } = req.body;
   const avatarFile = req.file; // 获取上传的头像文件
 
   if (!nickname) nickname = "DUTers"; // 默认昵称
   if (!email || !password || !qq_id || !username || !campus_id) {
-    // 如果必填参数缺少，删除文件（如果存在）并返回 400
     if (avatarFile) {
       try {
         await fs.promises.unlink(avatarFile.path);
@@ -48,17 +62,19 @@ router.post("/register", upload.single("image"), async (req, res) => {
     const avatarPath = avatarFile ? "/uploads/" + avatarFile.filename : "/uploads/default.png";
 
     if (rows.length > 0) {
-      // 如果已存在，也删除上传文件
       if (avatarFile) {
         try {
           await fs.promises.unlink(avatarFile.path);
         } catch {}
       }
-
       const emailRegistered = rows.some((row) => row.email === email);
       const usernameRegistered = rows.some((row) => row.username === username);
       return res.status(400).json({
-        message: emailRegistered && usernameRegistered ? "邮箱和用户名都已被注册" : emailRegistered ? "邮箱已被注册" : "用户名已被注册",
+        message: emailRegistered && usernameRegistered
+          ? "邮箱和用户名都已被注册"
+          : emailRegistered
+          ? "邮箱已被注册"
+          : "用户名已被注册",
       });
     }
 
@@ -66,11 +82,14 @@ router.post("/register", upload.single("image"), async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // 存入数据库
-    await db.query("INSERT INTO users (nickname, email, password, qq_id, username, campus_id, avatar) VALUES (?, ?, ?, ?, ?, ?, ?)", [nickname, email, hashedPassword, qq_id, username, campus_id, avatarPath]);
+    await db.query(
+      "INSERT INTO users (nickname, email, password, qq_id, username, campus_id, avatar) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [nickname, email, hashedPassword, qq_id, username, campus_id, avatarPath]
+    );
 
     res.status(201).json({ message: "注册成功" });
   } catch (err) {
-    // console.error(err);
+    console.error(err);
     if (avatarFile) {
       try {
         await fs.promises.unlink(avatarFile.path);
@@ -79,6 +98,7 @@ router.post("/register", upload.single("image"), async (req, res) => {
     res.status(500).json({ message: "服务器错误" });
   }
 });
+
 
 // 用户登录
 router.post("/login", async (req, res) => {
