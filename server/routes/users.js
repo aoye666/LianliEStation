@@ -13,17 +13,13 @@ let router = Router();
 dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY;
 
-
-
-// 设置注册限流，防止恶意注册：每个 IP 在 24 小时内最多允许 1 次注册请求
+// 设置注册限流，防止恶意注册：每个 IP 在 24 小时内最多允许 3 次成功注册
 const registerLimiter = rateLimit({
   windowMs: 24 * 60 * 60 * 1000, // 24小时
-  max: 1, // 每个 IP 最多允许 1 次请求
-  message: { message: "您今天已经注册过了，请明天再试" },
+  max: 3, // 每个 IP 最多允许 3 次成功注册请求
+  skipFailedRequests: true, // 仅对成功请求计数
+  message: { message: "您今天已经注册成功过一次，请明天再试" },
 });
-
-
-
 
 // 获取所有用户信息（仅供测试使用）
 router.get("/", (req, res) => {
@@ -67,6 +63,7 @@ router.post("/register", registerLimiter, logIP, upload.single("image"), async (
           await fs.promises.unlink(avatarFile.path);
         } catch {}
       }
+
       const emailRegistered = rows.some((row) => row.email === email);
       const usernameRegistered = rows.some((row) => row.username === username);
       return res.status(400).json({
