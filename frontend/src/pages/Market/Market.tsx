@@ -4,27 +4,44 @@ import MoreBar from '../../components/moreBar/moreBar'
 import Tabbar from '../../components/Tabbar/Tabbar'
 import more from '../../assets/more.png'
 import close from '../../assets/close.png'
-import schoolLogo from '../../assets/schoolLogo.png'
+import topLogo from '../../assets/topLogo.png'
+import axios from 'axios'
+import logo from '../../assets/logo.png'
+import search from '../../assets/search.png'
 
 const Market = () => {
+  type SearchInputs = {
+    text: string;
+  }
   let [marketType, setMarketType] = useState('sell');
   let [commodityType, setCommodityType] = useState('');
   let [showMore, setShowMore] = useState(false);
+
+  const [text, setText] = useState<SearchInputs["text"]>("");
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setText(event.target.value);
+  }
+
+  const handleSearch = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/posts/search?title=${text}`);
+      console.log(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
 
   return (
     <div className='market-container'>
 
       <div className='market-navbar'>   
-        <div className='logo'>
-          <img src="logo.png" alt="" />
-        </div>
-        <div className='search'>
-          <input type="text" placeholder="搜索" />
-        </div>
-        <div className='search-btn'>
-          <img src="search.png" alt="" />
-        </div>
+
+      <div className='logo'><img src={logo} alt='logo' /></div>
+        <input type="text" placeholder="搜好物" value={text} onChange={handleChange} />
+      <div className="icon" onClick={handleSearch}><img src={search} alt='search' /></div>
+
       </div>
     
 
@@ -32,7 +49,7 @@ const Market = () => {
         <div className='un-content'>   
 
           <div className='img'>
-            <img src={schoolLogo} alt="schoolLogo" />
+            <img src={topLogo} alt="schoolLogo" />
           </div>
 
           <div className='region'>

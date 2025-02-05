@@ -32,38 +32,40 @@
             border-color: #007bff; /* 聚焦时的边框颜色 */
             box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* 聚焦时的阴影效果 */
         }
-
+        
         .market-navbar{
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            height: 10vh;
-            // justify-content: space-between;
-            // align-items: center;
-            // margin: 10px 25px 0 25px;
+            margin: 10px 25px 0 25px;
+            transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0.5s;
 
-            // .logo{
-            //     display: flex;
-            //     width: 40px;
-            //     height: 40px;
-            //     margin-right: 10px;
-            // }
+            .logo{
+                display: flex;
+                width: 40px;
+                height: 40px;
+                margin-right: 10px;
+            }
 
-            // .search{
-            //     input{
-            //         border: 1px solid #acacac;
-            //         width: 220px;
-            //         height: 20px;
-            //         border-radius: 10px;
-            //         outline: none;
-            //     }
-            // }
+            input{
+                border: 1px solid #ccc;
+                width: 220px;
+                height: 20px;
+                border-radius: 10px;
+                outline: none;
+                padding-left: 3px;
+            }
 
-            // .search-btn{
-            //     display: flex;
-            //     width: 30px;
-            //     height: 30px;
-            // }
+            input:focus{
+                border-color: #007bff; /* 聚焦时的边框颜色 */
+                box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            }
+
+            .icon{
+                display: flex;
+                width: 30px;
+                height: 30px;
+            }
         }
 
         .market-body {
@@ -141,7 +143,8 @@
                     }
 
                     .more{
-                        display: flex;
+                        display: none;
+
                         img{
                             width: 25px;
                         }
@@ -160,7 +163,7 @@
                 flex-wrap: wrap;
                 overflow-y: scroll;
                 justify-content: space-between;
-                margin: 0 10px;
+                margin: 0 20px;
                 height: 65vh;
                 .commodity{
                     display: flex;
