@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_KEY = 'sk-c61481ce440445db9dc8b12298f7aecb';
-const API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation';
+const API_KEY = process.env.API_KEY as string;
+const API_URL = process.env.API_URL as string;
 
 interface PostRequest {
   model: string;
