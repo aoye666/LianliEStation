@@ -1,5 +1,73 @@
+$grey: #ededed;
 .messages-container {
+  width: 100%;
+  height: calc(100vh - 50px);
+  margin-top: 50px;
+  .messages-search-container {
     width: 100%;
-    height: calc(100vh - 50px);
-    margin-top: 50px;
+    height: 50px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    .messages-search-input {
+      width: 80%;
+      height: 30px;
+      padding: 0 10px;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    .messages-search-btn {
+      margin-left: 5px;
+      width: 27px;
+      height: 27px;
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+  }
+  .messages-control {
+    width: 100%;
+    height: 35px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid $grey;
+    .messages-control-item {
+      width: 33%;
+      height: 100%;
+      .messages-select {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: row;
+        font-size: 13px;
+        .messages-option {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+          .messages-icon {
+            width: 20px;
+            height: 20px;
+            margin-left: 3px;
+          }
+          .messages-label {
+            font-size: 16px;
+          }
+        }
+      }
+    }
+  }
+  .messages-list {
+    .messages-list-item {
+    }
+  }
 }
