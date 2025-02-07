@@ -5,7 +5,7 @@ import db from "../db.js";
 import dotenv from "dotenv";
 import upload from "../middlewares/uploadImg.js"; // 引入图片上传中间件
 import fs from "fs";
-import rateLimit from "express-rate-limit"; // 限流中间件
+import { registerLimiter, loginLimiter, passwordChangeLimiter,  verificationLimiter } from "../middlewares/limiter.js"; // 引入限流中间件
 import logIP from "../middlewares/logIP.js";  // 记录IP的中间件
 import sendVerificationCode from '../middlewares/mailer.js';  // 引入邮件发送逻辑
 
@@ -18,14 +18,6 @@ const SECRET_KEY = process.env.SECRET_KEY;
 // 存储验证码的临时存储（实际使用中应该用缓存或数据库）
 let currentVerificationCode = '';
 let currentVerificationEmail = '';
-
-// 设置注册限流，防止恶意注册：每个 IP 在 24 小时内最多允许 3 次成功注册
-const registerLimiter = rateLimit({
-  windowMs: 24 * 60 * 60 * 1000, // 24小时
-  max: 3, // 每个 IP 最多允许 3 次成功注册请求
-  skipFailedRequests: true, // 仅对成功请求计数
-  message: { message: "您今天已经注册成功过一次，请明天再试" },
-});
 
 // 获取所有用户信息（仅供测试使用）
 router.get("/", (req, res) => {
@@ -104,7 +96,7 @@ router.post("/register", registerLimiter, logIP, upload.single("image"), async (
 
 
 // 用户登录
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   const { identifier, password } = req.body;
 
   if (!identifier || !password) {
@@ -301,7 +293,7 @@ router.put("/profile", upload.single("image"), async (req, res) => {
 
 
 // 请求验证码（发送邮件）
-router.post('/RequestVerification', async (req, res) => {
+router.post('/RequestVerification', verificationLimiter, async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
@@ -315,8 +307,8 @@ router.post('/RequestVerification', async (req, res) => {
     // 存储验证码和邮箱（简易实现，实际上可以存入数据库或缓存）
     currentVerificationCode = verificationCode;
     currentVerificationEmail = email;
-    console.log(currentVerificationCode);
-    console.log(currentVerificationEmail);
+    // console.log(currentVerificationCode);
+    // console.log(currentVerificationEmail);
     
     
     res.status(200).json({ message: '验证码已发送，请检查您的邮箱' });
@@ -327,9 +319,8 @@ router.post('/RequestVerification', async (req, res) => {
 });
 
 
-
 // 修改密码
-router.put('/change-password', async (req, res) => {
+router.put('/change-password', passwordChangeLimiter, async (req, res) => {
   const { email, newPassword, verificationCode } = req.body;
 
   if (!email || !newPassword || !verificationCode) {
@@ -360,7 +351,6 @@ router.put('/change-password', async (req, res) => {
     res.status(500).json({ message: '服务器错误' });
   }
 });
-
 
 
 export default router;
