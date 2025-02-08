@@ -6,6 +6,8 @@ import search from '../../assets/search.png';
 import messages from '../../assets/messages.png';  
 import complain from '../../assets/complain.png';  
 import violate from '../../assets/violate.png';  
+import messageReaded from '../../assets/messageReaded.png';  
+import manage from '../../assets/settings.png';  
 
 interface OptionType {  
   value: string;  
@@ -39,8 +41,15 @@ const Messages = () => {
 
   const handleSearch = () => {  
     
-  };  
-<div><br></br></div>
+  }; 
+  const handleReaded = () => {  
+
+  }
+  const handleManage = () => {  
+    
+  }
+  
+
   return (  
     <div>  
       <Navbar title="信箱" />  
@@ -64,12 +73,18 @@ const Messages = () => {
               className="messages-select"
               isSearchable={false} // 如果不需要搜索功能
               defaultValue={ options[0] } 
-              styles={{indicatorsContainer: (provided) => ({...provided, width: "60px"}),
-              control: (provided) => ({...provided, width: "360px"})}}
             />  
           </div>  
-          <div className="messages-control-item">2</div>  
-          <div className="messages-control-item">3</div>  
+          <div className="messages-control-item" onClick={handleReaded}>
+            <div className="messages-control-item-btn">
+              <img src={messageReaded} alt="已读"  /><button>已读</button>
+            </div>
+          </div>  
+          <div className="messages-control-item" onClick={handleManage}>
+            <div className="messages-control-item-btn">
+              <img src={manage} alt="处理"  /><button>处理</button>
+            </div>
+          </div>  
         </div>  
         <div className="messages-list">  
           <div className="messages-list-item"></div>  

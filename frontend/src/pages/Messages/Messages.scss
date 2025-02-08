@@ -17,6 +17,7 @@ $grey: #ededed;
       padding: 0 10px;
       border-radius: 5px;
       font-size: 16px;
+      border: 3px solid $grey;
     }
     .messages-search-btn {
       margin-left: 5px;
@@ -36,12 +37,16 @@ $grey: #ededed;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    border: 1.5px solid $grey;
     .messages-control-item {
       width: 33%;
       height: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid $grey;
       .messages-select {
-        width: 100%;
+        width: 90px;
         height: 100%;
         display: flex;
         flex-direction: row;
@@ -57,11 +62,28 @@ $grey: #ededed;
           .messages-icon {
             width: 20px;
             height: 20px;
-            margin-left: 3px;
+            margin-right: 15px;
           }
           .messages-label {
             font-size: 16px;
           }
+        }
+      }
+      .messages-control-item-btn {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        img {
+          width: 20px;
+          height: 20px;
+          margin-right: 5px;
+        }
+        button {
+          border: none;
+          background-color: transparent;
         }
       }
     }
