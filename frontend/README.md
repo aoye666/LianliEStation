@@ -1,70 +1,75 @@
-# Getting Started with Create React App
+  ## 目录  
+ 
+- [项目目录](#项目目录)  
+- [功能模块](#功能模块)
+- [成型组件](#成型组件)
+- [技术栈](#技术栈)  
+- [安装与使用](#安装与使用)  
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 项目目录
 
-## Available Scripts
+基本敲定所有文件后再建立。
 
-In the project directory, you can run:
+## 功能模块  
 
-### `npm start`
+- **通用模块**
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+  -  注册/登录模块：利用zustand管理的authStore文件处理相关逻辑并管理状态信息，成功后跳转至market页。
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **一般用户模块**
 
-### `npm test`
+  -  商城模块：浏览各类商品，通过小标签筛选、选择不同排序，点击具体商品后进入详情页，可获知详情及发布者联系方式，下有评价部分（投诉则跳转至投诉界面）。
+  -  校园墙模块：后续开发。
+  -  发布模块：引入ai接口，对话框发送商品信息后ai读取信息并分类生成信息概述、用户确认生成模板后进入模板页，在模板页中检查确认商品信息并可上传最多三张图片，确认发布即可上传至商城。
+  -  用户模块：用户信息概述及个人操作，如查看收藏、查看发布历史（交易完成后可确认）、在信箱中查看申诉结果或违规通告、在设置中调节其他设置或退出账号。
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **管理员模块**
 
-### `npm run build`
+  - 商城管理模块：浏览各类商品，通过小标签筛选、选择不同排序，点击具体商品后进入详情页，可获知详情并进行各种管理操作，操作后跳转至信息发布页向发布者说明操作原因。
+  - 用户管理模块：浏览用户列表、查询指定用户，可获知详情并进行各种管理操作，操作后跳转至信息发布页向被操作者者说明操作原因。
+  - 申诉管理模块：类似一般用户的信箱页，可查看申诉信息并对申诉进行回复。
+  - 数据管理模块：综合管理模块，可查看各类统计信息或退出当前管理员账号。
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 成型组件
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+位于/components目录下，可直接在文件中引入使用的组件。
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- **Navbar**
+  - 包含可指定标题与返回按钮，用于二级子页面顶部，如收藏页、设置页、历史页等。具体使用规则见Navbar文件内顶部。
+    
+- **Tabbar**
+  - 一般用户的底部tabbar，仅用于商城页、校园墙页、用户页。
+    
+- **MTabbar**
+  - 管理员的底部tabbar，仅用于四个模块页。
+  
+- **ProtectedRoute**
+  - 保护路由，仅用于app.tsx文件，用于包裹在路由外以保证登陆后才能访问其他页面。
 
-### `npm run eject`
+## 技术栈    
+  
+- TypeScript
+- scss  
+- React
+- zustand
+- react-router-dom
+- axios
+- js-cookie
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 安装与使用  
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+下载完整项目后依次在终端中执行如下操作完成安装依赖、启动操作。  
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash   
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+# 进入项目目录  
+cd frontend  
 
-## Learn More
+# 安装依赖  
+npm install  
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+# 启动开发服务器  
+npm start
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```
+为了方便测试，目前app.tsx中的保护路由均已被注释，可通过在网址栏后输入/user、/post、/template等路径直接访问对应页面，而去掉注释后，只有登陆后才有权限访问。

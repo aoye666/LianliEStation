@@ -1,3 +1,10 @@
+$primary-color: #3498db;
+$hover-color: rgb(0, 86, 179);
+$background-color: #ffffff;
+$text-color: #333;
+$border-radius: 8px;
+$shadow-color: rgba(0, 0, 0, 0.1);
+    
     .button-basic {
     border: none;
     border-radius: 8px; /* 增加圆角 */
@@ -143,12 +150,115 @@
                     }
 
                     .more{
-                        display: none;
-
+                        display: flex;
                         img{
                             width: 25px;
                         }
                     }
+                }
+            }
+
+            .market-more{
+                display: flex;
+                position: absolute;
+                left: 0;
+                height: 78vh;
+                background-color: #bfbfbf; /* 更柔和的背景色 */
+                border-radius: 10px; /* 更圆滑的边角 */
+                border: 1px solid #e0e0e0; /* 使用更柔和的灰色边框 */
+                flex-direction: column;
+                padding: 20px; /* 适当的内边距 */
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+                background-color: #f9f9f9;
+                position: absolute;
+
+                input{
+                    outline:none;
+                }
+
+                input:focus {
+                    border-color: #007bff; /* 聚焦时的边框颜色 */
+                    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* 聚焦时的阴影效果 */
+                }
+
+                .price{
+                    display: flex;
+                    flex-direction: column;
+                    margin-left: 5px;
+                    margin-bottom: 10px;
+                    .price-title{  
+                        font-size: 18px;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    }
+
+                    .price-unit{
+                        display: flex;
+                        gap: 10px;
+                        justify-content: center;
+                        input{
+                            width: 100px;
+                            height: 30px;
+                            border: 1px solid #c4c2c2;
+                            border-radius: 10px;
+                        }
+                    }
+                }
+
+                .confirm{
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    button{
+                        margin-top: 20px;
+                        width: 150px;
+                        height: 30px;
+                        cursor: pointer;
+                        background-color: $primary-color;
+                        border: none;
+                        border-radius: 7px;
+                        box-shadow: $primary-color 0px 2px 5px;
+                        transition: all 0.2s ease;
+
+                        &:active{
+                            transform: translateY(2px);
+                            background-color: $hover-color;
+                        }
+                    }
+                }
+
+                .sort{
+                    display: flex;
+                    margin-left: 5px;
+                    flex-direction: column;
+                    .sort-title{  
+                        font-size: 18px;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    }
+
+                    .sort-list{
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        gap: 15px;
+                        border-bottom: 1px solid #c4c2c2;
+                        .item{
+                            display: flex;
+                            font-size: 16px;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                            width: 80px;
+                            border-radius: 10px;
+                        }
+
+                        .item:active{
+                            background-color: #003366; /* 按下时的颜色 */
+                            transform: scale(0.9);
+                        }
+                    }
+
                 }
             }
 

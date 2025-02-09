@@ -6,7 +6,7 @@ import logo from "../../assets/logo.png";
 import background from "../../assets/background1.jpg";
 
 type LoginInputs = {
-  username: string;
+  identifier: string;
   password: string;
 };
 
@@ -17,7 +17,7 @@ type ErrorType = {
 const Login: React.FC = () => {
   // 输入的用户信息
   const [inputs, setInputs] = useState<LoginInputs>({
-    username: "",
+    identifier: "",
     password: "",
   });
 
@@ -37,8 +37,8 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await login(inputs.username, inputs.password); // 调用 login 方法
-      navigate("/home");
+      await login(inputs.identifier, inputs.password); // 调用 login 方法
+      navigate("/market");
     } catch (err: any) {
       if (err.response) {
         setError(err.response.data);
@@ -56,13 +56,13 @@ const Login: React.FC = () => {
         <div className="login-title">连理e站</div>
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-item">
-            <label htmlFor="username">用户名:</label>
+            <label htmlFor="identifier">用户名或邮箱:</label>
             <input
               required
               type="text"
-              name="username"
-              id="username"
-              value={inputs.username}
+              name="identifier"
+              id="identifier"
+              value={inputs.identifier}
               onChange={handleChange}
             />
           </div>

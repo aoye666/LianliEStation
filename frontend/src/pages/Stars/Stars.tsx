@@ -1,9 +1,49 @@
 import Navbar from "../../components/Navbar/Navbar"
+import Tabbar from "../../components/Tabbar/Tabbar"
+import { use, useEffect, useState } from "react"
+import { useFavoriteStore } from "../../store"
 
 const Stars = () => {
+  const posts=useFavoriteStore((state) => state.posts)
+  const getPosts=useFavoriteStore((state) => state.getPosts)
+
+  // useEffect(() => {
+  //   getPosts()
+  // }, [])
+
+
   return (
-    <div>
-      <Navbar title="收藏" />
+    <div className="starts-container">
+      <div className="header">
+        <Navbar title="收藏" />
+      </div>
+
+      <div className="content">
+        {
+          posts.map((post) => (
+            <div className='commodity'>
+            <div className='commodity-img'>
+              <img src={post.images[0]} alt="" />
+            </div>
+            <div className='commodity-title'>
+              {post.title}
+            </div>
+            <div className='commodity-bottom'>
+              <div className='commodity-price'>
+                {post.price}
+              </div>
+              <div className='commodity-tag'>
+                {post.tag}
+              </div>
+            </div>      
+            </div>
+          ))
+        }
+      </div>
+
+      <div className="footer">
+        <Tabbar />
+      </div>
     </div>
   )
 }

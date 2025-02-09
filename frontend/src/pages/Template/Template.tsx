@@ -1,55 +1,60 @@
-import React from 'react'
+import React, { use } from 'react'
 import './Template.scss'
 import Tabbar from '../../components/Tabbar/Tabbar'
 import add from '../../assets/more.png'
 import takePlace from '../../assets/takePlace.png'
 import logo from '../../assets/logo.png'
 import { useState,useEffect,useReducer } from 'react'
-import { usePostStore } from 'store'
+import { useUserStore, usePostStore,useAuthStore } from '../../store'
+import axios from 'axios'
+import { useLocation } from 'react-router-dom'
 
 const initialState = {
-  selectedPostType: '买/卖',
-  lowPrice: 0,
-  highPrice: 10000,
-  tag: '商品类型',
-  content: '',
+  id:1,
   title: '',
-  selectedImages: [] as File[],
-  error: null as string | null,
+  content: '',
+  auther_id: null as number | null,
+  create_at: '',
+  status:"active",
+  price: 0,
   campus_id: 1,
+  post_type: '买/卖',
+  tag: '商品类型',
+  images: [] as File[],
+  error: null as string | null,
   campus_name: '校区选择',
-  user_id: 1,
 }
 
 type Action=
-  | { type: 'SET_SELECTED_POST_TYPE', payload: string }
-  | { type: 'SET_LOW_PRICE', payload: number }
-  | { type: 'SET_HIGH_PRICE', payload: number }
+  | { type: 'SET_POST_TYPE', payload: string }
   | { type: 'SET_TAG', payload: string }
   | { type: 'SET_CONTENT', payload: string }
   | { type: 'SET_TITLE', payload: string }
-  | { type: 'SET_SELECTED_IMAGES', payload: File[] }
+  | { type: 'SET_IMAGES', payload: File[] }
   | { type: 'SET_ERROR', payload: string | null }
   | { type: 'SET_CAMPUS_ID', payload: number }
   | { type: 'SET_CAMPUS_NAME', payload: string }
-  | { type: 'SET_USER_ID', payload: number }
+  | { type: 'SET_AUTHER_ID', payload: number | null }
+  | { type: 'SET_CREATE_AT', payload: string }
+  | { type: 'SET_PRICE', payload: number }
+  | { type: 'SET_ID', payload: number}
 
 const reducer = (state: typeof initialState, action: Action) => {
   switch (action.type) {
-    case 'SET_SELECTED_POST_TYPE':
+    case 'SET_ID':
+      return {
+       ...state,
+        id: action.payload,
+      }
+    case 'SET_POST_TYPE':
       return {
        ...state,
         selectedPostType: action.payload,
       }
-    case 'SET_LOW_PRICE':
+    case 'SET_PRICE':
       return {
        ...state,
-        lowPrice: action.payload,
-      }
-    case 'SET_HIGH_PRICE':
-      return {
-       ...state,
-        highPrice: action.payload,
+        price: action.payload,
       }
     case 'SET_TAG':
       return {
@@ -66,7 +71,7 @@ const reducer = (state: typeof initialState, action: Action) => {
        ...state,
         title: action.payload,
       }
-    case 'SET_SELECTED_IMAGES':
+    case 'SET_IMAGES':
       return {
        ...state,
         selectedImages: action.payload,
@@ -86,10 +91,15 @@ const reducer = (state: typeof initialState, action: Action) => {
        ...state,
         campus_name: action.payload,
       }
-    case 'SET_USER_ID':
+    case 'SET_AUTHER_ID':
+      return {
+        ...state,
+        auther_id: action.payload,
+      }
+    case 'SET_CREATE_AT':
       return {
        ...state,
-        user_id: action.payload,
+        create_at: action.payload,
       }
     default:
       return state
@@ -98,28 +108,42 @@ const reducer = (state: typeof initialState, action: Action) => {
 
 
 const Template = () => {
+  const location = useLocation()
+  const templateData = location.state as any
   const [state, dispatch] = useReducer(reducer, initialState)
 
-  const updatePostType = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    dispatch({ type: 'SET_SELECTED_POST_TYPE', payload: e.currentTarget.innerText })
+  const initialPostType = (value: string) => {
+    dispatch({ type: 'SET_POST_TYPE', payload: value })
   }
-  const setLowPrice = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: 'SET_LOW_PRICE', payload: e.target.valueAsNumber })
+  const initialTag = (value: string) => {
+    dispatch({ type: 'SET_TAG', payload: value })
   }
-  const setHighPrice = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: 'SET_HIGH_PRICE', payload: e.target.valueAsNumber })
+  const initialContent = (value: string) => {
+    dispatch({ type: 'SET_CONTENT', payload: value })
+  }
+  const initialTitle = (value: string) => {
+    dispatch({ type: 'SET_TITLE', payload: value })
+  }
+  const initialPrice = (value: number) => {
+    dispatch({ type: 'SET_PRICE', payload: value })
+  }
+  const setPostType = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    dispatch({ type: 'SET_POST_TYPE', payload: e.currentTarget.innerText })
+  }
+  const setPrice = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({ type: 'SET_PRICE', payload: e.target.valueAsNumber })
   }
   const setTag = (e:React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     dispatch({ type: 'SET_TAG', payload: e.currentTarget.innerText })
   }
-  const setContent = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const setContent = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     dispatch({ type: 'SET_CONTENT', payload: e.target.value })
   }
   const setTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: 'SET_TITLE', payload: e.target.value })
   }
   const setSelectedImages = (value: File[]) => {
-    dispatch({ type: 'SET_SELECTED_IMAGES', payload: value })
+    dispatch({ type: 'SET_IMAGES', payload: value })
   }
   const setError = (value: string | null) => {
     dispatch({ type: 'SET_ERROR', payload: value })
@@ -130,6 +154,30 @@ const Template = () => {
   const setCampusName = (value: string) => {
     dispatch({ type: 'SET_CAMPUS_NAME', payload: value })
   }
+  const setAuthorId = (value: number | null) => {
+    dispatch({ type: 'SET_AUTHER_ID', payload: value })
+  }
+  const setCreateAt = (value: string) => {
+    dispatch({ type: 'SET_CREATE_AT', payload: value })
+  }
+  const setId= (value: number) => {
+    dispatch({ type: 'SET_ID', payload: value })
+  }
+
+  const currentUser = useUserStore(state => state.currentUser)
+  const token = useAuthStore(state => state.token)
+
+  useEffect(() => {
+    setAuthorId(currentUser?.id || null)
+    setCreateAt(new Date().toISOString())
+    setId(currentUser?.id || 1)
+    setCampusId(currentUser?.campus_id || 0)
+    initialPostType(templateData?.post_type || '买/卖')
+    initialTag(templateData?.tag || '商品类型')
+    initialContent(templateData?.details || '')
+    initialTitle(templateData?.title || '')    
+    initialPrice(templateData?.price || 0)
+  },[])
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
@@ -144,28 +192,48 @@ const Template = () => {
   const handleCampusChange = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     setCampusId(parseInt(e.currentTarget.id))
     setCampusName(e.currentTarget.innerText)
+    
   }
-
-  const handlePublish = async () => {
-
-  }
-
-
 
   const {
-    selectedPostType,
-    lowPrice,
-    highPrice,
+    id,
+    post_type,
     tag,
     content,
     title,
-    selectedImages,
+    images,
     error,
     campus_id,
     campus_name,
+    auther_id,
+    create_at,
+    price,
   } = state
 
-
+  const handlePublish = async () => {
+    axios.post('http://localhost:5000/api/posts/publish', {
+      "id":id,
+      "title": title,
+      "content": content,
+      "auther_id": auther_id,
+      "create_at": create_at,
+      "status": "active",
+      "price": price,
+      "campus_id": campus_id,
+      "post_type": post_type,
+      "tag": tag,
+      "images": images,
+    },{
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).then(() => {
+      console.log('发布成功')
+  })
+  .catch((error) => {
+      console.log(error)
+  })
+}
 
   return (
     <div className='template-container'>
@@ -191,10 +259,10 @@ const Template = () => {
           <div className='sort-input'>
           <div className="dropdown">
             <div className='dropdown-sellOrBuy'>
-              <button className="dropdown-button">{`${selectedPostType}`}</button>
+              <button className="dropdown-button">{`${post_type}`}</button>
               <div className="dropdown-menu">
-                <div className="dropdown-item" onClick={(e) => updatePostType(e)}>买</div>
-                <div className="dropdown-item" onClick={(e) => updatePostType(e)}>卖</div>
+                <div className="dropdown-item" onClick={(e) => setPostType(e)}>买</div>
+                <div className="dropdown-item" onClick={(e) => setPostType(e)}>卖</div>
               </div>
             </div>
             <div className='dropdown-category'>
@@ -218,16 +286,10 @@ const Template = () => {
         </div>
 
         <div className='price'>
-            <label htmlFor="price-unit">价格</label>
-            <div className='price-unit'>
-                <div className='price-low'>
-                    <input type="number" placeholder='最低价格' onChange={(e) =>setLowPrice(e) }/>
-                </div>
-                -
-                <div className='price-high'>
-                    <input type="number" placeholder='最高价格' onChange={(e) =>setHighPrice(e) }/>
-                </div>
-            </div>
+            <label htmlFor="price">价格</label>
+              <div className='price-num'>
+                <input type="number" placeholder='商品价格' onChange={(e) =>setPrice(e) }/>
+              </div>
         </div>
 
         <div className='img-upload'>
@@ -245,13 +307,11 @@ const Template = () => {
               <div className='error'>{error}</div> 
               : 
               <div>
-                <img src={selectedImages[0] ? URL.createObjectURL(selectedImages[0]) : takePlace} alt="takePlace" />
-                <img src={selectedImages[1] ? URL.createObjectURL(selectedImages[1]) : takePlace} alt="takePlace" />
-                <img src={selectedImages[2] ? URL.createObjectURL(selectedImages[2]) : takePlace} alt="takePlace" />
+                <img src={images[0] ? URL.createObjectURL(images[0]) : takePlace} alt="takePlace" />
+                <img src={images[1] ? URL.createObjectURL(images[1]) : takePlace} alt="takePlace" />
+                <img src={images[2] ? URL.createObjectURL(images[2]) : takePlace} alt="takePlace" />
               </div>
-
               }
-            
 
           </div>
 
@@ -262,7 +322,7 @@ const Template = () => {
                 商品详情
             </label>
             <div className='detail-input'>
-              <input type="text" placeholder={"商品详情"} onChange={(e)=>setContent(e)} />
+              <textarea placeholder={"商品详情"} onChange={(e)=>setContent(e)} />
             </div>
         </div>
     </div>

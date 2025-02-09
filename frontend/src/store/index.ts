@@ -1,5 +1,6 @@
 export { default as useUserStore } from './userStore'
 export { default as usePostStore } from './postStore'
 export { default as useAuthStore } from './authStore'
+export { default as useFavoriteStore } from './favoriteStore'
 // export { default as useStarStore } from './starStore'
 // export { default as useMessageStore } from './messageStore'

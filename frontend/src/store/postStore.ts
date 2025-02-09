@@ -13,7 +13,7 @@ interface Post {
   status: 'active' | 'inactive' | 'deleted';
   price: number;
   campus_id: number;
-  reviews?: { id: number; user: string; rating: number; comment: string }[];
+  images:string[];
 }
 
 interface Filters {
@@ -25,103 +25,69 @@ interface Filters {
 }
 
 interface PostState {
+  page: number;
   posts: Post[];
-  filteredPosts: Post[];
-  currentPost: Post | null;
+  stars:Post[];
   filters: Filters;
   fetchPosts: () => Promise<void>;
-  fetchPostDetails: (postId: number) => Promise<void>;
-  setPost: (post: Post) => void;
-  clearPost: () => void;
   setFilters: (newFilters: Partial<Filters>) => void;
-  applyFilters: () => void;
-  updatePost: (updatedPost: Post) => void;
+  updatePosts:()=>Promise<void>;
+  setPage: () => void;
+  clearPosts: () => void;
 }
 
 const usePostStore = create<PostState>()(
   persist(
-    (set) => ({
-      posts: [],
-      filteredPosts: [],
-      currentPost: null,
-      filters: {
-        searchTerm: '',
-        priceRange: [0, 10000],
-        tag: null,
-        post_type: 'receive',
-        campus_id: 0,
-      },
+    (set, get) => ({
+      page:1,
+      stars:[],
+      posts: [], // 初始化 posts 为一个空数组
+      filters: { searchTerm: '', post_type: 'receive', tag: '', priceRange: [0, 1000000], campus_id: 0 },
+      setPage: () => set((preState)=>({
+        page: preState.page + 1
+      })),
       fetchPosts: async () => {
-        try {
-          const res = await axios.get('/posts');
-          set((state: PostState) => ({ posts: res.data, filteredPosts: res.data }));
-        } catch (error) {
-          console.error('Error fetching posts:', error);
-        }
+        const response = await axios.get('http://localhost:5000/api/posts', {
+          params: {
+            page:get().page,
+            limit:18,
+        }});
+        const data = await response.data;
+        set((state)=>({
+          posts:[...state.posts,...data]
+        })); // 更新 posts 状态
       },
-      fetchPostDetails: async (postId: number) => {
-        try {
-          const res = await axios.get(`/posts/${postId}`);
-          set({ currentPost: res.data });
-        } catch (error) {
-          console.error('Error fetching post details:', error);
-        }
-      },
-      setPost: (post: Post) => set({ currentPost: post }), // 设置当前帖子
-      clearPost: () => set({ currentPost: null }), // 清除当前帖子
-      setFilters: (newFilters: Partial<Filters>) => {
-        set((state: PostState) => ({
-          filters: {
-            ...state.filters,
-            ...newFilters,
-          },
-        }));
-        // 自动应用筛选条件
-        set((state: PostState) => ({
-          ...state,
-          filteredPosts: state.posts.filter((post: Post) =>
-            state.filters.searchTerm.toLowerCase().split(' ').every((term: string) =>
-              post.title.toLowerCase().includes(term)
-            ) &&
-            post.price >= state.filters.priceRange[0] &&
-            post.price <= state.filters.priceRange[1] &&
-            (state.filters.tag === null || post.tag === state.filters.tag) &&
-            post.post_type === state.filters.post_type &&
-            post.campus_id === state.filters.campus_id &&
-            post.status === 'active' // 确保只显示激活状态的帖子
-          ),
+
+      clearPosts: () => set(() => ({
+        posts: [],
+        page: 1,
+      })), // 清空 posts 状态
+      setFilters: async(newFilters) => {
+        set((state) => ({
+          filters: { ...state.filters, ...newFilters }, // 更新 filters 状态
         }));
       },
-      applyFilters: () => {
-        set((state: PostState) => ({
-          filteredPosts: state.posts.filter((post: Post) =>
-            state.filters.searchTerm.toLowerCase().split(' ').every((term: string) =>
-              post.title.toLowerCase().includes(term)
-            ) &&
-            post.price >= state.filters.priceRange[0] &&
-            post.price <= state.filters.priceRange[1] &&
-            (state.filters.tag === null || post.tag === state.filters.tag) &&
-            post.post_type === state.filters.post_type &&
-            post.campus_id === state.filters.campus_id &&
-            post.status === 'active' // 确保只显示激活状态的帖子
-          ),
-        }));
+      updatePosts: async ()=>{
+        const response = await axios.get('http://localhost:5000/api/posts', {
+          params: {
+            page:get().page,
+            limit:18,
+            searchTerm: get().filters.searchTerm,
+            post_type: get().filters.post_type,
+            tag: get().filters.tag,
+            priceRange: get().filters.priceRange,
+            campus_id: get().filters.campus_id,
+          }
+        });
+        const data = await response.data;
+        set((state)=>({
+          posts:[...state.posts,...data]
+        })); // 更新 posts 状态
       },
-      updatePost: (updatedPost: Post) => {
-        set((state: PostState) => ({
-          ...state,
-          posts: state.posts.map((post: Post) =>
-            post.id === updatedPost.id ? { ...post, ...updatedPost } : post
-          ),
-          filteredPosts: state.filteredPosts.map((post: Post) =>
-            post.id === updatedPost.id ? { ...post, ...updatedPost } : post
-          ),
-          currentPost: state.currentPost?.id === updatedPost.id ? { ...state.currentPost, ...updatedPost } : state.currentPost,
-        }));
-      },
+      
     }),
     {
-      name: 'post-storage', // 唯一名称
+      name: 'postStore', // localStorage 的 key
     }
   )
 );

@@ -1,9 +1,10 @@
+$bg:#EDEDED;
 .user-container {
     width: 100%;
     height: calc(100vh - 50px);
     display: flex;
     flex-direction: column;
-    background: #ccc;
+    background: $bg;
     .user-info {
         width: 100%;
         height: 250px;
@@ -19,7 +20,7 @@
                 width: 100%;
                 height: 100%;
                 border-radius: 50%;
-                border: 1px solid #ccc;
+                border: 1px solid $bg;
                 object-fit: cover;
             }
         }
@@ -38,7 +39,7 @@
         height: auto;
         display: flex;
         flex-direction: column;
-        border-top: 3px solid #ccc;
+        border-top: 3px solid $bg;
 
         .user-item {
             display: flex;
@@ -47,7 +48,7 @@
             width: 100%;
             height: 45px;
             background: white;
-            border-top: 1px solid #ccc;
+            border-top: 1px solid $bg;
             .item-icon {
                 margin-left: 5px;
                 margin-right: 5px;
