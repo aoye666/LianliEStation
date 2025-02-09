@@ -5,21 +5,19 @@ import db from "../db.js";
 import dotenv from "dotenv";
 import upload from "../middlewares/uploadImg.js"; // 引入图片上传中间件
 import fs from "fs";
-import rateLimit from "express-rate-limit"; // 限流中间件
+import { registerLimiter, loginLimiter, passwordChangeLimiter,  verificationLimiter } from "../middlewares/limiter.js"; // 引入限流中间件
 import logIP from "../middlewares/logIP.js";  // 记录IP的中间件
+import sendVerificationCode from '../middlewares/mailer.js';  // 引入邮件发送逻辑
 
 let router = Router();
 
 dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY;
 
-// 设置注册限流，防止恶意注册：每个 IP 在 24 小时内最多允许 3 次成功注册
-const registerLimiter = rateLimit({
-  windowMs: 24 * 60 * 60 * 1000, // 24小时
-  max: 3, // 每个 IP 最多允许 3 次成功注册请求
-  skipFailedRequests: true, // 仅对成功请求计数
-  message: { message: "您今天已经注册成功过一次，请明天再试" },
-});
+
+// 存储验证码的临时存储（实际使用中应该用缓存或数据库）
+let currentVerificationCode = '';
+let currentVerificationEmail = '';
 
 // 获取所有用户信息（仅供测试使用）
 router.get("/", (req, res) => {
@@ -98,7 +96,7 @@ router.post("/register", registerLimiter, logIP, upload.single("image"), async (
 
 
 // 用户登录
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   const { identifier, password } = req.body;
 
   if (!identifier || !password) {
@@ -292,5 +290,67 @@ router.put("/profile", upload.single("image"), async (req, res) => {
     res.status(401).json({ message: "Token 无效" });
   }
 });
+
+
+// 请求验证码（发送邮件）
+router.post('/RequestVerification', verificationLimiter, async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: '邮箱不能为空' });
+  }
+
+  try {
+    // 发送验证码
+    const verificationCode = await sendVerificationCode(email);
+
+    // 存储验证码和邮箱（简易实现，实际上可以存入数据库或缓存）
+    currentVerificationCode = verificationCode;
+    currentVerificationEmail = email;
+    // console.log(currentVerificationCode);
+    // console.log(currentVerificationEmail);
+    
+    
+    res.status(200).json({ message: '验证码已发送，请检查您的邮箱' });
+  } catch (error) {
+    console.error('发送验证码失败: ', error);
+    res.status(500).json({ message: '邮件发送失败' });
+  }
+});
+
+
+// 修改密码
+router.put('/change-password', passwordChangeLimiter, async (req, res) => {
+  const { email, newPassword, verificationCode } = req.body;
+
+  if (!email || !newPassword || !verificationCode) {
+    return res.status(400).json({ message: '缺少必要参数' });
+  }
+
+  // 验证验证码是否正确
+  if (verificationCode !== currentVerificationCode || email !== currentVerificationEmail) {
+    return res.status(400).json({ message: '验证码错误或已过期' });
+  }
+
+  try {
+    // 查找用户
+    const [user] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (user.length === 0) {
+      return res.status(404).json({ message: '用户不存在' });
+    }
+
+    // 加密新密码
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // 更新密码
+    await db.query('UPDATE users SET password = ? WHERE email = ?', [hashedPassword, email]);
+
+    res.status(200).json({ message: '密码修改成功' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '服务器错误' });
+  }
+});
+
 
 export default router;

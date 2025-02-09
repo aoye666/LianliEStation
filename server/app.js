@@ -8,7 +8,8 @@ import cors from "cors";
 import usersRouter from "./routes/users.js";
 import postsRouter from "./routes/posts.js";
 import appealsRouter from "./routes/appeals.js";
-import favoritesRouter from "./routes/favorites.js"
+import favoritesRouter from "./routes/favorites.js";
+import aiTemplateRouter from "./routes/aiTemplate.js";
 
 let app = express();
 
@@ -27,7 +28,7 @@ app.use("/api/users", usersRouter);
 app.use("/api/posts", postsRouter);
 app.use("/api/appeals", appealsRouter);
 app.use("/api/favorites", favoritesRouter);
-
+app.use("/api/aiTemplate", aiTemplateRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
