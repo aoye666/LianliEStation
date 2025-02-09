@@ -1,16 +1,30 @@
+// 变量定义
+$primary-color: #3498db;
+$hover-color: rgb(0, 86, 179);
+$background-color: #ffffff;
+$text-color: #333;
+$border-radius: 8px;
+$shadow-color: rgba(0, 0, 0, 0.1);
 
 .template-container {
     display: flex;
     flex-direction: column;
     transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0.5s;
 
-    input:focus {
+
+    input,textarea:focus {
         border-color: #007bff; /* 聚焦时的边框颜色 */
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* 聚焦时的阴影效果 */
+        box-shadow: 0 0 5px $hover-color; /* 聚焦时的阴影效果 */
     }
 
     input{
         outline: none;
+        padding-left:5px ;
+    }
+
+    textarea{
+        outline: none;
+        padding: 5px;
     }
     
     .navbar{
@@ -63,7 +77,7 @@
             width: 250px;
             gap: 6px;
 
-            .price-unit{
+            .price-num{
                 display: flex;
                 gap: 0 10px;
                 input{
@@ -81,6 +95,123 @@
             flex-direction: column;
             width: 250px;
             gap: 6px;
+            // 下拉菜单基础样式
+            .dropdown {
+                position: relative;
+                display: flex;
+                gap: 0 30px;
+            
+                // 菜单按钮样式
+                .dropdown-sellOrBuy{
+                    .dropdown-button{
+                        width: 80px;
+                        height: 25px;
+                    }   
+                }
+
+                .dropdown-category{
+                    .dropdown-button{
+                        width: 80px;
+                        height: 25px;
+                    }
+                }
+
+                .dropdown-campus{
+                    .dropdown-button{
+                        width: 80px;
+                        height: 25px;
+                    }   
+                }
+                .dropdown-button {
+                background-color: $primary-color;
+                color: $background-color;
+                border: none;
+                font-size: 16px;
+
+                cursor: pointer;
+                border-radius: $border-radius;
+                transition: background-color 0.3s ease;
+                border-radius: 10px;
+            
+                &:hover {
+                    background-color: $hover-color;
+                }
+            
+                &:focus {
+                    outline: none;
+                }
+                }
+            
+                // 下拉菜单内容
+                .dropdown-menu {
+                display: block;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                background-color: $background-color;
+                min-width: 300px;
+                border-radius: $border-radius;
+                box-shadow: 0 4px 8px $shadow-color;
+                z-index: 1;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease, transform 0.3s ease;
+                transform: translateY(-10px);
+            
+                // 显示时
+                &.show {
+                    display: block;
+                    opacity: 1;
+                    transform: translateY(0);
+                    pointer-events: auto;
+                }
+            
+                // 下拉菜单项样式
+                .dropdown-item {
+                    padding: 12px 20px;
+                    font-size: 16px;
+                    color: $text-color;
+                    text-align: left;
+                    cursor: pointer;
+                    transition: background-color 0.3s ease;
+            
+                    &:hover {
+                    background-color: $hover-color;
+                    color: #fff;
+                    }
+            
+                    &:focus {
+                    outline: none;
+                    }
+                }
+                }
+            }
+            
+            // 激活下拉菜单
+            .dropdown-sellOrBuy:hover .dropdown-menu {
+                display: block;
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+
+            .dropdown-category:hover .dropdown-menu {
+                display: block;
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+
+            .dropdown-campus:hover .dropdown-menu {
+                display: block;
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+
+            // .dropdown-menu:active.dropdown-menu {
+            //     display: none;
+            // }
 
         }
 
@@ -101,11 +232,21 @@
                 img{
                     width: 30px;
                 }
+                input{
+                    display: none;
+                }
             }
 
             .img-upload-down{
                 display: flex;
                 gap: 10px;
+
+                .error{
+                    position: relative;
+                    color: red;
+                    width: 250px;
+                    font-size: 12px;
+                }
 
                 img{
                     width: 60px;
@@ -116,6 +257,7 @@
         .detail{
             display: flex;
             flex-direction: column;
+            width: 250px;
 
             .detail-text{
                 font-size: 16px;
@@ -123,7 +265,9 @@
             }
 
             .detail-input{
-                input{
+                word-wrap: break-word;
+                white-space: pre-wrap; 
+                textarea{
                     border: 1px solid #ccc;
                     height: 120px;
                     width: 250px;
@@ -145,15 +289,15 @@
             width: 150px;
             height: 30px;
             cursor: pointer;
-            background-color: #007bff;
+            background-color: $primary-color;
             border: none;
             border-radius: 7px;
-            box-shadow: #007bff 0px 0px 7px;
+            box-shadow: $primary-color 0px 2px 5px;
             transition: all 0.2s ease;
 
             &:active{
                 transform: translateY(2px);
-                background-color: #003b7b;
+                background-color: $hover-color;
             }
         }
     }
