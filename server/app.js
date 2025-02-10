@@ -10,6 +10,7 @@ import postsRouter from "./routes/posts.js";
 import appealsRouter from "./routes/appeals.js";
 import favoritesRouter from "./routes/favorites.js";
 import aiTemplateRouter from "./routes/aiTemplate.js";
+import responsesRouter from "./routes/responses.js";
 
 let app = express();
 
@@ -29,6 +30,7 @@ app.use("/api/posts", postsRouter);
 app.use("/api/appeals", appealsRouter);
 app.use("/api/favorites", favoritesRouter);
 app.use("/api/aiTemplate", aiTemplateRouter);
+app.use("/api/responses", responsesRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

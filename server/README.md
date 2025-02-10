@@ -1,3 +1,7 @@
+[TOC]
+
+
+
 # 启动说明
 
 ## 环境变量
@@ -95,6 +99,19 @@ CREATE TABLE `appeal_images` (
     `image_url` VARCHAR(255) NOT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `responses` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,           -- 自增主键
+    `user_id` INT NOT NULL,                        -- 接收回复的用户ID
+    `response_type` ENUM('appeal', 'violation') NOT NULL, -- 回复类型：申诉回复或违规通告回复
+    `related_id` INT NOT NULL,                     -- 关联的申诉或违规通告记录ID
+    `content` TEXT NOT NULL,                       -- 管理员的回复内容
+    `read_status` ENUM('unread', 'read') NOT NULL DEFAULT 'unread', -- 回复状态，默认为未读
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP -- 创建时间，默认当前时间
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
 
 -- 用户表数据插入示例
 INSERT INTO `users` (`nickname`, `username`, `email`, `password`, `qq_id`, `campus_id`, `credit`, `avatar`)
@@ -912,3 +929,105 @@ Authorization: Bearer <your_token_here>
   - **内容:** `{ "message": "无效的 token" }`
   - **状态码:** 500
   - **内容:** `{ "message": "生成商品信息失败" }`
+
+## responses
+### 管理员创建回复
+
+- **方法:** POST
+- **路径:** `/api/responses/`
+- **功能:** 管理员创建回复（申诉结果或违规通告），回复内容由管理员编写，默认状态为 "unread"。
+- **请求头:**
+  - `Authorization`: Bearer `<JWT_TOKEN>` (必须为管理员的 Token，即 token 中 user_id 必须为 1)
+- **请求体 (JSON):**
+  - `user_id`: 接收回复的用户 ID，整数，必填。
+  - `response_type`: 回复类型，字符串，必填，可选值 `"appeal"`（申诉回复）或 `"violation"`（违规通告回复）。
+  - `related_id`: 关联的申诉或违规记录的 ID，整数，必填。
+  - `content`: 管理员回复内容，字符串，必填。
+- **成功响应:**
+  - **状态码:** 201
+  - **内容:**  
+    ```json
+    {
+      "message": "回复创建成功",
+      "response_id": 10
+    }
+    ```
+- **错误响应:**
+  - **状态码:** 401  
+    - `{ "message": "未提供 Token" }` 或 `{ "message": "Token 无效" }`
+  - **状态码:** 403  
+    - `{ "message": "只有管理员才能创建回复" }`
+  - **状态码:** 400  
+    - `{ "message": "缺少必要参数" }`
+  - **状态码:** 500  
+    - `{ "message": "服务器错误" }`
+
+### 用户查看自己的回复
+
+- **方法:** GET
+- **路径:** `/api/responses/`
+- **功能:** 查询当前登录用户收到的所有回复（申诉结果或违规通告）。
+- **请求头:**
+  - `Authorization`: Bearer `<JWT_TOKEN>`
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 返回一个回复记录数组，每条记录包含 `id`, `user_id`, `response_type`, `related_id`, `content`, `read_status`, `created_at` 等字段。
+- **错误响应:**
+  - **状态码:** 401  
+    - `{ "message": "未提供 Token" }`
+  - **状态码:** 500  
+    - `{ "message": "服务器错误" }`
+
+### 用户将回复标记为已读
+
+- **方法:** PUT
+- **路径:** `/api/responses/:response_id/read`
+- **功能:** 将当前登录用户收到的指定回复标记为已读。
+- **请求头:**
+  - `Authorization`: Bearer `<JWT_TOKEN>`
+- **请求参数:**
+  - `response_id` (URL 参数): 回复的 ID，整数，必填。
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** `{ "message": "回复已标记为已读" }`
+- **错误响应:**
+  - **状态码:** 401  
+    - `{ "message": "未提供 Token" }` 或 `{ "message": "Token 无效" }`
+  - **状态码:** 400  
+    - `{ "message": "缺少回复ID" }`
+  - **状态码:** 404  
+    - `{ "message": "回复不存在或不属于当前用户" }`
+  - **状态码:** 500  
+    - `{ "message": "服务器错误" }`
+
+### 查询未读回复
+
+- **方法:** GET
+- **路径:** `/api/responses/unread`
+- **功能:** 查询当前登录用户收到的所有未读回复（包括申诉结果或违规通告）。
+- **请求头:**
+  - `Authorization`: Bearer `<JWT_TOKEN>`
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 返回一个数组，包含所有 `read_status` 为 `unread` 的回复记录，每条记录包含字段 `id`, `user_id`, `response_type`, `related_id`, `content`, `read_status`, `created_at` 等。
+- **错误响应:**
+  - **状态码:** 401
+    - `{ "message": "未提供 Token" }`
+  - **状态码:** 500
+    - `{ "message": "查询失败" }`
+
+### 查询已读回复
+
+- **方法:** GET
+- **路径:** `/api/responses/read`
+- **功能:** 查询当前登录用户收到的所有已读回复。
+- **请求头:**
+  - `Authorization`: Bearer `<JWT_TOKEN>`
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 返回一个数组，包含所有 `read_status` 为 `read` 的回复记录，每条记录包含字段 `id`, `user_id`, `response_type`, `related_id`, `content`, `read_status`, `created_at` 等。
+- **错误响应:**
+  - **状态码:** 401
+    - `{ "message": "未提供 Token" }`
+  - **状态码:** 500
+    - `{ "message": "查询失败" }`
