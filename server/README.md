@@ -155,18 +155,90 @@ VALUES
 
 ## users
 
-### 获取所有用户信息
+### 获取所有用户信息(仅管理员)
 
 - **方法:** GET
 - **路径:** `/api/users/`
 - **功能:** 获取数据库中所有用户的基本信息，仅用于测试目的。
-- **请求参数:** 无
+- **请求参数:** token
 - **成功响应:**
   - **状态码:** 200
   - **内容:** 用户信息列表，包含 `id`, `nickname`, `email`。
 - **错误响应:**
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
+
+
+### 查询用户信息(by qq_id,仅限管理员)
+- 方法：GET 
+- 路径：/api/searchByQQ
+- 功能：该接口允许管理员通过用户的 qq_id 查询用户的详细信息,需要提供管理员身份验证.
+
+- 请求参数:
+  - qq_id (string, 必填)
+  - Authorization: Bearer <your_jwt_token>
+sql
+复制代码
+GET /search-by-qq?qq_id=1531830975
+Authorization: Bearer abc123yourjwtTokenhere
+成功响应（200 OK）
+如果管理员具有权限并且提供有效的 qq_id，返回相应的用户信息。
+
+json
+复制代码
+{
+  "id": 1,
+  "nickname": "DUTers",
+  "email": "example@example.com",
+  "qq_id": "1531830975",
+  "username": "user1"
+}
+错误响应
+400 Bad Request - 缺少 qq_id 参数。
+
+json
+复制代码
+{
+  "message": "缺少 qq_id 参数"
+}
+401 Unauthorized - 未提供有效的 Token。
+
+json
+复制代码
+{
+  "message": "未提供 Token"
+}
+403 Forbidden - 用户不是管理员（user_id != 1），无权限访问。
+
+json
+复制代码
+{
+  "message": "您没有权限执行此操作"
+}
+404 Not Found - 找不到对应 qq_id 的用户。
+
+json
+复制代码
+{
+  "message": "没有找到匹配的用户"
+}
+401 Unauthorized - 如果提供的 Token 无效或已过期。
+
+json
+复制代码
+{
+  "message": "Token 无效"
+}
+业务逻辑
+只有管理员（user_id == 1）才能访问此接口。如果是普通用户，则返回 403 Forbidden 错误。
+必须通过 Authorization 头传递有效的 JWT Token。
+查询时，必须提供有效的 qq_id，否则返回 400 Bad Request。
+返回的用户信息包含：id，nickname，email，qq_id，username 等。
+
+
+
+
+
 
 ### 用户注册
 
@@ -276,7 +348,7 @@ VALUES
 
 ---
 
-### **请求验证码**
+### 请求验证码
 
 - **方法:** `POST`
 - **路径:** `/api/users/RequestVerification`
@@ -296,7 +368,7 @@ VALUES
 
 ---
 
-### **修改密码**
+### 修改密码
 
 - **方法:** `PUT`
 - **路径:** `/api/users/change-password`
@@ -521,9 +593,9 @@ VALUES
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
-### 示例：
+  - 示例：
 
-#### 请求：
+  - 请求：
 
 ```http
 DELETE http://localhost:5000/api/posts/1
@@ -566,7 +638,7 @@ Authorization: Bearer <your_token_here>
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
-### 注意事项
+  - 注意事项
 
 1. **图片上传**：上传的图片存储在服务器的 `public/uploads/` 文件夹中，并且会返回图片的 URL。前端可以通过`http://localhost:5000/uploads/xxx`访问图片，xxx 文件存储在 images 数组里。
 2. **Token 验证**：需要使用 JWT Token 验证用户身份。在发送请求时，需要在请求头中提供有效的 Token（`Authorization: Bearer <token>`）。
@@ -632,9 +704,9 @@ Authorization: Bearer <your_token_here>
   - **状态码:** 500
   - **内容:** `{ "message": "获取图片信息失败" }`
 
-### 示例：
+  - 示例：
 
-#### 请求：
+  - 请求：
 
 ```http
 GET http://localhost:5000/api/posts/search?title=二手&status=active&min_price=10&max_price=100
@@ -672,9 +744,9 @@ GET http://localhost:5000/api/posts/search?title=二手&status=active&min_price=
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
-### 示例：
+  - 示例：
 
-#### 请求：
+  - 请求：
 
 ```http
 PUT http://localhost:5000/api/posts/1
@@ -693,7 +765,7 @@ Authorization: Bearer <your_token_here>
 
 ## appeals
 
-### **获取所有申诉**
+### 获取所有申诉(仅管理员)
 
 - **方法:** `GET`
 - **路径:** `/api/appeals/`
@@ -708,7 +780,7 @@ Authorization: Bearer <your_token_here>
 
 ---
 
-### **提交申诉**
+### 提交申诉
 
 - **方法:** `POST`
 - **路径:** `/api/appeals/publish`
@@ -731,7 +803,7 @@ Authorization: Bearer <your_token_here>
 
 ---
 
-### **查询未解决的申诉（仅限当前用户）**
+### 查询未解决的申诉
 
 - **方法:** `GET`
 - **路径:** `/api/appeals/search/pending`
@@ -748,7 +820,7 @@ Authorization: Bearer <your_token_here>
 
 ---
 
-### **查询已解决的申诉（仅限当前用户）**
+### 查询已解决的申诉
 
 - **方法:** `GET`
 - **路径:** `/api/appeals/search/resolved`
@@ -765,7 +837,7 @@ Authorization: Bearer <your_token_here>
 
 ---
 
-### **查询已撤销的申诉（仅限当前用户）**
+### 查询已撤销的申诉
 
 - **方法:** `GET`
 - **路径:** `/api/appeals/search/deleted`
@@ -782,7 +854,7 @@ Authorization: Bearer <your_token_here>
 
 ---
 
-### **修改申诉状态**
+### 修改申诉状态
 
 - **方法:** `PUT`
 - **路径:** `/api/appeals/:appeal_id`
@@ -805,7 +877,7 @@ Authorization: Bearer <your_token_here>
 
 ---
 
-### **删除申诉（软删除）**
+### 删除申诉
 
 - **方法:** `DELETE`
 - **路径:** `/api/appeals/:appeal_id`
@@ -894,10 +966,10 @@ Authorization: Bearer <your_token_here>
 
 ---
 
-### 错误处理
+  - 错误处理
 
-- **状态码:** 500
-- **内容:** `{ "message": "服务器错误" }`
+    - **状态码:** 500
+    - **内容:** `{ "message": "服务器错误" }`
 
 ## aiTemlate
 
@@ -931,7 +1003,7 @@ Authorization: Bearer <your_token_here>
   - **内容:** `{ "message": "生成商品信息失败" }`
 
 ## responses
-### 管理员创建回复
+### 创建回复(仅管理员)
 
 - **方法:** POST
 - **路径:** `/api/responses/`
@@ -962,7 +1034,7 @@ Authorization: Bearer <your_token_here>
   - **状态码:** 500  
     - `{ "message": "服务器错误" }`
 
-### 用户查看自己的回复
+### 查看回复
 
 - **方法:** GET
 - **路径:** `/api/responses/`
@@ -978,7 +1050,7 @@ Authorization: Bearer <your_token_here>
   - **状态码:** 500  
     - `{ "message": "服务器错误" }`
 
-### 用户将回复标记为已读
+### 标记回复为已读
 
 - **方法:** PUT
 - **路径:** `/api/responses/:response_id/read`

@@ -18,17 +18,37 @@ const SECRET_KEY = process.env.SECRET_KEY;
 let currentVerificationCode = "";
 let currentVerificationEmail = "";
 
-// 获取所有用户信息（仅供测试使用）
+// 获取所有用户信息（仅限管理员）
 router.get("/", (req, res) => {
-  db.query("SELECT id, nickname, email FROM users")
-    .then(([rows]) => {
-      res.json(rows); // 返回用户列表
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).json({ message: "服务器错误" });
-    });
+  const token = req.headers.authorization?.split(" ")[1]; // 获取 token
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY); // 解码 Token 获取用户信息
+
+    // 假设 user_id == 1 为管理员
+    if (decoded.user_id !== 1) {
+      return res.status(403).json({ message: "您没有权限查看用户列表" });
+    }
+
+    // 查询所有用户信息
+    db.query("SELECT id, nickname, email FROM users")
+      .then(([rows]) => {
+        res.json(rows); // 返回用户列表
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).json({ message: "服务器错误" });
+      });
+  } catch (err) {
+    console.error(err);
+    return res.status(401).json({ message: "Token 无效" });
+  }
 });
+
 
 // 用户注册，支持头像上传，同时使用 IP 限流和打印 IP 功能
 router.post("/register", registerLimiter, logIP, upload.single("image"), async (req, res) => {
@@ -83,6 +103,46 @@ router.post("/register", registerLimiter, logIP, upload.single("image"), async (
     res.status(500).json({ message: "服务器错误" });
   }
 });
+
+
+// 根据 qq_id 查询用户信息（仅限管理员）
+router.get("/searchByQQ", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1]; // 获取 token
+  const { qq_id } = req.query;  // 获取请求的 qq_id
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  if (!qq_id) {
+    return res.status(400).json({ message: "缺少 qq_id 参数" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY); // 解码 Token 获取用户信息
+
+    // 假设 user_id == 1 为管理员
+    if (decoded.user_id !== 1) {
+      return res.status(403).json({ message: "您没有权限执行此操作" });
+    }
+
+    // 查询指定 qq_id 的用户信息
+    const [rows] = await db.query("SELECT id, nickname, email, qq_id, username FROM users WHERE qq_id = ?", [qq_id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "没有找到匹配的用户" });
+    }
+
+    res.status(200).json(rows[0]); // 返回找到的用户信息
+  } catch (err) {
+    console.error(err);
+    return res.status(401).json({ message: "Token 无效" });
+  }
+});
+
+
+
+
 
 // 用户登录
 router.post("/login", loginLimiter, async (req, res) => {
