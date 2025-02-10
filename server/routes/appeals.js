@@ -10,22 +10,20 @@ let router = Router();
 dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY;
 
-// 获取所有申诉，仅限管理员
 router.get("/", (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
-  
+
   if (!token) {
     return res.status(401).json({ message: "未提供 Token" });
   }
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
-    
-    // 假设user_id==1为管理员
-    if (decoded.user_id !== 1) {
+
+    // 判断 isAdmin 是否为 true，来决定是否有权限
+    if (!decoded.isAdmin) {
       return res.status(403).json({ message: "您没有权限查看申诉列表" });
     }
-
 
     db.query("SELECT * FROM appeals WHERE status != 'deleted'") // 过滤已删除的申诉
       .then(([rows]) => {

@@ -21,8 +21,8 @@ router.post("/", async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
-    // 检查是否为管理员（user_id === 1）
-    if (decoded.user_id !== 1) {
+    // 检查是否为管理员（通过 isAdmin 字段判断）
+    if (!decoded.isAdmin) {
       return res.status(403).json({ message: "只有管理员才能创建回复" });
     }
 

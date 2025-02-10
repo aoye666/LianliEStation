@@ -29,8 +29,8 @@ router.get("/", (req, res) => {
   try {
     const decoded = jwt.verify(token, SECRET_KEY); // 解码 Token 获取用户信息
 
-    // 假设 user_id == 1 为管理员
-    if (decoded.user_id !== 1) {
+    // 判断 token 中的 isAdmin 字段是否为 true
+    if (decoded.isAdmin !== true) {
       return res.status(403).json({ message: "您没有权限查看用户列表" });
     }
 
@@ -48,6 +48,7 @@ router.get("/", (req, res) => {
     return res.status(401).json({ message: "Token 无效" });
   }
 });
+
 
 
 // 用户注册，支持头像上传，同时使用 IP 限流和打印 IP 功能
@@ -105,10 +106,42 @@ router.post("/register", registerLimiter, logIP, upload.single("image"), async (
 });
 
 
+// 管理员注册
+router.post("/admin/register", async (req, res) => {
+  const { username, password, email } = req.body; 
+
+  if (!username || !password || !email) {
+    return res.status(400).json({ message: "请提供用户名、密码和邮箱" });
+  }
+
+  try {
+    // 检查管理员是否已经存在
+    const [existingAdmin] = await db.query("SELECT * FROM admins WHERE username = ? OR email = ?", [username, email]);
+    if (existingAdmin.length > 0) {
+      return res.status(400).json({ message: "管理员用户名或邮箱已存在" });
+    }
+
+    // 加密密码
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 创建管理员账户
+    const [result] = await db.query("INSERT INTO admins (username, password, email) VALUES (?, ?, ?)", [username, hashedPassword, email]);
+
+    // 返回成功消息
+    res.status(201).json({ message: "管理员注册成功" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "服务器错误" });
+  }
+});
+
+
+
+
 // 根据 qq_id 查询用户信息（仅限管理员）
-router.get("/searchByQQ", async (req, res) => {
+router.post("/searchByQQ", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1]; // 获取 token
-  const { qq_id } = req.query;  // 获取请求的 qq_id
+  const { qq_id } = req.body; // 从请求体中获取 qq_id
 
   if (!token) {
     return res.status(401).json({ message: "未提供 Token" });
@@ -121,13 +154,16 @@ router.get("/searchByQQ", async (req, res) => {
   try {
     const decoded = jwt.verify(token, SECRET_KEY); // 解码 Token 获取用户信息
 
-    // 假设 user_id == 1 为管理员
-    if (decoded.user_id !== 1) {
+    // 通过 isAdmin 字段判断是否为管理员
+    if (!decoded.isAdmin) {
       return res.status(403).json({ message: "您没有权限执行此操作" });
     }
 
     // 查询指定 qq_id 的用户信息
-    const [rows] = await db.query("SELECT id, nickname, email, qq_id, username FROM users WHERE qq_id = ?", [qq_id]);
+    const [rows] = await db.query(
+      "SELECT id, nickname, email, qq_id, username FROM users WHERE qq_id = ?",
+      [qq_id]
+    );
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "没有找到匹配的用户" });
@@ -142,24 +178,40 @@ router.get("/searchByQQ", async (req, res) => {
 
 
 
-
-
-// 用户登录
+// 用户(管理员)登录
 router.post("/login", loginLimiter, async (req, res) => {
-  const { identifier, password } = req.body;
+  const { identifier, password, role } = req.body; // 增加 role 字段，标识用户身份
 
-  if (!identifier || !password) {
-    return res.status(400).json({ message: "请正确输入用户名或密码" });
+  if (!identifier || !password || !role) {
+    return res.status(400).json({ message: "请正确输入用户名、密码和身份" });
   }
 
   try {
-    const [rows] = await db.query("SELECT * FROM users WHERE username = ? OR email = ?", [identifier, identifier]);
+    let user;
+    let isAdmin = false;
 
-    if (rows.length === 0) {
-      return res.status(401).json({ message: "用户名/邮箱或密码错误" });
+    if (role === "admin") {
+      // 管理员登录逻辑
+      const [adminRows] = await db.query("SELECT * FROM admins WHERE username = ?", [identifier]);
+
+      if (adminRows.length === 0) {
+        return res.status(401).json({ message: "管理员用户名或密码错误" });
+      }
+
+      user = adminRows[0];
+      isAdmin = true; // 标记为管理员
+    } else if (role === "user") {
+      // 普通用户登录逻辑
+      const [userRows] = await db.query("SELECT * FROM users WHERE username = ? OR email = ?", [identifier, identifier]);
+
+      if (userRows.length === 0) {
+        return res.status(401).json({ message: "用户名/邮箱或密码错误" });
+      }
+
+      user = userRows[0];
+    } else {
+      return res.status(400).json({ message: "无效的身份" });
     }
-
-    const user = rows[0];
 
     // 验证密码
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -168,22 +220,29 @@ router.post("/login", loginLimiter, async (req, res) => {
     }
 
     // 生成 JWT 令牌
-    const token = jwt.sign(
-      {
-        user_id: user.id,
-        username: user.username,
-        nickname: user.nickname,
-        campus_id: user.campus_id,
-        qq: user.qq_id,
-        avatar: `${user.avatar}`,
-      },
-      SECRET_KEY,
-      { expiresIn: "7d" }
-    );
+    const tokenPayload = isAdmin
+      ? {
+          user_id: user.id,
+          username: user.username,
+          isAdmin: true, // 标记为管理员
+        }
+      : {
+          user_id: user.id,
+          username: user.username,
+          nickname: user.nickname,
+          campus_id: user.campus_id,
+          qq: user.qq_id,
+          avatar: user.avatar,
+          isAdmin: false, // 标记为普通用户
+        };
 
+    const token = jwt.sign(tokenPayload, SECRET_KEY, { expiresIn: "7d" });
+
+    // 返回登录结果
     res.status(200).json({
       message: "登录成功",
       token,
+      isAdmin, // 返回是否为管理员，方便前端重定向
     });
   } catch (err) {
     console.error(err);

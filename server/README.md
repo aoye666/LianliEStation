@@ -32,6 +32,17 @@ EMAIL_PASS=
 API_KEY
 ```
 
+
+## 临时管理员账户
+```json
+"identifier":"胡骏阳",
+"password":"123456",
+"role":"admin"
+```
+
+
+
+
 ## 数据库环境
 
 代码中并没有新建数据库的命令，请确保本地数据库中存在`marketplace`库，示例 api 中的 users 表初始化代码如下，仅供测试
@@ -112,6 +123,14 @@ CREATE TABLE `responses` (
 
 
 
+CREATE TABLE admins (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,  -- 管理员 ID
+  `username` VARCHAR(100) NOT NULL,     -- 管理员用户名
+  `password` VARCHAR(255) NOT NULL,     -- 加密后的密码
+  `email` VARCHAR(100) NOT NULL
+);
+
+
 
 -- 用户表数据插入示例
 INSERT INTO `users` (`nickname`, `username`, `email`, `password`, `qq_id`, `campus_id`, `credit`, `avatar`)
@@ -170,75 +189,13 @@ VALUES
 
 
 ### 查询用户信息(by qq_id,仅限管理员)
-- 方法：GET 
+- 方法：POST
 - 路径：/api/searchByQQ
 - 功能：该接口允许管理员通过用户的 qq_id 查询用户的详细信息,需要提供管理员身份验证.
 
 - 请求参数:
   - qq_id (string, 必填)
   - Authorization: Bearer <your_jwt_token>
-sql
-复制代码
-GET /search-by-qq?qq_id=1531830975
-Authorization: Bearer abc123yourjwtTokenhere
-成功响应（200 OK）
-如果管理员具有权限并且提供有效的 qq_id，返回相应的用户信息。
-
-json
-复制代码
-{
-  "id": 1,
-  "nickname": "DUTers",
-  "email": "example@example.com",
-  "qq_id": "1531830975",
-  "username": "user1"
-}
-错误响应
-400 Bad Request - 缺少 qq_id 参数。
-
-json
-复制代码
-{
-  "message": "缺少 qq_id 参数"
-}
-401 Unauthorized - 未提供有效的 Token。
-
-json
-复制代码
-{
-  "message": "未提供 Token"
-}
-403 Forbidden - 用户不是管理员（user_id != 1），无权限访问。
-
-json
-复制代码
-{
-  "message": "您没有权限执行此操作"
-}
-404 Not Found - 找不到对应 qq_id 的用户。
-
-json
-复制代码
-{
-  "message": "没有找到匹配的用户"
-}
-401 Unauthorized - 如果提供的 Token 无效或已过期。
-
-json
-复制代码
-{
-  "message": "Token 无效"
-}
-业务逻辑
-只有管理员（user_id == 1）才能访问此接口。如果是普通用户，则返回 403 Forbidden 错误。
-必须通过 Authorization 头传递有效的 JWT Token。
-查询时，必须提供有效的 qq_id，否则返回 400 Bad Request。
-返回的用户信息包含：id，nickname，email，qq_id，username 等。
-
-
-
-
-
 
 ### 用户注册
 
@@ -265,24 +222,107 @@ json
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
-### 用户登录
+### 管理员注册(暂时开放)
+- **URL**: `/api/users/admin/register`
+- **方法**: `POST`
+- **请求头**:
+  - `Content-Type: application/json`
 
-- **方法:** POST
-- **路径:** `/api/users/login`
-- **功能:** 验证用户的用户名和密码。如果验证通过，返回 JWT 令牌。
-- **请求参数:**
-  - `identifier`: 用户名或邮箱，字符串，必需。
-  - `password`: 用户密码，字符串，必需。
-- **成功响应:**
-  - **状态码:** 200
-  - **内容:** `{ "message": "登录成功", "token": "<JWT_TOKEN>" }`
-- **错误响应:**
-  - **状态码:** 400
-  - **内容:** `{ "message": "请正确输入用户名或密码" }`
-  - **状态码:** 401
-  - **内容:** `{ "message": "用户名/邮箱或密码错误" }`
-  - **状态码:** 500
-  - **内容:** `{ "message": "服务器错误" }`
+| 参数      | 类型     | 描述                           | 必填  |
+|-----------|----------|--------------------------------|-------|
+| `username` | `string` | 管理员用户名                    | 是    |
+| `password`   | `string` | 管理员密码                      | 是    |
+| `email`       | `string` | 管理员邮箱                      | 是    |
+
+```json
+{
+  "username": "admin123",
+  "password": "adminpassword123",
+  "email": "admin123@example.com"
+}
+```
+
+
+
+### 用户(管理员)登录
+- **URL**: `/login`
+- **方法**: `POST`
+- **请求头**:
+  - `Content-Type: application/json`
+
+| 参数      | 类型     | 描述                           | 必填  |
+|-----------|----------|--------------------------------|-------|
+| `identifier` | `string` | 用户名或邮箱                    | 是    |
+| `password`   | `string` | 用户密码                        | 是    |
+| `role`       | `string` | 用户身份（`admin` 或 `user`）   | 是    |
+
+
+
+```json
+{
+  "identifier": "user123",
+  "password": "password123",
+  "role": "user"
+}
+```
+
+- **成功响应**:
+  - **状态码**: `200 OK`
+  - **响应体**:
+
+```json
+{
+  "message": "登录成功",
+  "token": "JWT_Token_Here",
+  "isAdmin": false
+}
+```
+
+- **失败响应**:
+  - **状态码**: `400 Bad Request`
+    - **描述**: 缺少必要的参数或身份无效。
+    - **响应体**:
+
+```json
+{
+  "message": "请正确输入用户名、密码和身份"
+}
+```
+
+  - **状态码**: `401 Unauthorized`
+    - **描述**: 用户名/邮箱或密码错误，或者管理员身份验证失败。
+    - **响应体**:
+
+```json
+{
+  "message": "用户名/邮箱或密码错误"
+}
+```
+
+  - **状态码**: `403 Forbidden`
+    - **描述**: 无权限访问。
+    - **响应体**:
+
+```json
+{
+  "message": "您没有权限登录"
+}
+```
+
+  - 功能
+    - 根据传入的 `role`（`admin` 或 `user`）来验证管理员或普通用户身份。
+    - 验证 `identifier`（可以是用户名或邮箱）和 `password` 的匹配。
+    - 根据身份返回是否为管理员，并生成相应的 JWT token。
+    - 在登录成功后，返回 `isAdmin` 字段标识用户身份，前端可以根据该字段进行相应的重定向或显示。
+
+-  说明
+   - **`role` 参数**:
+     - `admin`: 管理员身份，系统会查找 `admins` 表验证登录。
+     - `user`: 普通用户身份，系统会查找 `users` 表验证登录。
+
+   - 登录成功后，前端可以通过 `isAdmin` 判断用户身份，如果是管理员，则跳转到管理员页面，否则跳转到普通用户页面。
+
+   - 返回的 JWT token 中包含用户身份信息，可以用于后续身份验证。
 
 ### 获取当前用户信息
 
@@ -322,7 +362,7 @@ json
 
 **方法:** PUT
 **路径:** `/api/users/profile`
-**功能:** 更新当前登录用户的基本信息（昵称、QQ 号、用户名、校区 ID）及头像，需提供 `Authorization` 头部。
+**功能:** 更新当前登录用户的基本信息（昵称、QQ 号、校区及头像），需提供 `Authorization` 头部。
 
 - **请求参数:**
   - `nickname`: 用户昵称，字符串，必须。
