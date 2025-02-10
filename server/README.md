@@ -44,6 +44,9 @@ CREATE TABLE `users` (
     `campus_id` INT NOT NULL,
     `credit` INT NOT NULL DEFAULT 100,
     `avatar` VARCHAR(255) NOT NULL DEFAULT '/uploads/default.png',
+    `banner_url` VARCHAR(255) NOT NULL DEFAULT '/uploads/default_banner.png',
+    `background_url` VARCHAR(255) NOT NULL DEFAULT '/uploads/default_background.png',
+    `theme_id` INT NOT NULL DEFAULT 1,
     PRIMARY KEY (`id`),
     UNIQUE KEY `email_unique` (`email`),
     UNIQUE KEY `username_unique` (`username`)
@@ -300,6 +303,113 @@ VALUES
   - 确保提供的验证码与发送到邮箱中的验证码匹配，且未过期。
 
 ---
+
+### 修改用户主题
+
+- **方法:** PUT
+- **路径:** `/api/users/change-theme`
+- **功能:** 更新当前登录用户的主题设置，需提供 `Authorization` 头部。
+- **请求参数:**
+- `theme_id`: 主题 ID，整型，必需。
+- **请求头:**
+- `Authorization`: `Bearer <JWT_TOKEN>`
+- **成功响应:**
+- **状态码:** 200
+- **内容:** `{ "message": "更新成功" }`
+- **错误响应:**
+- **状态码:** 400
+  - **内容:** `{ "message": "缺少必要参数" }`
+- **状态码:** 401
+  - **内容:** `{ "message": "未提供 Token" }`
+- **状态码:** 401
+  - **内容:** `{ "message": "Token 无效" }`
+- **状态码:** 404
+  - **内容:** `{ "message": "用户不存在" }`
+
+---
+
+### 修改用户背景
+
+- **方法:** PUT
+- **路径:** `/api/users/change-background`
+- **功能:** 更新当前登录用户的背景图片，需提供 `Authorization` 头部。
+- **请求参数:**
+- `image`: 背景图片文件，必需。
+- **请求头:**
+- `Authorization`: `Bearer <JWT_TOKEN>`
+- `Content-Type`: `multipart/form-data`
+- **成功响应:**
+- **状态码:** 200
+- **内容:** `{ "message": "更新成功" }`
+- **错误响应:**
+- **状态码:** 400
+  - **内容:** `{ "message": "请选择要上传的背景图片" }`
+- **状态码:** 401
+  - **内容:** `{ "message": "未提供 Token" }`
+- **状态码:** 401
+  - **内容:** `{ "message": "Token 无效" }`
+- **状态码:** 404
+  - **内容:** `{ "message": "用户不存在" }`
+- **备注:**
+- 上传新背景图片后，旧的非默认背景图片将被自动删除
+- 默认背景图片路径为 `/uploads/default_background.png`
+
+---
+
+### 修改用户 Banner 图
+
+- **方法:** PUT
+- **路径:** `/api/users/change-banner`
+- **功能:** 更新当前登录用户的 banner 图片，需提供 `Authorization` 头部。
+- **请求参数:**
+- `image`: banner 图片文件，必需。
+- **请求头:**
+- `Authorization`: `Bearer <JWT_TOKEN>`
+- `Content-Type`: `multipart/form-data`
+- **成功响应:**
+- **状态码:** 200
+- **内容:** `{ "message": "更新成功" }`
+- **错误响应:**
+- **状态码:** 400
+  - **内容:** `{ "message": "请选择要上传的 banner 图片" }`
+- **状态码:** 401
+  - **内容:** `{ "message": "未提供 Token" }`
+- **状态码:** 401
+  - **内容:** `{ "message": "Token 无效" }`
+- **状态码:** 404
+  - **内容:** `{ "message": "用户不存在" }`
+- **备注:**
+- 上传新 banner 图片后，旧的非默认 banner 图片将被自动删除
+- 默认 banner 图片路径为 `/uploads/default_banner.png`
+
+---
+
+### 获取用户主题设置
+
+- **方法:** GET
+- **路径:** `/api/users/get-theme`
+- **功能:** 获取当前登录用户的主题、背景图片和 banner 图片设置，需提供 `Authorization` 头部。
+- **请求头:**
+- `Authorization`: `Bearer <JWT_TOKEN>`
+- **成功响应:**
+- **状态码:** 200
+- **内容:**
+  ```json
+  {
+    "theme_id": <主题ID>,
+    "background_url": <背景图片URL>,
+    "banner_url": <banner图片URL>
+  }
+  ```
+- **错误响应:**
+- **状态码:** 401
+  - **内容:** `{ "message": "未提供 Token" }`
+- **状态码:** 401
+  - **内容:** `{ "message": "Token 无效" }`
+- **状态码:** 404
+  - **内容:** `{ "message": "用户不存在" }`
+- **备注:**
+- 建议前端使用 localStorage 缓存这些数据，避免频繁请求服务器
 
 ## posts
 

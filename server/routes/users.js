@@ -5,19 +5,18 @@ import db from "../db.js";
 import dotenv from "dotenv";
 import upload from "../middlewares/uploadImg.js"; // 引入图片上传中间件
 import fs from "fs";
-import { registerLimiter, loginLimiter, passwordChangeLimiter,  verificationLimiter } from "../middlewares/limiter.js"; // 引入限流中间件
-import logIP from "../middlewares/logIP.js";  // 记录IP的中间件
-import sendVerificationCode from '../middlewares/mailer.js';  // 引入邮件发送逻辑
+import { registerLimiter, loginLimiter, passwordChangeLimiter, verificationLimiter } from "../middlewares/limiter.js"; // 引入限流中间件
+import logIP from "../middlewares/logIP.js"; // 记录IP的中间件
+import sendVerificationCode from "../middlewares/mailer.js"; // 引入邮件发送逻辑
 
 let router = Router();
 
 dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY;
 
-
 // 存储验证码的临时存储（实际使用中应该用缓存或数据库）
-let currentVerificationCode = '';
-let currentVerificationEmail = '';
+let currentVerificationCode = "";
+let currentVerificationEmail = "";
 
 // 获取所有用户信息（仅供测试使用）
 router.get("/", (req, res) => {
@@ -30,8 +29,6 @@ router.get("/", (req, res) => {
       res.status(500).json({ message: "服务器错误" });
     });
 });
-
-
 
 // 用户注册，支持头像上传，同时使用 IP 限流和打印 IP 功能
 router.post("/register", registerLimiter, logIP, upload.single("image"), async (req, res) => {
@@ -65,11 +62,7 @@ router.post("/register", registerLimiter, logIP, upload.single("image"), async (
       const emailRegistered = rows.some((row) => row.email === email);
       const usernameRegistered = rows.some((row) => row.username === username);
       return res.status(400).json({
-        message: emailRegistered && usernameRegistered
-          ? "邮箱和用户名都已被注册"
-          : emailRegistered
-          ? "邮箱已被注册"
-          : "用户名已被注册",
+        message: emailRegistered && usernameRegistered ? "邮箱和用户名都已被注册" : emailRegistered ? "邮箱已被注册" : "用户名已被注册",
       });
     }
 
@@ -77,10 +70,7 @@ router.post("/register", registerLimiter, logIP, upload.single("image"), async (
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // 存入数据库
-    await db.query(
-      "INSERT INTO users (nickname, email, password, qq_id, username, campus_id, avatar) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [nickname, email, hashedPassword, qq_id, username, campus_id, avatarPath]
-    );
+    await db.query("INSERT INTO users (nickname, email, password, qq_id, username, campus_id, avatar) VALUES (?, ?, ?, ?, ?, ?, ?)", [nickname, email, hashedPassword, qq_id, username, campus_id, avatarPath]);
 
     res.status(201).json({ message: "注册成功" });
   } catch (err) {
@@ -93,7 +83,6 @@ router.post("/register", registerLimiter, logIP, upload.single("image"), async (
     res.status(500).json({ message: "服务器错误" });
   }
 });
-
 
 // 用户登录
 router.post("/login", loginLimiter, async (req, res) => {
@@ -291,13 +280,12 @@ router.put("/profile", upload.single("image"), async (req, res) => {
   }
 });
 
-
 // 请求验证码（发送邮件）
-router.post('/RequestVerification', verificationLimiter, async (req, res) => {
+router.post("/RequestVerification", verificationLimiter, async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
-    return res.status(400).json({ message: '邮箱不能为空' });
+    return res.status(400).json({ message: "邮箱不能为空" });
   }
 
   try {
@@ -309,48 +297,240 @@ router.post('/RequestVerification', verificationLimiter, async (req, res) => {
     currentVerificationEmail = email;
     // console.log(currentVerificationCode);
     // console.log(currentVerificationEmail);
-    
-    
-    res.status(200).json({ message: '验证码已发送，请检查您的邮箱' });
+
+    res.status(200).json({ message: "验证码已发送，请检查您的邮箱" });
   } catch (error) {
-    console.error('发送验证码失败: ', error);
-    res.status(500).json({ message: '邮件发送失败' });
+    console.error("发送验证码失败: ", error);
+    res.status(500).json({ message: "邮件发送失败" });
   }
 });
 
-
 // 修改密码
-router.put('/change-password', passwordChangeLimiter, async (req, res) => {
+router.put("/change-password", passwordChangeLimiter, async (req, res) => {
   const { email, newPassword, verificationCode } = req.body;
 
   if (!email || !newPassword || !verificationCode) {
-    return res.status(400).json({ message: '缺少必要参数' });
+    return res.status(400).json({ message: "缺少必要参数" });
   }
 
   // 验证验证码是否正确
   if (verificationCode !== currentVerificationCode || email !== currentVerificationEmail) {
-    return res.status(400).json({ message: '验证码错误或已过期' });
+    return res.status(400).json({ message: "验证码错误或已过期" });
   }
 
   try {
     // 查找用户
-    const [user] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    const [user] = await db.query("SELECT * FROM users WHERE email = ?", [email]);
     if (user.length === 0) {
-      return res.status(404).json({ message: '用户不存在' });
+      return res.status(404).json({ message: "用户不存在" });
     }
 
     // 加密新密码
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // 更新密码
-    await db.query('UPDATE users SET password = ? WHERE email = ?', [hashedPassword, email]);
+    await db.query("UPDATE users SET password = ? WHERE email = ?", [hashedPassword, email]);
 
-    res.status(200).json({ message: '密码修改成功' });
+    res.status(200).json({ message: "密码修改成功" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: '服务器错误' });
+    res.status(500).json({ message: "服务器错误" });
   }
 });
 
+// 修改用户主题
+router.put("/change-theme", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  const { theme_id } = req.body;
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+
+    // 验证必填参数
+    if (!theme_id) {
+      return res.status(400).json({ message: "缺少必要参数" });
+    }
+
+    // 更新用户信息
+    const [result] = await db.query("UPDATE users SET theme_id = ? WHERE id = ?", [theme_id, decoded.user_id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "用户不存在" });
+    }
+
+    res.status(200).json({ message: "更新成功" });
+  } catch (err) {
+    console.error(err);
+    res.status(401).json({ message: "Token 无效" });
+  }
+});
+
+// 修改用户背景
+router.put("/change-background", upload.single("image"), async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  const backgroundFile = req.file; // 获取上传的背景文件
+
+  if (!token) {
+    if (backgroundFile) {
+      try {
+        await fs.promises.unlink(backgroundFile.path);
+      } catch {}
+      return res.status(401).json({ message: "未提供 Token" });
+    }
+  }
+
+  // 检查是否上传文件
+  if (!backgroundFile) {
+    return res.status(400).json({ message: "请选择要上传的背景图片" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+
+    // 从数据库获取旧背景路径
+    const [oldUserRows] = await db.query("SELECT background_url FROM users WHERE id = ?", [decoded.user_id]);
+    if (!oldUserRows.length) {
+      if (backgroundFile) {
+        import("fs").then((fsModule) => fsModule.unlink(backgroundFile.path, () => {}));
+      }
+      return res.status(404).json({ message: "用户不存在" });
+    }
+
+    let oldBackground = oldUserRows[0].background;
+    let backgroundPath = oldBackground; // 如果无新背景就保持原背景
+
+    // 如果上传了新背景，则删除旧背景（非默认）并更新为新路径
+    if (backgroundFile) {
+      if (oldBackground && oldBackground !== "/uploads/default_background.png") {
+        try {
+          await fs.promises.unlink("public" + oldBackground);
+        } catch {}
+      }
+      backgroundPath = "/uploads/" + backgroundFile.filename;
+    }
+
+    // 更新用户信息
+    const [result] = await db.query("UPDATE users SET background_url = ? WHERE id = ?", [backgroundPath, decoded.user_id]);
+
+    if (result.affectedRows === 0) {
+      if (backgroundFile) {
+        try {
+          await fs.promises.unlink(backgroundFile.path);
+        } catch {}
+      }
+
+      return res.status(404).json({ message: "用户不存在" });
+    }
+
+    res.status(200).json({ message: "更新成功" });
+  } catch (err) {
+    console.error(err);
+    if (backgroundFile) {
+      try {
+        await fs.promises.unlink(backgroundFile.path);
+      } catch {}
+    }
+    res.status(401).json({ message: "Token 无效" });
+  }
+});
+
+// 修改用户 banner 图
+router.put("/change-banner", upload.single("image"), async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  const bannerFile = req.file; // 获取上传的 banner 文件
+
+  if (!token) {
+    if (bannerFile) {
+      try {
+        await fs.promises.unlink(bannerFile.path);
+      } catch {}
+      return res.status(401).json({ message: "未提供 Token" });
+    }
+  }
+
+  // 检查是否上传文件
+  if (!bannerFile) {
+    return res.status(400).json({ message: "请选择要上传的 banner 图片" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+
+    // 从数据库获取旧 banner 路径
+    const [oldUserRows] = await db.query("SELECT banner_url FROM users WHERE id = ?", [decoded.user_id]);
+    if (!oldUserRows.length) {
+      if (bannerFile) {
+        import("fs").then((fsModule) => fsModule.unlink(bannerFile.path, () => {}));
+      }
+      return res.status(404).json({ message: "用户不存在" });
+    }
+
+    let oldBanner = oldUserRows[0].banner;
+    let bannerPath = oldBanner; // 如果无新 banner 就保持原 banner
+
+    // 如果上传了新 banner，则删除旧 banner（非默认）并更新为新路径
+    if (bannerFile) {
+      if (oldBanner && oldBanner !== "/uploads/default_banner.png") {
+        try {
+          await fs.promises.unlink("public" + oldBanner);
+        } catch {}
+      }
+      bannerPath = "/uploads/" + bannerFile.filename;
+    }
+
+    // 更新用户信息
+    const [result] = await db.query("UPDATE users SET banner_url = ? WHERE id = ?", [bannerPath, decoded.user_id]);
+
+    if (result.affectedRows === 0) {
+      if (bannerFile) {
+        try {
+          await fs.promises.unlink(bannerFile.path);
+        } catch {}
+      }
+
+      return res.status(404).json({ message: "用户不存在" });
+    }
+
+    res.status(200).json({ message: "更新成功" });
+  } catch (err) {
+    console.error(err);
+    if (bannerFile) {
+      try {
+        await fs.promises.unlink(bannerFile.path);
+      } catch {}
+    }
+    res.status(401).json({ message: "Token 无效" });
+  }
+});
+
+// 查询用户主题、背景、banner 图
+// 建议前端使用 localStorage 缓存，避免频繁请求
+router.get("/get-theme", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+
+    // 在数据库中查询用户主题、背景、banner 图
+    const [rows] = await db.query("SELECT theme_id, background_url, banner_url FROM users WHERE id = ?", [decoded.user_id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "用户不存在" });
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(401).json({ message: "Token 无效" });
+  }
+});
 
 export default router;
