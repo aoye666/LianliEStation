@@ -81,6 +81,7 @@ const Login: React.FC = () => {
           {error && <div>{error.message}</div>}
           <div className="login-register">
             <Link to="/register">立即注册！</Link>
+            <Link to="/forget">忘记密码?</Link>
           </div>
         </form>
       </div>

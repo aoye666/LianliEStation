@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import {useAuthStore} from "../store";
+import Cookies from "js-cookie";
 import axios from "axios";
 
 interface Post {
@@ -18,24 +18,24 @@ interface Post {
   }
 
   interface FavoriteStoreState {
-    token: string | null;
     posts: Post[];
     getPosts: () => Promise<void>;
     addPost: (post: Post) => void;
     removePost: (post: Post) => void;
   }
 
+  const token = Cookies.get("auth-token");
+
   const useFavoriteStore = create<FavoriteStoreState>()(
     persist(
         (set, get) => ({
-            token:useAuthStore((state) => state.token),
             posts: [],
             getPosts: async () => {
                 const { data } = await axios.get<Post[]>(
                     "http://localhost:5000/api/favorites/user/favorites",
                     {
                         headers: {
-                            Authorization: `Bearer ${get().token}`,
+                            Authorization: `Bearer ${token}`,
                         },
                     }
                 );
@@ -44,7 +44,7 @@ interface Post {
             addPost: (post) => {
                 axios.post("http://localhost:5000/api/favorites/add",post.id,{
                     headers: {
-                        Authorization: `Bearer ${get().token}`,
+                        Authorization: `Bearer ${token}`,
                     },
                 })
             },
@@ -52,7 +52,7 @@ interface Post {
             removePost: (post) => {
                 axios.post("http://localhost:5000/api/favorites/add",post.id,{
                     headers: {
-                        Authorization: `Bearer ${get().token}`,
+                        Authorization: `Bearer ${token}`,
                     },
                 })
             },

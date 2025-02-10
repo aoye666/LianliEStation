@@ -87,7 +87,7 @@ const usePostStore = create<PostState>()(
       
     }),
     {
-      name: 'postStore', // localStorage 的 key
+      name: 'postStore',
     }
   )
 );
