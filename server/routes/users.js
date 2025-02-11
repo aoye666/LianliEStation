@@ -244,6 +244,7 @@ router.post("/login", loginLimiter, async (req, res) => {
   }
 });
 
+
 // 获取用户个人信息
 router.get("/profile", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
@@ -255,24 +256,23 @@ router.get("/profile", async (req, res) => {
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
 
-    // 直接返回 JWT 里已有的信息，减少数据库查询
+    // 获取用户信息（包括 email 和 credit）
+    const [userRows] = await db.query("SELECT email, credit FROM users WHERE id = ?", [decoded.user_id]);
+
+    if (userRows.length === 0) {
+      return res.status(404).json({ message: "用户不存在" });
+    }
+
+    // 返回用户的详细信息，包括 email 和 credit
     const userData = {
       nickname: decoded.nickname,
       username: decoded.username,
       campus_id: decoded.campus_id,
       qq: decoded.qq,
       avatar: decoded.avatar,
+      email: userRows[0].email,  // 从数据库查询得到的 email
+      credit: userRows[0].credit,  // 从数据库查询得到的 credit
     };
-
-    // 只有当信用分等重要信息需要更新时，才查数据库?  how?  还没想好。。。。
-    // 给出查询路由，具体时机由前端决定
-    const [rows] = await db.query("SELECT credit FROM users WHERE id = ?", [decoded.user_id]);
-
-    if (rows.length === 0) {
-      return res.status(404).json({ message: "用户不存在" });
-    }
-
-    userData.credit = rows[0].credit;
 
     res.status(200).json(userData);
   } catch (err) {
@@ -280,6 +280,7 @@ router.get("/profile", async (req, res) => {
     res.status(401).json({ message: "Token 无效" });
   }
 });
+
 
 // 删除当前用户（需要身份验证）
 router.delete("/profile", async (req, res) => {
