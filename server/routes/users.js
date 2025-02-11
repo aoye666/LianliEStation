@@ -134,7 +134,7 @@ router.post("/searchByQQ", async (req, res) => {
     }
 
     // 查询指定 qq_id 的用户信息
-    const [rows] = await db.query("SELECT id, nickname, email, qq_id, username, credit FROM users WHERE qq_id = ?", [qq_id]);
+    const [rows] = await db.query("SELECT id, nickname, email, qq_id, username, credit, campus_id FROM users WHERE qq_id = ?", [qq_id]);
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "没有找到匹配的用户" });
