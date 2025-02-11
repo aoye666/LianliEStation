@@ -38,7 +38,7 @@ router.post("/generate", async (req, res) => {
       messages: [
         {
           role: "system",
-          content: '请根据用户输入生成符合以下结构的商品信息：{ "title": "商品名", "price": 价格, "tag": "资料作业" 或 "跑步打卡" 或 "生活用品" 或 "数码电子" 或 "拼单组队" 或 "其他", "post_type": "sell" 或 "receive", "details": "详情" }',
+          content: '请根据用户输入生成符合以下结构的商品信息：{ "title": "商品名", "price": 价格, "tag": "学业资料" 或 "跑腿代课" 或 "生活用品" 或 "数码电子" 或 "拼单组队" 或 "捞人询问" , "post_type": "sell" 或 "receive", "details": "详情" }',
         },
         {
           role: "user",
