@@ -34,8 +34,8 @@ router.get("/", (req, res) => {
       return res.status(403).json({ message: "您没有权限查看用户列表" });
     }
 
-    // 查询所有用户信息
-    db.query("SELECT id, nickname, email FROM users")
+    // 查询所有用户信息：email, qq_id, nickname, username, id, campus_id, credit
+    db.query("SELECT id, nickname, email, qq_id, username, campus_id, credit FROM users")
       .then(([rows]) => {
         res.json(rows); // 返回用户列表
       })
@@ -48,7 +48,6 @@ router.get("/", (req, res) => {
     return res.status(401).json({ message: "Token 无效" });
   }
 });
-
 
 
 // 用户注册，支持头像上传，同时使用 IP 限流和打印 IP 功能
@@ -135,9 +134,6 @@ router.post("/admin/register", async (req, res) => {
   }
 });
 
-
-
-
 // 根据 qq_id 查询用户信息（仅限管理员）
 router.post("/searchByQQ", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1]; // 获取 token
@@ -161,7 +157,7 @@ router.post("/searchByQQ", async (req, res) => {
 
     // 查询指定 qq_id 的用户信息
     const [rows] = await db.query(
-      "SELECT id, nickname, email, qq_id, username FROM users WHERE qq_id = ?",
+      "SELECT id, nickname, email, qq_id, username, credit FROM users WHERE qq_id = ?",
       [qq_id]
     );
 
@@ -180,37 +176,36 @@ router.post("/searchByQQ", async (req, res) => {
 
 // 用户(管理员)登录
 router.post("/login", loginLimiter, async (req, res) => {
-  const { identifier, password, role } = req.body; // 增加 role 字段，标识用户身份
+  const { identifier, password } = req.body;
 
-  if (!identifier || !password || !role) {
-    return res.status(400).json({ message: "请正确输入用户名、密码和身份" });
+  if (!identifier || !password) {
+    return res.status(400).json({ message: "请正确输入用户名/邮箱和密码" });
   }
 
   try {
     let user;
     let isAdmin = false;
 
-    if (role === "admin") {
-      // 管理员登录逻辑
-      const [adminRows] = await db.query("SELECT * FROM admins WHERE username = ?", [identifier]);
+    // 先在普通用户表中查询
+    const [userRows] = await db.query(
+      "SELECT * FROM users WHERE username = ? OR email = ?",
+      [identifier, identifier]
+    );
 
+    if (userRows.length > 0) {
+      user = userRows[0];
+      isAdmin = false;
+    } else {
+      // 如果普通用户表中没有，再在管理员表中查询
+      const [adminRows] = await db.query(
+        "SELECT * FROM admins WHERE username = ?",
+        [identifier]
+      );
       if (adminRows.length === 0) {
-        return res.status(401).json({ message: "管理员用户名或密码错误" });
-      }
-
-      user = adminRows[0];
-      isAdmin = true; // 标记为管理员
-    } else if (role === "user") {
-      // 普通用户登录逻辑
-      const [userRows] = await db.query("SELECT * FROM users WHERE username = ? OR email = ?", [identifier, identifier]);
-
-      if (userRows.length === 0) {
         return res.status(401).json({ message: "用户名/邮箱或密码错误" });
       }
-
-      user = userRows[0];
-    } else {
-      return res.status(400).json({ message: "无效的身份" });
+      user = adminRows[0];
+      isAdmin = true;
     }
 
     // 验证密码
@@ -219,12 +214,12 @@ router.post("/login", loginLimiter, async (req, res) => {
       return res.status(401).json({ message: "用户名/邮箱或密码错误" });
     }
 
-    // 生成 JWT 令牌
+    // 构建 JWT 负载，根据身份返回不同信息
     const tokenPayload = isAdmin
       ? {
           user_id: user.id,
           username: user.username,
-          isAdmin: true, // 标记为管理员
+          isAdmin: true,
         }
       : {
           user_id: user.id,
@@ -233,16 +228,15 @@ router.post("/login", loginLimiter, async (req, res) => {
           campus_id: user.campus_id,
           qq: user.qq_id,
           avatar: user.avatar,
-          isAdmin: false, // 标记为普通用户
+          isAdmin: false,
         };
 
     const token = jwt.sign(tokenPayload, SECRET_KEY, { expiresIn: "7d" });
 
-    // 返回登录结果
     res.status(200).json({
       message: "登录成功",
       token,
-      isAdmin, // 返回是否为管理员，方便前端重定向
+      isAdmin,
     });
   } catch (err) {
     console.error(err);
@@ -651,5 +645,42 @@ router.get("/get-theme", async (req, res) => {
     res.status(401).json({ message: "Token 无效" });
   }
 });
+
+
+// 管理员修改用户信用值 (credit)
+router.put("/updateCredit", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1]; // 获取 token
+  const { qq_id, credit } = req.body; // 获取 qq_id 和新的 credit 值
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  if (!qq_id || credit === undefined) {
+    return res.status(400).json({ message: "缺少必要参数" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY); // 解码 Token 获取用户信息
+
+    // 通过 isAdmin 字段判断是否为管理员
+    if (!decoded.isAdmin) {
+      return res.status(403).json({ message: "您没有权限执行此操作" });
+    }
+
+    // 更新指定 qq_id 用户的 credit 值
+    const [result] = await db.query("UPDATE users SET credit = ? WHERE qq_id = ?", [credit, qq_id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "没有找到匹配的用户" });
+    }
+
+    res.status(200).json({ message: "信用值已更新" });
+  } catch (err) {
+    console.error(err);
+    return res.status(401).json({ message: "Token 无效" });
+  }
+});
+
 
 export default router;

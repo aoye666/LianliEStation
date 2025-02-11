@@ -182,20 +182,69 @@ VALUES
 - **请求参数:** token
 - **成功响应:**
   - **状态码:** 200
-  - **内容:** 用户信息列表，包含 `id`, `nickname`, `email`。
+  - **内容:** 用户信息列表，包含 email, qq_id, nickname, username, id, campus_id, credit
 - **错误响应:**
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
 
-### 查询用户信息(by qq_id,仅限管理员)
-- 方法：POST
-- 路径：/api/searchByQQ
-- 功能：该接口允许管理员通过用户的 qq_id 查询用户的详细信息,需要提供管理员身份验证.
+### 通过 QQ 号搜索用户信息（管理员专用）
 
-- 请求参数:
-  - qq_id (string, 必填)
-  - Authorization: Bearer <your_jwt_token>
+**方法:** POST  
+**路径:** `/api/users/searchByQQ`  
+**功能:** 允许管理员通过 QQ 号码查询用户信息，需提供 `Authorization` 头部。  
+
+- **请求参数:**
+  - `qq_id`: 用户的 QQ 号码，字符串，必填。
+
+- **请求头:**
+  - `Authorization`: `Bearer <JWT_TOKEN>`
+
+- **成功响应:**
+  - **状态码:** 200  
+  - **内容:**  
+    ```json
+    {
+      "id": 1,
+      "nickname": "示例用户",
+      "email": "example@example.com",
+      "qq_id": "12345678",
+      "username": "user123",
+      "credit": 100
+    }
+    ```
+
+- **错误响应:**
+  - **状态码:** 400  
+    - **内容:**  
+      ```json
+      { "message": "缺少 qq_id 参数" }
+      ```
+  - **状态码:** 401  
+    - **内容:**  
+      ```json
+      { "message": "未提供 Token" }
+      ```
+    - 或  
+      ```json
+      { "message": "Token 无效" }
+      ```
+  - **状态码:** 403  
+    - **内容:**  
+      ```json
+      { "message": "您没有权限执行此操作" }
+      ```
+  - **状态码:** 404  
+    - **内容:**  
+      ```json
+      { "message": "没有找到匹配的用户" }
+      ```
+  - **状态码:** 500  
+    - **内容:**  
+      ```json
+      { "message": "服务器错误" }
+      ```
+
 
 ### 用户注册
 
@@ -254,7 +303,6 @@ VALUES
 |-----------|----------|--------------------------------|-------|
 | `identifier` | `string` | 用户名或邮箱                    | 是    |
 | `password`   | `string` | 用户密码                        | 是    |
-| `role`       | `string` | 用户身份（`admin` 或 `user`）   | 是    |
 
 
 
@@ -262,7 +310,6 @@ VALUES
 {
   "identifier": "user123",
   "password": "password123",
-  "role": "user"
 }
 ```
 
@@ -310,19 +357,13 @@ VALUES
 ```
 
   - 功能
-    - 根据传入的 `role`（`admin` 或 `user`）来验证管理员或普通用户身份。
     - 验证 `identifier`（可以是用户名或邮箱）和 `password` 的匹配。
     - 根据身份返回是否为管理员，并生成相应的 JWT token。
     - 在登录成功后，返回 `isAdmin` 字段标识用户身份，前端可以根据该字段进行相应的重定向或显示。
-
--  说明
-   - **`role` 参数**:
-     - `admin`: 管理员身份，系统会查找 `admins` 表验证登录。
-     - `user`: 普通用户身份，系统会查找 `users` 表验证登录。
-
-   - 登录成功后，前端可以通过 `isAdmin` 判断用户身份，如果是管理员，则跳转到管理员页面，否则跳转到普通用户页面。
-
-   - 返回的 JWT token 中包含用户身份信息，可以用于后续身份验证。
+    
+    - 登录成功后，前端可以通过 `isAdmin` 判断用户身份，如果是管理员，则跳转到管理员页面，否则跳转到普通用户页面。
+    
+    - 返回的 JWT token 中包含用户身份信息，可以用于后续身份验证。
 
 ### 获取当前用户信息
 
@@ -333,7 +374,7 @@ VALUES
   - `Authorization`: `Bearer <JWT_TOKEN>`
 - **成功响应:**
   - **状态码:** 200
-  - **内容:** `{ "nickname": "DUTers", "username": "testuser", "campus_id": 1, "qq": "12345678", "credit": 100 ，'avater': "default.png"}`
+  - **内容:** `{ "nickname": "DUTers", "username": "testuser", "campus_id": 1, "qq": "12345678", "credit": 100 ，'avatar': "default.png"}`
 - **错误响应:**
   - **状态码:** 401
   - **内容:** `{ "message": "Token 无效" }`
@@ -539,6 +580,61 @@ VALUES
   - **内容:** `{ "message": "用户不存在" }`
 - **备注:**
 - 建议前端使用 localStorage 缓存这些数据，避免频繁请求服务器
+
+
+### 修改用户信用值(仅管理员)
+
+**方法:** PUT  
+**路径:** `/api/users/updateCredit`  
+**功能:** 允许管理员通过 QQ 号码修改用户的信用值，需提供 `Authorization` 头部。
+
+- **请求参数:**
+  - `qq_id` (字符串，必填): 用户的 QQ 号码。
+  - `credit` (整数，必填): 需要更新的信用值。
+
+- **请求头:**
+  - `Authorization`: `Bearer <JWT_TOKEN>`
+
+- **成功响应:**
+  - **状态码:** 200  
+  - **内容:**  
+    ```json
+    { "message": "信用值已更新" }
+    ```
+
+- **错误响应:**
+  - **状态码:** 400  
+  - **内容:**  
+      ```json
+      { "message": "缺少必要参数" }
+      ```
+  - **状态码:** 401  
+  - **内容:**  
+      ```json
+      { "message": "未提供 Token" }
+      ```
+  - 或  
+      ```json
+      { "message": "Token 无效" }
+      ```
+  - **状态码:** 403  
+  - **内容:**  
+      ```json
+      { "message": "您没有权限执行此操作" }
+      ```
+  - **状态码:** 404  
+  - **内容:**  
+      ```json
+      { "message": "没有找到匹配的用户" }
+      ```
+  - **状态码:** 500  
+  - **内容:**  
+      ```json
+      { "message": "服务器错误" }
+      ```
+
+
+
 
 ## posts
 
