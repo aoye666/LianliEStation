@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react"; // 导入useEffect
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import "./Post.scss";
@@ -19,6 +19,7 @@ export interface PostProps {
 
 const Post = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [textareaValue, setTextareaValue] = useState<string>("");
   const [dialogHistory, setDialogHistory] = useState<
@@ -36,7 +37,7 @@ const Post = () => {
     }
   };
 
-  // api调用
+  // API调用
   const handleRequest = async (text: string = textareaValue) => {
     if (!text) {
       alert("请输入商品信息");
@@ -135,10 +136,17 @@ const Post = () => {
     handleRequest(previousText);
   };
 
+  // 监听dialogHistory的变化并滚动到底部
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [dialogHistory]);
+
   return (
     <div className="post-container">
-      <Navbar title="发布助手小e" />
-      <div className="dialog-container">
+      <Navbar title="发布助手小e" backActive={true} backPath="market" />
+      <div className="dialog-container" ref={containerRef}>
         {dialogHistory.map((dialog, index) => (
           <div
             key={index}

@@ -8,17 +8,17 @@ interface User {
   nickname: string;
   email: string;
   username: string;
-  role: string;
   campus_id: number;
-  qq_id: string;
+  qq: string;
   credit: number;
+  avatar: string;
 }
 
 interface UserState {
   users: User[];
   currentUser: User | null;
   fetchUsers: () => Promise<void>;
-  fetchUserProfile: (username: string) => Promise<void>;
+  fetchUserProfile: () => Promise<void>;
 }
 
 const useUserStore = create<UserState>()(
@@ -34,13 +34,17 @@ const useUserStore = create<UserState>()(
           console.error('Error fetching users:', error);
         }
       },
-      fetchUserProfile: async (username: string) => {
+      fetchUserProfile: async () => {
         try {
-          const res = await axios.post('/api/users/profile', { username });
+          const res = await axios.get('/api/users/profile', {
+            headers: {
+              Authorization: `Bearer <JWT_TOKEN>`, // 确保替换<JWT_TOKEN>为实际的token
+            },
+          });
           set({ currentUser: res.data });
         } catch (error: any) {
-          if (error.response && error.response.status === 404) {
-            console.error('用户不存在');
+          if (error.response && error.response.status === 401) {
+            console.error('Token无效');
           } else if (error.response && error.response.status === 500) {
             console.error('服务器错误');
           } else {

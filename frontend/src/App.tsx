@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.scss";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import { useAuthStore } from "./store";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"; //保护路由，未登录将只能导航至login和register页面
 //懒加载不同页面
@@ -9,6 +9,7 @@ const Post = React.lazy(() => import("./pages/Post/Post"));
 const Template = React.lazy(() => import("./pages/Template/Template"));
 const Login = React.lazy(() => import("./pages/Login/Login"));
 const Register = React.lazy(() => import("./pages/Register/Register"));
+const Reset = React.lazy(() => import("./pages/Reset/Reset"));
 const User = React.lazy(() => import("./pages/User/User"));
 const Forum = React.lazy(() => import("./pages/Forum/Forum"));
 const Settings = React.lazy(() => import("./pages/Settings/Settings"));
@@ -17,28 +18,16 @@ const Messages = React.lazy(() => import("./pages/Messages/Messages"));
 const History = React.lazy(() => import("./pages/History/History"));
 
 const App: React.FC = () => {
+  // 检查是否登录
   const { isAuthenticated } = useAuthStore();
 
-  // 测试阶段可以注释掉保护路由
   const router = createBrowserRouter([
-    {
-      path: "/",
-      element: isAuthenticated ? (
-        <ProtectedRoute>
-          <Market />
-        </ProtectedRoute>
-      ) : (
-        <Login />
-      ),
-    },
     {
       path: "*",
       element: isAuthenticated ? (
-        <ProtectedRoute>
-          <Market />
-        </ProtectedRoute>
+        <Navigate to="/user/market" replace />
       ) : (
-        <Login />
+        <Navigate to="/login" replace />
       ),
     },
     {
@@ -49,76 +38,80 @@ const App: React.FC = () => {
       path: "/register",
       element: <Register />,
     },
+    {  
+      path: "/reset/:type",  
+      element: <Reset />,  
+    },
     {
-      path: "/market",
+      path: "/user/market",
       element: (
-        //<ProtectedRoute>
+        <ProtectedRoute>
           <Market />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
     {
-      path: "/forum",
+      path: "/user/forum",
       element: (
-        //<ProtectedRoute>
+        <ProtectedRoute>
           <Forum />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
     {
-      path: "/post",
+      path: "/user/post",
       element: (
-        //<ProtectedRoute>
+        <ProtectedRoute>
           <Post />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
     {
-      path: "/template",
+      path: "/user/post/template",
       element: (
-        //<ProtectedRoute>
+        <ProtectedRoute>
           <Template />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
     {
-      path: "/user",
+      path: "/user/user",
       element: (
-        // <ProtectedRoute>
+        <ProtectedRoute>
           <User />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
     {
-      path: "/stars",
+      path: "/user/stars",
       element: (
-        // <ProtectedRoute>
+        <ProtectedRoute>
           <Stars />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
     {
-      path: "/messages",
+      path: "/user/messages",
       element: (
-        // <ProtectedRoute>
+        <ProtectedRoute>
           <Messages />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
     {
-      path: "/history",
+      path: "/user/history",
       element: (
-        // <ProtectedRoute>
+        <ProtectedRoute>
           <History />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
     {
-      path: "/settings",
+      path: "/user/settings",
       element: (
-        // <ProtectedRoute>
+        <ProtectedRoute>
           <Settings />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
   ]);

@@ -200,7 +200,7 @@ const Register: React.FC = () => {
             <div className="error-message">{error.message}</div>
           ) : (
             <div>
-              <Link to="/">立即登录！</Link>
+              <Link to="/login">立即登录！</Link>
             </div>
           )}
         </form>

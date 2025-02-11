@@ -52,7 +52,7 @@ const Messages = () => {
 
   return (  
     <div>  
-      <Navbar title="信箱" />  
+      <Navbar title="信箱" backActive={true} backPath="user" />  
       <div className="messages-container">  
         <div className="messages-search-container">  
           <input  

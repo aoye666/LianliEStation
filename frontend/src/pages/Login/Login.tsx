@@ -79,9 +79,9 @@ const Login: React.FC = () => {
           </div>
           <button type="submit">登录</button>
           {error && <div>{error.message}</div>}
-          <div className="login-register">
-            <Link to="/register">立即注册！</Link>
-            <Link to="/forget">忘记密码?</Link>
+          <div className="register-forget">
+            <Link className="link" to="/register">立即注册！</Link>
+            <Link className="link" to="/forget">忘记密码?</Link>
           </div>
         </form>
       </div>

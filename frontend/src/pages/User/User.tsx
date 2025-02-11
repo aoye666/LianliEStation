@@ -8,6 +8,7 @@ import history from "../../assets/history.png"
 import messages from "../../assets/messages.png"
 import settings from "../../assets/settings.png"
 import right from "../../assets/right.png"
+import background from "../../assets/background-wide.jpg"
 
 const User = () => {
   const { currentUser } = useUserStore();
@@ -15,24 +16,29 @@ const User = () => {
 
   return (
     <div className="user-container">
+      <div className="user-bg">
+        <img src={background} alt="用户头像" />
+      </div>
       <div className="user-info">
         <div className="user-face"><img src={user} alt="用户头像" /></div>
-        <div className="user-name">昵称：{currentUser?.username || 'test'}</div>
-        <div className="user-credit">信誉：{currentUser?.credit || '100'}</div>
-        <div className="user-email">邮箱：{currentUser?.email || 'test@test.com'}</div>
+        <div className="user-text">
+          <div className="user-name">昵称：{currentUser?.username || 'test'}</div>
+          <div className="user-credit">信誉：{currentUser?.credit || '100'}</div>
+          <div className="user-email">邮箱：{currentUser?.email || 'test@test.com'}</div>
+        </div>
       </div>
       <div className="user-settings">
-        <div className="user-item" onClick={() => navigate('/stars')}>
+        <div className="user-item" onClick={() => navigate('/user/stars')}>
           <img src={stars} alt="收藏" className="item-icon"></img><div className="item-text">收藏</div><img src={right} alt="右箭头" className="right-icon"></img>
         </div> 
-        <div className="user-item" onClick={() => navigate('/history')}>
+        <div className="user-item" onClick={() => navigate('/user/history')}>
           <img src={history} alt="历史" className="item-icon"></img><div className="item-text">历史</div><img src={right} alt="右箭头" className="right-icon"></img>
         </div>
-        <div className="user-item" onClick={() => navigate('/messages')}>
+        <div className="user-item" onClick={() => navigate('/user/messages')}>
           <img src={messages} alt="信箱" className="item-icon"></img><div className="item-text">信箱 </div><img src={right} alt="右箭头" className="right-icon"></img>
         </div>
       </div>
-      <div className="user-settings" onClick={() => navigate('/settings')}>
+      <div className="user-settings" onClick={() => navigate('/user/settings')}>
         <div className="user-item">
           <img src={settings} alt="设置" className="item-icon"></img><div className="item-text">设置</div><img src={right} alt="右箭头" className="right-icon"></img>
         </div>
