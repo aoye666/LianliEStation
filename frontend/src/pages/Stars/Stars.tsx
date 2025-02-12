@@ -2,14 +2,15 @@ import Navbar from "../../components/Navbar/Navbar"
 import Tabbar from "../../components/Tabbar/Tabbar"
 import { use, useEffect, useState } from "react"
 import { useFavoriteStore } from "../../store"
+import takePlace from "../../assets/takePlace.png"
 
 const Stars = () => {
   const posts=useFavoriteStore((state) => state.posts)
   const getPosts=useFavoriteStore((state) => state.getPosts)
 
-  // useEffect(() => {
-  //   getPosts()
-  // }, [])
+  useEffect(() => {
+    getPosts()
+  }, [])
 
 
   return (
@@ -23,7 +24,7 @@ const Stars = () => {
           posts.map((post) => (
             <div className='commodity'>
             <div className='commodity-img'>
-              <img src={post.images[0]} alt="" />
+            <img src={post.images[0]?post.images[0]:takePlace} alt="" />
             </div>
             <div className='commodity-title'>
               {post.title}
