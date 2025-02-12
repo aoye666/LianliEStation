@@ -1,14 +1,20 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./App.scss";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { useAuthStore } from "./store";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+} from "react-router-dom";
+import { useAuthStore, useUserStore } from "./store";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"; //保护路由，未登录将只能导航至login和register页面
+import Detail from "./components/Detail/Detail";
 //懒加载不同页面
 const Market = React.lazy(() => import("./pages/Market/Market"));
 const Post = React.lazy(() => import("./pages/Post/Post"));
 const Template = React.lazy(() => import("./pages/Template/Template"));
 const Login = React.lazy(() => import("./pages/Login/Login"));
 const Register = React.lazy(() => import("./pages/Register/Register"));
+const Reset = React.lazy(() => import("./pages/Reset/Reset"));
 const User = React.lazy(() => import("./pages/User/User"));
 const Forum = React.lazy(() => import("./pages/Forum/Forum"));
 const Settings = React.lazy(() => import("./pages/Settings/Settings"));
@@ -17,28 +23,52 @@ const Messages = React.lazy(() => import("./pages/Messages/Messages"));
 const History = React.lazy(() => import("./pages/History/History"));
 
 const App: React.FC = () => {
-  const { isAuthenticated } = useAuthStore();
+  // 锁定竖屏
+  const lockOrientation = () => {
+    if (window.screen.orientation && window.screen.orientation.lock) {
+      window.screen.orientation.lock("portrait").catch((err) => {
+        console.error("锁定竖屏失败:", err);
+      });
+    }
+  };
 
-  // 测试阶段可以注释掉保护路由
+  // 监听屏幕方向变化
+  useEffect(() => {
+    const handleOrientationChange = () => {
+      if (window.matchMedia("(orientation: landscape)").matches) {
+        alert("请将设备旋转到竖屏模式以获得最佳体验。");
+        lockOrientation(); // 尝试锁定竖屏
+      }
+    };
+
+    // 绑定事件监听器
+    window.addEventListener("resize", handleOrientationChange);
+    window.addEventListener("orientationchange", handleOrientationChange);
+
+    // 在组件卸载时移除监听器
+    return () => {
+      window.removeEventListener("resize", handleOrientationChange);
+      window.removeEventListener("orientationchange", handleOrientationChange);
+    };
+  }, []);
+
+  // 检查是否登录并获取用户信息
+  const { isAuthenticated } = useAuthStore();
+  const { fetchUserProfile, getTheme } = useUserStore();
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchUserProfile(); // 初始化 currentUser
+      getTheme(); // 初始化 userTheme
+    }
+  }, [isAuthenticated, fetchUserProfile, getTheme]);
+
   const router = createBrowserRouter([
-    {
-      path: "/",
-      element: isAuthenticated ? (
-        <ProtectedRoute>
-          <Market />
-        </ProtectedRoute>
-      ) : (
-        <Login />
-      ),
-    },
     {
       path: "*",
       element: isAuthenticated ? (
-        <ProtectedRoute>
-          <Market />
-        </ProtectedRoute>
+        <Navigate to="/user/market" replace />
       ) : (
-        <Login />
+        <Navigate to="/login" replace />
       ),
     },
     {
@@ -50,82 +80,94 @@ const App: React.FC = () => {
       element: <Register />,
     },
     {
-      path: "/market",
+      path: "/reset/:type",
+      element: <Reset />,
+    },
+    {
+      path: "/user/market",
       element: (
-        //<ProtectedRoute>
+        <ProtectedRoute>
           <Market />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
     {
-      path: "/forum",
+      path: "/user/market/:postId",
       element: (
-        //<ProtectedRoute>
+        <ProtectedRoute>
+          <Detail />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/user/forum",
+      element: (
+        <ProtectedRoute>
           <Forum />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
     {
-      path: "/post",
+      path: "/user/post",
       element: (
-        //<ProtectedRoute>
+        <ProtectedRoute>
           <Post />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
     {
-      path: "/template",
+      path: "/user/post/template",
       element: (
-        //<ProtectedRoute>
+        <ProtectedRoute>
           <Template />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
     {
-      path: "/user",
+      path: "/user/user",
       element: (
-        // <ProtectedRoute>
+        <ProtectedRoute>
           <User />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
     {
-      path: "/stars",
+      path: "/user/stars",
       element: (
-        // <ProtectedRoute>
+        <ProtectedRoute>
           <Stars />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
     {
-      path: "/messages",
+      path: "/user/messages",
       element: (
-        // <ProtectedRoute>
+        <ProtectedRoute>
           <Messages />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
     {
-      path: "/history",
+      path: "/user/history",
       element: (
-        // <ProtectedRoute>
+        <ProtectedRoute>
           <History />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
     {
-      path: "/settings",
+      path: "/user/settings",
       element: (
-        // <ProtectedRoute>
+        <ProtectedRoute>
           <Settings />
-        //</ProtectedRoute>
+        </ProtectedRoute>
       ),
     },
   ]);
 
   return (
     <div className="App">
-      <React.Suspense fallback={<div>Loading...</div>}>
+      <React.Suspense fallback={<div>加载中......请稍候......</div>}>
         <RouterProvider router={router} />
       </React.Suspense>
     </div>

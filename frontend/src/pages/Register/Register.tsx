@@ -89,7 +89,7 @@ const Register: React.FC = () => {
       };
 
       await register(userData);
-      navigate("/");
+      navigate("/login");
     } catch (err: any) {
       if (err.response) {
         setError(err.response.data);
@@ -200,7 +200,7 @@ const Register: React.FC = () => {
             <div className="error-message">{error.message}</div>
           ) : (
             <div>
-              <Link to="/">立即登录！</Link>
+              <Link to="/login">立即登录！</Link>
             </div>
           )}
         </form>

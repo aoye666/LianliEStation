@@ -14,6 +14,7 @@ const History = () => {
 
 
   return (
+
     <div className="history-container">
       <div className="header">
         <Navbar title="历史" />
@@ -45,6 +46,7 @@ const History = () => {
       <div className="footer">
         <Tabbar />
       </div>
+
     </div>
   )
 }

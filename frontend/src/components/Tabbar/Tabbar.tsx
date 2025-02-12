@@ -14,25 +14,25 @@ const Tabbar = () => {
 
   return (
     <div className="tabbar-container">
-      <div className="tabbar-item" onClick={() => handleClick("/market")}>
+      <div className="tabbar-item" onClick={() => handleClick("/user/market")}>
         <div className="tabbar-icon">
           <img src={market} alt="market"></img>
         </div>
         <span>商城</span>
       </div>
-      <div className="tabbar-item" onClick={() => handleClick("/forum")}>
+      <div className="tabbar-item" onClick={() => handleClick("/user/forum")}>
         <div className="tabbar-icon">
           <img src={forum} alt="forum"></img>
         </div>
         <span>校园墙</span>
       </div>
-      <div className="tabbar-item" onClick={() => handleClick("/post")}>
+      <div className="tabbar-item" onClick={() => handleClick("/user/post")}>
         <div className="tabbar-icon">
           <img src={post} alt="post"></img>
         </div>
         <span>发布</span>
       </div>
-      <div className="tabbar-item" onClick={() => handleClick("/user")}>
+      <div className="tabbar-item" onClick={() => handleClick("/user/user")}>
         <div className="tabbar-icon">
           <img src={user} alt="user"></img>
         </div>

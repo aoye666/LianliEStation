@@ -11,7 +11,7 @@ export const registerLimiter = rateLimit({
 // 登录限流，防止暴力破解
 export const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15分钟
-  max: 5, // 每个 IP 最多允许 5 次登录尝试
+  max: 10, // 每个 IP 最多允许 5 次登录尝试
   message: { message: "您的登录尝试次数过多，请稍后再试" },
   skipSuccessfulRequests: true, // 只对失败的请求计数
 });

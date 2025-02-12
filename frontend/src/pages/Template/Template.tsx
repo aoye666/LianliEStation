@@ -157,14 +157,8 @@ const Template = () => {
   const setCampusName = (value: string) => {
     dispatch({ type: 'SET_CAMPUS_NAME', payload: value })
   }
-  const setAuthorId = (value: number | null) => {
-    dispatch({ type: 'SET_AUTHER_ID', payload: value })
-  }
   const setCreateAt = (value: string) => {
     dispatch({ type: 'SET_CREATE_AT', payload: value })
-  }
-  const setId= (value: number) => {
-    dispatch({ type: 'SET_ID', payload: value })
   }
 
   const token = Cookies.get("auth-token");
@@ -173,11 +167,11 @@ const Template = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    setAuthorId(currentUser?.id || null)
     setCreateAt(new Date().toISOString())
     setId(Date.now())
     setCampusId(currentUser?.campus_id || 1)
     initialPostType(templateData?.post_type || 'receive')
+
     initialTag(templateData?.tag || '商品类型')
     initialContent(templateData?.details || '')
     initialTitle(templateData?.title || '')    

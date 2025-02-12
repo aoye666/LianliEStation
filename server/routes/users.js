@@ -18,30 +18,43 @@ const SECRET_KEY = process.env.SECRET_KEY;
 let currentVerificationCode = "";
 let currentVerificationEmail = "";
 
-// 获取所有用户信息（仅供测试使用）
+// 获取所有用户信息（仅限管理员）
 router.get("/", (req, res) => {
-  db.query("SELECT id, nickname, email FROM users")
-    .then(([rows]) => {
-      res.json(rows); // 返回用户列表
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).json({ message: "服务器错误" });
-    });
+  const token = req.headers.authorization?.split(" ")[1]; // 获取 token
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY); // 解码 Token 获取用户信息
+
+    // 判断 token 中的 isAdmin 字段是否为 true
+    if (decoded.isAdmin !== true) {
+      return res.status(403).json({ message: "您没有权限查看用户列表" });
+    }
+
+    // 查询所有用户信息：email, qq_id, nickname, username, id, campus_id, credit
+    db.query("SELECT id, nickname, email, qq_id, username, campus_id, credit FROM users")
+      .then(([rows]) => {
+        res.json(rows); // 返回用户列表
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).json({ message: "服务器错误" });
+      });
+  } catch (err) {
+    console.error(err);
+    return res.status(401).json({ message: "Token 无效" });
+  }
 });
 
-// 用户注册，支持头像上传，同时使用 IP 限流和打印 IP 功能
-router.post("/register", registerLimiter, logIP, upload.single("image"), async (req, res) => {
+// 用户注册，同时使用 IP 限流和打印 IP 功能
+router.post("/register", registerLimiter, logIP, async (req, res) => {
   let { nickname, email, password, qq_id, username, campus_id } = req.body;
-  const avatarFile = req.file; // 获取上传的头像文件
 
   if (!nickname) nickname = "DUTers"; // 默认昵称
   if (!email || !password || !qq_id || !username || !campus_id) {
-    if (avatarFile) {
-      try {
-        await fs.promises.unlink(avatarFile.path);
-      } catch {}
-    }
     return res.status(400).json({ message: "缺少必要参数" });
   }
 
@@ -49,16 +62,7 @@ router.post("/register", registerLimiter, logIP, upload.single("image"), async (
     // 检查邮箱或用户名是否已存在
     const [rows] = await db.query("SELECT * FROM users WHERE email = ? OR username = ?", [email, username]);
 
-    // 处理头像路径
-    const avatarPath = avatarFile ? "/uploads/" + avatarFile.filename : "/uploads/default.png";
-
     if (rows.length > 0) {
-      if (avatarFile) {
-        try {
-          await fs.promises.unlink(avatarFile.path);
-        } catch {}
-      }
-
       const emailRegistered = rows.some((row) => row.email === email);
       const usernameRegistered = rows.some((row) => row.username === username);
       return res.status(400).json({
@@ -70,36 +74,106 @@ router.post("/register", registerLimiter, logIP, upload.single("image"), async (
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // 存入数据库
-    await db.query("INSERT INTO users (nickname, email, password, qq_id, username, campus_id, avatar) VALUES (?, ?, ?, ?, ?, ?, ?)", [nickname, email, hashedPassword, qq_id, username, campus_id, avatarPath]);
+    await db.query("INSERT INTO users (nickname, email, password, qq_id, username, campus_id ) VALUES (?, ?, ?, ?, ?, ?)", [nickname, email, hashedPassword, qq_id, username, campus_id]);
 
     res.status(201).json({ message: "注册成功" });
   } catch (err) {
     console.error(err);
-    if (avatarFile) {
-      try {
-        await fs.promises.unlink(avatarFile.path);
-      } catch {}
-    }
     res.status(500).json({ message: "服务器错误" });
   }
 });
 
-// 用户登录
+// 管理员注册
+router.post("/admin/register", async (req, res) => {
+  const { username, password, email } = req.body;
+
+  if (!username || !password || !email) {
+    return res.status(400).json({ message: "请提供用户名、密码和邮箱" });
+  }
+
+  try {
+    // 检查管理员是否已经存在
+    const [existingAdmin] = await db.query("SELECT * FROM admins WHERE username = ? OR email = ?", [username, email]);
+    if (existingAdmin.length > 0) {
+      return res.status(400).json({ message: "管理员用户名或邮箱已存在" });
+    }
+
+    // 加密密码
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 创建管理员账户
+    const [result] = await db.query("INSERT INTO admins (username, password, email) VALUES (?, ?, ?)", [username, hashedPassword, email]);
+
+    // 返回成功消息
+    res.status(201).json({ message: "管理员注册成功" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "服务器错误" });
+  }
+});
+
+// 根据 qq_id 查询用户信息（仅限管理员）
+router.post("/searchByQQ", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1]; // 获取 token
+  const { qq_id } = req.body; // 从请求体中获取 qq_id
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  if (!qq_id) {
+    return res.status(400).json({ message: "缺少 qq_id 参数" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY); // 解码 Token 获取用户信息
+
+    // 通过 isAdmin 字段判断是否为管理员
+    if (!decoded.isAdmin) {
+      return res.status(403).json({ message: "您没有权限执行此操作" });
+    }
+
+    // 查询指定 qq_id 的用户信息
+    const [rows] = await db.query("SELECT id, nickname, email, qq_id, username, credit, campus_id FROM users WHERE qq_id = ?", [qq_id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "没有找到匹配的用户" });
+    }
+
+    res.status(200).json(rows[0]); // 返回找到的用户信息
+  } catch (err) {
+    console.error(err);
+    return res.status(401).json({ message: "Token 无效" });
+  }
+});
+
+// 用户(管理员)登录
 router.post("/login", loginLimiter, async (req, res) => {
   const { identifier, password } = req.body;
 
   if (!identifier || !password) {
-    return res.status(400).json({ message: "请正确输入用户名或密码" });
+    return res.status(400).json({ message: "请正确输入用户名/邮箱和密码" });
   }
 
   try {
-    const [rows] = await db.query("SELECT * FROM users WHERE username = ? OR email = ?", [identifier, identifier]);
+    let user;
+    let isAdmin = false;
 
-    if (rows.length === 0) {
-      return res.status(401).json({ message: "用户名/邮箱或密码错误" });
+    // 先在普通用户表中查询
+    const [userRows] = await db.query("SELECT * FROM users WHERE username = ? OR email = ?", [identifier, identifier]);
+
+    if (userRows.length > 0) {
+      user = userRows[0];
+      isAdmin = false;
+    } else {
+      // 如果普通用户表中没有，再在管理员表中查询
+      const [adminRows] = await db.query("SELECT * FROM admins WHERE username = ?", [identifier]);
+      if (adminRows.length === 0) {
+        return res.status(401).json({ message: "用户名/邮箱或密码错误" });
+      }
+      user = adminRows[0];
+      isAdmin = true;
     }
-
-    const user = rows[0];
 
     // 验证密码
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -107,23 +181,28 @@ router.post("/login", loginLimiter, async (req, res) => {
       return res.status(401).json({ message: "用户名/邮箱或密码错误" });
     }
 
-    // 生成 JWT 令牌
-    const token = jwt.sign(
-      {
-        user_id: user.id,
-        username: user.username,
-        nickname: user.nickname,
-        campus_id: user.campus_id,
-        qq: user.qq_id,
-        avatar: `${user.avatar}`,
-      },
-      SECRET_KEY,
-      { expiresIn: "7d" }
-    );
+    // 构建 JWT 负载，根据身份返回不同信息
+    const tokenPayload = isAdmin
+      ? {
+          user_id: user.id,
+          username: user.username,
+          isAdmin: true,
+        }
+      : {
+          user_id: user.id,
+          username: user.username,
+          nickname: user.nickname,
+          campus_id: user.campus_id,
+          qq: user.qq_id,
+          isAdmin: false,
+        };
+
+    const token = jwt.sign(tokenPayload, SECRET_KEY, { expiresIn: "7d" });
 
     res.status(200).json({
       message: "登录成功",
       token,
+      isAdmin,
     });
   } catch (err) {
     console.error(err);
@@ -142,24 +221,22 @@ router.get("/profile", async (req, res) => {
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
 
-    // 直接返回 JWT 里已有的信息，减少数据库查询
+    // 获取用户信息（包括 email 和 credit）
+    const [userRows] = await db.query("SELECT email, credit FROM users WHERE id = ?", [decoded.user_id]);
+
+    if (userRows.length === 0) {
+      return res.status(404).json({ message: "用户不存在" });
+    }
+
+    // 返回用户的详细信息，包括 email 和 credit
     const userData = {
       nickname: decoded.nickname,
       username: decoded.username,
       campus_id: decoded.campus_id,
       qq: decoded.qq,
-      avatar: decoded.avatar,
+      email: userRows[0].email, // 从数据库查询得到的 email
+      credit: userRows[0].credit, // 从数据库查询得到的 credit
     };
-
-    // 只有当信用分等重要信息需要更新时，才查数据库?  how?  还没想好。。。。
-    // 给出查询路由，具体时机由前端决定
-    const [rows] = await db.query("SELECT credit FROM users WHERE id = ?", [decoded.user_id]);
-
-    if (rows.length === 0) {
-      return res.status(404).json({ message: "用户不存在" });
-    }
-
-    userData.credit = rows[0].credit;
 
     res.status(200).json(userData);
   } catch (err) {
@@ -191,17 +268,11 @@ router.delete("/profile", async (req, res) => {
   }
 });
 
-// 修改用户信息，包括头像（需要身份验证）
-router.put("/profile", upload.single("image"), async (req, res) => {
+// 修改用户信息（需要身份验证）
+router.put("/profile", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
-  const avatarFile = req.file; // 获取上传的头像文件
 
   if (!token) {
-    if (avatarFile) {
-      try {
-        await fs.promises.unlink(avatarFile.path);
-      } catch {}
-    }
     return res.status(401).json({ message: "未提供 Token" });
   }
 
@@ -211,46 +282,13 @@ router.put("/profile", upload.single("image"), async (req, res) => {
 
     // 验证必填参数
     if (!nickname || !qq_id || !campus_id) {
-      if (avatarFile) {
-        try {
-          await fs.promises.unlink(avatarFile.path);
-        } catch {}
-      }
       return res.status(400).json({ message: "缺少必要参数" });
     }
 
-    // 从数据库获取旧头像路径
-    const [oldUserRows] = await db.query("SELECT avatar FROM users WHERE id = ?", [decoded.user_id]);
-    if (!oldUserRows.length) {
-      if (avatarFile) {
-        import("fs").then((fsModule) => fsModule.unlink(avatarFile.path, () => {}));
-      }
-      return res.status(404).json({ message: "用户不存在" });
-    }
-
-    let oldAvatar = oldUserRows[0].avatar;
-    let avatarPath = oldAvatar; // 如果无新头像就保持原头像
-
-    // 如果上传了新头像，则删除旧头像（非默认）并更新为新路径
-    if (avatarFile) {
-      if (oldAvatar && oldAvatar !== "/uploads/default.png") {
-        try {
-          await fs.promises.unlink("public" + oldAvatar);
-        } catch {}
-      }
-      avatarPath = "/uploads/" + avatarFile.filename;
-    }
-
     // 更新用户信息
-    const [result] = await db.query("UPDATE users SET nickname = ?, qq_id = ?,  campus_id = ?, avatar = ? WHERE id = ?", [nickname, qq_id, campus_id, avatarPath, decoded.user_id]);
+    const [result] = await db.query("UPDATE users SET nickname = ?, qq_id = ?,  campus_id = ? WHERE id = ?", [nickname, qq_id, campus_id, decoded.user_id]);
 
     if (result.affectedRows === 0) {
-      if (avatarFile) {
-        try {
-          await fs.promises.unlink(avatarFile.path);
-        } catch {}
-      }
-
       return res.status(404).json({ message: "用户不存在" });
     }
 
@@ -262,7 +300,6 @@ router.put("/profile", upload.single("image"), async (req, res) => {
         nickname: nickname,
         campus_id: campus_id,
         qq: qq_id,
-        avatar: avatarPath,
       },
       SECRET_KEY,
       { expiresIn: "7d" }
@@ -271,11 +308,6 @@ router.put("/profile", upload.single("image"), async (req, res) => {
     res.status(200).json({ message: "更新成功", token: newToken });
   } catch (err) {
     console.error(err);
-    if (avatarFile) {
-      try {
-        await fs.promises.unlink(avatarFile.path);
-      } catch {}
-    }
     res.status(401).json({ message: "Token 无效" });
   }
 });
@@ -507,7 +539,76 @@ router.put("/change-banner", upload.single("image"), async (req, res) => {
   }
 });
 
-// 查询用户主题、背景、banner 图
+// 修改用户头像
+router.put("/change-avatar", upload.single("image"), async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  const avatarFile = req.file; // 获取上传的头像文件
+
+  if (!token) {
+    if (avatarFile) {
+      try {
+        await fs.promises.unlink(avatarFile.path);
+      } catch {}
+      return res.status(401).json({ message: "未提供 Token" });
+    }
+  }
+
+  // 检查是否上传文件
+  if (!avatarFile) {
+    return res.status(400).json({ message: "请选择要上传的头像图片" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+
+    // 从数据库获取旧头像路径
+    const [oldUserRows] = await db.query("SELECT avatar FROM users WHERE id = ?", [decoded.user_id]);
+    if (!oldUserRows.length) {
+      if (avatarFile) {
+        import("fs").then((fsModule) => fsModule.unlink(avatarFile.path, () => {}));
+      }
+      return res.status(404).json({ message: "用户不存在" });
+    }
+
+    let oldAvatar = oldUserRows[0].avatar;
+    let avatarPath = oldAvatar; // 如果无新头像就保持原头像
+
+    // 如果上传了新头像，则删除旧头像（非默认）并更新为新路径
+    if (avatarFile) {
+      if (oldAvatar && oldAvatar !== "/uploads/default_avatar.png") {
+        try {
+          await fs.promises.unlink("public" + oldAvatar);
+        } catch {}
+      }
+      avatarPath = "/uploads/" + avatarFile.filename;
+    }
+
+    // 更新用户信息
+    const [result] = await db.query("UPDATE users SET avatar = ? WHERE id = ?", [avatarPath, decoded.user_id]);
+
+    if (result.affectedRows === 0) {
+      if (avatarFile) {
+        try {
+          await fs.promises.unlink(avatarFile.path);
+        } catch {}
+      }
+
+      return res.status(404).json({ message: "用户不存在" });
+    }
+
+    res.status(200).json({ message: "更新成功" });
+  } catch (err) {
+    console.error(err);
+    if (avatarFile) {
+      try {
+        await fs.promises.unlink(avatarFile.path);
+      } catch {}
+    }
+    res.status(401).json({ message: "Token 无效" });
+  }
+});
+
+// 查询用户主题、背景、banner 图、头像
 // 建议前端使用 localStorage 缓存，避免频繁请求
 router.get("/get-theme", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
@@ -519,8 +620,8 @@ router.get("/get-theme", async (req, res) => {
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
 
-    // 在数据库中查询用户主题、背景、banner 图
-    const [rows] = await db.query("SELECT theme_id, background_url, banner_url FROM users WHERE id = ?", [decoded.user_id]);
+    // 在数据库中查询用户主题、背景、banner 图、头像
+    const [rows] = await db.query("SELECT theme_id, background_url, banner_url , avatar FROM users WHERE id = ?", [decoded.user_id]);
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "用户不存在" });
@@ -530,6 +631,41 @@ router.get("/get-theme", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(401).json({ message: "Token 无效" });
+  }
+});
+
+// 管理员修改用户信用值 (credit)
+router.put("/updateCredit", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1]; // 获取 token
+  const { qq_id, credit } = req.body; // 获取 qq_id 和新的 credit 值
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  if (!qq_id || credit === undefined) {
+    return res.status(400).json({ message: "缺少必要参数" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY); // 解码 Token 获取用户信息
+
+    // 通过 isAdmin 字段判断是否为管理员
+    if (!decoded.isAdmin) {
+      return res.status(403).json({ message: "您没有权限执行此操作" });
+    }
+
+    // 更新指定 qq_id 用户的 credit 值
+    const [result] = await db.query("UPDATE users SET credit = ? WHERE qq_id = ?", [credit, qq_id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "没有找到匹配的用户" });
+    }
+
+    res.status(200).json({ message: "信用值已更新" });
+  } catch (err) {
+    console.error(err);
+    return res.status(401).json({ message: "Token 无效" });
   }
 });
 

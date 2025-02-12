@@ -10,17 +10,35 @@ let router = Router();
 dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY;
 
-// 获取所有申诉
 router.get("/", (req, res) => {
-  db.query("SELECT * FROM appeals WHERE status != 'deleted'") // 过滤已删除
-    .then(([rows]) => {
-      res.json(rows); // 返回申诉列表
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).json({ message: "服务器错误" });
-    });
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+
+    // 判断 isAdmin 是否为 true，来决定是否有权限
+    if (!decoded.isAdmin) {
+      return res.status(403).json({ message: "您没有权限查看申诉列表" });
+    }
+
+    db.query("SELECT * FROM appeals WHERE status != 'deleted'") // 过滤已删除的申诉
+      .then(([rows]) => {
+        res.json(rows); // 返回申诉列表
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).json({ message: "服务器错误" });
+      });
+  } catch (err) {
+    console.error(err);
+    return res.status(401).json({ message: "Token 无效" });
+  }
 });
+
 
 // 提交申诉
 router.post("/publish", upload.array("images", 5), async (req, res) => {
@@ -216,7 +234,7 @@ router.get("/search/deleted", async (req, res) => {
   }
 });
 
-// 修改申诉状态
+// 修改申诉状态（仅限管理员）
 router.put("/:appeal_id", (req, res) => {
   const { appeal_id } = req.params;
   const { status } = req.body;
@@ -232,20 +250,20 @@ router.put("/:appeal_id", (req, res) => {
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
-    const user_id = decoded.user_id;
 
-    // 确认该申诉存在并且是允许修改的
+    // 检查当前用户是否为管理员（user_id为1）
+    if (decoded.user_id !== 1) {
+      return res.status(403).json({ message: "只有管理员才能修改申诉状态" });
+    }
+
+    // 确认该申诉存在
     db.query("SELECT * FROM appeals WHERE id = ?", [appeal_id])
       .then(([rows]) => {
         if (rows.length === 0) {
           return res.status(404).json({ message: "申诉不存在" });
         }
 
-        // 判断当前用户是否为管理员或该申诉的创建者
-        if (user_id !== rows[0].author_id) {
-          return res.status(403).json({ message: "您没有权限修改该申诉" });
-        }
-
+        // 更新申诉状态
         db.query("UPDATE appeals SET status = ? WHERE id = ?", [status, appeal_id])
           .then(() => {
             res.status(200).json({ message: "申诉状态已更新" });
@@ -264,6 +282,7 @@ router.put("/:appeal_id", (req, res) => {
     res.status(401).json({ message: "无效的 token" });
   }
 });
+
 
 // 删除申诉（软删除）
 router.delete("/:appeal_id", (req, res) => {

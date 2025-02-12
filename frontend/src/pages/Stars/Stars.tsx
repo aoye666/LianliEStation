@@ -15,10 +15,7 @@ const Stars = () => {
 
   return (
     <div className="starts-container">
-      <div className="header">
-        <Navbar title="收藏" />
-      </div>
-
+      <Navbar title="收藏" backActive={true} backPath="user" />
       <div className="content">
         {
           posts.map((post) => (

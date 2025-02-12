@@ -1,6 +1,8 @@
-// 使用说明： 在文件头中import Navbar from 'path/to/Navbar'（具体路径）;
-// 在需要的地方使用<Navbar title='标题'/>
-// 下方主容器设置 height: calc(100vh - 50px); margin-top: 50px; 以保证不重叠。
+// 使用说明： 1、在文件头中import Navbar from 'path/to/Navbar'（具体路径）;
+//           2、在需要的地方直接使用<Navbar title='标题' backActive={true or false} backPath='(/user/)market'/>第一个参数必填、第二三个参数为回退按钮参数可选。
+// 注意：1、下方主容器设置 height: calc(100vh - 50px); margin-top: 50px; 以保证不重叠。不需要在navbar外部再嵌套。
+//      2、图片文件路径请使用正确的相对路径。
+//      3、可选的回退按钮参数 backActive 和 backPath，默认值为 false 和 "market"，路径前已加上“/user/”只需补充后续即可。
 
 import "./Navbar.scss";
 import left from '../../assets/left.png';
@@ -8,20 +10,24 @@ import { useNavigate } from "react-router-dom";
 
 interface NavbarProps {
   title: string;
+  backActive?: boolean;
+  backPath?: string;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ title }) => {
+const Navbar: React.FC<NavbarProps> = ({ title, backActive = false, backPath = "market"}) => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate("/user");
+    navigate(`/user/${backPath}`);
   };
 
   return (
     <div className='navbar-container'>
-      <div className='left' onClick={handleBack}>
-        <img src={left} alt='返回' />
-      </div>
+      {backActive && (
+        <div className='left' onClick={handleBack}>
+          <img src={left} alt='返回' />
+        </div>
+      )}
       <div className="navbar-title">{title}</div>
     </div>
   );

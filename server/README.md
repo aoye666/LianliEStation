@@ -1,3 +1,5 @@
+[TOC]
+
 # 启动说明
 
 ## 环境变量
@@ -26,6 +28,14 @@ SECRET_KEY=
 EMAIL_USER=
 EMAIL_PASS=
 API_KEY
+```
+
+## 临时管理员账户
+
+```json
+"identifier":"胡骏阳",
+"password":"123456",
+"role":"admin"
 ```
 
 ## 数据库环境
@@ -96,6 +106,27 @@ CREATE TABLE `appeal_images` (
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `responses` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,           -- 自增主键
+    `user_id` INT NOT NULL,                        -- 接收回复的用户ID
+    `response_type` ENUM('appeal', 'violation') NOT NULL, -- 回复类型：申诉回复或违规通告回复
+    `related_id` INT NOT NULL,                     -- 关联的申诉或违规通告记录ID
+    `content` TEXT NOT NULL,                       -- 管理员的回复内容
+    `read_status` ENUM('unread', 'read') NOT NULL DEFAULT 'unread', -- 回复状态，默认为未读
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP -- 创建时间，默认当前时间
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+CREATE TABLE admins (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,  -- 管理员 ID
+  `username` VARCHAR(100) NOT NULL,     -- 管理员用户名
+  `password` VARCHAR(255) NOT NULL,     -- 加密后的密码
+  `email` VARCHAR(100) NOT NULL
+);
+
+
+
 -- 用户表数据插入示例
 INSERT INTO `users` (`nickname`, `username`, `email`, `password`, `qq_id`, `campus_id`, `credit`, `avatar`)
 VALUES
@@ -136,27 +167,93 @@ VALUES
 
 # API 文档
 
+## 说明
+
+上传图片时请务必使用 `multipart/form-data` 的请求体格式，非图片请务必使用 `application/json` 的请求体格式
+
+主题图片等不常改动的信息**强烈建议**使用 `localStorage` 缓存在前端，以减少数据库压力
+
 ## users
 
-### 获取所有用户信息
+### 获取所有用户信息(仅管理员)
 
 - **方法:** GET
 - **路径:** `/api/users/`
 - **功能:** 获取数据库中所有用户的基本信息，仅用于测试目的。
-- **请求参数:** 无
+- **请求参数:** token
 - **成功响应:**
   - **状态码:** 200
-  - **内容:** 用户信息列表，包含 `id`, `nickname`, `email`。
+  - **内容:** 用户信息列表，包含 email, qq_id, nickname, username, id, campus_id, credit
 - **错误响应:**
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
+
+### 通过 QQ 号搜索用户信息（管理员专用）
+
+**方法:** POST  
+**路径:** `/api/users/searchByQQ`  
+**功能:** 允许管理员通过 QQ 号码查询用户信息，需提供 `Authorization` 头部。
+
+- **请求参数:**
+
+  - `qq_id`: 用户的 QQ 号码，字符串，必填。
+
+- **请求头:**
+
+  - `Authorization`: `Bearer <JWT_TOKEN>`
+
+- **成功响应:**
+
+  - **状态码:** 200
+  - **内容:**
+    ```json
+    {
+      "id": 1,
+      "nickname": "示例用户",
+      "email": "example@example.com",
+      "qq_id": "12345678",
+      "username": "user123",
+      "credit": 100
+    }
+    ```
+
+- **错误响应:**
+  - **状态码:** 400
+    - **内容:**
+      ```json
+      { "message": "缺少 qq_id 参数" }
+      ```
+  - **状态码:** 401
+    - **内容:**
+      ```json
+      { "message": "未提供 Token" }
+      ```
+    - 或
+      ```json
+      { "message": "Token 无效" }
+      ```
+  - **状态码:** 403
+    - **内容:**
+      ```json
+      { "message": "您没有权限执行此操作" }
+      ```
+  - **状态码:** 404
+    - **内容:**
+      ```json
+      { "message": "没有找到匹配的用户" }
+      ```
+  - **状态码:** 500
+    - **内容:**
+      ```json
+      { "message": "服务器错误" }
+      ```
 
 ### 用户注册
 
 - **方法:** POST
 - **路径:** `/api/users/register`
 - **功能:** 允许新用户注册。检查邮箱和用户名是否已被注册，未注册则将新用户信息插入数据库。
-- **请求体:** (使用 `multipart/form-data`)
+- **请求体:** (使用 `application/json`)
 
   - **请求参数:**
     - `nickname`: 用户昵称，字符串，可选，默认为 'DUTers'。
@@ -165,7 +262,6 @@ VALUES
     - `qq_id`: 用户的 QQ 号码，字符串，必需。
     - `username`: 用户名，字符串，必需。
     - `campus_id`: 用户所在校区，整型，必需。
-    - `image`：用户头像，可选
 
 - **成功响应:**
   - **状态码:** 201
@@ -176,40 +272,155 @@ VALUES
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
-### 用户登录
+### 管理员注册(暂时开放)
 
-- **方法:** POST
-- **路径:** `/api/users/login`
-- **功能:** 验证用户的用户名和密码。如果验证通过，返回 JWT 令牌。
-- **请求参数:**
-  - `identifier`: 用户名或邮箱，字符串，必需。
-  - `password`: 用户密码，字符串，必需。
-- **成功响应:**
-  - **状态码:** 200
-  - **内容:** `{ "message": "登录成功", "token": "<JWT_TOKEN>" }`
-- **错误响应:**
-  - **状态码:** 400
-  - **内容:** `{ "message": "请正确输入用户名或密码" }`
-  - **状态码:** 401
-  - **内容:** `{ "message": "用户名/邮箱或密码错误" }`
-  - **状态码:** 500
-  - **内容:** `{ "message": "服务器错误" }`
+- **URL**: `/api/users/admin/register`
+- **方法**: `POST`
+- **请求头**:
+  - `Content-Type: application/json`
+
+| 参数       | 类型     | 描述         | 必填 |
+| ---------- | -------- | ------------ | ---- |
+| `username` | `string` | 管理员用户名 | 是   |
+| `password` | `string` | 管理员密码   | 是   |
+| `email`    | `string` | 管理员邮箱   | 是   |
+
+```json
+{
+  "username": "admin123",
+  "password": "adminpassword123",
+  "email": "admin123@example.com"
+}
+```
+
+### 用户(管理员)登录
+
+- **URL**: `/login`
+- **方法**: `POST`
+- **请求头**:
+  - `Content-Type: application/json`
+
+| 参数         | 类型     | 描述         | 必填 |
+| ------------ | -------- | ------------ | ---- |
+| `identifier` | `string` | 用户名或邮箱 | 是   |
+| `password`   | `string` | 用户密码     | 是   |
+
+```json
+{
+  "identifier": "user123",
+  "password": "password123"
+}
+```
+
+- **成功响应**:
+  - **状态码**: `200 OK`
+  - **响应体**:
+
+```json
+{
+  "message": "登录成功",
+  "token": "JWT_Token_Here",
+  "isAdmin": false
+}
+```
+
+- **失败响应**:
+  - **状态码**: `400 Bad Request`
+    - **描述**: 缺少必要的参数或身份无效。
+    - **响应体**:
+
+```json
+{
+  "message": "请正确输入用户名、密码和身份"
+}
+```
+
+- **状态码**: `401 Unauthorized`
+  - **描述**: 用户名/邮箱或密码错误，或者管理员身份验证失败。
+  - **响应体**:
+
+```json
+{
+  "message": "用户名/邮箱或密码错误"
+}
+```
+
+- **状态码**: `403 Forbidden`
+  - **描述**: 无权限访问。
+  - **响应体**:
+
+```json
+{
+  "message": "您没有权限登录"
+}
+```
+
+- 功能
+
+  - 验证 `identifier`（可以是用户名或邮箱）和 `password` 的匹配。
+  - 根据身份返回是否为管理员，并生成相应的 JWT token。
+  - 在登录成功后，返回 `isAdmin` 字段标识用户身份，前端可以根据该字段进行相应的重定向或显示。
+
+  - 登录成功后，前端可以通过 `isAdmin` 判断用户身份，如果是管理员，则跳转到管理员页面，否则跳转到普通用户页面。
+
+  - 返回的 JWT token 中包含用户身份信息，可以用于后续身份验证。
 
 ### 获取当前用户信息
 
 - **方法:** GET
 - **路径:** `/api/users/profile`
-- **功能:** 获取当前登录用户的详细信息，需提供 `Authorization` 头部。
-- **请求头:**
+- **功能:** 获取当前登录用户的个人信息，包括昵称、用户名、QQ 号、邮箱和信用分。需要提供 `Authorization` 头部。
+- **请求头**:
+
   - `Authorization`: `Bearer <JWT_TOKEN>`
-- **成功响应:**
+
+- 成功响应:
   - **状态码:** 200
-  - **内容:** `{ "nickname": "DUTers", "username": "testuser", "campus_id": 1, "qq": "12345678", "credit": 100 ，'avater': "default.png"}`
-- **错误响应:**
-  - **状态码:** 401
-  - **内容:** `{ "message": "Token 无效" }`
-  - **状态码:** 500
-  - **内容:** `{ "message": "服务器错误" }`
+  - **内容:**
+    ```json
+    {
+      "nickname": "用户昵称",
+      "username": "用户名",
+      "campus_id": 1,
+      "qq": "QQ号",
+      "email": "用户邮箱",
+      "credit": 100
+    }
+    ```
+- 错误响应:
+
+  - **状态码:** 400  
+    **内容:**
+    ```json
+    { "message": "缺少必要参数" }
+    ```
+  - **状态码:** 401  
+    **内容:**
+    ```json
+    { "message": "未提供 Token" }
+    ```
+  - **状态码:** 401  
+    **内容:**
+
+    ```json
+    { "message": "Token 无效" }
+    ```
+
+  - **状态码:** 404  
+    **内容:**
+
+    ```json
+    { "message": "用户不存在" }
+    ```
+
+  - **状态码:** 500  
+    **内容:**
+    ```json
+    { "message": "服务器错误" }
+    ```
+
+- **Authorization 头部**：需要携带有效的 JWT token 用于身份验证。
+- **返回数据**：用户的个人信息包括昵称、用户名、QQ 号、邮箱和信用分。
 
 ### 删除当前用户账户
 
@@ -233,13 +444,15 @@ VALUES
 
 **方法:** PUT
 **路径:** `/api/users/profile`
-**功能:** 更新当前登录用户的基本信息（昵称、QQ 号、用户名、校区 ID）及头像，需提供 `Authorization` 头部。
+**功能:** 更新当前登录用户的基本信息（昵称、QQ 号、校区），需提供 `Authorization` 头部。
 
-- **请求参数:**
-  - `nickname`: 用户昵称，字符串，必须。
-  - `qq_id`: 用户的 QQ 号码，字符串，必需。
-  - `campus_id`: 用户所在校区，整型，必需。
-  - `image`：用户头像，可选
+- **请求体:** (使用 `application/json`)
+
+  - **请求参数:**
+    - `nickname`: 用户昵称，字符串，必须。
+    - `qq_id`: 用户的 QQ 号码，字符串，必需。
+    - `campus_id`: 用户所在校区，整型，必需。
+
 - **请求头:**
   - `Authorization`: `Bearer <JWT_TOKEN>`
 - **成功响应:**
@@ -259,7 +472,7 @@ VALUES
 
 ---
 
-### **请求验证码**
+### 请求验证码
 
 - **方法:** `POST`
 - **路径:** `/api/users/RequestVerification`
@@ -279,7 +492,7 @@ VALUES
 
 ---
 
-### **修改密码**
+### 修改密码
 
 - **方法:** `PUT`
 - **路径:** `/api/users/change-password`
@@ -309,8 +522,11 @@ VALUES
 - **方法:** PUT
 - **路径:** `/api/users/change-theme`
 - **功能:** 更新当前登录用户的主题设置，需提供 `Authorization` 头部。
-- **请求参数:**
-- `theme_id`: 主题 ID，整型，必需。
+- **请求体:** (使用 `multipart/form-data`)
+
+  - **请求参数:**
+  - `theme_id`: 主题 ID，整型，必需。
+
 - **请求头:**
 - `Authorization`: `Bearer <JWT_TOKEN>`
 - **成功响应:**
@@ -333,11 +549,13 @@ VALUES
 - **方法:** PUT
 - **路径:** `/api/users/change-background`
 - **功能:** 更新当前登录用户的背景图片，需提供 `Authorization` 头部。
-- **请求参数:**
-- `image`: 背景图片文件，必需。
+- **请求体:** (使用 `multipart/form-data`)
+
+  - **请求参数:**
+  - `image`: 背景图片文件，必需。
+
 - **请求头:**
 - `Authorization`: `Bearer <JWT_TOKEN>`
-- `Content-Type`: `multipart/form-data`
 - **成功响应:**
 - **状态码:** 200
 - **内容:** `{ "message": "更新成功" }`
@@ -361,11 +579,13 @@ VALUES
 - **方法:** PUT
 - **路径:** `/api/users/change-banner`
 - **功能:** 更新当前登录用户的 banner 图片，需提供 `Authorization` 头部。
-- **请求参数:**
-- `image`: banner 图片文件，必需。
+- **请求体:** (使用 `multipart/form-data`)
+
+  - **请求参数:**
+  - `image`: banner 图片文件，必需。
+
 - **请求头:**
 - `Authorization`: `Bearer <JWT_TOKEN>`
-- `Content-Type`: `multipart/form-data`
 - **成功响应:**
 - **状态码:** 200
 - **内容:** `{ "message": "更新成功" }`
@@ -384,6 +604,36 @@ VALUES
 
 ---
 
+### 修改用户头像
+
+- **方法:** PUT
+- **路径:** `/api/users/change-avatar`
+- **功能:** 更新当前登录用户的 banner 图片，需提供 `Authorization` 头部。
+- **请求体:** (使用 `multipart/form-data`)
+
+  - **请求参数:**
+  - `image`: banner 图片文件，必需。
+
+- **请求头:**
+- `Authorization`: `Bearer <JWT_TOKEN>`
+- **成功响应:**
+- **状态码:** 200
+- **内容:** `{ "message": "更新成功" }`
+- **错误响应:**
+- **状态码:** 400
+  - **内容:** `{ "message": "请选择要上传的头像图片" }`
+- **状态码:** 401
+  - **内容:** `{ "message": "未提供 Token" }`
+- **状态码:** 401
+  - **内容:** `{ "message": "Token 无效" }`
+- **状态码:** 404
+  - **内容:** `{ "message": "用户不存在" }`
+- **备注:**
+- 上传新头像后，旧的非默认头像将被自动删除
+- 默认头像图片路径为 `/uploads/default.png`
+
+---
+
 ### 获取用户主题设置
 
 - **方法:** GET
@@ -398,7 +648,8 @@ VALUES
   {
     "theme_id": <主题ID>,
     "background_url": <背景图片URL>,
-    "banner_url": <banner图片URL>
+    "banner_url": <banner图片URL>,
+    "avatar": <头像图片URL>
   }
   ```
 - **错误响应:**
@@ -409,7 +660,61 @@ VALUES
 - **状态码:** 404
   - **内容:** `{ "message": "用户不存在" }`
 - **备注:**
-- 建议前端使用 localStorage 缓存这些数据，避免频繁请求服务器
+- **建议前端使用 localStorage 缓存这些数据，避免频繁请求服务器**
+
+### 修改用户信用值(仅管理员)
+
+**方法:** PUT  
+**路径:** `/api/users/updateCredit`  
+**功能:** 允许管理员通过 QQ 号码修改用户的信用值，需提供 `Authorization` 头部。
+
+- **请求参数:**
+
+  - `qq_id` (字符串，必填): 用户的 QQ 号码。
+  - `credit` (整数，必填): 需要更新的信用值。
+
+- **请求头:**
+
+  - `Authorization`: `Bearer <JWT_TOKEN>`
+
+- **成功响应:**
+
+  - **状态码:** 200
+  - **内容:**
+    ```json
+    { "message": "信用值已更新" }
+    ```
+
+- **错误响应:**
+  - **状态码:** 400
+  - **内容:**
+    ```json
+    { "message": "缺少必要参数" }
+    ```
+  - **状态码:** 401
+  - **内容:**
+    ```json
+    { "message": "未提供 Token" }
+    ```
+  - 或
+    ```json
+    { "message": "Token 无效" }
+    ```
+  - **状态码:** 403
+  - **内容:**
+    ```json
+    { "message": "您没有权限执行此操作" }
+    ```
+  - **状态码:** 404
+  - **内容:**
+    ```json
+    { "message": "没有找到匹配的用户" }
+    ```
+  - **状态码:** 500
+  - **内容:**
+    ```json
+    { "message": "服务器错误" }
+    ```
 
 ## posts
 
@@ -495,6 +800,7 @@ VALUES
   - **状态码:** 200
   - **内容:** `{ "message": "帖子已标记为删除" }`
 - **错误响应:**
+
   - **状态码:** 400
   - **内容:** `{ "message": "缺少必要参数" }`
   - **状态码:** 401
@@ -504,9 +810,9 @@ VALUES
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
-### 示例：
+  - 示例：
 
-#### 请求：
+  - 请求：
 
 ```http
 DELETE http://localhost:5000/api/posts/1
@@ -542,6 +848,7 @@ Authorization: Bearer <your_token_here>
     }
     ```
 - **错误响应:**
+
   - **状态码:** 400
   - **内容:** `{ "message": "缺少帖子 ID" }`
   - **状态码:** 404
@@ -549,7 +856,7 @@ Authorization: Bearer <your_token_here>
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
-### 注意事项
+  - 注意事项
 
 1. **图片上传**：上传的图片存储在服务器的 `public/uploads/` 文件夹中，并且会返回图片的 URL。前端可以通过`http://localhost:5000/uploads/xxx`访问图片，xxx 文件存储在 images 数组里。
 2. **Token 验证**：需要使用 JWT Token 验证用户身份。在发送请求时，需要在请求头中提供有效的 Token（`Authorization: Bearer <token>`）。
@@ -608,6 +915,7 @@ Authorization: Bearer <your_token_here>
 ```
 
 - **错误响应:**
+
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
   - **状态码:** 404
@@ -615,9 +923,9 @@ Authorization: Bearer <your_token_here>
   - **状态码:** 500
   - **内容:** `{ "message": "获取图片信息失败" }`
 
-### 示例：
+  - 示例：
 
-#### 请求：
+  - 请求：
 
 ```http
 GET http://localhost:5000/api/posts/search?title=二手&status=active&min_price=10&max_price=100
@@ -646,6 +954,7 @@ GET http://localhost:5000/api/posts/search?title=二手&status=active&min_price=
   - **状态码:** 200
   - **内容:** `{ "message": "帖子更新成功" }`
 - **错误响应:**
+
   - **状态码:** 400
   - **内容:** `{ "message": "缺少必要参数" }`
   - **状态码:** 401
@@ -655,9 +964,9 @@ GET http://localhost:5000/api/posts/search?title=二手&status=active&min_price=
   - **状态码:** 500
   - **内容:** `{ "message": "服务器错误" }`
 
-### 示例：
+  - 示例：
 
-#### 请求：
+  - 请求：
 
 ```http
 PUT http://localhost:5000/api/posts/1
@@ -676,7 +985,7 @@ Authorization: Bearer <your_token_here>
 
 ## appeals
 
-### **获取所有申诉**
+### 获取所有申诉(仅管理员)
 
 - **方法:** `GET`
 - **路径:** `/api/appeals/`
@@ -691,7 +1000,7 @@ Authorization: Bearer <your_token_here>
 
 ---
 
-### **提交申诉**
+### 提交申诉
 
 - **方法:** `POST`
 - **路径:** `/api/appeals/publish`
@@ -714,7 +1023,7 @@ Authorization: Bearer <your_token_here>
 
 ---
 
-### **查询未解决的申诉（仅限当前用户）**
+### 查询未解决的申诉
 
 - **方法:** `GET`
 - **路径:** `/api/appeals/search/pending`
@@ -731,7 +1040,7 @@ Authorization: Bearer <your_token_here>
 
 ---
 
-### **查询已解决的申诉（仅限当前用户）**
+### 查询已解决的申诉
 
 - **方法:** `GET`
 - **路径:** `/api/appeals/search/resolved`
@@ -748,7 +1057,7 @@ Authorization: Bearer <your_token_here>
 
 ---
 
-### **查询已撤销的申诉（仅限当前用户）**
+### 查询已撤销的申诉
 
 - **方法:** `GET`
 - **路径:** `/api/appeals/search/deleted`
@@ -765,7 +1074,7 @@ Authorization: Bearer <your_token_here>
 
 ---
 
-### **修改申诉状态**
+### 修改申诉状态
 
 - **方法:** `PUT`
 - **路径:** `/api/appeals/:appeal_id`
@@ -788,7 +1097,7 @@ Authorization: Bearer <your_token_here>
 
 ---
 
-### **删除申诉（软删除）**
+### 删除申诉
 
 - **方法:** `DELETE`
 - **路径:** `/api/appeals/:appeal_id`
@@ -877,10 +1186,10 @@ Authorization: Bearer <your_token_here>
 
 ---
 
-### 错误处理
+- 错误处理
 
-- **状态码:** 500
-- **内容:** `{ "message": "服务器错误" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
 
 ## aiTemlate
 
@@ -900,7 +1209,7 @@ Authorization: Bearer <your_token_here>
   {
   "title": "商品名", // 生成的商品名称
   "price": 价格,     // 商品价格
-  "tag": "标签",      // 商品标签，可选值： "资料作业"、"跑步打卡"、"生活用品"、"数码电子"、"拼单组队"、"其他"
+  "tag": "标签",      // 商品标签，可选值： "学业资料" 或 "跑腿代课" 或 "生活用品" 或 "数码电子" 或 "拼单组队" 或 "捞人询问"
   "post_type": "交易类型", // 交易类型，可选值： "sell" 或 "receive"
   "details": "详情"   // 商品详情描述
   }
@@ -912,3 +1221,106 @@ Authorization: Bearer <your_token_here>
   - **内容:** `{ "message": "无效的 token" }`
   - **状态码:** 500
   - **内容:** `{ "message": "生成商品信息失败" }`
+
+## responses
+
+### 创建回复(仅管理员)
+
+- **方法:** POST
+- **路径:** `/api/responses/`
+- **功能:** 管理员创建回复（申诉结果或违规通告），回复内容由管理员编写，默认状态为 "unread"。
+- **请求头:**
+  - `Authorization`: Bearer `<JWT_TOKEN>` (必须为管理员的 Token，即 token 中 user_id 必须为 1)
+- **请求体 (JSON):**
+  - `user_id`: 接收回复的用户 ID，整数，必填。
+  - `response_type`: 回复类型，字符串，必填，可选值 `"appeal"`（申诉回复）或 `"violation"`（违规通告回复）。
+  - `related_id`: 关联的申诉或违规记录的 ID，整数，必填。
+  - `content`: 管理员回复内容，字符串，必填。
+- **成功响应:**
+  - **状态码:** 201
+  - **内容:**
+    ```json
+    {
+      "message": "回复创建成功",
+      "response_id": 10
+    }
+    ```
+- **错误响应:**
+  - **状态码:** 401
+    - `{ "message": "未提供 Token" }` 或 `{ "message": "Token 无效" }`
+  - **状态码:** 403
+    - `{ "message": "只有管理员才能创建回复" }`
+  - **状态码:** 400
+    - `{ "message": "缺少必要参数" }`
+  - **状态码:** 500
+    - `{ "message": "服务器错误" }`
+
+### 查看回复
+
+- **方法:** GET
+- **路径:** `/api/responses/`
+- **功能:** 查询当前登录用户收到的所有回复（申诉结果或违规通告）。
+- **请求头:**
+  - `Authorization`: Bearer `<JWT_TOKEN>`
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 返回一个回复记录数组，每条记录包含 `id`, `user_id`, `response_type`, `related_id`, `content`, `read_status`, `created_at` 等字段。
+- **错误响应:**
+  - **状态码:** 401
+    - `{ "message": "未提供 Token" }`
+  - **状态码:** 500
+    - `{ "message": "服务器错误" }`
+
+### 标记回复为已读
+
+- **方法:** PUT
+- **路径:** `/api/responses/:response_id/read`
+- **功能:** 将当前登录用户收到的指定回复标记为已读。
+- **请求头:**
+  - `Authorization`: Bearer `<JWT_TOKEN>`
+- **请求参数:**
+  - `response_id` (URL 参数): 回复的 ID，整数，必填。
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** `{ "message": "回复已标记为已读" }`
+- **错误响应:**
+  - **状态码:** 401
+    - `{ "message": "未提供 Token" }` 或 `{ "message": "Token 无效" }`
+  - **状态码:** 400
+    - `{ "message": "缺少回复ID" }`
+  - **状态码:** 404
+    - `{ "message": "回复不存在或不属于当前用户" }`
+  - **状态码:** 500
+    - `{ "message": "服务器错误" }`
+
+### 查询未读回复
+
+- **方法:** GET
+- **路径:** `/api/responses/unread`
+- **功能:** 查询当前登录用户收到的所有未读回复（包括申诉结果或违规通告）。
+- **请求头:**
+  - `Authorization`: Bearer `<JWT_TOKEN>`
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 返回一个数组，包含所有 `read_status` 为 `unread` 的回复记录，每条记录包含字段 `id`, `user_id`, `response_type`, `related_id`, `content`, `read_status`, `created_at` 等。
+- **错误响应:**
+  - **状态码:** 401
+    - `{ "message": "未提供 Token" }`
+  - **状态码:** 500
+    - `{ "message": "查询失败" }`
+
+### 查询已读回复
+
+- **方法:** GET
+- **路径:** `/api/responses/read`
+- **功能:** 查询当前登录用户收到的所有已读回复。
+- **请求头:**
+  - `Authorization`: Bearer `<JWT_TOKEN>`
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** 返回一个数组，包含所有 `read_status` 为 `read` 的回复记录，每条记录包含字段 `id`, `user_id`, `response_type`, `related_id`, `content`, `read_status`, `created_at` 等。
+- **错误响应:**
+  - **状态码:** 401
+    - `{ "message": "未提供 Token" }`
+  - **状态码:** 500
+    - `{ "message": "查询失败" }`

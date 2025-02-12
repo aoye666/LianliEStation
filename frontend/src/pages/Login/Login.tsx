@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuthStore } from "../../store";
+import { useAuthStore, useUserStore } from "../../store";
 import "./Login.scss";
 import logo from "../../assets/logo.png";
 import background from "../../assets/background1.jpg";
@@ -26,6 +26,7 @@ const Login: React.FC = () => {
 
   const navigate = useNavigate();
   const { login } = useAuthStore();
+  const { fetchUserProfile, getTheme } = useUserStore();
 
   // 设置用户信息
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,12 +39,14 @@ const Login: React.FC = () => {
     e.preventDefault();
     try {
       await login(inputs.identifier, inputs.password); // 调用 login 方法
-      navigate("/market");
+      await fetchUserProfile(); // 调用 fetchUserProfile 方法，设置 currentUser
+      await getTheme(); // 调用 getTheme 方法，设置 userTheme
+      navigate("/user/market");
     } catch (err: any) {
       if (err.response) {
         setError(err.response.data);
       } else {
-        setError({ message: "发生未知错误" });
+        setError({ message: "登录错误" });
       }
     }
   };
@@ -79,9 +82,13 @@ const Login: React.FC = () => {
           </div>
           <button type="submit">登录</button>
           {error && <div>{error.message}</div>}
-          <div className="login-register">
-            <Link to="/register">立即注册！</Link>
-            <Link to="/forget">忘记密码?</Link>
+          <div className="register-forget">
+            <Link className="link" to="/register">
+              立即注册！
+            </Link>
+            <Link className="link" to="/forget">
+              忘记密码?
+            </Link>
           </div>
         </form>
       </div>

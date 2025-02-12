@@ -1,63 +1,77 @@
-$bg:#EDEDED;
+$bg: #ededed;
 .user-container {
+  width: 100%;
+  height: calc(100vh - 50px);
+  display: flex;
+  flex-direction: column;
+  background: $bg;
+  .user-bg {
     width: 100%;
-    height: calc(100vh - 50px);
+    height: auto;
+    aspect-ratio: 16/9;
+    img {
+      width: 100%;
+      object-fit: cover;
+    }
+  }
+  .user-info {
+    position: relative;
+    margin-top: -15px;
+    border-radius: 15px 15px 0 0;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    flex-direction: row;
+    background: white;
+    .user-face {
+        margin-left: 10px;
+      align-self: center;
+      width: 60px;
+      height: 60px;
+      img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 1px solid $bg;
+        object-fit: cover;
+      }
+    }
+    .user-text {
+        margin-left: 20px;
+      align-self: center;
+      display: flex;
+      flex-direction: column;
+      .user-name {
+      }
+      .user-credit {
+      }
+      .user-email {
+      }
+    }
+  }
+  .user-settings {
+    width: 100%;
+    height: auto;
     display: flex;
     flex-direction: column;
-    background: $bg;
-    .user-info {
-        width: 100%;
-        height: 250px;
-        display: flex;
-        flex-direction: column;
-        background: white;
-        .user-face {
-            align-self: center;
-            width: 100px;
-            height: 100px;
-            margin-top: 70px;
-            img {
-                width: 100%;
-                height: 100%;
-                border-radius: 50%;
-                border: 1px solid $bg;
-                object-fit: cover;
-            }
-        }
-        .user-name {
-            margin-left: 120px;
-        }
-        .user-credit {
-            margin-left: 120px;
-        }
-        .user-email {
-            margin-left: 120px;
-        }
-    }
-    .user-settings {
-        width: 100%;
-        height: auto;
-        display: flex;
-        flex-direction: column;
-        border-top: 3px solid $bg;
+    border-top: 3px solid $bg;
 
-        .user-item {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            width: 100%;
-            height: 45px;
-            background: white;
-            border-top: 1px solid $bg;
-            .item-icon {
-                margin-left: 5px;
-                margin-right: 5px;
-            }
-            .right-icon {
-                position: absolute;
-                right: 0;
-            }
-        }
-        
+    .user-item {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      width: 100%;
+      height: 45px;
+      background: white;
+      border-top: 1px solid $bg;
+      .item-icon {
+        margin-left: 5px;
+        margin-right: 5px;
+      }
+      .right-icon {
+        position: absolute;
+        right: 0;
+      }
     }
+  }
 }
