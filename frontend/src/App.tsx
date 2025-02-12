@@ -1,8 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./App.scss";
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
-import { useAuthStore } from "./store";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+} from "react-router-dom";
+import { useAuthStore, useUserStore } from "./store";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"; //保护路由，未登录将只能导航至login和register页面
+import Detail from "./components/Detail/Detail";
 //懒加载不同页面
 const Market = React.lazy(() => import("./pages/Market/Market"));
 const Post = React.lazy(() => import("./pages/Post/Post"));
@@ -18,8 +23,44 @@ const Messages = React.lazy(() => import("./pages/Messages/Messages"));
 const History = React.lazy(() => import("./pages/History/History"));
 
 const App: React.FC = () => {
-  // 检查是否登录
+  // 锁定竖屏
+  const lockOrientation = () => {
+    if (window.screen.orientation && window.screen.orientation.lock) {
+      window.screen.orientation.lock("portrait").catch((err) => {
+        console.error("锁定竖屏失败:", err);
+      });
+    }
+  };
+
+  // 监听屏幕方向变化
+  useEffect(() => {
+    const handleOrientationChange = () => {
+      if (window.matchMedia("(orientation: landscape)").matches) {
+        alert("请将设备旋转到竖屏模式以获得最佳体验。");
+        lockOrientation(); // 尝试锁定竖屏
+      }
+    };
+
+    // 绑定事件监听器
+    window.addEventListener("resize", handleOrientationChange);
+    window.addEventListener("orientationchange", handleOrientationChange);
+
+    // 在组件卸载时移除监听器
+    return () => {
+      window.removeEventListener("resize", handleOrientationChange);
+      window.removeEventListener("orientationchange", handleOrientationChange);
+    };
+  }, []);
+
+  // 检查是否登录并获取用户信息
   const { isAuthenticated } = useAuthStore();
+  const { fetchUserProfile, getTheme } = useUserStore();
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchUserProfile(); // 初始化 currentUser
+      getTheme(); // 初始化 userTheme
+    }
+  }, [isAuthenticated, fetchUserProfile, getTheme]);
 
   const router = createBrowserRouter([
     {
@@ -38,15 +79,23 @@ const App: React.FC = () => {
       path: "/register",
       element: <Register />,
     },
-    {  
-      path: "/reset/:type",  
-      element: <Reset />,  
+    {
+      path: "/reset/:type",
+      element: <Reset />,
     },
     {
       path: "/user/market",
       element: (
         <ProtectedRoute>
           <Market />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/user/market/:postId",
+      element: (
+        <ProtectedRoute>
+          <Detail />
         </ProtectedRoute>
       ),
     },
@@ -118,7 +167,7 @@ const App: React.FC = () => {
 
   return (
     <div className="App">
-      <React.Suspense fallback={<div>Loading...</div>}>
+      <React.Suspense fallback={<div>加载中......请稍候......</div>}>
         <RouterProvider router={router} />
       </React.Suspense>
     </div>

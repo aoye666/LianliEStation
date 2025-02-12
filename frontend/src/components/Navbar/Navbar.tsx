@@ -2,7 +2,7 @@
 //           2、在需要的地方直接使用<Navbar title='标题' backActive={true or false} backPath='(/user/)market'/>第一个参数必填、第二三个参数为回退按钮参数可选。
 // 注意：1、下方主容器设置 height: calc(100vh - 50px); margin-top: 50px; 以保证不重叠。不需要在navbar外部再嵌套。
 //      2、图片文件路径请使用正确的相对路径。
-//      3、可选的回退按钮参数 backActive 和 backPath，默认值为 false 和 "market"，路径前以加上“/user/”只需补充后续即可。
+//      3、可选的回退按钮参数 backActive 和 backPath，默认值为 false 和 "market"，路径前已加上“/user/”只需补充后续即可。
 
 import "./Navbar.scss";
 import left from '../../assets/left.png';

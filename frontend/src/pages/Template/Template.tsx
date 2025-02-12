@@ -154,23 +154,15 @@ const Template = () => {
   const setCampusName = (value: string) => {
     dispatch({ type: 'SET_CAMPUS_NAME', payload: value })
   }
-  const setAuthorId = (value: number | null) => {
-    dispatch({ type: 'SET_AUTHER_ID', payload: value })
-  }
   const setCreateAt = (value: string) => {
     dispatch({ type: 'SET_CREATE_AT', payload: value })
-  }
-  const setId= (value: number) => {
-    dispatch({ type: 'SET_ID', payload: value })
   }
 
   const currentUser = useUserStore(state => state.currentUser)
   const token = useAuthStore(state => state.token)
 
   useEffect(() => {
-    setAuthorId(currentUser?.id || null)
     setCreateAt(new Date().toISOString())
-    setId(currentUser?.id || 1)
     setCampusId(currentUser?.campus_id || 0)
     initialPostType(templateData?.post_type || '买/卖')
     initialTag(templateData?.tag || '商品类型')
