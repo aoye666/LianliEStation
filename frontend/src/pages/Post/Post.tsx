@@ -105,7 +105,7 @@ const Post = () => {
     try {
       const templateData: PostProps = JSON.parse(content);
       // 跳转至模板页，并传递模板参数
-      navigate("/template", { state: templateData });
+      navigate("/user/post/template", { state: templateData });
     } catch (error) {
       console.error("解析模板数据失败", error);
       alert("解析模板数据失败，请重试");

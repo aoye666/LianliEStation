@@ -168,15 +168,13 @@ const Template = () => {
 
   useEffect(() => {
     setCreateAt(new Date().toISOString())
-    setId(Date.now())
     setCampusId(currentUser?.campus_id || 1)
     initialPostType(templateData?.post_type || 'receive')
-
     initialTag(templateData?.tag || '商品类型')
     initialContent(templateData?.details || '')
     initialTitle(templateData?.title || '')    
     initialPrice(templateData?.price || 0)
-    console.log(currentUser)
+    console.log(currentUser?.campus_id)
   },[])
 
   const {
