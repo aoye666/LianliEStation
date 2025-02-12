@@ -8,6 +8,7 @@ import topLogo from '../../assets/topLogo.png'
 import axios from 'axios'
 import logo from '../../assets/logo.png'
 import search from '../../assets/search.png'
+import takePlace from '../../assets/takePlace.png'
 import { usePostStore } from '../../store'
 
 const Market = () => {
@@ -20,20 +21,27 @@ const Market = () => {
   const setFilters = usePostStore((state) => state.setFilters);
   const updatePosts = usePostStore((state) => state.updatePosts);
   const clearPosts = usePostStore((state) => state.clearPosts);
+  const fetchPosts = usePostStore((state) => state.fetchPosts);
+  const clear=usePostStore((state) => state.clear);
 
   const scrollRef = useRef<HTMLDivElement|null>(null);
   
 
-  // useEffect(() => {
-  //   fetchPosts();
-  // },[])
+  useEffect(() => {
+    updatePosts();
+    console.log(filters);
+  },[])
+
+  window.addEventListener('beforeunload', () => {
+    clear();
+  });
 
   const handleScroll = () => {
     if (scrollRef.current) {
       const { scrollHeight, scrollTop, clientHeight } = scrollRef.current;
 
       // 判断该部件是否滚动到底部
-      if (scrollTop + clientHeight >= scrollHeight - 10) {
+      if (scrollTop + clientHeight >= scrollHeight) {
         setPage();
         updatePosts();
       }
@@ -45,14 +53,16 @@ const Market = () => {
   }
 
   const handleSearch = async () => {
-    try {
-      filters.searchTerm = searchInputs;
-      await setFilters(filters); 
-      clearPosts(); 
-      updatePosts();
-    } catch (error) {
-      console.log(error);
-    }
+    // try {
+    //   console.log(filters)
+    //   filters.searchTerm = searchInputs;
+    //   await setFilters(filters); 
+    //   clearPosts(); 
+    //   updatePosts();
+    // } catch (error) {
+    //   console.log(error);
+    // }
+    console.log(posts)
   }
 
   const handleOnConfirm = async () => {
@@ -88,22 +98,37 @@ const Market = () => {
               <div className='tag-item'>
                 <div className='market-type'>
                   <div className='sell'>
-                    <button onClick={() => setFilters({post_type:'sell'})}>出</button>
+                    <button onClick={async() => {
+                      setFilters({post_type:'sell'})
+                      handleOnConfirm();
+                      }}>出</button>
                   </div>
                   <div className='buy'>
-                    <button onClick={() => setFilters({post_type:'receive'})}>收</button>
+                    <button onClick={async() => {
+                      setFilters({post_type:'receive'})
+                      handleOnConfirm();
+                      }}>收</button>
                   </div>
                 </div>
                 <div className='commodity-type'>
                   <div className='detail'>
                     <div>
-                      <button onClick={() => setFilters({tag: '跑腿打卡'})}>跑腿</button>
+                      <button onClick={async() => {
+                        setFilters({tag: '跑腿打卡'})
+                        handleOnConfirm();
+                        }}>跑腿</button>
                     </div>
                     <div>
-                      <button onClick={() => setFilters({tag: '数码电子'})}>数码</button>
+                      <button onClick={async() => {
+                        setFilters({tag: '数码电子'})
+                        handleOnConfirm();
+                      }}>数码</button>
                     </div>
                     <div>
-                      <button onClick={() => setFilters({tag: '服饰配饰'})}>服饰</button>
+                      <button onClick={async() => {
+                        setFilters({tag: '服饰配饰'})
+                        handleOnConfirm();
+                      }}>服饰</button>
                     </div>
                   </div>  
                 </div>
@@ -135,6 +160,17 @@ const Market = () => {
 
                       </div>
 
+                      <div className='location'>
+                          <div className='location-title'>
+                              <span>校区</span>
+                          </div>
+                          <div className='location-list'>
+                              <div className='item' onClick={() => {setFilters({campus_id: 1})}}>凌水校区</div>
+                              <div className='item' onClick={() => {setFilters({campus_id: 2})}}>开发区校区</div>
+                              <div className='item' onClick={() => {setFilters({campus_id: 3})}}>盘锦校区</div>
+                          </div>
+                      </div>
+
                       <div className='sort'>
                           <div className='sort-title'>
                               <span>类别</span>
@@ -144,8 +180,8 @@ const Market = () => {
                               <div className='item' onClick={() => {setFilters({tag: '跑腿打卡'})}}>跑腿打卡</div>
                               <div className='item' onClick={() => {setFilters({tag: '数码电子'})}}>数码电子</div>
                               <div className='item' onClick={() => {setFilters({tag: '拼单组队'})}}>拼单组队</div>
-                              <div className='item' onClick={() => {setFilters({tag: '服饰配饰'})}}>服饰配饰</div>
                               <div className='item' onClick={() => {setFilters({tag: '其他'})}}>其他</div>
+                              <div className='item' onClick={() => {setFilters({tag: null})}}>全部</div>
                           </div>
                       </div>
                       
@@ -156,12 +192,12 @@ const Market = () => {
                   </div>
           }
 
-        <div className='content' ref={scrollRef}>    
+        <div className='content' ref={scrollRef} onScroll={handleScroll}>    
         {
           posts.map((post) => (
             <div className='commodity'>
             <div className='commodity-img'>
-              <img src={post.images[0]} alt="" />
+              <img src={post.images[0]?post.images[0]:takePlace} alt="" />
             </div>
             <div className='commodity-title'>
               {post.title}
@@ -176,24 +212,7 @@ const Market = () => {
             </div>      
           </div>
             ))
-          }
-          <div className='commodity'>
-          <div className='commodity-img'>
-            <img src="commodity.jpg" alt="" />
-          </div>
-          <div className='commodity-title'>
-            c语言教材
-          </div>
-          <div className='commodity-bottom'>
-            <div className='commodity-price'>
-              ￥5
-            </div>
-            <div className='commodity-tag'>
-              学习
-            </div>
-          </div>      
-          </div>
-          
+        }          
         </div>
       </div>
 

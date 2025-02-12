@@ -206,6 +206,39 @@ $shadow-color: rgba(0, 0, 0, 0.1);
                     }
                 }
 
+                .location{
+                    display: flex;
+                    flex-direction: column;
+                    margin-left: 5px;
+                    margin-bottom: 10px;
+
+                    .location-title{  
+                        font-size: 18px;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    }
+
+                    .location-list{
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        gap: 15px;
+                        .item{
+                            display: flex;
+                            font-size: 16px;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                            width: 80px;
+                            border-radius: 10px;
+                        }
+
+                        .item:active{
+                            background-color: #003366; /* 按下时的颜色 */
+                            transform: scale(0.9);
+                        }
+                    }
+                }
+
                 .confirm{
                     display: flex;
                     justify-content: center;
@@ -274,7 +307,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
                 overflow-y: scroll;
                 justify-content: space-between;
                 margin: 0 20px;
-                height: 65vh;
+                height: 70vh;
                 .commodity{
                     display: flex;
                     flex-direction: column;
