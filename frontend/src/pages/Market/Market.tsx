@@ -197,7 +197,7 @@ const Market = () => {
           posts.map((post) => (
             <div className='commodity'>
             <div className='commodity-img'>
-              <img src={post.images[0]?post.images[0]:takePlace} alt="" />
+              <img src={post.images[0]?'post.images[0]':takePlace} alt="" />
             </div>
             <div className='commodity-title'>
               {post.title}
