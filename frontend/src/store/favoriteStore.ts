@@ -21,7 +21,7 @@ interface Post {
     posts: Post[];
     getPosts: () => Promise<void>;
     addPost: (post: Post) => void;
-    removePost: (post: Post) => void;
+    removePost: (postId: number) => void;
   }
 
   const token = Cookies.get("auth-token");
@@ -49,8 +49,8 @@ interface Post {
                 })
             },
             
-            removePost: (post) => {
-                axios.post("http://localhost:5000/api/favorites/add",post.id,{
+            removePost: (postId: number) => {
+                axios.post("http://localhost:5000/api/favorites/add",postId,{
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

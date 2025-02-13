@@ -174,7 +174,6 @@ const Template = () => {
     initialContent(templateData?.details || '')
     initialTitle(templateData?.title || '')    
     initialPrice(templateData?.price || 0)
-    console.log(currentUser?.campus_id)
   },[])
 
   const {
