@@ -72,7 +72,7 @@ const useUserStore = create<UserState>()(
       // 管理员获取所有用户信息
       fetchUsers: async () => {
         try {
-          const res = await axios.get("/api/users/");
+          const res = await axios.get("http://localhost:5000/api/users/");
           set({ users: res.data });
         } catch (error: any) {
           if (error.response) console.error(error.response.data.message);
@@ -81,7 +81,7 @@ const useUserStore = create<UserState>()(
       // 用户获取自己的信息
       fetchUserProfile: async () => {
         try {
-          const res = await axios.get("/api/users/profile", {
+          const res = await axios.get("http://localhost:5000/api/users/profile", {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -94,7 +94,7 @@ const useUserStore = create<UserState>()(
       // 管理员通过QQ号搜索用户
       fetchByQQ: async (qq: string) => {
         try {
-          const res = await axios.post("/api/users/searchByQQ", {
+          const res = await axios.post("http://localhost:5000/api/users/searchByQQ", {
             params: {
               qq_id: qq,
             },
@@ -110,7 +110,7 @@ const useUserStore = create<UserState>()(
       // 获取用户的所有主题信息
       getTheme: async () => {
         try {
-          const res = await axios.get("/api/users/get-theme", {
+          const res = await axios.get("http://localhost:5000/api/users/get-theme", {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -123,7 +123,7 @@ const useUserStore = create<UserState>()(
       // 更换用户的主题编号
       changeTheme: async (theme_id: number) => {
         try {
-          const res = await axios.put("/api/users/change-theme", {
+          const res = await axios.put("http://localhost:5000/api/users/change-theme", {
             params: {
               theme_id: theme_id,
             },
@@ -145,7 +145,7 @@ const useUserStore = create<UserState>()(
       // 更新用户的发布背景
       changeBackground: async (background: string) => {
         try {
-          const res = await axios.put("/api/users/change-background", {
+          const res = await axios.put("http://localhost:5000/api/users/change-background", {
             params: {
               background: background,
             },
@@ -167,7 +167,7 @@ const useUserStore = create<UserState>()(
       // 更新用户的banner
       changeBanner: async (banner: string) => {
         try {
-          const res = await axios.put("/api/users/change-banner", {
+          const res = await axios.put("http://localhost:5000/api/users/change-banner", {
             params: {
               banner: banner,
             },
@@ -189,7 +189,7 @@ const useUserStore = create<UserState>()(
       // 更新用户的头像
       changeAvatar: async (avatar: string) => {
         try {
-          const res = await axios.put("/api/users/change-banner", {
+          const res = await axios.put("http://localhost:5000/api/users/change-banner", {
             params: {
               image: avatar,
             },
@@ -215,7 +215,7 @@ const useUserStore = create<UserState>()(
         qq_id: string
       ) => {
         try {
-          const res = await axios.put("/api/users/profile", {
+          const res = await axios.put("http://localhost:5000/api/users/profile", {
             params: {
               nickname: nickname,
               campus_id: campus_id,
@@ -244,7 +244,7 @@ const useUserStore = create<UserState>()(
       // 管理员更新用户信誉分
       updateCredit: async (qq_id: string, credit: number) => {
         try {
-          const res = await axios.put("/api/users/searchByQQ", {
+          const res = await axios.put("http://localhost:5000/api/users/searchByQQ", {
             params: {
               qq_id: qq_id,
               credit: credit,

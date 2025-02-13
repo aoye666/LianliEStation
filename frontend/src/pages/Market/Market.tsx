@@ -1,11 +1,9 @@
 import { useRef, useEffect, useState } from 'react'
 import "./Market.scss"
-import MoreBar from '../../components/moreBar/moreBar'
 import Tabbar from '../../components/Tabbar/Tabbar'
 import more from '../../assets/more.png'
 import close from '../../assets/close.png'
 import topLogo from '../../assets/topLogo.png'
-import axios from 'axios'
 import logo from '../../assets/logo.png'
 import search from '../../assets/search.png'
 import takePlace from '../../assets/takePlace.png'
@@ -21,15 +19,11 @@ const Market = () => {
   const setFilters = usePostStore((state) => state.setFilters);
   const updatePosts = usePostStore((state) => state.updatePosts);
   const clearPosts = usePostStore((state) => state.clearPosts);
-  const fetchPosts = usePostStore((state) => state.fetchPosts);
   const clear=usePostStore((state) => state.clear);
-
   const scrollRef = useRef<HTMLDivElement|null>(null);
   
-
   useEffect(() => {
     updatePosts();
-    console.log(filters);
   },[])
 
   window.addEventListener('beforeunload', () => {
@@ -53,16 +47,15 @@ const Market = () => {
   }
 
   const handleSearch = async () => {
-    // try {
-    //   console.log(filters)
-    //   filters.searchTerm = searchInputs;
-    //   await setFilters(filters); 
-    //   clearPosts(); 
-    //   updatePosts();
-    // } catch (error) {
-    //   console.log(error);
-    // }
-    console.log(posts)
+    try {
+      console.log(filters)
+      filters.searchTerm = searchInputs;
+      await setFilters(filters); 
+      clearPosts(); 
+      updatePosts();
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   const handleOnConfirm = async () => {
@@ -195,22 +188,22 @@ const Market = () => {
         <div className='content' ref={scrollRef} onScroll={handleScroll}>    
         {
           posts.map((post) => (
-            <div className='commodity'>
-            <div className='commodity-img'>
-              <img src={post.images[0]?'post.images[0]':takePlace} alt="" />
-            </div>
-            <div className='commodity-title'>
-              {post.title}
-            </div>
-            <div className='commodity-bottom'>
-              <div className='commodity-price'>
-                {post.price}
+            <div className='commodity-item'>
+              <div className='commodity-img'>
+                <img src={post.images[0]?`http://localhost:5000${post.images[0]}`:takePlace} alt="takePlace" />
               </div>
-              <div className='commodity-tag'>
-                {post.tag}
+              <div className='commodity-title'>
+                {post.title}
               </div>
-            </div>      
-          </div>
+              <div className='commodity-bottom'>
+                <div className='commodity-price'>
+                  {post.price}
+                </div>
+                <div className='commodity-tag'>
+                  {post.tag}
+              </div>
+              </div>      
+            </div>
             ))
         }          
         </div>
