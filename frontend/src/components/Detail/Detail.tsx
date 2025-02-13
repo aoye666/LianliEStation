@@ -1,12 +1,14 @@
 import { usePostStore, useUserStore } from "../../store";
 import { useState, useEffect, useRef } from "react";
 import "./Detail.scss";
-
 import user from "../../assets/user.png";
 import copy from "../../assets/copy.png";
+import stars from "../../assets/stars.png";
+import share from "../../assets/share.png";
 import img1 from "../../assets/background1.jpg";
 import img2 from "../../assets/background2.jpg";
 import img3 from "../../assets/background3.jpg";
+import Navbar from "../../components/Navbar/Navbar";
 
 const Detail = () => {
   const images = [img1, img2, img3];
@@ -67,6 +69,7 @@ const Detail = () => {
 
   return (
     <div className="detail-container">
+      <Navbar title="详情" />
       <div
         className="detail-slider"
         onTouchStart={handleTouchStart}
@@ -101,7 +104,9 @@ const Detail = () => {
           </div>
         </div>
       </div>
-      <div className="detail-title">占位符内容，请替换为实际内容。占位符内容，请替换为实际内容。</div>
+      <div className="detail-title">
+        占位符内容，请替换为实际内容。占位符内容，请替换为实际内容。
+      </div>
       <div className="detail-profile">
         <div className="detail-price">￥5</div>
         <div className="detail-postType">出</div>
@@ -115,12 +120,21 @@ const Detail = () => {
         <div className="poster-name">PROSELYTE</div>
         <div className="poster-credit">100分</div>
         <div className="poster-time">05-05-10:00</div>
-        <img
-          className="poster-copyBtn"
-          src={copy}
-          alt="发布者QQ号"
-          onClick={handleCopy}
-        />
+      </div>
+      <div className="detail-btn">
+        <div className="contact-btn">
+          <img
+            className="qqBtn-icon"
+            src={copy}
+            alt="发布者QQ号"
+            onClick={handleCopy}
+          />
+          <div className="qqBtn-text">立即联系！</div>
+        </div>
+        <div className="star-btn">
+          <img className="starBtn-icon" src={stars} alt="收藏" />
+          <div className="starBtn-text">加入收藏</div>
+        </div>
       </div>
     </div>
   );
