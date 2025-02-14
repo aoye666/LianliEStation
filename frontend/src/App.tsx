@@ -7,9 +7,9 @@ import {
 } from "react-router-dom";
 import { useAuthStore, useUserStore } from "./store";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"; //保护路由，未登录将只能导航至login和register页面
-import Detail from "./components/Detail/Detail";
 //懒加载不同页面
 const Market = React.lazy(() => import("./pages/Market/Market"));
+const Detail = React.lazy(() => import("./pages/Detail/Detail"));
 const Post = React.lazy(() => import("./pages/Post/Post"));
 const Template = React.lazy(() => import("./pages/Template/Template"));
 const Login = React.lazy(() => import("./pages/Login/Login"));
@@ -59,6 +59,7 @@ const App: React.FC = () => {
     if (isAuthenticated) {
       fetchUserProfile(); // 初始化 currentUser
       getTheme(); // 初始化 userTheme
+      // console.log("已登录，获取用户信息");
     }
   }, [isAuthenticated, fetchUserProfile, getTheme]);
 
