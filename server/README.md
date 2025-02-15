@@ -842,7 +842,9 @@ Authorization: Bearer <your_token_here>
         "price": 50,
         "campus_id": 1,
         "post_type": "sale",
-        "tag": "书籍"
+        "tag": "书籍",
+        "likes":1,
+        "complaints":0
       },
       "images": ["/uploads/1738204953485-tios2b1p2dl.png", "/uploads/1738204953486-tios2b1p2dl.jpg"]
     }
@@ -982,6 +984,51 @@ Authorization: Bearer <your_token_here>
   "status": "active"
 }
 ```
+
+### 修改点赞数
+
+**方法:** `PUT`  
+**路径:** `/api/like/:post_id`  
+**功能:** 增加指定帖子（`post_id`）的点赞
+
+- **请求参数:**
+  - `post_id`: 帖子的 ID，整型，必须。
+
+- **成功响应:**
+  - **状态码:** `200`
+  - **内容:** `{ "message": "点赞成功" }`
+
+- **错误响应:**
+  - **状态码:** `401`
+    - **内容:** `{ "message": "未提供 Token" }`
+  - **状态码:** `404`
+    - **内容:** `{ "message": "帖子未找到" }`
+  - **状态码:** `500`
+    - **内容:** `{ "message": "服务器错误" }`
+
+---
+
+### 修改投诉数
+
+**方法:** `PUT`  
+**路径:** `/api/complaint/:post_id`  
+**功能:** 增加指定帖子（`post_id`）的投诉数
+- **请求参数:**
+  - `post_id`: 帖子的 ID，整型，必须。
+
+- **成功响应:**
+  - **状态码:** `200`
+  - **内容:** `{ "message": "投诉成功" }`
+
+- **错误响应:**
+  - **状态码:** `401`
+    - **内容:** `{ "message": "未提供 Token" }`
+  - **状态码:** `404`
+    - **内容:** `{ "message": "帖子未找到" }`
+  - **状态码:** `500`
+    - **内容:** `{ "message": "服务器错误" }`
+
+
 
 ## appeals
 

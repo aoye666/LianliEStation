@@ -174,7 +174,7 @@ router.get("/byID/:post_id", (req, res) => {
   }
 
   // 查询帖子信息，并且获取与该帖子相关的图片
-  db.query("SELECT id, title, content, author_id, created_at, status, price, campus_id, post_type, tag FROM posts WHERE id = ? AND status != 'deleted'", [post_id])
+  db.query("SELECT id, title, content, author_id, created_at, status, price, campus_id, post_type, tag, likes, complaints FROM posts WHERE id = ? AND status != 'deleted'", [post_id])
     .then(([rows]) => {
       if (rows.length === 0) {
         return res.status(404).json({ message: "帖子未找到或已被删除" });
@@ -415,5 +415,44 @@ router.put("/:post_id", upload.array("images", 5), async (req, res) => {
     res.status(500).json({ message: "服务器错误" });
   }
 });
+
+
+// 修改点赞数
+router.put("/like/:post_id", async (req, res) => {
+  const { post_id } = req.params; // 获取帖子 ID
+  try {
+    // 更新帖子点赞数
+    const [result] = await db.query("UPDATE posts SET likes = likes + 1 WHERE id = ? AND status != 'deleted'", [post_id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "帖子未找到" });
+    }
+
+    res.status(200).json({ message: "点赞成功" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "服务器错误" });
+  }
+});
+
+// 修改投诉数
+router.put("/complaint/:post_id", async (req, res) => {
+  const { post_id } = req.params; // 获取帖子 ID
+  try {
+    // 更新帖子投诉数
+    const [result] = await db.query("UPDATE posts SET complaints = complaints + 1 WHERE id = ? AND status != 'deleted'", [post_id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "帖子未找到" });
+    }
+
+    res.status(200).json({ message: "投诉成功" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "服务器错误" });
+  }
+});
+
+
 
 export default router;
