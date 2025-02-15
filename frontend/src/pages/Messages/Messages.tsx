@@ -6,7 +6,7 @@ import search from '../../assets/search.png';
 import messages from '../../assets/messages.png';  
 import complain from '../../assets/complain.png';  
 import violate from '../../assets/violate.png';  
-import messageReaded from '../../assets/messageReaded.png';  
+import messageRead from '../../assets/message-read.png';  
 import manage from '../../assets/settings.png';  
 
 interface OptionType {  
@@ -39,10 +39,8 @@ const CustomOption = (props: any) => {
 const Messages = () => {  
   const navigate = useNavigate();  
 
-  const handleSearch = () => {  
-    
-  }; 
-  const handleReaded = () => {  
+
+  const handleRead = () => {  
 
   }
   const handleManage = () => {  
@@ -53,17 +51,7 @@ const Messages = () => {
   return (  
     <div>  
       <Navbar title="信箱" backActive={true} backPath="user" />  
-      <div className="messages-container">  
-        <div className="messages-search-container">  
-          <input  
-            type='text'  
-            placeholder='搜索消息'  
-            className="messages-search-input"  
-          />  
-          <div className="messages-search-btn" onClick={handleSearch}>  
-            <img src={search} alt="搜索" />  
-          </div>  
-        </div>  
+      <div className="messages-container">   
         {/* 使用 react-select */}  
         <div className="messages-control">  
           <div className="messages-control-item">  
@@ -75,9 +63,9 @@ const Messages = () => {
               defaultValue={ options[0] } 
             />  
           </div>  
-          <div className="messages-control-item" onClick={handleReaded}>
+          <div className="messages-control-item" onClick={handleRead}>
             <div className="messages-control-item-btn">
-              <img src={messageReaded} alt="已读"  /><button>已读</button>
+              <img src={messageRead} alt="已读"  /><button>已读</button>
             </div>
           </div>  
           <div className="messages-control-item" onClick={handleManage}>

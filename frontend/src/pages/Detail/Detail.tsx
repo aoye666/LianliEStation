@@ -18,7 +18,6 @@ import img3 from "../../assets/background3.jpg";
 const Detail = () => {
   const images = [img1, img2, img3];
   const currentUser = useUserStore(state => state.currentUser);
-  // console.log(currentUser);
   const [qq, setQq] = useState(currentUser?.qq); // 初始化 qq
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentAlter, setCurrentAlter] = useState("user");
@@ -62,6 +61,7 @@ const Detail = () => {
 
   // 点击复制按钮，复制发布者QQ号到剪贴板
   const handleCopy = () => {
+    console.log(currentUser);
     if (qq) {
       navigator.clipboard
         .writeText(qq)
@@ -145,8 +145,8 @@ const Detail = () => {
       </div>
       <div className="detail-poster">
         <img className="poster-icon" src={user} alt="发布者头像" />
-        <div className="poster-name">PROSELYTE</div>
-        <div className="poster-credit">100分</div>
+        <div className="poster-name">{currentUser?.nickname}</div>
+        <div className="poster-credit">{currentUser?.credit}分</div>
         <div className="poster-time">05-05-10:00</div>
       </div>
       <div className="detail-alternative">
