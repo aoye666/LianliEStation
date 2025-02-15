@@ -420,15 +420,31 @@ router.put("/:post_id", upload.array("images", 5), async (req, res) => {
 // 修改点赞数
 router.put("/like/:post_id", async (req, res) => {
   const { post_id } = req.params; // 获取帖子 ID
+  const { like } = req.body; // 获取前端传递的 like（true 或 false）
+
+  if (like === undefined) {
+    return res.status(400).json({ message: "缺少 like 参数" });
+  }
+
   try {
+    // 判断是增加还是减少点赞数
+    const likeChange = like === true ? 1 : (like === false ? -1 : 0);
+    
+    if (likeChange === 0) {
+      return res.status(400).json({ message: "无效的 like 参数，必须是 true 或 false" });
+    }
+
     // 更新帖子点赞数
-    const [result] = await db.query("UPDATE posts SET likes = likes + 1 WHERE id = ? AND status != 'deleted'", [post_id]);
+    const [result] = await db.query(
+      "UPDATE posts SET likes = likes + ? WHERE id = ? AND status != 'deleted'",
+      [likeChange, post_id]
+    );
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "帖子未找到" });
     }
 
-    res.status(200).json({ message: "点赞成功" });
+    res.status(200).json({ message: likeChange === 1 ? "点赞成功" : "取消点赞成功" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "服务器错误" });
@@ -438,20 +454,37 @@ router.put("/like/:post_id", async (req, res) => {
 // 修改投诉数
 router.put("/complaint/:post_id", async (req, res) => {
   const { post_id } = req.params; // 获取帖子 ID
+  const { complaint } = req.body; // 获取前端传递的 complaint（true 或 false）
+
+  if (complaint === undefined) {
+    return res.status(400).json({ message: "缺少 complaint 参数" });
+  }
+
   try {
+    // 判断是增加还是减少投诉数
+    const complaintChange = complaint === true ? 1 : (complaint === false ? -1 : 0);
+    
+    if (complaintChange === 0) {
+      return res.status(400).json({ message: "无效的 complaint 参数，必须是 true 或 false" });
+    }
+
     // 更新帖子投诉数
-    const [result] = await db.query("UPDATE posts SET complaints = complaints + 1 WHERE id = ? AND status != 'deleted'", [post_id]);
+    const [result] = await db.query(
+      "UPDATE posts SET complaints = complaints + ? WHERE id = ? AND status != 'deleted'",
+      [complaintChange, post_id]
+    );
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "帖子未找到" });
     }
 
-    res.status(200).json({ message: "投诉成功" });
+    res.status(200).json({ message: complaintChange === 1 ? "投诉成功" : "取消投诉成功" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "服务器错误" });
   }
 });
+
 
 
 
