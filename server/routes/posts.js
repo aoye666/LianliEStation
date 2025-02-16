@@ -274,6 +274,17 @@ router.get("/search", async (req, res) => {
     const [countRows] = await db.query(countQuery, params);
     const total = countRows[0].total;
 
+    // 如果总数为0，直接返回空结果
+    if (total === 0) {
+      return res.status(200).json({
+        total: 0,
+        count: 0, // 添加当前页帖子数量
+        page: Number(page),
+        limit: Number(limit),
+        posts: [],
+      });
+    }
+
     // 查询具体数据
     const dataQuery = `
       SELECT *
@@ -283,12 +294,20 @@ router.get("/search", async (req, res) => {
       LIMIT ?
       OFFSET ?
     `;
+
     // 追加分页参数
     params.push(Number(limit), Number(offset));
     const [rows] = await db.query(dataQuery, params);
 
+    // 添加第二次检查
     if (rows.length === 0) {
-      return res.status(200).json({ total, posts: [] });
+      return res.status(200).json({
+        total,
+        count: 0,
+        page: Number(page),
+        limit: Number(limit),
+        posts: [],
+      });
     }
 
     // 获取已查到帖子ID列表
@@ -313,6 +332,7 @@ router.get("/search", async (req, res) => {
 
     res.status(200).json({
       total,
+      count: postsWithImages.length, // 添加当前页帖子数量
       page: Number(page),
       limit: Number(limit),
       posts: postsWithImages,
@@ -416,7 +436,6 @@ router.put("/:post_id", upload.array("images", 5), async (req, res) => {
   }
 });
 
-
 // 修改点赞数
 router.put("/like/:post_id", async (req, res) => {
   const { post_id } = req.params; // 获取帖子 ID
@@ -428,17 +447,14 @@ router.put("/like/:post_id", async (req, res) => {
 
   try {
     // 判断是增加还是减少点赞数
-    const likeChange = like === true ? 1 : (like === false ? -1 : 0);
-    
+    const likeChange = like === true ? 1 : like === false ? -1 : 0;
+
     if (likeChange === 0) {
       return res.status(400).json({ message: "无效的 like 参数，必须是 true 或 false" });
     }
 
     // 更新帖子点赞数
-    const [result] = await db.query(
-      "UPDATE posts SET likes = likes + ? WHERE id = ? AND status != 'deleted'",
-      [likeChange, post_id]
-    );
+    const [result] = await db.query("UPDATE posts SET likes = likes + ? WHERE id = ? AND status != 'deleted'", [likeChange, post_id]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "帖子未找到" });
@@ -462,17 +478,14 @@ router.put("/complaint/:post_id", async (req, res) => {
 
   try {
     // 判断是增加还是减少投诉数
-    const complaintChange = complaint === true ? 1 : (complaint === false ? -1 : 0);
-    
+    const complaintChange = complaint === true ? 1 : complaint === false ? -1 : 0;
+
     if (complaintChange === 0) {
       return res.status(400).json({ message: "无效的 complaint 参数，必须是 true 或 false" });
     }
 
     // 更新帖子投诉数
-    const [result] = await db.query(
-      "UPDATE posts SET complaints = complaints + ? WHERE id = ? AND status != 'deleted'",
-      [complaintChange, post_id]
-    );
+    const [result] = await db.query("UPDATE posts SET complaints = complaints + ? WHERE id = ? AND status != 'deleted'", [complaintChange, post_id]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "帖子未找到" });
@@ -485,7 +498,104 @@ router.put("/complaint/:post_id", async (req, res) => {
   }
 });
 
+router.get("/user-history", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  const { page = 1, limit = 10 } = req.query; // 添加分页参数
 
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
 
+  try {
+    // 解码 Token 获取用户信息
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const author_id = decoded.user_id;
+
+    if (!author_id) {
+      return res.status(401).json({ message: "无效的用户信息" });
+    }
+
+    // 计算分页偏移量
+    const offset = (page - 1) * limit;
+
+    // 检查用户是否存在
+    const [userExists] = await db.query("SELECT id FROM users WHERE id = ?", [author_id]);
+
+    if (userExists.length === 0) {
+      return res.status(404).json({ message: "用户不存在" });
+    }
+
+    // 首先获取总数
+    const [countRows] = await db.query("SELECT COUNT(*) as total FROM posts WHERE author_id = ? AND status != 'deleted'", [author_id]);
+    const total = countRows[0].total;
+
+    // 如果总数为0，直接返回空结果
+    if (total === 0) {
+      return res.status(200).json({
+        total: 0,
+        count: 0,
+        page: Number(page),
+        limit: Number(limit),
+        posts: [],
+      });
+    }
+
+    // 查询当前页的帖子
+    const [rows] = await db.query(
+      `SELECT * FROM posts 
+       WHERE author_id = ? AND status != 'deleted' 
+       ORDER BY id DESC
+       LIMIT ? OFFSET ?`,
+      [author_id, Number(limit), Number(offset)]
+    );
+
+    // 如果当前页没有数据，返回空结果
+    if (rows.length === 0) {
+      return res.status(200).json({
+        total,
+        count: 0,
+        page: Number(page),
+        limit: Number(limit),
+        posts: [],
+      });
+    }
+
+    // 获取已查到帖子ID列表
+    const postIds = rows.map((p) => p.id);
+
+    // 查询对应的图片
+    let imageRows = [];
+    if (postIds.length > 0) {
+      [imageRows] = await db.query("SELECT post_id, image_url FROM post_images WHERE post_id IN (?)", [postIds]);
+    }
+
+    // 创建 post_id -> [image_url] 的映射
+    const imagesMap = imageRows.reduce((map, row) => {
+      if (!map[row.post_id]) {
+        map[row.post_id] = [];
+      }
+      map[row.post_id].push(row.image_url);
+      return map;
+    }, {});
+
+    // 组装帖子与图片
+    const postsWithImages = rows.map((post) => {
+      post.images = imagesMap[post.id] || [];
+      return post;
+    });
+
+    // 返回带分页信息的响应
+    res.status(200).json({
+      total, // 总记录数
+      count: postsWithImages.length, // 当前页记录数
+      page: Number(page), // 当前页码
+      limit: Number(limit), // 每页限制
+      posts: postsWithImages, // 帖子数据
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "服务器错误" });
+  }
+});
 
 export default router;

@@ -843,8 +843,8 @@ Authorization: Bearer <your_token_here>
         "campus_id": 1,
         "post_type": "sale",
         "tag": "书籍",
-        "likes":1,
-        "complaints":0
+        "likes": 1,
+        "complaints": 0
       },
       "images": ["/uploads/1738204953485-tios2b1p2dl.png", "/uploads/1738204953486-tios2b1p2dl.jpg"]
     }
@@ -889,6 +889,7 @@ Authorization: Bearer <your_token_here>
   {
   "total": 50, // 符合条件的总记录数
   "page": 1, // 当前页码
+  "count": 10, // 当前页帖子数
   "limit": 10, // 每页记录数
   "posts": [
     {
@@ -911,7 +912,9 @@ Authorization: Bearer <your_token_here>
 
 ```
 {
-  "total": 0, // 符合条件的总记录数
+  "total": 10, // 符合条件的总记录数
+  "count": 0, // 当前页 post 数
+  "limit": 10, // 每页帖子数
   "posts": [] // 空列表
 }
 ```
@@ -922,12 +925,8 @@ Authorization: Bearer <your_token_here>
   - **内容:** `{ "message": "服务器错误" }`
   - **状态码:** 404
   - **内容:** `{ "message": "未找到符合条件的帖子" }`
-  - **状态码:** 500
-  - **内容:** `{ "message": "获取图片信息失败" }`
 
-  - 示例：
-
-  - 请求：
+  - 示例请求：
 
 ```http
 GET http://localhost:5000/api/posts/search?title=二手&status=active&min_price=10&max_price=100
@@ -992,10 +991,12 @@ Authorization: Bearer <your_token_here>
 **功能:** 增加或减少指定帖子（`post_id`）的点赞数。通过传递 `like` 为 `true` 来增加点赞，传递 `false` 来减少点赞。
 
 - **请求参数:**
+
   - `post_id`: 帖子的 ID，整型，必须。
   - `like`: 布尔值，`true` 增加点赞数，`false` 减少点赞数，必须。
 
 - **成功响应:**
+
   - **状态码:** `200`
   - **内容:** `{ "message": "点赞成功" }` 或 `{ "message": "取消点赞成功" }`
 
@@ -1016,10 +1017,12 @@ Authorization: Bearer <your_token_here>
 **功能:** 增加或减少指定帖子（`post_id`）的投诉数。通过传递 `complaint` 为 `true` 来增加投诉数，传递 `false` 来减少投诉数。
 
 - **请求参数:**
+
   - `post_id`: 帖子的 ID，整型，必须。
   - `complaint`: 布尔值，`true` 增加投诉数，`false` 减少投诉数，必须。
 
 - **成功响应:**
+
   - **状态码:** `200`
   - **内容:** `{ "message": "投诉成功" }` 或 `{ "message": "取消投诉成功" }`
 
@@ -1031,7 +1034,73 @@ Authorization: Bearer <your_token_here>
   - **状态码:** `500`
     - **内容:** `{ "message": "服务器错误" }`
 
+### 查询当前用户发布历史
 
+- **方法:** GET
+- **路径:** `/api/posts/user-history`
+- **功能:** 查询当前 token 所指向用户的帖子发布历史。
+- **请求头:**
+- `Authorization`: `Bearer <JWT_TOKEN>`
+- **请求参数:**
+  - `page`：当前页码，整数，可选，默认 1。
+  - `limit`：每页的记录数，整数，可选，默认 10
+- **成功响应:**
+
+  - **状态码:** 200
+  - **内容:**
+
+  ```
+  {
+    "total": integer,     // 用户帖子总数
+    "count": integer,     // 当前页帖子数量
+    "page": integer,      // 当前页码
+    "limit": integer,     // 每页显示数量
+    "posts": [
+      {
+        "id": integer,
+        "title": string,
+        "content": string,
+        "status": string,
+        "campus_id": integer,
+        "post_type": string,
+        "tag": string,
+        "images": [
+          string// 图片URL数组
+        ]
+        // . ... 其他帖子字段
+      }
+    ]
+  }
+  ```
+
+- **无数响应**
+
+```
+{
+  "total": 10, // 符合条件的总记录数
+  "count": 0, // 当前页 post 数
+  "limit": 10, // 每页帖子数
+  "posts": [] // 空列表
+}
+```
+
+- **错误响应:**
+
+  - **状态码:** 401
+  - **内容:** `{ "message": "未提供 Token" }`
+  - **状态码:** 401
+  - **内容:** `{ "message": "无效的用户信息" }`
+  - **状态码:** 404
+  - **内容:** `{ "message": "用户不存在" }`
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+- 示例请求：
+
+```http
+GET /user-history?page=1&limit=10
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...0
+```
 
 ## appeals
 
