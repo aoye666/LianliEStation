@@ -320,7 +320,7 @@ const Template = () => {
 
         <div className='img-upload'>
           <div className='img-upload-up'>
-            <label htmlFor="img-upload-icon">
+            <label htmlFor="upload-icon">
               上传图片
             </label>
             <div className='img-upload-icon'>
