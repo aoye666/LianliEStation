@@ -10,7 +10,7 @@ const pool = createPool({
   port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "root",
-  database: process.env.DB_NAME || "marketplace",
+  database: process.env.DB_NAME || "makertplace",
 });
 
 // 导出 Promise 版本的连接池
