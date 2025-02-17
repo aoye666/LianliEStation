@@ -343,7 +343,6 @@ router.get("/search", async (req, res) => {
   }
 });
 
-// 修改帖子
 router.put("/:post_id", upload.array("images", 5), async (req, res) => {
   const { post_id } = req.params;
   const { title, content, price, campus_id, status, post_type, tag } = req.body;
@@ -397,13 +396,21 @@ router.put("/:post_id", upload.array("images", 5), async (req, res) => {
       return res.status(404).json({ message: "帖子未找到或用户无权修改" });
     }
 
-    // 删除旧图片
-    const [oldImages] = await db.query("SELECT image_url FROM post_images WHERE post_id = ?", [post_id]);
-    for (const img of oldImages) {
-      const oldFilePath = "public" + img.image_url;
-      await fs.promises.unlink(oldFilePath).catch(() => {});
+    // 只在有新图片上传时才处理图片
+    if (files && files.length > 0) {
+      // 删除旧图片
+      const [oldImages] = await db.query("SELECT image_url FROM post_images WHERE post_id = ?", [post_id]);
+      for (const img of oldImages) {
+        const oldFilePath = "public" + img.image_url;
+        await fs.promises.unlink(oldFilePath).catch(() => {});
+      }
+      await db.query("DELETE FROM post_images WHERE post_id = ?", [post_id]);
+
+      // 插入新图片
+      const imageUrls = files.map((file) => `/uploads/${file.filename}`);
+      const imagePromises = imageUrls.map((url) => db.query("INSERT INTO post_images (post_id, image_url) VALUES (?, ?)", [post_id, url]));
+      await Promise.all(imagePromises);
     }
-    await db.query("DELETE FROM post_images WHERE post_id = ?", [post_id]);
 
     // 更新帖子
     const updateQuery = `
@@ -411,14 +418,6 @@ router.put("/:post_id", upload.array("images", 5), async (req, res) => {
       SET title = ?, content = ?, price = ?, campus_id = ?, status = ?, post_type = ?, tag = ? WHERE id = ?`;
 
     await db.query(updateQuery, [title, content, price, campus_id, status, post_type, tag, post_id]);
-
-    // 插入新图片
-    let imageUrls = [];
-    if (req.files && req.files.length) {
-      imageUrls = req.files.map((file) => `/uploads/${file.filename}`);
-      const imagePromises = imageUrls.map((url) => db.query("INSERT INTO post_images (post_id, image_url) VALUES (?, ?)", [post_id, url]));
-      await Promise.all(imagePromises);
-    }
 
     // 返回成功信息
     res.status(200).json({ message: "帖子更新成功" });
