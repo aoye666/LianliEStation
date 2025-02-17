@@ -11,6 +11,7 @@ import appealsRouter from "./routes/appeals.js";
 import favoritesRouter from "./routes/favorites.js";
 import aiTemplateRouter from "./routes/aiTemplate.js";
 import responsesRouter from "./routes/responses.js";
+import campusWallRouter from "./routes/campusWall.js";
 
 let app = express();
 
@@ -31,6 +32,7 @@ app.use("/api/appeals", appealsRouter);
 app.use("/api/favorites", favoritesRouter);
 app.use("/api/aiTemplate", aiTemplateRouter);
 app.use("/api/responses", responsesRouter);
+app.use("/api/campusWall", campusWallRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

@@ -125,7 +125,22 @@ CREATE TABLE admins (
   `email` VARCHAR(100) NOT NULL
 );
 
+CREATE TABLE `campus_wall_posts` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `title` VARCHAR(255) NOT NULL,
+    `content` TEXT NOT NULL,
+    `author_id` INT NOT NULL,
+    `campus_id` INT NOT NULL,
+    `status` ENUM('active', 'deleted') DEFAULT 'active',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `campus_wall_images` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `post_id` INT NOT NULL,
+    `image_url` VARCHAR(255) NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 用户表数据插入示例
 INSERT INTO `users` (`nickname`, `username`, `email`, `password`, `qq_id`, `campus_id`, `credit`, `avatar`)
@@ -158,6 +173,21 @@ VALUES
 (1, 1, '2025-01-01 11:00:00'),
 (2, 3, '2025-01-02 13:00:00'),
 (1, 4, '2025-01-03 14:00:00');
+
+-- 插入校园墙帖子示例数据
+INSERT INTO `campus_wall_posts` (`title`, `content`, `author_id`, `campus_id`, `created_at`)
+VALUES
+('期末复习小组招募', '正在找考研政治的复习小组，一起打卡学习，互相监督。', 1, 1, '2025-01-15 08:30:00'),
+('晨跑小伙伴招募', '每天早上6:30体育场集合，欢迎加入晨跑队伍！', 2, 1, '2025-01-15 09:00:00'),
+('图书馆捡到一张学生卡', '今天在图书馆三楼捡到一张学生卡，失主请联系我认领。', 1, 2, '2025-01-15 14:20:00');
+
+-- 插入对应的图片数据
+INSERT INTO `campus_wall_images` (`post_id`, `image_url`, `created_at`)
+VALUES
+(1, '/uploads/wall/study_group.jpg', '2025-01-15 08:31:00'),
+(2, '/uploads/wall/morning_run1.jpg', '2025-01-15 09:01:00'),
+(2, '/uploads/wall/morning_run2.jpg', '2025-01-15 09:01:00'),
+(3, '/uploads/wall/student_card.jpg', '2025-01-15 14:21:00');
 ```
 
 ##
@@ -1443,3 +1473,77 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...0
     - `{ "message": "未提供 Token" }`
   - **状态码:** 500
     - `{ "message": "查询失败" }`
+
+## campusWall
+
+### 获取校园墙帖子列表
+
+- **方法:** GET
+- **路径:** `/api/campusWall/`
+- **功能:** 获取所有未删除的校园墙帖子**仅供测试**。
+- **请求参数:** 无
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:**
+  ```json
+  {
+    "posts": [
+      {
+        "id": "帖子ID",
+        "title": "标题",
+        "content": "内容",
+        "author_id": "作者ID",
+        "campus_id": "校区ID",
+        "status": "帖子状态",
+        "created_at": "创建时间",
+        "images": ["图片URL数组"]
+      }
+    ]
+  }
+  ```
+- **错误响应:**
+  - **状态码:** 500
+  - **内容:** `{ "message": "服务器错误" }`
+
+### 发布校园墙帖子
+
+- **方法:** POST
+- **路径:** `/api/campusWall/publish`
+- **功能:** 发布新的校园墙帖子，支持最多 3 张图片上传。
+- **请求头:**
+  - `Authorization`: Bearer `<token>`，必填
+- **请求体:** (使用 `multipart/form-data`)
+  - `title`: 帖子标题，必填
+  - `content`: 帖子内容，必填
+  - `campus_id`: 校区 ID，必填
+  - `images`: 图片文件，可选，最多 3 张
+- **成功响应:**
+  - **状态码:** 201
+  - **内容:** `{ "message": "发布成功" }`
+- **错误响应:**
+  - **状态码:** 400
+    - `{ "message": "缺少必要参数" }`
+  - **状态码:** 401
+    - `{ "message": "未提供Token" }`
+  - **状态码:** 500
+    - `{ "message": "服务器错误" }`
+
+### 删除校园墙帖子
+
+- **方法:** DELETE
+- **路径:** `/api/campusWall/:post_id`
+- **功能:** 将指定帖子标记为删除状态（软删除）。
+- **请求头:**
+  - `Authorization`: Bearer `<token>`，必填
+- **请求参数:**
+  - `post_id`: 帖子 ID（URL 参数）
+- **成功响应:**
+  - **状态码:** 200
+  - **内容:** `{ "message": "删除成功" }`
+- **错误响应:**
+  - **状态码:** 401
+    - `{ "message": "未提供Token" }`
+  - **状态码:** 403
+    - `{ "message": "没有权限删除此帖子" }`
+  - **状态码:** 500
+    - `{ "message": "服务器错误" }`
