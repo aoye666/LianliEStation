@@ -25,6 +25,8 @@ const initialState = {
   images: [] as File[],
   error: null as string | null,
   campus_name: '校区选择',
+  likes: 0,
+  complints: 0,
 }
 
 type Action=
@@ -36,7 +38,7 @@ type Action=
   | { type: 'SET_ERROR', payload: string | null }
   | { type: 'SET_CAMPUS_ID', payload: number }
   | { type: 'SET_CAMPUS_NAME', payload: string }
-  | { type: 'SET_AUTHER_ID', payload: number | null }
+  | { type: 'SET_AUTHOR_ID', payload: number | null }
   | { type: 'SET_CREATE_AT', payload: string }
   | { type: 'SET_PRICE', payload: number }
   | { type: 'SET_ID', payload: number}
@@ -93,7 +95,7 @@ const reducer = (state: typeof initialState, action: Action) => {
        ...state,
         campus_name: action.payload,
       }
-    case 'SET_AUTHER_ID':
+    case 'SET_AUTHOR_ID':
       return {
         ...state,
         auther_id: action.payload,
@@ -189,6 +191,8 @@ const Template = () => {
     author_id,
     create_at,
     price,
+    likes,
+    complints,
   } = state
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -229,6 +233,8 @@ const Template = () => {
     images.forEach((image) => {
       formData.append('images', image);
     });
+    formData.append('likes', likes.toString());
+    formData.append('complints', complints.toString());
     axios.post('http://localhost:5000/api/posts/publish', formData,{
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -358,7 +364,7 @@ const Template = () => {
     </div>
        <div className='tabbar'>
         <Tabbar />
-       </div>
+      </div>
     </div>
   )
 }
