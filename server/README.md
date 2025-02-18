@@ -72,7 +72,9 @@ CREATE TABLE `posts` (
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `status` ENUM('active', 'inactive', 'deleted') DEFAULT 'active',
     `price` DECIMAL(10, 2) DEFAULT 0.00,
-    `campus_id` INT NOT NULL
+    `campus_id` INT NOT NULL,
+    `likes` INT DEFAULT 0, 
+    `complaints` INT DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `appeals` (
@@ -202,6 +204,8 @@ VALUES
 上传图片时请务必使用 `multipart/form-data` 的请求体格式，非图片请务必使用 `application/json` 的请求体格式
 
 主题图片等不常改动的信息**强烈建议**使用 `localStorage` 缓存在前端，以减少数据库压力
+
+如果有未使用的api请告知后端删除
 
 ## users
 
@@ -745,6 +749,55 @@ VALUES
     ```json
     { "message": "服务器错误" }
     ```
+
+
+
+
+
+### 根据用户ID查询用户基本信息
+
+- **方法:** `GET`  
+- **路径:** `/api/users/userInfo/:user_id`  
+- **功能:** 根据用户 ID 获取用户的 `qq_id`、`credit` 和 `avatar` 信息。
+- **请求参数：**`user_id`: 用户的 ID，整型，必须。
+
+- **成功响应:**
+状态码: `200`
+内容:
+  ```json
+  {
+    "qq_id": "123456789",
+    "credit": 500,
+    "avatar": "/uploads/avatar123.jpg"
+  }
+  ```
+  - `qq_id`: 用户的 QQ 号码，字符串。
+  - `credit`: 用户的信用分，整型。
+  - `avatar`: 用户的头像路径，字符串。
+
+- **错误响应:**
+  - **状态码:** `400`
+  - **内容:** `{ "message": "缺少用户 ID" }`
+  - **状态码:** `404`
+  - **内容:** `{ "message": "用户不存在" }`
+  - **状态码:** `500`
+  - **内容:** `{ "message": "服务器错误" }`
+
+- **示例请求：**
+```bash
+GET /api/users/userInfo/123
+```
+（假设 `123` 为用户的 ID）
+
+- **示例响应：**
+```json
+{
+  "qq_id": "123456789",
+  "credit": 500,
+  "avatar": "/uploads/avatar123.jpg"
+}
+```
+
 
 ## posts
 

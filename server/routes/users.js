@@ -669,4 +669,35 @@ router.put("/updateCredit", async (req, res) => {
   }
 });
 
+
+
+// 根据用户ID查询用户的qq_id, credit,和avatar信息,便于前端帖子的详情页查询用户基本信息
+router.get("/userInfo/:user_id", async (req, res) => {
+  const { user_id } = req.params;
+
+  if (!user_id) {
+    return res.status(400).json({ message: "缺少用户 ID" });
+  }
+
+  try {
+    const [rows] = await db.query("SELECT qq_id, credit, avatar FROM users WHERE id = ?", [user_id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "用户不存在" });
+    }
+
+    const user = rows[0]; 
+    res.status(200).json({
+      qq_id: user.qq_id,
+      credit: user.credit,
+      avatar: user.avatar,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "服务器错误" });
+  }
+});
+
+
+
 export default router;
