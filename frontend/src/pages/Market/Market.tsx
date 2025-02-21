@@ -8,6 +8,8 @@ import logo from '../../assets/logo.png'
 import search from '../../assets/search.png'
 import takePlace from '../../assets/takePlace.png'
 import { usePostStore } from '../../store'
+import { useNavigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 
 const Market = () => {
   const [searchInputs, setSearchInputs]=useState('')
@@ -21,6 +23,7 @@ const Market = () => {
   const clearPosts = usePostStore((state) => state.clearPosts);
   const clear=usePostStore((state) => state.clear);
   const scrollRef = useRef<HTMLDivElement|null>(null);
+  const navigate = useNavigate();
   
   useEffect(() => {
     updatePosts();
@@ -188,7 +191,7 @@ const Market = () => {
         <div className='content' ref={scrollRef} onScroll={handleScroll}>    
         {
           posts.map((post) => (
-            <div className='commodity-item' key={post.id}>
+            <div className='commodity-item' key={post.id} onClick={() => {navigate(`/user/market/:${post.id}`)}}>
               <div className='commodity-img'>
                 <img src={post.images[0]?`http://localhost:5000${post.images[0]}`:takePlace} alt="takePlace" />
               </div>

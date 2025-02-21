@@ -243,7 +243,7 @@ const Template = () => {
     }).then(() => {
       handleSuccess()
       console.log('发布成功')
-      navigate('/market')
+      navigate('/user/market')
   })
   .catch((error) => {
       console.log(error)
