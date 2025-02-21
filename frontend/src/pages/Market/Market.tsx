@@ -24,9 +24,10 @@ const Market = () => {
   const clear=usePostStore((state) => state.clear);
   const scrollRef = useRef<HTMLDivElement|null>(null);
   const navigate = useNavigate();
+  const fetchPosts= usePostStore((state)=>state.fetchPosts)
   
   useEffect(() => {
-    updatePosts();
+    fetchPosts();
   },[])
 
   window.addEventListener('beforeunload', () => {
@@ -50,15 +51,17 @@ const Market = () => {
   }
 
   const handleSearch = async () => {
-    try {
-      console.log(filters)
-      filters.searchTerm = searchInputs;
-      await setFilters(filters); 
-      clearPosts(); 
-      updatePosts();
-    } catch (error) {
-      console.log(error);
-    }
+    // try {
+    //   console.log(filters)
+    //   filters.searchTerm = searchInputs;
+    //   await setFilters(filters); 
+    //   clearPosts(); 
+    //   updatePosts();
+    // } catch (error) {
+    //   console.log(error);
+    // }
+    console.log(filters)
+
   }
 
   const handleOnConfirm = async () => {
