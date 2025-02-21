@@ -243,7 +243,7 @@ const Template = () => {
     }).then(() => {
       handleSuccess()
       console.log('发布成功')
-      navigate('/user/market')
+      window.location.href = '/target-page'
   })
   .catch((error) => {
       console.log(error)
@@ -362,9 +362,6 @@ const Template = () => {
     <div className='submit'>
       <button onClick={() => handlePublish()}>发布</button>
     </div>
-       <div className='tabbar'>
-        <Tabbar />
-      </div>
     </div>
   )
 }

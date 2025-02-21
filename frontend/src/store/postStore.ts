@@ -22,8 +22,8 @@ interface Filters {
   searchTerm: string | null;
   priceRange: [number, number];
   tag: string | null;
-  post_type: "receive" | "sell";
-  campus_id: number;
+  post_type: "receive" | "sell"|null;
+  campus_id: number|null;
 }
 
 interface PostState {
@@ -48,10 +48,10 @@ const usePostStore = create<PostState>()(
       currentPost: null,
       filters: {
         searchTerm: "",
-        post_type: "receive",
+        post_type: null,
         tag: "",
         priceRange: [0, 1000000],
-        campus_id: 0,
+        campus_id: null,
       },
       setPage: () =>
         set((preState) => ({
@@ -59,18 +59,21 @@ const usePostStore = create<PostState>()(
         })),
       fetchPosts: async () => {
         try {
-          const response = await axios.get("http://localhost:5000/api/posts", {
-            params: {
-              page: get().page,
-              limit: 1,
-            },
-          });
+          const response = await axios.get(
+            "http://localhost:5000/api/posts/search",
+            {
+              params: {
+                page: get().page,
+                limit: 12,
+              },
+            }
+          );
 
           // 检查返回数据是否有效
           if (response.status === 200 && response.data) {
-            const data = response.data;
+            const data = response.data.posts;
             set((state) => ({
-              posts: [...state.posts, ...data], // 更新 posts 状态
+              posts: [...data], // 更新 posts 状态
             }));
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
