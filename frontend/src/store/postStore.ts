@@ -66,6 +66,12 @@ const usePostStore = create<PostState>()(
               params: {
                 page: get().page,
                 limit: 12,
+                keyword: get().filters.searchTerm,
+                post_type: get().filters.post_type,
+                tag: get().filters.tag,
+                min_price: get().filters.priceRange[0],
+                max_price: get().filters.priceRange[1],
+                campus_id: get().filters.campus_id,
               },
             }
           );
@@ -126,7 +132,7 @@ const usePostStore = create<PostState>()(
           posts: [],
           page: 1,
           filters: {
-            searchTerm: null,
+            searchTerm: "",
             post_type: null,
             tag: null,
             priceRange: [0, 1000000],
@@ -146,7 +152,7 @@ const usePostStore = create<PostState>()(
       clearFilters:()=>
         set(()=>({
           filters: {
-            searchTerm: null,
+            searchTerm: "",
             post_type: null,
             tag: null,
             priceRange: [0, 1000000],

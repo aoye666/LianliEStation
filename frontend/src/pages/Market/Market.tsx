@@ -61,7 +61,7 @@ const Market = () => {
     } catch (error) {
       console.log(error);
     }
-
+    console.log(filters)
   }
 
   const handleOnConfirm = async () => {
