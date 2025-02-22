@@ -25,13 +25,14 @@ const Market = () => {
   const scrollRef = useRef<HTMLDivElement|null>(null);
   const navigate = useNavigate();
   const fetchPosts= usePostStore((state)=>state.fetchPosts)
+  const clearFilters=usePostStore((state)=>state.clearFilters)
   
   useEffect(() => {
     fetchPosts();
   },[])
 
   window.addEventListener('beforeunload', () => {
-    clear();
+    clearFilters();
   });
 
   const handleScroll = () => {
@@ -51,16 +52,15 @@ const Market = () => {
   }
 
   const handleSearch = async () => {
-    // try {
-    //   console.log(filters)
-    //   filters.searchTerm = searchInputs;
-    //   await setFilters(filters); 
-    //   clearPosts(); 
-    //   updatePosts();
-    // } catch (error) {
-    //   console.log(error);
-    // }
-    console.log(filters)
+    try {
+      console.log(filters)
+      filters.searchTerm = searchInputs;
+      await setFilters(filters); 
+      clearPosts(); 
+      updatePosts();
+    } catch (error) {
+      console.log(error);
+    }
 
   }
 
@@ -113,7 +113,7 @@ const Market = () => {
                   <div className='detail'>
                     <div>
                       <button onClick={async() => {
-                        setFilters({tag: '跑腿打卡'})
+                        setFilters({tag: '跑腿代课'})
                         handleOnConfirm();
                         }}>跑腿</button>
                     </div>
@@ -125,9 +125,9 @@ const Market = () => {
                     </div>
                     <div>
                       <button onClick={async() => {
-                        setFilters({tag: '服饰配饰'})
+                        setFilters({tag: null})
                         handleOnConfirm();
-                      }}>服饰</button>
+                      }}>全部</button>
                     </div>
                   </div>  
                 </div>
@@ -167,6 +167,7 @@ const Market = () => {
                               <div className='item' onClick={() => {setFilters({campus_id: 1})}}>凌水校区</div>
                               <div className='item' onClick={() => {setFilters({campus_id: 2})}}>开发区校区</div>
                               <div className='item' onClick={() => {setFilters({campus_id: 3})}}>盘锦校区</div>
+                              <div className='item' onClick={() => {setFilters({campus_id: null})}}>全部</div>
                           </div>
                       </div>
 
@@ -175,11 +176,13 @@ const Market = () => {
                               <span>类别</span>
                           </div>
                           <div className='sort-list'>
-                              <div className='item' onClick={() => {setFilters({tag: '资料作业'})}}>资料作业</div>
-                              <div className='item' onClick={() => {setFilters({tag: '跑腿打卡'})}}>跑腿打卡</div>
+                              <div className='item' onClick={() => {setFilters({tag: '学业资料'})}}>学业资料</div>
+                              <div className='item' onClick={() => {setFilters({tag: '跑腿代课'})}}>跑腿代课</div>
+                              <div className='item' onClick={() => {setFilters({tag: '生活用品'})}}>生活用品</div>
                               <div className='item' onClick={() => {setFilters({tag: '数码电子'})}}>数码电子</div>
                               <div className='item' onClick={() => {setFilters({tag: '拼单组队'})}}>拼单组队</div>
-                              <div className='item' onClick={() => {setFilters({tag: '其他'})}}>其他</div>
+                              <div className='item' onClick={() => {setFilters({tag: '捞人询问'})}}>捞人询问</div>
+                              <div className='item' onClick={() => {setFilters({tag: "其他"})}}>其他</div>
                               <div className='item' onClick={() => {setFilters({tag: null})}}>全部</div>
                           </div>
                       </div>
