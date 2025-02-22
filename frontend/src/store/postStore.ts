@@ -38,6 +38,7 @@ interface PostState {
   updatePosts: () => Promise<void>;
   setPage: () => void;
   clearPosts: () => void;
+  clearFilters: () => void;
 }
 
 const usePostStore = create<PostState>()(
@@ -126,10 +127,10 @@ const usePostStore = create<PostState>()(
           page: 1,
           filters: {
             searchTerm: null,
-            post_type: "sell",
+            post_type: null,
             tag: null,
             priceRange: [0, 1000000],
-            campus_id: 1,
+            campus_id: null,
           },
         })), // 清空所有状态，包括 posts 等
       clearPosts: () =>
@@ -142,6 +143,16 @@ const usePostStore = create<PostState>()(
           filters: { ...state.filters, ...newFilters }, // 更新 filters 状态
         }));
       },
+      clearFilters:()=>
+        set(()=>({
+          filters: {
+            searchTerm: null,
+            post_type: null,
+            tag: null,
+            priceRange: [0, 1000000],
+            campus_id: null,
+          }
+        })),
       updatePosts: async () => {
         try {
           const response = await axios.get(
