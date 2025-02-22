@@ -308,13 +308,13 @@ $shadow-color: rgba(0, 0, 0, 0.1);
                 flex-wrap: wrap;
                 overflow-y: scroll;
                 justify-content: space-between;
-                margin: 0 20px;
+                margin: 0 15px;
                 height: 70vh;
                 .commodity-item{
                     display: flex;
                     flex-direction: column;
                     border: 1px solid #acacac;
-                    width: 160px;
+                    width: 155px;
                     height: 160px;
                     margin: 2px;
                     border-radius: 5px;
@@ -355,6 +355,13 @@ $shadow-color: rgba(0, 0, 0, 0.1);
                             border: 1px solid #c7c7c7;
                             border-radius: 5px;
                             padding: 2px;
+                            font-size: 15px;
+                        }
+
+                        .commodity-price{
+                            font-size: 15px;
+                            font-weight: bold;
+                            color: $hover-color;
                         }
                     }
 
