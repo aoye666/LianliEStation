@@ -32,7 +32,7 @@ const Market = () => {
   },[])
 
   window.addEventListener('beforeunload', () => {
-    clearFilters();
+    clear();
   });
 
   const handleScroll = () => {
@@ -197,7 +197,7 @@ const Market = () => {
         <div className='content' ref={scrollRef} onScroll={handleScroll}>    
         {
           posts.map((post) => (
-            <div className='commodity-item' key={post.id} onClick={() => {navigate(`/user/market/:${post.id}`)}}>
+            <div className='commodity-item' key={post.id} onClick={() => {navigate(`/user/market/${post.id}`)}}>
               <div className='commodity-img'>
                 <img src={post.images[0]?`http://localhost:5000${post.images[0]}`:takePlace} alt="takePlace" />
               </div>
