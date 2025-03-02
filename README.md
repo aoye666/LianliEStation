@@ -1,8 +1,7 @@
 
-
 # LianliEStation连理e站
 
-大连理工大学校园集市平台
+连理e站——校园智联生活平台
 
 <!-- PROJECT SHIELDS -->
 
@@ -18,12 +17,15 @@
 
 <p align="center">
   <a href="https://github.com/ProselyteCoding/LianliEStation/">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="assets/logo.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">连理e站</h3>
+  <video width="640" height="480" controls>
+    <source src="assets/“连理e站”——校园智联生活平台.mp4" type="video/mp4">
+  </video>
   <p align="center">
-    大连理工大学校园集市
+    连理e站——校园智联生活平台
     <br />
     <a href="https://github.com/ProselyteCoding/LianliEStation"><strong>探索本项目的文档 »</strong></a>
     <br />
@@ -37,9 +39,6 @@
 
 </p>
 
-
- 本篇README.md面向开发者
- 
 ## 目录
 
 - [上手指南](#上手指南)
@@ -57,16 +56,12 @@
 
 ### 上手指南
 
-请将所有链接中的“shaojintian/Best_README_template”改为“your_github_name/your_repository”
-
-
-
-###### 开发前的配置要求
+#### 开发前的配置要求
 
 1. xxxxx x.x.x
 2. xxxxx x.x.x
 
-###### **安装步骤**
+#### **安装步骤**
 
 1. Get a free API Key at [https://example.com](https://example.com)
 2. Clone the repo
@@ -76,6 +71,7 @@ git clone https://github.com/ProselyteCoding/LianliEStation.git
 ```
 
 ### 文件目录说明
+
 eg:
 
 ```
@@ -98,11 +94,7 @@ filetree
 
 ```
 
-
-
-
-
-### 开发的架构 
+### 开发的架构
 
 请阅读[ARCHITECTURE.md](https://github.com/ProselyteCoding/LianliEStation/blob/main/ARCHITECTURE.md) 查阅为该项目的架构。
 
@@ -124,14 +116,11 @@ filetree
 
 贡献使开源社区成为一个学习、激励和创造的绝佳场所。你所作的任何贡献都是**非常感谢**的。
 
-
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
-
 
 ### 版本控制
 
@@ -141,7 +130,7 @@ filetree
 
 xxx@xxxx
 
-知乎:xxxx  &ensp; qq:xxxxxx    
+知乎:xxxx  &ensp; qq:3197908785
 
  *您也可以在贡献者名单中参看所有参与该项目的开发者。*
 
@@ -150,7 +139,6 @@ xxx@xxxx
 该项目签署了MIT 授权许可，详情请参阅 [LICENSE.txt](https://github.com/ProselyteCoding/LianliEStation/blob/main/LICENSE)
 
 ### 鸣谢
-
 
 - [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
 - [Img Shields](https://shields.io)

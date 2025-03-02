@@ -13,11 +13,11 @@ $bg:#EDEDED;
         background: white;
         border-top: 1px solid $bg;
         .item-text {
-            margin-left: 10px;
+            margin-left: 20px;
         }
         .item-value {
             position: absolute;
-            right:10px;
+            right: 15px;
             color: #898484;
         }
         .item-icon {
@@ -26,7 +26,7 @@ $bg:#EDEDED;
         }
         .right-icon {
             position: absolute;
-            right: 5px;
+            right: 10px;
         }
     }
     .logout-container {

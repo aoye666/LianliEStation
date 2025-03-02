@@ -37,16 +37,16 @@ $bg: #ededed;
       }
     }
     .user-text {
-        margin-left: 20px;
+      margin-left: 20px;
       align-self: center;
       display: flex;
       flex-direction: column;
-      .user-name {
-      }
-      .user-credit {
-      }
-      .user-email {
-      }
+      // .user-name {
+      // }
+      // .user-credit {
+      // }
+      // .user-email {
+      // }
     }
   }
   .user-settings {
@@ -65,12 +65,12 @@ $bg: #ededed;
       background: white;
       border-top: 1px solid $bg;
       .item-icon {
-        margin-left: 5px;
-        margin-right: 5px;
+        margin-left: 15px;
+        margin-right: 10px;
       }
       .right-icon {
         position: absolute;
-        right: 0;
+        right: 10px;
       }
     }
   }

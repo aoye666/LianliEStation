@@ -67,7 +67,7 @@ const User = () => {
           <img src={avatarSrc} alt="用户头像" />  
         </div>  
         <div className="user-text">  
-          <div className="user-name">昵称：{currentUser?.username || 'test'}</div>  
+          <div className="user-name">昵称：{currentUser?.nickname || 'test'}</div>  
           <div className="user-credit">信誉：{currentUser?.credit || '100'}</div>  
           <div className="user-email">邮箱：{currentUser?.email || 'test@test.com'}</div>  
         </div>  
