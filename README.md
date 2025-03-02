@@ -21,13 +21,13 @@
   <h3 align="center">连理e站</h3>
   <p align="center">
     连理e站——校园智联生活平台
+    <br /><br />
     <a href="https://github.com/ProselyteCoding/LianliEStation/">  
-      <img src="assets/宣传视频.gif" alt="宣传视频" width="640" height="480">  
+      <img src="assets/宣传视频.gif" alt="宣传视频" width="800" height="450">  
     </a> 
-    <br />
+    <br /><br />
     <a href="https://github.com/ProselyteCoding/LianliEStation"><strong>探索本项目的文档 »</strong></a>
-    <br />
-    <br />
+    <br /><br />
     <a href="https://github.com/ProselyteCoding/LianliEStation">查看Demo</a>
     ·
     <a href="https://github.com/ProselyteCoding/LianliEStation/issues">报告Bug</a>
