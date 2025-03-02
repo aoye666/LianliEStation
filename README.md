@@ -1,7 +1,6 @@
+# LianliEStation 连理 e 站
 
-# LianliEStation连理e站
-
-连理e站——校园智联生活平台
+连理 e 站——校园智联生活平台
 
 <!-- PROJECT SHIELDS -->
 
@@ -19,13 +18,12 @@
   <a href="https://github.com/ProselyteCoding/LianliEStation/">
     <img src="assets/logo.png" alt="Logo" width="80" height="80">
   </a>
-
   <h3 align="center">连理e站</h3>
-  <video width="640" height="480" controls>
-    <source src="assets/“连理e站”——校园智联生活平台.mp4" type="video/mp4">
-  </video>
   <p align="center">
     连理e站——校园智联生活平台
+    <a href="https://github.com/ProselyteCoding/LianliEStation/">  
+      <img src="assets/宣传视频.gif" alt="宣传视频" width="640" height="480">  
+    </a> 
     <br />
     <a href="https://github.com/ProselyteCoding/LianliEStation"><strong>探索本项目的文档 »</strong></a>
     <br />
@@ -75,7 +73,7 @@ git clone https://github.com/ProselyteCoding/LianliEStation.git
 eg:
 
 ```
-filetree 
+filetree
 ├── ARCHITECTURE.md
 ├── LICENSE.txt
 ├── README.md
@@ -124,19 +122,19 @@ filetree
 
 ### 版本控制
 
-该项目使用Git进行版本管理。您可以在repository参看当前可用版本。
+该项目使用 Git 进行版本管理。您可以在 repository 参看当前可用版本。
 
 ### 作者
 
 xxx@xxxx
 
-知乎:xxxx  &ensp; qq:3197908785
+知乎:xxxx &ensp; qq:3197908785
 
- *您也可以在贡献者名单中参看所有参与该项目的开发者。*
+_您也可以在贡献者名单中参看所有参与该项目的开发者。_
 
 ### 版权说明
 
-该项目签署了MIT 授权许可，详情请参阅 [LICENSE.txt](https://github.com/ProselyteCoding/LianliEStation/blob/main/LICENSE)
+该项目签署了 MIT 授权许可，详情请参阅 [LICENSE.txt](https://github.com/ProselyteCoding/LianliEStation/blob/main/LICENSE)
 
 ### 鸣谢
 
@@ -148,7 +146,8 @@ xxx@xxxx
 - [xxxxxxxxxxxxxx](https://connoratherton.com/loaders)
 
 <!-- links -->
-[your-project-path]:ProselyteCoding/LianliEStation
+
+[your-project-path]: ProselyteCoding/LianliEStation
 [contributors-shield]: https://img.shields.io/github/contributors/ProselyteCoding/LianliEStation.svg?style=flat-square
 [contributors-url]: https://github.com/ProselyteCoding/LianliEStation/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/ProselyteCoding/LianliEStation.svg?style=flat-square
