@@ -15,9 +15,10 @@ const History = () => {
   const scrollRef=useRef<HTMLDivElement|null>(null)
   const setPage=useHistoryStore((state)=>state.setPage)
   const clear=useHistoryStore((state)=>state.clear)
+  const initialPosts=useHistoryStore((state)=>state.initialPosts)
 
   useEffect(() => {
-    getPosts()
+    initialPosts()
   }, [])
 
   window.addEventListener('beforeunload', () => {
@@ -62,7 +63,7 @@ const History = () => {
         <div className="content">
           {
             posts.map((post) => (
-              <div className='commodity' ref={scrollRef} onScroll={handleScroll}>
+              <div className='commodity' key={post.id} ref={scrollRef} onScroll={handleScroll}>
 
                 {
                   isVisible?<div className="commodity-delete" key={post.id} onClick={() => handleCheck(post.id)} style={checked[post.id] ? {backgroundColor: "#3498db",border: "none"} : {backgroundColor: "white"}} />:null

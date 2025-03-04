@@ -2,6 +2,8 @@ import Navbar from "../../components/Navbar/Navbar"
 import React,{ useEffect, useState } from "react"
 import { useFavoriteStore } from "../../store"
 import takePlace from "../../assets/takePlace.png"
+import background1 from "../../assets/background1.jpg"
+import background2 from "../../assets/background2.jpg"
 import "./Stars.scss"
 
 type checkBox={[number:number]:boolean}
@@ -78,7 +80,7 @@ const Stars = () => {
                 }
 
                 <div className='commodity-img'>
-                <img src={takePlace} alt="" />
+                <img src={background1} alt="" />
                 </div>
                 <div className="commodity-description">
                   <div className='commodity-title'>
@@ -100,18 +102,18 @@ const Stars = () => {
 
               <div className='commodity'>
                 <div className='commodity-img'>
-                <img src={takePlace} alt="" />
+                <img src={background2} alt="" />
                 </div>
                 <div className="commodity-description">
                   <div className='commodity-title'>
-                    c语言教材
+                    模电教材
                   </div>
                   <div className="commodity-detail">
                     有勾画，开发区校区面交
                   </div>
                   <div className='commodity-bottom'>
                     <div className='commodity-price'>
-                      15r
+                      5r
                     </div>
                     <div className='commodity-tag'>
                       教材
