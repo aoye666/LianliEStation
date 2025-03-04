@@ -25,6 +25,7 @@ interface HistoryStoreState{
     setPage:()=>void;
     page:number;
     clear:()=>void;
+    initialPosts:()=>Promise<void>;
 }
 
 const token=Cookies.get("auth-token")
@@ -39,9 +40,40 @@ const useHistoryStore=create<HistoryStoreState>()(
             setPage: () => set((preState)=>({
                 page: preState.page + 1
               })),
-              clear:()=>set(()=>({
+            clear:()=>set(()=>({
                 posts:[]
               })),
+            initialPosts:async ()=>{
+              try {
+                const response = await axios.get('http://localhost:5000/api/posts/user-history', {
+                  params: {
+                    page:get().page,
+                    limit:12
+                  },
+                  headers:{
+                    Authorization:`Bearer ${token}`
+                  }
+                });
+                
+                // 检查返回数据是否有效
+                if (response.status === 200 && response.data) {
+                  const data = response.data.posts;
+                  set((state) => ({
+                    posts: [...data], // 更新 posts 状态
+                  }));
+                } else {
+                  // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
+                  console.log('No posts available or unexpected response status');
+                }
+              } catch (error) {
+                // 捕获请求失败的错误（如 404 或网络问题）
+                if (error instanceof Error) {
+                  console.error('Error fetching posts:', error.message);
+                } else {
+                  console.error('Error fetching posts:', error);
+                }
+              }
+            },
             getPosts:async ()=>{
                 try {
                     const response = await axios.get('http://localhost:5000/api/posts/user-history', {

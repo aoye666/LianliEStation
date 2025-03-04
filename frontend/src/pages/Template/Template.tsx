@@ -10,6 +10,7 @@ import axios from 'axios'
 import { useLocation } from 'react-router-dom'
 import { useNavigate } from "react-router-dom";
 import Cookies from 'js-cookie'
+import Navbar from '../../components/Navbar/Navbar'
 
 const initialState = {
   id:1,
@@ -254,12 +255,13 @@ const Template = () => {
   return (
     <div className='template-container'>
       <div className='navbar'>
-        <div className='logo'>
+        {/* <div className='logo'>
           <img src={logo} alt="logo" />          
         </div>
         <div className='text'>
           连理e站
-        </div>
+        </div> */}
+        <Navbar backActive={true} backPath='/user/post' title='发布' />
       </div>
        
       <div className='content'>
@@ -270,7 +272,7 @@ const Template = () => {
           </div>
         </div>
 
-        <div>
+      <div>
 
       {/* 显示提示框 */}
       {isSuccess && (

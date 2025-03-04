@@ -114,7 +114,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
                                 font-size: 16px;
                                 font-weight: 600;
                                 color: $hover-color;
-                                margin-right: 100px;
+                                margin-right: 80px;
                             }
 
                             .commodity-tag{
@@ -135,17 +135,24 @@ $shadow-color: rgba(0, 0, 0, 0.1);
         display: flex;
         align-items: center;
         justify-content: center;
+        position: fixed;
+        bottom: 20px;
 
         .delete-button{
             display: flex;
 
             button{
+                position: fixed;
                 border: none;
                 border-radius: 10px;
                 width: 100px;
                 height: 25px;
                 background-color: rgb(241, 69, 69);
                 transition: all 0.3s ease;
+                bottom: 20px;
+                left: 37%;
+                box-shadow: #b00202 0px 0px 8px 0px;
+
 
                 &:active{
                     transform: translateY(3px);
