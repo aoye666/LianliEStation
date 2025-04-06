@@ -1,3 +1,4 @@
+
 import createError from "http-errors";
 import express, { json, urlencoded } from "express";
 import cookieParser from "cookie-parser";
@@ -5,6 +6,7 @@ import logger from "morgan";
 import cors from "cors";
 
 // 示例路由
+import authRouter from "./routes/auth.js";
 import usersRouter from "./routes/users.js";
 import postsRouter from "./routes/posts.js";
 import appealsRouter from "./routes/appeals.js";
@@ -26,6 +28,7 @@ app.use(cors());
 app.use("/uploads", express.static("public/uploads"));
 
 // 示例路由
+app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/posts", postsRouter);
 app.use("/api/appeals", appealsRouter);
