@@ -2,6 +2,7 @@
 
 [toc]
 ## authRoutes
+
 ### 用户注册
 
 基本信息
@@ -315,3 +316,286 @@
 
 
 ## usersRoutes
+
+### 获取用户资料
+
+基本信息
+- **路径**: `/api/users/profile`
+- **方法**: `GET`
+- **描述**: 根据用户角色返回不同的信息：管理员获取所有用户信息，普通用户获取个人资料
+- ==**备注**: 这个api的管理员部分还未测试==
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+|-------|------|------|------|
+| - | - | - | 无需请求参数，通过 Token 识别用户身份 |
+
+请求头
+```
+Authorization: Bearer {token}
+```
+
+响应参数
+| 状态码 | 内容类型 | 描述 |
+|------|----------|------|
+| 200 | application/json | 成功获取数据 |
+| 401 | application/json | 未提供Token或Token无效 |
+| 404 | application/json | 用户不存在（仅针对普通用户） |
+| 500 | application/json | 服务器错误 |
+
+响应示例
+
+- 管理员成功响应 (状态码：200)
+  ```json
+  {
+    "users": [
+      {
+        "id": 1,
+        "nickname": "用户1",
+        "email": "user1@example.com",
+        "qq_id": "123456789",
+        "username": "user1",
+        "campus_id": 1,
+        "credit": 100,
+        "theme_id": 1,
+        "background_url": "/uploads/bg1.jpg",
+        "banner_url": "/uploads/banner1.jpg",
+        "avatar": "/uploads/avatar1.jpg"
+      },
+      {
+        "id": 2,
+        "nickname": "用户2",
+        "email": "user2@example.com",
+        "qq_id": "987654321",
+        "username": "user2",
+        "campus_id": 2,
+        "credit": 80,
+        "theme_id": 2,
+        "background_url": "/uploads/bg2.jpg",
+        "banner_url": "/uploads/banner2.jpg",
+        "avatar": "/uploads/avatar2.jpg"
+      }
+      // 更多用户...
+    ]
+  }
+  ```
+
+- 普通用户成功响应 (状态码：200)
+  ```json
+  {
+    "nickname": "测试用户",
+    "username": "testuser",
+    "campus_id": 1,
+    "qq": "123456789",
+    "email": "test@example.com",
+    "credit": 100,
+    "theme_id": 1,
+    "background_url": "/uploads/background.jpg",
+    "banner_url": "/uploads/banner.jpg",
+    "avatar": "/uploads/avatar.jpg"
+  }
+  ```
+
+- Token未提供 (状态码：401)
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token无效 (状态码：401)
+  ```json
+  {
+    "message": "Token 无效"
+  }
+  ```
+
+- 用户不存在 (状态码：404)
+  ```json
+  {
+    "message": "用户不存在"
+  }
+  ```
+
+**备注**
+- 该API合并了之前的 `/` 和 `/get-theme` 功能
+- 根据用户角色（管理员/普通用户）返回不同内容
+- 普通用户只能查看自己的资料
+- 管理员可以查看所有用户的资料
+- 建议普通用户端使用 localStorage 缓存主题相关信息，避免频繁请求
+
+
+
+### 更新用户资料
+
+基本信息
+- **路径**: `/api/users/profile`
+- **方法**: `PUT`
+- **描述**: 更新当前用户的个人信息，包括基本资料和主题设置
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+|-------|------|------|------|
+| nickname | String | 是 | 用户昵称 |
+| qq_id | String | 是 | QQ号码 |
+| campus_id | Number | 是 | 校区ID |
+| theme_id | Number | 否 | 主题ID，不提供则保持原值 |
+
+请求头
+```
+Authorization: Bearer {token}
+```
+
+请求体示例
+```json
+{
+  "nickname": "新昵称",
+  "qq_id": "123456789",
+  "campus_id": 2,
+  "theme_id": 3
+}
+```
+
+响应参数
+| 状态码 | 内容类型 | 描述 |
+|------|----------|------|
+| 200 | application/json | 更新成功 |
+| 400 | application/json | 缺少必要参数 |
+| 401 | application/json | 未提供Token或Token无效 |
+| 404 | application/json | 用户不存在 |
+| 500 | application/json | 服务器错误 |
+
+响应示例
+
+- 成功响应 (状态码：200)
+  ```json
+  {
+    "message": "更新成功",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+  ```
+
+- 参数错误 (状态码：400)
+  ```json
+  {
+    "message": "缺少必要参数"
+  }
+  ```
+
+- Token未提供 (状态码：401)
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token无效 (状态码：401)
+  ```json
+  {
+    "message": "Token 无效"
+  }
+  ```
+
+- 用户不存在 (状态码：404)
+  ```json
+  {
+    "message": "用户不存在"
+  }
+  ```
+
+**备注**
+- 此API合并了个人资料更新和主题设置功能
+- 更新成功后会返回新的JWT令牌，包含更新后的用户信息
+- 客户端应使用返回的新token替换旧token
+- nickname、qq_id和campus_id为必填项，theme_id为可选项
+
+
+
+### 上传用户图片
+
+基本信息
+- **路径**: `/api/users/profile/image`
+- **方法**: `PUT`
+- **描述**: 统一处理用户头像、背景图和Banner图的上传
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+|-------|------|------|------|
+| type | String | 是 | 图片类型，必须是以下值之一：`avatar`（头像）、`background`（背景图）、`banner`（Banner图）。作为查询参数提供 |
+| image | File | 是 | 要上传的图片文件 |
+
+请求头
+```
+Authorization: Bearer {token}
+Content-Type: multipart/form-data
+```
+
+请求示例
+```
+PUT /api/users/profile/image?type=avatar
+
+备注：
+/api/users/profile/image?type=avatar 上传头像
+/api/users/profile/image?type=background 上传背景
+/api/users/profile/image?type=banner 上传banner
+```
+
+响应参数
+| 状态码 | 内容类型 | 描述 |
+|------|----------|------|
+| 200 | application/json | 更新成功 |
+| 400 | application/json | 未选择图片文件或无效的图片类型 |
+| 401 | application/json | 未提供Token或Token无效 |
+| 404 | application/json | 用户不存在 |
+| 500 | application/json | 服务器错误 |
+
+响应示例
+
+- 成功响应 (状态码：200)
+  ```json
+  {
+    "message": "更新成功"
+  }
+  ```
+
+- 参数错误 (状态码：400)
+  ```json
+  {
+    "message": "请选择要上传的头像图片"
+  }
+  ```
+  或
+  ```json
+  {
+    "message": "无效的图片类型，必须是 avatar, background 或 banner"
+  }
+  ```
+
+- Token未提供 (状态码：401)
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token无效 (状态码：401)
+  ```json
+  {
+    "message": "Token 无效"
+  }
+  ```
+
+- 用户不存在 (状态码：404)
+  ```json
+  {
+    "message": "用户不存在"
+  }
+  ```
+
+**备注**
+- 此API合并了原先的三个图片上传接口（头像/背景/Banner）
+- 通过查询参数`type`指定要上传的图片类型
+- 图片上传后保存在服务器的`/uploads/`目录
+- 如果用户已有自定义图片（非默认图片），旧图片将被自动删除
+- 根据不同的图片类型，会更新用户表中的不同字段（avatar/background_url/banner_url）
+- 使用multipart/form-data提交图片，字段名必须为"image"
