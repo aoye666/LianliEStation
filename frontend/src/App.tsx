@@ -5,22 +5,23 @@ import {
   RouterProvider,
   Navigate,
 } from "react-router-dom";
-import { useAuthStore, useUserStore } from "./store";
+import { useUserStore } from "./store";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"; //保护路由，未登录将只能导航至login和register页面
 //懒加载不同页面
 const Market = React.lazy(() => import("./pages/Market/Market"));
-const Detail = React.lazy(() => import("./pages/Detail/Detail"));
-const Post = React.lazy(() => import("./pages/Post/Post"));
-const Template = React.lazy(() => import("./pages/Template/Template"));
-const Login = React.lazy(() => import("./pages/Login/Login"));
-const Register = React.lazy(() => import("./pages/Register/Register"));
-const Reset = React.lazy(() => import("./pages/Reset/Reset"));
+const Detail = React.lazy(() => import("./pages/Market/Detail/Detail"));
+const Publish = React.lazy(() => import("./pages/Publish/Publish"));
+const Template = React.lazy(() => import("./pages/Publish/Template/Template"));
+const Login = React.lazy(() => import("./pages/Auth/Login/Login"));
+const Register = React.lazy(() => import("./pages/Auth/Register/Register"));
+const Reset = React.lazy(() => import("./pages/User/Settings/Reset/Reset"));
 const User = React.lazy(() => import("./pages/User/User"));
 const Forum = React.lazy(() => import("./pages/Forum/Forum"));
-const Settings = React.lazy(() => import("./pages/Settings/Settings"));
-const Stars = React.lazy(() => import("./pages/Stars/Stars"));
-const Messages = React.lazy(() => import("./pages/Messages/Messages"));
-const History = React.lazy(() => import("./pages/History/History"));
+const ForumDisable = React.lazy(() => import("./pages/ForumDisable/Forum"));
+const Settings = React.lazy(() => import("./pages/User/Settings/Settings"));
+const Favorites = React.lazy(() => import("./pages/User/Favorites/Favorites"));
+const Messages = React.lazy(() => import("./pages/User/Messages/Messages"));
+const History = React.lazy(() => import("./pages/User/History/History"));
 
 const App: React.FC = () => {
   // 锁定竖屏
@@ -53,7 +54,7 @@ const App: React.FC = () => {
   }, []);
 
   // 检查是否登录并获取用户信息
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useUserStore();
   const { fetchUserProfile, getTheme } = useUserStore();
   useEffect(() => {
     if (isAuthenticated) {
@@ -67,25 +68,25 @@ const App: React.FC = () => {
     {
       path: "*",
       element: isAuthenticated ? (
-        <Navigate to="/user/market" replace />
+        <Navigate to="/market" replace />
       ) : (
-        <Navigate to="/login" replace />
+        <Navigate to="/auth/login" replace />
       ),
     },
     {
-      path: "/login",
+      path: "/auth/login",
       element: <Login />,
     },
     {
-      path: "/register",
+      path: "/auth/register",
       element: <Register />,
     },
     {
-      path: "/reset/:type",
+      path: "/user/settings/reset/:type",
       element: <Reset />,
     },
     {
-      path: "/user/market",
+      path: "/market",
       element: (
         <ProtectedRoute>
           <Market />
@@ -93,7 +94,7 @@ const App: React.FC = () => {
       ),
     },
     {
-      path: "/user/market/:postId",
+      path: "/market/:postId",
       element: (
         <ProtectedRoute>
           <Detail />
@@ -101,7 +102,15 @@ const App: React.FC = () => {
       ),
     },
     {
-      path: "/user/forum",
+      path: "/forum",
+      element: (
+        <ProtectedRoute>
+          <ForumDisable />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/forum-test",
       element: (
         <ProtectedRoute>
           <Forum />
@@ -109,15 +118,15 @@ const App: React.FC = () => {
       ),
     },
     {
-      path: "/user/post",
+      path: "/publish",
       element: (
         <ProtectedRoute>
-          <Post />
+          <Publish />
         </ProtectedRoute>
       ),
     },
     {
-      path: "/user/post/template",
+      path: "/publish/template",
       element: (
         <ProtectedRoute>
           <Template />
@@ -125,7 +134,7 @@ const App: React.FC = () => {
       ),
     },
     {
-      path: "/user/user",
+      path: "/user",
       element: (
         <ProtectedRoute>
           <User />
@@ -133,10 +142,10 @@ const App: React.FC = () => {
       ),
     },
     {
-      path: "/user/stars",
+      path: "/user/favorites",
       element: (
         <ProtectedRoute>
-          <Stars />
+          <Favorites />
         </ProtectedRoute>
       ),
     },

@@ -73,7 +73,7 @@ const User = () => {
         </div>  
       </div>  
       <div className="user-settings">  
-        <div className="user-item" onClick={() => navigate('/user/stars')}>  
+        <div className="user-item" onClick={() => navigate('/user/favorites')}>  
           <img src={stars} alt="收藏" className="item-icon" />  
           <div className="item-text">收藏</div>  
           <img src={right} alt="右箭头" className="right-icon" />  

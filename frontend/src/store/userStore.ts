@@ -1,4 +1,5 @@
-// src/store/userStore.ts
+// user、auth、admin 相关的状态管理
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import axios from "axios";
@@ -49,6 +50,10 @@ interface UserState {
   detailUser: IDSearchedUser | null; // 详情页对应的发布者
   searchedUser: QQSearchedUser | null; // 管理员通过QQ号搜索到的用户
   userTheme: UserTheme; // 用户的主题信息
+  isAuthenticated: boolean;
+  token: string | null;
+  isAdmin: boolean;
+
   fetchUsers: () => Promise<void>;
   fetchByQQ: (qq: string) => Promise<void>;
   fetchByID: (id: number) => Promise<void>;
@@ -64,11 +69,31 @@ interface UserState {
     qq_id: string
   ) => Promise<void>;
   updateCredit: (qq_id: string, credit: number) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<void>;
+  register: (userData: {
+    nickname: string;
+    email: string;
+    password: string;
+    qq_id: string;
+    username: string;
+    campus_id: number;
+  }) => Promise<void>;
+  logout: () => void;
+  deleteUser: (username: string) => Promise<void>;
+  requestVerification: (email: string) => Promise<void>;
+  changePassword: (
+    email: string,
+    verificationCode: string,
+    newPassword: string
+  ) => Promise<void>;
 }
 
 const useUserStore = create<UserState>()(
   persist(
     (set) => ({
+      isAuthenticated: false,
+      token: null,
+      isAdmin: false,
       users: [],
       currentUser: null,
       detailUser: null,
@@ -78,6 +103,85 @@ const useUserStore = create<UserState>()(
         background_url: undefined,
         banner_url: undefined,
         avatar: undefined,
+      },
+      login: async (identifier: string, password: string) => {
+        try {
+          const res = await axios.post(
+            "http://localhost:5000/api/auth/login",
+            { identifier, password }
+          );
+          const token = res.data.token;
+          const isAdmin = res.data.isAdmin;
+          Cookies.set("auth-token", token, { expires: 7 });
+          set({ isAuthenticated: true, token, isAdmin });
+        } catch (error: any) {
+          if (error.response) console.error(error.response.data.message);
+        }
+      },
+      register: async (userData: {
+        nickname: string;
+        email: string;
+        password: string;
+        qq_id: string;
+        username: string;
+        campus_id: number;
+      }) => {
+        try {
+          const res = await axios.post(
+            "http://localhost:5000/api/auth/register",
+            userData
+          );
+          console.log(res.data.message); // 注册成功
+        } catch (error: any) {
+          console.error(error.response.data.message); // 注册失败
+        }
+      },
+      logout: () => {
+        Cookies.remove("auth-token"); // 登出时移除 cookie
+        set({ isAuthenticated: false, token: null });
+      },
+      deleteUser: async (username: string) => {
+        try {
+          const res = await axios.delete(
+            "http://localhost:5000/api/users/profile",
+            { data: { username } }
+          );
+          console.log(res.data.message); // 账户已删除
+          Cookies.remove("auth-token"); // 删除用户时移除 cookie
+          set({ isAuthenticated: false, token: null });
+        } catch (error: any) {
+          if (error.response) console.error(error.response.data.message);
+        }
+      },
+      requestVerification: async (email: string) => {
+        try {
+          const res = await axios.post(
+            "http://localhost:5000/api/auth/verification",
+            { email }
+          );
+          if (res.status === 200) {
+            console.log(res.data.message); // 验证码已发送，请检查您的邮箱
+          }
+        } catch (error: any) {
+          if (error.response) console.error(error.response.data.message);
+        }
+      },
+      changePassword: async (
+        email: string,
+        verificationCode: string,
+        newPassword: string
+      ) => {
+        try {
+          const res = await axios.put(
+            "http://localhost:5000/api/auth/change-password",
+            { email, verificationCode, newPassword }
+          );
+          if (res.status === 200) {
+            console.log(res.data.message); // 密码修改成功
+          }
+        } catch (error: any) {
+          if (error.response) console.error(error.response.data.message);
+        }
       },
       // 管理员获取所有用户信息
       fetchUsers: async () => {
@@ -129,7 +233,7 @@ const useUserStore = create<UserState>()(
       fetchByID: async (id: number) => {
         try {
           const res = await axios.get(
-            `http://localhost:5000/api/users/userInfo/${id}`,
+            `http://localhost:5000/api/users/user-info/${id}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,

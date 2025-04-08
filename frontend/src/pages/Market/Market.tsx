@@ -7,28 +7,19 @@ import topLogo from '../../assets/topLogo.png'
 import logo from '../../assets/logo.png'
 import search from '../../assets/search.png'
 import takePlace from '../../assets/takePlace.png'
-import { usePostStore } from '../../store'
+import { useMainStore } from '../../store'
 import { useNavigate } from 'react-router-dom'
 import { Navigate } from 'react-router-dom'
 
 const Market = () => {
   const [searchInputs, setSearchInputs]=useState('')
   const [showMore, setShowMore] = useState(false);
-  const page = usePostStore((state) => state.page);
-  const posts = usePostStore((state) => state.posts);
-  const setPage = usePostStore((state) => state.setPage);
-  const filters = usePostStore((state) => state.filters);
-  const setFilters = usePostStore((state) => state.setFilters);
-  const updatePosts = usePostStore((state) => state.updatePosts);
-  const clearPosts = usePostStore((state) => state.clearPosts);
-  const clear=usePostStore((state) => state.clear);
+  const { page, goods, setPage, filters, setFilters, updateGoods, clearGoods, clear, fetchGoods, clearFilters } = useMainStore();
   const scrollRef = useRef<HTMLDivElement|null>(null);
   const navigate = useNavigate();
-  const fetchPosts= usePostStore((state)=>state.fetchPosts)
-  const clearFilters=usePostStore((state)=>state.clearFilters)
   
   useEffect(() => {
-    fetchPosts();
+    fetchGoods();
   },[])
 
   window.addEventListener('beforeunload', () => {
@@ -42,7 +33,7 @@ const Market = () => {
       // 判断该部件是否滚动到底部
       if (scrollTop + clientHeight >= scrollHeight) {
         setPage();
-        updatePosts();
+        updateGoods();
       }
     }
   };
@@ -56,8 +47,8 @@ const Market = () => {
       console.log(filters)
       filters.searchTerm = searchInputs;
       await setFilters(filters); 
-      clearPosts(); 
-      updatePosts();
+      clearGoods(); 
+      updateGoods();
     } catch (error) {
       console.log(error);
     }
@@ -65,9 +56,9 @@ const Market = () => {
   }
 
   const handleOnConfirm = async () => {
-    clearPosts();
+    clearGoods();
     setShowMore(false);
-    updatePosts();
+    updateGoods();
   }
 
   return (
@@ -98,13 +89,13 @@ const Market = () => {
                 <div className='market-type'>
                   <div className='sell'>
                     <button onClick={async() => {
-                      setFilters({post_type:'sell'})
+                      setFilters({goods_type:'sell'})
                       handleOnConfirm();
                       }}>出</button>
                   </div>
                   <div className='buy'>
                     <button onClick={async() => {
-                      setFilters({post_type:'receive'})
+                      setFilters({goods_type:'receive'})
                       handleOnConfirm();
                       }}>收</button>
                   </div>
@@ -142,7 +133,7 @@ const Market = () => {
         
         {showMore && 
                   <div className='market-more'>
-                    <div className="moreBar">
+                    <div className="morebar">
                       <div className='price'>
                           <div className='price-title'>
                               <span>价格区间</span>
@@ -196,20 +187,20 @@ const Market = () => {
 
         <div className='content' ref={scrollRef} onScroll={handleScroll}>    
         {
-          posts.map((post) => (
-            <div className='commodity-item' key={post.id} onClick={() => {navigate(`/user/market/${post.id}`)}}>
+          goods.map((item) => (
+            <div className='commodity-item' key={item.id} onClick={() => {navigate(`/market/${item.id}`)}}>
               <div className='commodity-img'>
-                <img src={post.images[0]?`http://localhost:5000${post.images[0]}`:takePlace} alt="takePlace" />
+                <img src={item.images[0]?`http://localhost:5000${item.images[0]}`:takePlace} alt="takePlace" />
               </div>
               <div className='commodity-title'>
-                {post.title}
+                {item.title}
               </div>
               <div className='commodity-bottom'>
                 <div className='commodity-price'>
-                  {post.price}
+                  {item.price}
                 </div>
                 <div className='commodity-tag'>
-                  {post.tag}
+                  {item.tag}
               </div>
               </div>      
             </div>

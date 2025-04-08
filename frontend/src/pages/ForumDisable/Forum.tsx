@@ -6,7 +6,7 @@ import Navbar from "../../components/Navbar/Navbar"
 const Forum = () => {
   return (
     <div className="forum-container">
-      <Navbar title="校园墙" backActive={false} />
+      <Navbar title="校园墙" />
       <div className="notice-container">
         <div className="notice-img"><img src={forum} alt="forum" /></div>
         <div className="notice-text">校园墙功能即将推出！</div>

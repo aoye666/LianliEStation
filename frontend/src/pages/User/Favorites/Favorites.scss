@@ -1,0 +1,166 @@
+$primary-color: #3498db;
+$hover-color: rgb(0, 86, 179);
+$background-color: #ffffff;
+$text-color: #333;
+$border-radius: 8px;
+$shadow-color: rgba(0, 0, 0, 0.1);
+
+.favorites-container {
+    display: flex;
+    flex-direction: column;
+    // .header{
+
+    // }
+
+    .body{
+        display: flex;
+        height: calc(100vh - 80px); 
+        margin-top: 50px;
+        flex-direction: column;
+
+        .manange{
+            button{
+                width: 70px;
+                height: 20px;
+                border: none;
+                border-radius: 10px;
+                transition: all 0.3s ease;
+                background-color: $primary-color;
+
+                &:active{
+                    background-color: $hover-color;
+                    cursor: pointer;
+                    transform: translateY(3px);
+                }
+
+            }
+        }
+
+        .content{
+            display: flex;
+            gap: 5px;
+            flex-direction: column;
+            height: 65vh;
+            margin-right: 25px;
+            margin-left: 6px;
+            .commodity{
+                display: flex;
+                border: 1px solid #acacac;
+                width: 100%;
+                height: 100px;
+                margin: 2px;
+                border-radius: 7px;
+                align-items: center;
+                padding-left: 8px;
+
+                .commodity-delete{
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    border: 1px solid #676767;
+                    border-radius: 6px;
+                    width: 15px;
+                    height: 15px;
+                    transition: all 0.3s ease;
+                    cursor: pointer;
+                }
+    
+                .commodity-img{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-top: 6px;
+                margin-bottom: 6px;
+    
+                    img{
+                        width: 85px;
+                        height: 85px;
+                    }
+    
+                }
+
+                .commodity-description{
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+
+                    .commodity-title{
+                        font-size: 15px;
+                        display: flex;
+                        justify-self: start;
+                        align-items: start;
+                        margin-left: 10px;
+                        margin-top: 5px;
+                        font-size: 16px;
+                        font-weight: 500;
+                        }
+
+                        .commodity-detail{
+                            font-size: 14px;
+                            display: flex;
+                            margin-left: 10px;
+                            overflow: hidden;
+                            height: 35px;
+                            text-overflow: ellipsis;
+                        }
+        
+                        .commodity-bottom{
+                            display: flex;
+                            align-items: end;
+                            padding: 0 10px;
+                            width: 100%;
+                            
+                            .commodity-price{
+                                font-size: 16px;
+                                font-weight: 600;
+                                color: $hover-color;
+                                margin-right:100px ;
+                            }
+
+                            .commodity-tag{
+                                border: 1px solid #c7c7c7;
+                                border-radius: 5px;
+                                padding: 2px;
+
+                                }
+                        }
+                }
+    
+                }  
+        }
+
+    }
+
+    .footer{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        bottom: 20px;
+        position: fixed;
+
+        .delete-button{
+            display: flex;
+
+            button{
+                position: fixed;
+                border: none;
+                border-radius: 10px;
+                width: 100px;
+                height: 25px;
+                background-color: rgb(241, 69, 69);
+                transition: all 0.3s ease;
+                bottom: 20px;
+                left: 37%;
+                box-shadow: #b00202 0px 0px 8px 0px;
+
+                &:active{
+                    transform: translateY(3px);
+                    background-color: #b00202;
+                }
+            }
+        }
+
+    }
+
+    
+}
