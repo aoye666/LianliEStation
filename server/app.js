@@ -1,19 +1,19 @@
-
-import createError from "http-errors";
-import express, { json, urlencoded } from "express";
 import cookieParser from "cookie-parser";
-import logger from "morgan";
 import cors from "cors";
+import express, { json, urlencoded } from "express";
+import createError from "http-errors";
+import logger from "morgan";
 
 // 示例路由
-import authRouter from "./routes/auth.js";
-import usersRouter from "./routes/users.js";
-import postsRouter from "./routes/posts.js";
-import appealsRouter from "./routes/appeals.js";
-import favoritesRouter from "./routes/favorites.js";
 import aiTemplateRouter from "./routes/aiTemplate.js";
-import responsesRouter from "./routes/responses.js";
+import appealsRouter from "./routes/appeals.js";
+import authRouter from "./routes/auth.js";
 import campusWallRouter from "./routes/campusWall.js";
+import favoritesRouter from "./routes/favorites.js";
+import goodsRouter from "./routes/goods.js";
+import postsRouter from "./routes/posts.js";
+import responsesRouter from "./routes/responses.js";
+import usersRouter from "./routes/users.js";
 
 let app = express();
 
@@ -30,6 +30,7 @@ app.use("/uploads", express.static("public/uploads"));
 // 示例路由
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/goods", goodsRouter);
 app.use("/api/posts", postsRouter);
 app.use("/api/appeals", appealsRouter);
 app.use("/api/favorites", favoritesRouter);

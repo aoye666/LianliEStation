@@ -62,18 +62,18 @@ CREATE TABLE `users` (
     UNIQUE KEY `username_unique` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `posts` (
+CREATE TABLE `goods` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `title` VARCHAR(255) NOT NULL,
     `content` TEXT,
-    `post_type` ENUM('receive', 'sell') NOT NULL,
+    `goods_type` ENUM('receive', 'sell') NOT NULL,
     `tag` VARCHAR(255),
     `author_id` INT NOT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `status` ENUM('active', 'inactive', 'deleted') DEFAULT 'active',
     `price` DECIMAL(10, 2) DEFAULT 0.00,
     `campus_id` INT NOT NULL,
-    `likes` INT DEFAULT 0, 
+    `likes` INT DEFAULT 0,
     `complaints` INT DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -120,7 +120,7 @@ CREATE TABLE `responses` (
 
 
 
-CREATE TABLE admins (
+CREATE TABLE `admins` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,  -- 管理员 ID
   `username` VARCHAR(100) NOT NULL,     -- 管理员用户名
   `password` VARCHAR(255) NOT NULL,     -- 加密后的密码
@@ -151,7 +151,7 @@ VALUES
 ('User2', 'user2', 'user2@example.com', 'hashed_password2', '987654321', 2, 100, '/uploads/avatar2.png');
 
 -- 帖子表数据插入示例
-INSERT INTO `posts` (`author_id`, `title`, `content`, `post_type`, `tag`, `created_at`, `status`, `price`, `campus_id`)
+INSERT INTO `goods` (`author_id`, `title`, `content`, `goods_type`, `tag`, `created_at`, `status`, `price`, `campus_id`)
 VALUES
 (1, '二手数学分析教材', '浙江大学版教材，无字迹破损，附习题解答', 'sell', '教材', '2025-01-01 10:00:00', 'active', 35.50, 1),
 (2, '九成新机械键盘', 'Cherry MX红轴，RGB背光，包装齐全', 'sell', '电子产品', '2025-01-02 11:00:00', 'active', 299.00, 1),
@@ -205,7 +205,7 @@ VALUES
 
 主题图片等不常改动的信息**强烈建议**使用 `localStorage` 缓存在前端，以减少数据库压力
 
-如果有未使用的api请告知后端删除
+如果有未使用的 api 请告知后端删除
 
 ## users
 
@@ -750,20 +750,17 @@ VALUES
     { "message": "服务器错误" }
     ```
 
+### 根据用户 ID 查询用户基本信息
 
-
-
-
-### 根据用户ID查询用户基本信息
-
-- **方法:** `GET`  
-- **路径:** `/api/users/userInfo/:user_id`  
+- **方法:** `GET`
+- **路径:** `/api/users/userInfo/:user_id`
 - **功能:** 根据用户 ID 获取用户的 `qq_id`、`credit` 、`avatar`，`nickname` 信息。
 - **请求参数：**`user_id`: 用户的 ID，整型，必须。
 
 - **成功响应:**
-状态码: `200`
-内容:
+  状态码: `200`
+  内容:
+
   ```json
   {
     "qq_id": "123456789",
@@ -772,12 +769,14 @@ VALUES
     "nickname": "3333333"
   }
   ```
+
   - `qq_id`: 用户的 QQ 号码，字符串。
   - `credit`: 用户的信用分，整型。
   - `avatar`: 用户的头像路径，字符串。
   - `nickname`: 用户昵称，字符串。
 
 - **错误响应:**
+
   - **状态码:** `400`
   - **内容:** `{ "message": "缺少用户 ID" }`
   - **状态码:** `404`
@@ -786,12 +785,15 @@ VALUES
   - **内容:** `{ "message": "服务器错误" }`
 
 - **示例请求：**
+
 ```bash
 GET /api/users/userInfo/123
 ```
+
 （假设 `123` 为用户的 ID）
 
 - **示例响应：**
+
 ```json
 {
   "qq_id": "123456789",
@@ -800,7 +802,6 @@ GET /api/users/userInfo/123
   "nickname": "3333333"
 }
 ```
-
 
 ## posts
 

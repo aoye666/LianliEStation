@@ -1,26 +1,29 @@
 # 新 API 文档
 
 [toc]
+
 ## authRoutes
 
 ### 用户注册
 
 基本信息
+
 - 路径: `/api/auth/register`
 - 方法: `POST`
 - 描述: 注册新用户
 
 请求参数
-| 参数名      | 类型   | 必选 | 描述                     |
+| 参数名 | 类型 | 必选 | 描述 |
 | ----------- | ------ | ---- | ------------------------ |
-| nickname    | String | 否   | 用户昵称，如不提供则默认为 "DUTers" |
-| email       | String | 是   | 用户邮箱，必须唯一        |
-| password    | String | 是   | 用户密码                 |
-| qq_id       | String | 是   | QQ号码                   |
-| username    | String | 是   | 用户名，必须唯一         |
-| campus_id   | Number | 是   | 校区ID                   |
+| nickname | String | 否 | 用户昵称，如不提供则默认为 "DUTers" |
+| email | String | 是 | 用户邮箱，必须唯一 |
+| password | String | 是 | 用户密码 |
+| qq_id | String | 是 | QQ 号码 |
+| username | String | 是 | 用户名，必须唯一 |
+| campus_id | Number | 是 | 校区 ID |
 
 请求体示例
+
 ```json
 {
   "nickname": "DUTers",
@@ -34,15 +37,16 @@
 
 响应参数
 
-| 状态码 | 内容类型         | 描述                      |
-| ------ | ---------------- | ------------------------- |
-| 201    | application/json  | 注册成功                  |
-| 400    | application/json  | 参数错误或邮箱/用户名已存在 |
-| 500    | application/json  | 服务器错误                |
+| 状态码 | 内容类型         | 描述                        |
+| ------ | ---------------- | --------------------------- |
+| 201    | application/json | 注册成功                    |
+| 400    | application/json | 参数错误或邮箱/用户名已存在 |
+| 500    | application/json | 服务器错误                  |
 
 响应示例
 
 - 成功响应 (状态码：201)
+
   ```json
   {
     "message": "注册成功"
@@ -50,6 +54,7 @@
   ```
 
 - 参数错误 (状态码：400)
+
   ```json
   {
     "message": "缺少必要参数"
@@ -57,18 +62,23 @@
   ```
 
 - 邮箱/用户名已存在 (状态码：400)
+
   ```json
   {
     "message": "邮箱已被注册"
   }
   ```
+
   或
+
   ```json
   {
     "message": "用户名已被注册"
   }
   ```
+
   或
+
   ```json
   {
     "message": "邮箱和用户名都已被注册"
@@ -83,25 +93,28 @@
   ```
 
 **备注**
+
 - 该接口使用了请求频率限制 (rate limit)
-- 注册操作会记录用户IP地址
+- 注册操作会记录用户 IP 地址
 
 ---
 
 ### 用户登录
 
 基本信息
+
 - 路径: `/api/auth/login`
 - 方法: `POST`
 - 描述: 用户或管理员登录系统，获取身份验证令牌
 
 请求参数
-| 参数名     | 类型   | 必选 | 描述                           |
+| 参数名 | 类型 | 必选 | 描述 |
 | ---------- | ------ | ---- | ------------------------------ |
-| identifier | String | 是   | 用户名或邮箱（普通用户），或用户名（管理员） |
-| password   | String | 是   | 登录密码                       |
+| identifier | String | 是 | 用户名或邮箱（普通用户），或用户名（管理员） |
+| password | String | 是 | 登录密码 |
 
 请求体示例
+
 ```json
 {
   "identifier": "user123",
@@ -111,16 +124,17 @@
 
 响应参数
 
-| 状态码 | 内容类型         | 描述                      |
-| ------ | ---------------- | ------------------------- |
-| 200    | application/json  | 登录成功，返回token和用户类型 |
-| 400    | application/json  | 请求参数缺失               |
-| 401    | application/json  | 用户不存在或密码错误       |
-| 500    | application/json  | 服务器错误                 |
+| 状态码 | 内容类型         | 描述                            |
+| ------ | ---------------- | ------------------------------- |
+| 200    | application/json | 登录成功，返回 token 和用户类型 |
+| 400    | application/json | 请求参数缺失                    |
+| 401    | application/json | 用户不存在或密码错误            |
+| 500    | application/json | 服务器错误                      |
 
 响应示例
 
 - 成功响应 (状态码：200)
+
   ```json
   {
     "message": "登录成功",
@@ -130,6 +144,7 @@
   ```
 
 - 请求参数缺失 (状态码：400)
+
   ```json
   {
     "message": "请正确输入用户名/邮箱和密码"
@@ -137,6 +152,7 @@
   ```
 
 - 用户名/密码错误 (状态码：401)
+
   ```json
   {
     "message": "用户名/邮箱或密码错误"
@@ -151,29 +167,32 @@
   ```
 
 **备注**
+
 - 该接口使用了请求频率限制 (rate limit)
-- 登录成功后会返回JWT令牌，有效期为7天
-- 令牌应在后续请求中通过Authorization头部传递，格式为 `Bearer {token}`
-- 对于普通用户，令牌包含用户ID、用户名、昵称、校区ID和QQ信息
-- 对于管理员，令牌只包含用户ID、用户名和管理员标识
+- 登录成功后会返回 JWT 令牌，有效期为 7 天
+- 令牌应在后续请求中通过 Authorization 头部传递，格式为 `Bearer {token}`
+- 对于普通用户，令牌包含用户 ID、用户名、昵称、校区 ID 和 QQ 信息
+- 对于管理员，令牌只包含用户 ID、用户名和管理员标识
 
 ---
 
 ### 管理员注册（未启用）
 
 基本信息
+
 - 路径: `/api/auth/admin/register`
 - 方法: `POST`
 - 描述: 注册新管理员
 
 请求参数
-| 参数名   | 类型   | 必选 | 描述                        |
+| 参数名 | 类型 | 必选 | 描述 |
 | -------- | ------ | ---- | --------------------------- |
-| username | String | 是   | 管理员用户名，必须唯一      |
-| password | String | 是   | 管理员密码                  |
-| email    | String | 是   | 管理员邮箱，必须唯一        |
+| username | String | 是 | 管理员用户名，必须唯一 |
+| password | String | 是 | 管理员密码 |
+| email | String | 是 | 管理员邮箱，必须唯一 |
 
 请求体示例
+
 ```json
 {
   "username": "admin",
@@ -187,6 +206,7 @@
 ### 请求验证码
 
 基本信息
+
 - **路径**: `/api/auth/verification`
 - **方法**: `POST`
 - **描述**: 向指定邮箱发送验证码，用于密码重置等需要验证身份的操作
@@ -197,6 +217,7 @@
 | email | String | 是 | 用户注册的邮箱地址 |
 
 请求体示例
+
 ```json
 {
   "email": "user@example.com"
@@ -213,6 +234,7 @@
 响应示例
 
 - 成功响应 (状态码：200)
+
   ```json
   {
     "message": "验证码已发送，请检查您的邮箱"
@@ -220,6 +242,7 @@
   ```
 
 - 参数错误 (状态码：400)
+
   ```json
   {
     "message": "邮箱不能为空"
@@ -234,15 +257,17 @@
   ```
 
 **备注**
+
 - 该接口使用了请求频率限制 (verificationLimiter)，防止恶意请求
 - 验证码临时存储在服务器内存中，有效期限短
-- 实际生产环境中建议使用Redis等缓存服务存储验证码
+- 实际生产环境中建议使用 Redis 等缓存服务存储验证码
 
 ---
 
 ### 修改密码
 
 基本信息
+
 - **路径**: `/api/auth/change-password`
 - **方法**: `PUT`
 - **描述**: 通过验证码验证身份后修改用户密码
@@ -255,6 +280,7 @@
 | verificationCode | String | 是 | 用户收到的验证码 |
 
 请求体示例
+
 ```json
 {
   "email": "user@example.com",
@@ -274,6 +300,7 @@
 响应示例
 
 - 成功响应 (状态码：200)
+
   ```json
   {
     "message": "密码修改成功"
@@ -281,6 +308,7 @@
   ```
 
 - 参数错误 (状态码：400)
+
   ```json
   {
     "message": "缺少必要参数"
@@ -288,6 +316,7 @@
   ```
 
 - 验证码错误 (状态码：400)
+
   ```json
   {
     "message": "验证码错误或已过期"
@@ -295,6 +324,7 @@
   ```
 
 - 用户不存在 (状态码：404)
+
   ```json
   {
     "message": "用户不存在"
@@ -309,21 +339,22 @@
   ```
 
 **备注**
+
 - 该接口使用了请求频率限制 (passwordChangeLimiter)，防止暴力破解
 - 验证码必须与最近一次请求发送的验证码匹配
-- 新密码会经过bcrypt加密后存储
+- 新密码会经过 bcrypt 加密后存储
 - 验证码验证成功后即视为身份验证通过
-
 
 ## usersRoutes
 
 ### 获取用户资料
 
 基本信息
+
 - **路径**: `/api/users/profile`
 - **方法**: `GET`
 - **描述**: 根据用户角色返回不同的信息：管理员获取所有用户信息，普通用户获取个人资料
-- ==**备注**: 这个api的管理员部分还未测试==
+- ==**备注**: 这个 api 的管理员部分还未测试==
 
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
@@ -331,6 +362,7 @@
 | - | - | - | 无需请求参数，通过 Token 识别用户身份 |
 
 请求头
+
 ```
 Authorization: Bearer {token}
 ```
@@ -339,13 +371,14 @@ Authorization: Bearer {token}
 | 状态码 | 内容类型 | 描述 |
 |------|----------|------|
 | 200 | application/json | 成功获取数据 |
-| 401 | application/json | 未提供Token或Token无效 |
+| 401 | application/json | 未提供 Token 或 Token 无效 |
 | 404 | application/json | 用户不存在（仅针对普通用户） |
 | 500 | application/json | 服务器错误 |
 
 响应示例
 
 - 管理员成功响应 (状态码：200)
+
   ```json
   {
     "users": [
@@ -381,6 +414,7 @@ Authorization: Bearer {token}
   ```
 
 - 普通用户成功响应 (状态码：200)
+
   ```json
   {
     "nickname": "测试用户",
@@ -396,14 +430,16 @@ Authorization: Bearer {token}
   }
   ```
 
-- Token未提供 (状态码：401)
+- Token 未提供 (状态码：401)
+
   ```json
   {
     "message": "未提供 Token"
   }
   ```
 
-- Token无效 (状态码：401)
+- Token 无效 (状态码：401)
+
   ```json
   {
     "message": "Token 无效"
@@ -418,17 +454,17 @@ Authorization: Bearer {token}
   ```
 
 **备注**
-- 该API合并了之前的 `/` 和 `/get-theme` 功能
+
+- 该 API 合并了之前的 `/` 和 `/get-theme` 功能
 - 根据用户角色（管理员/普通用户）返回不同内容
 - 普通用户只能查看自己的资料
 - 管理员可以查看所有用户的资料
 - 建议普通用户端使用 localStorage 缓存主题相关信息，避免频繁请求
 
-
-
 ### 更新用户资料
 
 基本信息
+
 - **路径**: `/api/users/profile`
 - **方法**: `PUT`
 - **描述**: 更新当前用户的个人信息，包括基本资料和主题设置
@@ -437,16 +473,18 @@ Authorization: Bearer {token}
 | 参数名 | 类型 | 必选 | 描述 |
 |-------|------|------|------|
 | nickname | String | 是 | 用户昵称 |
-| qq_id | String | 是 | QQ号码 |
-| campus_id | Number | 是 | 校区ID |
-| theme_id | Number | 否 | 主题ID，不提供则保持原值 |
+| qq_id | String | 是 | QQ 号码 |
+| campus_id | Number | 是 | 校区 ID |
+| theme_id | Number | 否 | 主题 ID，不提供则保持原值 |
 
 请求头
+
 ```
 Authorization: Bearer {token}
 ```
 
 请求体示例
+
 ```json
 {
   "nickname": "新昵称",
@@ -461,13 +499,14 @@ Authorization: Bearer {token}
 |------|----------|------|
 | 200 | application/json | 更新成功 |
 | 400 | application/json | 缺少必要参数 |
-| 401 | application/json | 未提供Token或Token无效 |
+| 401 | application/json | 未提供 Token 或 Token 无效 |
 | 404 | application/json | 用户不存在 |
 | 500 | application/json | 服务器错误 |
 
 响应示例
 
 - 成功响应 (状态码：200)
+
   ```json
   {
     "message": "更新成功",
@@ -476,20 +515,23 @@ Authorization: Bearer {token}
   ```
 
 - 参数错误 (状态码：400)
+
   ```json
   {
     "message": "缺少必要参数"
   }
   ```
 
-- Token未提供 (状态码：401)
+- Token 未提供 (状态码：401)
+
   ```json
   {
     "message": "未提供 Token"
   }
   ```
 
-- Token无效 (状态码：401)
+- Token 无效 (状态码：401)
+
   ```json
   {
     "message": "Token 无效"
@@ -504,33 +546,35 @@ Authorization: Bearer {token}
   ```
 
 **备注**
-- 此API合并了个人资料更新和主题设置功能
-- 更新成功后会返回新的JWT令牌，包含更新后的用户信息
-- 客户端应使用返回的新token替换旧token
-- nickname、qq_id和campus_id为必填项，theme_id为可选项
 
-
+- 此 API 合并了个人资料更新和主题设置功能
+- 更新成功后会返回新的 JWT 令牌，包含更新后的用户信息
+- 客户端应使用返回的新 token 替换旧 token
+- nickname、qq_id 和 campus_id 为必填项，theme_id 为可选项
 
 ### 上传用户图片
 
 基本信息
+
 - **路径**: `/api/users/profile/image`
 - **方法**: `PUT`
-- **描述**: 统一处理用户头像、背景图和Banner图的上传
+- **描述**: 统一处理用户头像、背景图和 Banner 图的上传
 
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
 |-------|------|------|------|
-| type | String | 是 | 图片类型，必须是以下值之一：`avatar`（头像）、`background`（背景图）、`banner`（Banner图）。作为查询参数提供 |
+| type | String | 是 | 图片类型，必须是以下值之一：`avatar`（头像）、`background`（背景图）、`banner`（Banner 图）。作为查询参数提供 |
 | image | File | 是 | 要上传的图片文件 |
 
 请求头
+
 ```
 Authorization: Bearer {token}
 Content-Type: multipart/form-data
 ```
 
 请求示例
+
 ```
 PUT /api/users/profile/image?type=avatar
 
@@ -545,13 +589,14 @@ PUT /api/users/profile/image?type=avatar
 |------|----------|------|
 | 200 | application/json | 更新成功 |
 | 400 | application/json | 未选择图片文件或无效的图片类型 |
-| 401 | application/json | 未提供Token或Token无效 |
+| 401 | application/json | 未提供 Token 或 Token 无效 |
 | 404 | application/json | 用户不存在 |
 | 500 | application/json | 服务器错误 |
 
 响应示例
 
 - 成功响应 (状态码：200)
+
   ```json
   {
     "message": "更新成功"
@@ -559,26 +604,31 @@ PUT /api/users/profile/image?type=avatar
   ```
 
 - 参数错误 (状态码：400)
+
   ```json
   {
     "message": "请选择要上传的头像图片"
   }
   ```
+
   或
+
   ```json
   {
     "message": "无效的图片类型，必须是 avatar, background 或 banner"
   }
   ```
 
-- Token未提供 (状态码：401)
+- Token 未提供 (状态码：401)
+
   ```json
   {
     "message": "未提供 Token"
   }
   ```
 
-- Token无效 (状态码：401)
+- Token 无效 (状态码：401)
+
   ```json
   {
     "message": "Token 无效"
@@ -593,9 +643,449 @@ PUT /api/users/profile/image?type=avatar
   ```
 
 **备注**
-- 此API合并了原先的三个图片上传接口（头像/背景/Banner）
+
+- 此 API 合并了原先的三个图片上传接口（头像/背景/Banner）
 - 通过查询参数`type`指定要上传的图片类型
 - 图片上传后保存在服务器的`/uploads/`目录
 - 如果用户已有自定义图片（非默认图片），旧图片将被自动删除
 - 根据不同的图片类型，会更新用户表中的不同字段（avatar/background_url/banner_url）
-- 使用multipart/form-data提交图片，字段名必须为"image"
+- 使用 multipart/form-data 提交图片，字段名必须为"image"
+
+## goodsRoutes
+
+### 软删除商品
+
+基本信息
+
+- **路径**: `/api/goods/:post_id`
+- **方法**: `DELETE`
+- **描述**: 根据商品 ID 将商品标记为已删除状态，管理员可删除任意商品，普通用户只能删除自己的商品
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+|-------|------|------|------|
+| post_id | String | 是 | 商品 ID，作为 URL 路径参数提供 |
+
+请求头
+
+```
+Authorization: Bearer {token}
+```
+
+响应参数
+| 状态码 | 内容类型 | 描述 |
+|------|----------|------|
+| 200 | application/json | 删除成功 |
+| 400 | application/json | 缺少必要参数 |
+| 401 | application/json | 未提供 Token 或 Token 无效 |
+| 404 | application/json | 商品未找到或用户无权删除 |
+| 500 | application/json | 服务器错误 |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "商品已标记为删除"
+  }
+  ```
+
+- 管理员删除成功 (状态码：200)
+
+  ```json
+  {
+    "message": "管理员已删除商品"
+  }
+  ```
+
+- 参数错误 (状态码：400)
+
+  ```json
+  {
+    "message": "缺少必要参数"
+  }
+  ```
+
+- Token 未提供 (状态码：401)
+
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token 无效 (状态码：401)
+
+  ```json
+  {
+    "message": "无效的 Token"
+  }
+  ```
+
+- 商品未找到 (状态码：404)
+
+  ```json
+  {
+    "message": "商品未找到或用户无权删除"
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 该接口执行的是软删除，实际上是将商品状态更新为"deleted"
+- 管理员可以删除任何商品，普通用户只能删除自己创建的商品
+- 已删除的商品将不会出现在商品列表中
+
+### 分页查询商品
+
+基本信息
+
+- **路径**: `/api/goods`
+- **方法**: `GET`
+- **描述**: 根据条件筛选和分页获取商品列表
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+|-------|------|------|------|
+| keyword | String | 否 | 搜索关键词，会匹配标题和内容 |
+| title | String | 否 | 商品标题关键词 |
+| status | String | 否 | 商品状态 |
+| campus_id | Number | 否 | 校区 ID |
+| goods_type | String | 否 | 商品类型 |
+| tag | String | 否 | 商品标签 |
+| min_price | Number | 否 | 最低价格 |
+| max_price | Number | 否 | 最高价格 |
+| page | Number | 否 | 页码，不提供则返回所有结果 |
+| limit | Number | 否 | 每页数量，与 page 一起使用 |
+
+请求示例
+
+```
+GET /api/goods?keyword=电脑&campus_id=1&min_price=1000&max_price=5000&page=1&limit=10
+```
+
+响应参数
+| 状态码 | 内容类型 | 描述 |
+|------|----------|------|
+| 200 | application/json | 成功获取商品列表 |
+| 500 | application/json | 服务器错误 |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "total": 25,
+    "count": 10,
+    "page": 1,
+    "limit": 10,
+    "goods": [
+      {
+        "id": 123,
+        "title": "二手笔记本电脑",
+        "content": "9成新笔记本电脑，性能良好...",
+        "price": 3000,
+        "campus_id": 1,
+        "status": "available",
+        "goods_type": "electronic",
+        "tag": "computer",
+        "author_id": 456,
+        "likes": 5,
+        "complaints": 0,
+        "images": ["/uploads/image1.jpg", "/uploads/image2.jpg"]
+      }
+      // 更多商品...
+    ]
+  }
+  ```
+
+- 无结果响应 (状态码：200)
+
+  ```json
+  {
+    "total": 0,
+    "count": 0,
+    "page": 1,
+    "limit": 10,
+    "goods": []
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 查询结果按照商品 ID 降序排列（最新发布的商品排在前面）
+- 默认不返回已删除（status='deleted'）的商品
+- 响应中的商品包含关联的图片 URLs
+- 当使用分页时，需同时提供 page 和 limit 参数
+- 不使用分页时，将返回所有符合条件的商品
+- total 表示符合条件的总商品数，count 表示当前页面返回的商品数
+
+### 修改商品信息
+
+基本信息
+
+- **路径**: `/api/goods/:post_id`
+- **方法**: `PUT`
+- **描述**: 更新指定商品的信息，包括文本信息和图片
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+|-------|------|------|------|
+| post_id | String | 是 | 商品 ID，作为 URL 路径参数提供 |
+| title | String | 是 | 商品标题 |
+| content | String | 否 | 商品描述内容 |
+| price | Number | 是 | 商品价格 |
+| campus_id | Number | 是 | 校区 ID |
+| status | String | 是 | 商品状态 |
+| goods_type | String | 是 | 商品类型 |
+| tag | String | 否 | 商品标签 |
+| images | File[] | 否 | 商品图片，最多 3 张 |
+
+请求头
+
+```
+Authorization: Bearer {token}
+Content-Type: multipart/form-data
+```
+
+请求体示例
+
+```
+FormData:
+title: "二手笔记本电脑"
+content: "9成新笔记本电脑，性能良好，电池续航6小时"
+price: 3000
+campus_id: 1
+status: "available"
+goods_type: "electronic"
+tag: "computer"
+images: [文件1.jpg, 文件2.jpg]
+```
+
+响应参数
+| 状态码 | 内容类型 | 描述 |
+|------|----------|------|
+| 200 | application/json | 更新成功 |
+| 400 | application/json | 缺少必要参数或参数错误 |
+| 401 | application/json | 未提供 Token 或 Token 无效 |
+| 404 | application/json | 商品未找到或用户无权修改 |
+| 500 | application/json | 服务器错误 |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "商品更新成功"
+  }
+  ```
+
+- 参数错误 (状态码：400)
+
+  ```json
+  {
+    "message": "缺少必要参数"
+  }
+  ```
+
+  或
+
+  ```json
+  {
+    "message": "价格必须是数字"
+  }
+  ```
+
+- Token 未提供 (状态码：401)
+
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token 无效 (状态码：401)
+
+  ```json
+  {
+    "message": "无效的 Token"
+  }
+  ```
+
+- 商品未找到 (状态码：404)
+
+  ```json
+  {
+    "message": "商品未找到或用户无权修改"
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 普通用户只能修改自己发布的商品，管理员可以修改任何商品
+- 上传新图片时会删除该商品原有的所有图片
+- 图片上传字段名必须为"images"，最多允许上传 3 张图片
+- 图片将保存在服务器的`/uploads/`目录，并通过 post_images 表与商品关联
+- 如果只想更新商品文本信息而不更改图片，请不要包含 images 字段
+
+---
+
+### 修改商品点赞数和投诉数
+
+基本信息
+
+- **路径**: `/api/goods/:action/:post_id`
+- **方法**: `PUT`
+- **描述**: 增加或减少商品的点赞数或投诉数
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+|-------|------|------|------|
+| action | String | 是 | 操作类型，必须是 "like" 或 "complaint"，作为 URL 路径参数提供 |
+| post_id | String | 是 | 商品 ID，作为 URL 路径参数提供 |
+| value | Boolean | 是 | true 表示增加计数，false 表示减少计数 |
+
+请求体示例
+
+```json
+{
+  "value": true
+}
+```
+
+或
+
+```json
+{
+  "value": false
+}
+```
+
+响应参数
+| 状态码 | 内容类型 | 描述 |
+|------|----------|------|
+| 200 | application/json | 操作成功 |
+| 400 | application/json | 无效的操作类型或参数 |
+| 404 | application/json | 商品未找到 |
+| 500 | application/json | 服务器错误 |
+
+响应示例
+
+- 点赞成功 (状态码：200)
+
+  ```json
+  {
+    "message": "点赞成功"
+  }
+  ```
+
+- 取消点赞成功 (状态码：200)
+
+  ```json
+  {
+    "message": "取消点赞成功"
+  }
+  ```
+
+- 投诉成功 (状态码：200)
+
+  ```json
+  {
+    "message": "投诉成功"
+  }
+  ```
+
+- 取消投诉成功 (状态码：200)
+
+  ```json
+  {
+    "message": "取消投诉成功"
+  }
+  ```
+
+- 无效操作类型 (状态码：400)
+
+  ```json
+  {
+    "message": "无效的操作类型，必须是 like 或 complaint"
+  }
+  ```
+
+- 缺少参数 (状态码：400)
+
+  ```json
+  {
+    "message": "缺少 like 参数"
+  }
+  ```
+
+  或
+
+  ```json
+  {
+    "message": "缺少 complaint 参数"
+  }
+  ```
+
+- 参数值无效 (状态码：400)
+
+  ```json
+  {
+    "message": "无效的 like 参数，必须是 true 或 false"
+  }
+  ```
+
+  或
+
+  ```json
+  {
+    "message": "无效的 complaint 参数，必须是 true 或 false"
+  }
+  ```
+
+- 商品未找到 (状态码：404)
+
+  ```json
+  {
+    "message": "商品未找到"
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 该 API 用于增加或减少商品的点赞数和投诉数
+- action 参数必须是"like"或"complaint"
+- value 参数必须是布尔值，true 表示增加计数，false 表示减少计数
+- 例如：PUT /api/goods/like/123 加上 body {"value": true} 表示给 ID 为 123 的商品点赞
+- 软删除的商品不会被操作影响
