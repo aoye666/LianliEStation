@@ -8,12 +8,17 @@ import logger from "morgan";
 import aiTemplateRouter from "./routes/aiTemplate.js";
 import appealsRouter from "./routes/appeals.js";
 import authRouter from "./routes/auth.js";
-import campusWallRouter from "./routes/campusWall.js";
+// import campusWallRouter from "./routes/campusWall.js";
 import favoritesRouter from "./routes/favorites.js";
 import goodsRouter from "./routes/goods.js";
-import postsRouter from "./routes/posts.js";
-import responsesRouter from "./routes/responses.js";
+// import postsRouter from "./routes/posts.js";
+// import responsesRouter from "./routes/responses.js";
 import usersRouter from "./routes/users.js";
+import forumRouter from "./routes/forum.js";
+import adminRouter from "./routes/admin.js";
+import historyRouter from "./routes/history.js";
+import messagesRouter from "./routes/messages.js";
+import publishRouter from "./routes/publish.js";
 
 let app = express();
 
@@ -31,12 +36,18 @@ app.use("/uploads", express.static("public/uploads"));
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/goods", goodsRouter);
-app.use("/api/posts", postsRouter);
+// app.use("/api/posts", postsRouter);
 app.use("/api/appeals", appealsRouter);
 app.use("/api/favorites", favoritesRouter);
 app.use("/api/aiTemplate", aiTemplateRouter);
-app.use("/api/responses", responsesRouter);
-app.use("/api/campusWall", campusWallRouter);
+// app.use("/api/responses", responsesRouter);
+// app.use("/api/campusWall", campusWallRouter);
+app.use("/api/forum", forumRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/history", historyRouter);
+app.use("/api/messages", messagesRouter);
+app.use("/api/publish", publishRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
