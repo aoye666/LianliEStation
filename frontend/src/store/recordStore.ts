@@ -14,7 +14,6 @@ interface Response {
   read_status: string;
   created_at: string;
 }
-
 interface Appeal {
   author_id: number;
   goods_id: number;
@@ -23,7 +22,6 @@ interface Appeal {
   created_at: string;
   image_url: string[];
 }
-
 interface FavoriteGoods {
   id: number;
   title: string;
@@ -37,7 +35,6 @@ interface FavoriteGoods {
   campus_id: number;
   images: string[];
 }
-
 interface FavoritePost {
   id: number;
   title: string;
@@ -50,7 +47,6 @@ interface HistoryPost {
   content: string | null;
   // 待具体实现时补充
 }
-
 interface HistoryGoods {
   id: number;
   title: string;
@@ -65,7 +61,8 @@ interface HistoryGoods {
   images: string[];
 }
 
-interface MessageState {
+interface RecordState {
+  // history 相关的状态管理及方法
   historyGoods: HistoryGoods[];
   historyPosts: HistoryPost[];
   getHistoryGoods: () => Promise<void>;
@@ -74,11 +71,15 @@ interface MessageState {
   page: number;
   clear: () => void;
   initialHistoryGoods: () => Promise<void>;
+
+  // favorites 相关的状态管理及方法
   favoritesGoods: FavoriteGoods[];
   favoritePosts: FavoritePost[];
   getFavoritesGoods: () => Promise<void>;
   addFavoriteGoods: (favoriteGoods: FavoriteGoods) => void;
   removeFavoriteGoods: (favoriteId: number) => void;
+
+  // messages 相关的状态管理及方法
   appeals: Appeal[];
   responses: Response[];
   typedResponses: Response[];
@@ -102,7 +103,8 @@ interface MessageState {
   searchResponses: (read_status: string) => Promise<void>; // 查询回复
 }
 
-const useMessageStore = create<MessageState>((set, get) => ({
+const useRecordStore = create<RecordState>((set, get) => ({
+  // history 相关的状态管理及方法具体实现
   historyGoods: [],
   page: 1,
   setPage: () =>
@@ -181,7 +183,6 @@ const useMessageStore = create<MessageState>((set, get) => ({
       }
     }
   },
-
   removeHistoryGoods: (id) => {
     axios.delete(`http://localhost:5000/api/goods/${id}`, {
       headers: {
@@ -189,6 +190,8 @@ const useMessageStore = create<MessageState>((set, get) => ({
       },
     });
   },
+
+  // favorites 相关的状态管理及方法具体实现
   historyPosts: [],
   favoritesGoods: [],
   favoritePosts: [],
@@ -210,7 +213,6 @@ const useMessageStore = create<MessageState>((set, get) => ({
       },
     });
   },
-
   removeFavoriteGoods: (favoriteId: number) => {
     axios.post("http://localhost:5000/api/favorites/add", favoriteId, {
       headers: {
@@ -218,6 +220,8 @@ const useMessageStore = create<MessageState>((set, get) => ({
       },
     });
   },
+
+  // messages 相关的状态管理及方法具体实现
   appeals: [],
   responses: [],
   typedResponses: [],
@@ -236,7 +240,6 @@ const useMessageStore = create<MessageState>((set, get) => ({
       }
     }
   },
-
   submitAppeal: async (goods_id: number, content: string, images: string[]) => {
     try {
       const response = await axios.post(
@@ -244,7 +247,7 @@ const useMessageStore = create<MessageState>((set, get) => ({
         { goods_id, content, images: [] }
       );
       console.log(response.data.message); // 申诉提交成功
-      await useMessageStore.getState().fetchAppeals(); // 重新获取申诉列表
+      await useRecordStore.getState().fetchAppeals(); // 重新获取申诉列表
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error(
@@ -256,7 +259,6 @@ const useMessageStore = create<MessageState>((set, get) => ({
       }
     }
   },
-
   searchAppeals: async (status: string) => {
     try {
       const response = await axios.get(
@@ -274,7 +276,6 @@ const useMessageStore = create<MessageState>((set, get) => ({
       }
     }
   },
-
   updateAppealStatus: async (appeal_id: number, status: string) => {
     try {
       const response = await axios.put(
@@ -282,7 +283,7 @@ const useMessageStore = create<MessageState>((set, get) => ({
         { status }
       );
       console.log(response.data.message); // 状态修改成功
-      await useMessageStore.getState().fetchAppeals(); // 重新获取申诉列表
+      await useRecordStore.getState().fetchAppeals(); // 重新获取申诉列表
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error(
@@ -294,14 +295,13 @@ const useMessageStore = create<MessageState>((set, get) => ({
       }
     }
   },
-
   deleteAppeal: async (appeal_id: number) => {
     try {
       const response = await axios.delete(
         `http://localhost:5000/api/appeals/${appeal_id}`
       );
       console.log(response.data.message); // 申诉删除成功
-      await useMessageStore.getState().fetchAppeals(); // 重新获取申诉列表
+      await useRecordStore.getState().fetchAppeals(); // 重新获取申诉列表
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error(
@@ -328,7 +328,6 @@ const useMessageStore = create<MessageState>((set, get) => ({
       }
     }
   },
-
   submitResponse: async (
     user_id: number,
     response_type: string,
@@ -351,7 +350,7 @@ const useMessageStore = create<MessageState>((set, get) => ({
         }
       );
       console.log(response.data.message); // 回复提交成功
-      await useMessageStore.getState().fetchResponses(); // 重新获取回复列表
+      await useRecordStore.getState().fetchResponses(); // 重新获取回复列表
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error(
@@ -363,7 +362,6 @@ const useMessageStore = create<MessageState>((set, get) => ({
       }
     }
   },
-
   markResponse: async (response_id: number) => {
     try {
       const response = await axios.put(
@@ -376,7 +374,7 @@ const useMessageStore = create<MessageState>((set, get) => ({
         }
       );
       console.log(response.data.message); // 回复标记为已读成功
-      await useMessageStore.getState().fetchResponses(); // 重新获取回复列表
+      await useRecordStore.getState().fetchResponses(); // 重新获取回复列表
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error(
@@ -407,4 +405,4 @@ const useMessageStore = create<MessageState>((set, get) => ({
   },
 }));
 
-export default useMessageStore;
+export default useRecordStore;
