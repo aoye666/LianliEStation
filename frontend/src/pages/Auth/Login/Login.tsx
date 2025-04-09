@@ -26,7 +26,7 @@ const Login: React.FC = () => {
 
   const navigate = useNavigate();
   const { login } = useUserStore();
-  const { fetchUserProfile, getTheme } = useUserStore();
+  const { fetchUserProfile } = useUserStore();
 
   // 设置用户信息
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,7 +40,6 @@ const Login: React.FC = () => {
     try {
       await login(inputs.identifier, inputs.password); // 调用 login 方法
       await fetchUserProfile(); // 调用 fetchUserProfile 方法，设置 currentUser
-      await getTheme(); // 调用 getTheme 方法，设置 userTheme
       navigate("/market");
     } catch (err: any) {
       if (err.response) {

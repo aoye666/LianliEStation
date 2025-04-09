@@ -30,12 +30,11 @@ const Publish: React.FC = () => {
   const [previousText, setPreviousText] = useState<string>("");
 
   const token = Cookies.get("auth-token");
-
-  const { userTheme } = useUserStore();
+  const { currentUser } =  useUserStore();
 
   // 将图片转换为Base64并存储到localStorage  
     const storeImagesInLocalStorage = async () => {  
-      const backgroundUrl = userTheme.background_url ? `http://localhost:5000${userTheme.background_url}` : null;  
+      const backgroundUrl = currentUser?.background_url ? `http://localhost:5000${currentUser.background_url}` : null;  
   
       if (backgroundUrl) {  
         const backgroundBase64: any = await fetchImageAsBase64(backgroundUrl);  
@@ -92,7 +91,7 @@ const Publish: React.FC = () => {
     // 调用API生成模板
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/aiTemplate/Generate",
+        "http://localhost:5000/api/publish/template",
         { text: text },
         {
           headers: {
@@ -186,7 +185,7 @@ const Publish: React.FC = () => {
     <div className="publish-container">
       <Navbar title="发布助手小e" />
       <div className="dialog-container" ref={containerRef}>
-        {userTheme.background_url ? (
+        {currentUser?.background_url ? (
           <img
             src={backgroundSrc}
             alt="背景"

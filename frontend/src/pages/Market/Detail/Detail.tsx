@@ -1,4 +1,4 @@
-import { useMainStore, useUserStore } from "../../../store";
+import { useMainStore } from "../../../store";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom"; // 使用 useParams 从路由获取参数
 import "./Detail.scss";
@@ -11,28 +11,42 @@ import drop from "../../../assets/drop.png";
 import share from "../../../assets/share.png";
 import left from "../../../assets/left.png";
 
+interface Goods {
+  id: number;
+  title: string;
+  content: string | null;
+  price: number;
+  campus_id: number;
+  status: "active" | "inactive" | "deleted";
+  goods_type: "receive" | "sell";
+  tag: string | null;
+  author_id: number;
+  likes: number;
+  complaints: number;
+  created_at: string;
+  images: string[];
+  author_qq_id: string | null;
+  author_nickname: string | null;
+  author_avatar: string | null;
+  author_credit: number;
+}
+
 const Detail = () => {
+  const { goods } = useMainStore();
   const param = useParams();
-  const ID = param.goodsId;
-  const [images, setImages] = useState<string[]>([]); // 图片数组
-  const { fetchByID, detailUser } = useUserStore();
-  const { fetchGoodsItem, currentGoods } = useMainStore();
-  const [qq, setQq] = useState(""); // 初始化 qq
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [currentAlter, setCurrentAlter] = useState("user");
-  const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
+  const ID = param.goodsId; // 通过路由参数获取商品id
+  const [currentGoods, setCurrentGoods] = useState<Goods>(); // 当前详情商品
+  const [currentIndex, setCurrentIndex] = useState(0); // 当前图片索引
+  const [currentAlter, setCurrentAlter] = useState("user"); // 当前互动类型 user/appeal/manage
+  const touchStartX = useRef(0); // 记录触摸起始位置
+  const touchEndX = useRef(0); // 记录触摸结束位置
   const navigate = useNavigate();
 
-  // 根据 postID 获取帖子和用户数据
   useEffect(() => {
     const fetchData = async () => {
       const numericID = Number(ID);
-      await fetchGoodsItem(numericID);
-      setImages(currentGoods?.images || []);
-      const userId = currentGoods?.author_id || 0; // 确保在获取到 currentPost 后再获取用户信息
-      await fetchByID(userId);
-      setQq(detailUser?.qq || ""); // 在获取到 detailUser 后设置 qq
+      if (goods)
+      setCurrentGoods(goods.find((item) => item.id === numericID));
     };
 
     if (ID) {
@@ -59,20 +73,22 @@ const Detail = () => {
   };
 
   const nextImage = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+    if (currentGoods?.images.length)
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % currentGoods?.images.length);
   };
 
   const prevImage = () => {
+    if (currentGoods?.images.length)
     setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + images.length) % images.length
+      (prevIndex) => (prevIndex - 1 + currentGoods?.images.length) % currentGoods?.images.length
     );
   };
 
   // 点击复制按钮，复制发布者QQ号到剪贴板
   const handleCopy = () => {
-    if (qq) {
+    if (currentGoods?.author_qq_id) {
       navigator.clipboard
-        .writeText(qq)
+        .writeText(currentGoods?.author_qq_id)
         .then(() => {
           console.log("QQ号已复制到剪贴板");
         })
@@ -84,8 +100,16 @@ const Detail = () => {
     }
   };
 
+  const handleLike = () => {
+    console.log("点赞功能正在开发，暂不支持");
+  };
+
+  const handleDislike = () => {
+    console.log("不喜欢功能正在开发，暂不支持");
+  };
+
   // 处理时间格式化
-  const formatDateTime = (dateTime:string|undefined) => {
+  const formatDateTime = (dateTime: string | undefined) => {
     if (!dateTime) return ""; // 如果没有时间字符串，返回空
     const datePart = dateTime.split("T")[0]; // 获取日期部分
     const timePart = dateTime.split("T")[1].split(":"); // 获取时间部分并分割为数组
@@ -96,27 +120,20 @@ const Detail = () => {
     const minute = timePart[1]; // 获取分钟
 
     return `${month}-${day} ${hour}:${minute}`; // 返回格式化后的字符串
-  }; 
+  };
 
-  // 
+  //
   const handleCampusID = (campus_id: number) => {
-    if (campus_id === 1) 
-    {
+    if (campus_id === 1) {
       return "凌水主校区";
-    }
-    else if (campus_id === 2) 
-    {
+    } else if (campus_id === 2) {
       return "开发区校区";
-    }
-    else if (campus_id === 3)
-    {
+    } else if (campus_id === 3) {
       return "盘锦校区";
-    }
-    else 
-    {
+    } else {
       return "校区获取错误";
     }
-  }
+  };
 
   return (
     <div className="detail-container">
@@ -149,11 +166,11 @@ const Detail = () => {
         <div className="slider-container">
           <img
             className="slider-item"
-            src={images[currentIndex]}
+            src={currentGoods?.images[currentIndex]}
             alt={`${currentIndex + 1}`}
           />
           <div className="slider-index">
-            {images.map((_, index) => (
+            {currentGoods?.images.map((_, index) => (
               <div
                 key={index}
                 className="index-item"
@@ -172,18 +189,22 @@ const Detail = () => {
           {currentGoods?.goods_type === "sell" ? "出" : "收"}
         </div>
         <div className="detail-tag">{currentGoods?.tag}</div>
-        <div className="detail-campus">{handleCampusID(currentGoods?.campus_id || 1)}</div>
+        <div className="detail-campus">
+          {handleCampusID(currentGoods?.campus_id || 1)}
+        </div>
       </div>
       <div className="detail-content">{currentGoods?.content}</div>
       <div className="detail-author">
         <img
           className="author-icon"
-          src={detailUser?.avatar}
+          src={currentGoods?.author_avatar || ""}
           alt="发布者头像"
         />
-        <div className="author-name">{detailUser?.nickname}</div>
-        <div className="author-credit">{detailUser?.credit}分</div>
-        <div className="author-time">{formatDateTime(currentGoods?.created_at)}</div>
+        <div className="author-name">{currentGoods?.author_nickname}</div>
+        <div className="author-credit">{currentGoods?.author_credit}分</div>
+        <div className="author-time">
+          {formatDateTime(currentGoods?.created_at)}
+        </div>
       </div>
       <div className="detail-alternative">
         {currentAlter === "user" && (
@@ -221,11 +242,11 @@ const Detail = () => {
         )}
         {currentAlter === "manage" && (
           <div className="alter-manage">
-            <div className="manage-like">
+            <div className="manage-like" onClick={handleLike}>
               <img className="like-icon" src={like} alt="喜欢" />
               <div className="like-text">{currentGoods?.likes}</div>
             </div>
-            <div className="manage-dislike">
+            <div className="manage-dislike" onClick={handleDislike}>
               <img className="dislike-icon" src={dislike} alt="不喜欢" />
               <div className="dislike-text">{currentGoods?.complaints}</div>
             </div>

@@ -11,14 +11,14 @@ import { useEffect } from "react";
 import Cookies from "js-cookie"; 
 
 const User = () => {  
-  const { currentUser, userTheme } = useUserStore();  
+  const { currentUser } = useUserStore();  
   const navigate = useNavigate();
   const token = Cookies.get("token");  
 
   // 将图片转换为Base64并存储到localStorage  
   const storeImagesInLocalStorage = async () => {  
-    const avatarUrl = userTheme.avatar ? `http://localhost:5000${userTheme.avatar}` : null;  
-    const bannerUrl = userTheme.banner_url ? `http://localhost:5000${userTheme.banner_url}` : null;  
+    const avatarUrl = currentUser?.avatar ? `http://localhost:5000${currentUser.avatar}` : null;  
+    const bannerUrl = currentUser?.banner_url ? `http://localhost:5000${currentUser.banner_url}` : null;  
 
     if (avatarUrl) {  
       const avatarBase64: any = await fetchImageAsBase64(avatarUrl);  

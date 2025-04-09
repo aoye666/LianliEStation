@@ -14,7 +14,7 @@ import { Navigate } from 'react-router-dom'
 const Market = () => {
   const [searchInputs, setSearchInputs]=useState('')
   const [showMore, setShowMore] = useState(false);
-  const { page, goods, setPage, filters, setFilters, updateGoods, clearGoods, clear, fetchGoods, clearFilters } = useMainStore();
+  const { marketPage, goods, setMarketPage, filters, setFilters, updateGoods, clearGoods, clear, fetchGoods, clearFilters } = useMainStore();
   const scrollRef = useRef<HTMLDivElement|null>(null);
   const navigate = useNavigate();
   
@@ -32,7 +32,7 @@ const Market = () => {
 
       // 判断该部件是否滚动到底部
       if (scrollTop + clientHeight >= scrollHeight) {
-        setPage();
+        setMarketPage();
         updateGoods();
       }
     }

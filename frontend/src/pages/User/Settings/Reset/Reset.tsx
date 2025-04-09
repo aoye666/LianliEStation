@@ -18,19 +18,15 @@ interface Profile {
 const Reset = () => {
   const {
     currentUser,
-    userTheme,
     changeProfile,
-    changeTheme,
-    changeBackground,
-    changeBanner,
-    changeAvatar,
+    changeImage
   } = useUserStore();
   const defaultProfile: Profile = {
     nickname: currentUser?.nickname || "",
     campus_id: currentUser?.campus_id || 1,
     qq_id: currentUser?.qq || "",
     avatar: undefined,
-    theme_id: userTheme.theme_id,
+    theme_id: currentUser?.theme_id,
     background_url: undefined,
     banner_url: undefined,
   };
@@ -71,24 +67,24 @@ const Reset = () => {
 
   const handleBannerSubmit = () => {
     if (profile?.banner_url) {
-      changeBanner(profile.banner_url); // 传递文件对象
+      changeImage("banner", profile.banner_url); // 传递文件对象
     }
   };
 
   const handleBackgroundSubmit = () => {
     if (profile?.background_url) {
-      changeBackground(profile.background_url); // 传递文件对象
+      changeImage("background", profile.background_url); // 传递文件对象
     }
   };
 
   const handleAvatarSubmit = () => {
     if (profile?.avatar) {
-      changeAvatar(profile.avatar); // 传递文件对象
+      changeImage("avatar", profile.avatar); // 传递文件对象
     }
   };
 
   const handleThemeSubmit = () => {
-    changeTheme(profile?.theme_id || 1);
+    changeProfile(currentUser?.nickname || "", currentUser?.campus_id || 1, currentUser?.qq || "", profile?.theme_id || 1);
   };
 
   switch (type) {

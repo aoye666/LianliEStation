@@ -8,37 +8,48 @@ interface Goods {
   id: number;
   title: string;
   content: string | null;
+  price: number;
+  campus_id: number;
+  status: "active" | "inactive" | "deleted";
   goods_type: "receive" | "sell";
   tag: string | null;
   author_id: number;
-  created_at: string;
-  status: "active" | "inactive" | "deleted";
-  price: number;
-  campus_id: number;
-  images: string[];
   likes: number;
   complaints: number;
+  created_at: string;
+  images: string[];
+  author_qq_id: string | null;
+  author_nickname: string | null;
+  author_avatar: string | null;
+  author_credit: number;
+}
+
+interface Post {
+  id: number;
+  title: string;
+  content: string | null;
 }
 
 interface Filters {
   searchTerm: string | null;
   priceRange: [number, number];
   tag: string | null;
-  goods_type: "receive" | "sell"|null;
-  campus_id: number|null;
+  goods_type: "receive" | "sell" | null;
+  campus_id: number | null;
 }
 
 interface MainState {
-  page: number;
+  marketPage: number;
+  forumPage: number;
   goods: Goods[];
-  currentGoods: Goods | null;
+  posts: Post[];
   filters: Filters;
   clear: () => void;
   fetchGoods: () => Promise<void>;
-  fetchGoodsItem: (id: number) => Promise<void>;
   setFilters: (newFilters: Partial<Filters>) => void;
   updateGoods: () => Promise<void>;
-  setPage: () => void;
+  setMarketPage: () => void;
+  setForumPage: () => void;
   clearGoods: () => void;
   clearFilters: () => void;
 }
@@ -46,9 +57,10 @@ interface MainState {
 const useMainStore = create<MainState>()(
   persist(
     (set, get) => ({
-      page: 1,
-      goods: [], // 初始化 goods 为一个空数组
-      currentGoods: null,
+      marketPage: 1,
+      forumPage: 1,
+      goods: [],
+      posts: [],
       filters: {
         searchTerm: "",
         goods_type: null,
@@ -56,17 +68,23 @@ const useMainStore = create<MainState>()(
         priceRange: [0, 1000000],
         campus_id: null,
       },
-      setPage: () =>
+      setMarketPage: () => {
         set((preState) => ({
-          page: preState.page + 1,
-        })),
+          marketPage: preState.marketPage + 1,
+        }));
+      },
+      setForumPage: () => {
+        set((preState) => ({
+          forumPage: preState.forumPage + 1,
+        }));
+      },
       fetchGoods: async () => {
         try {
           const response = await axios.get(
             "http://localhost:5000/api/posts/search",
             {
               params: {
-                page: get().page,
+                page: get().marketPage,
                 limit: 12,
                 keyword: get().filters.searchTerm,
                 goods_type: get().filters.goods_type,
@@ -97,38 +115,6 @@ const useMainStore = create<MainState>()(
           }
         }
       },
-      fetchGoodsItem: async (id: number) => {
-        try {
-          const response = await axios.get(
-            `http://localhost:5000/api/posts/byID/${id}`,
-            {
-              params: {
-                post_id: id,
-              },
-            }
-          );
-          // 检查返回数据是否有效
-          if (response.status === 200 && response.data) {
-            const postData = response.data.post; // 访问 post 数据
-            const images = response.data.images || []; // 访问 images 数据
-
-            // 更新状态
-            set({
-              currentGoods: { ...postData, images }, // 更新 currentPost
-            });
-          } else {
-            // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
-            console.log("No posts available or unexpected response status");
-          }
-        } catch (error) {
-          // 捕获请求失败的错误（如 404 或网络问题）
-          if (error instanceof Error) {
-            console.error("Error fetching posts:", error.message);
-          } else {
-            console.error("Error fetching posts:", error);
-          }
-        }
-      },
       clear: () =>
         set(() => ({
           goods: [],
@@ -143,23 +129,23 @@ const useMainStore = create<MainState>()(
         })), // 清空所有状态，包括 posts 等
       clearGoods: () =>
         set(() => ({
-          posts: [],
-          page: 1,
+          goods: [],
+          marketPage: 1,
         })), // 清空 posts 状态
       setFilters: async (newFilters) => {
         set((state) => ({
           filters: { ...state.filters, ...newFilters }, // 更新 filters 状态
         }));
       },
-      clearFilters:()=>
-        set(()=>({
+      clearFilters: () =>
+        set(() => ({
           filters: {
             searchTerm: "",
             goods_type: null,
             tag: null,
             priceRange: [0, 1000000],
             campus_id: null,
-          }
+          },
         })),
       updateGoods: async () => {
         try {
@@ -167,7 +153,7 @@ const useMainStore = create<MainState>()(
             "http://localhost:5000/api/posts/search",
             {
               params: {
-                page: get().page,
+                page: get().marketPage,
                 limit: 12,
                 keyword: get().filters.searchTerm,
                 post_type: get().filters.goods_type,

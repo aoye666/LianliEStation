@@ -55,11 +55,10 @@ const App: React.FC = () => {
 
   // 检查是否登录并获取用户信息
   const { isAuthenticated } = useUserStore();
-  const { fetchUserProfile, getTheme } = useUserStore();
+  const { fetchUserProfile } = useUserStore();
   useEffect(() => {
     if (isAuthenticated) {
       fetchUserProfile(); // 初始化 currentUser
-      getTheme(); // 初始化 userTheme
       // console.log("已登录，获取用户信息");
     }
   }, [isAuthenticated]);
