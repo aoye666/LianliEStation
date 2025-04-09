@@ -86,9 +86,9 @@ CREATE TABLE `appeals` (
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `post_images` (
+CREATE TABLE `goods_images` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `post_id` INT NOT NULL,
+    `goods_id` INT NOT NULL,
     `image_url` VARCHAR(255) NOT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

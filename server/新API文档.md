@@ -597,9 +597,11 @@ PUT /api/users/profile/image?type=avatar
 
 - 成功响应 (状态码：200)
 
-  ```json
+    ```json
   {
-    "message": "更新成功"
+    "message": "更新成功",
+    "url": "/uploads/avatar123.jpg",
+    "type": "avatar"
   }
   ```
 
