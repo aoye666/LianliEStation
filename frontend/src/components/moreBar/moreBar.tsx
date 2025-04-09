@@ -1,9 +1,8 @@
-import React from'react';
-import './moreBar.scss';
+import './MoreBar.scss';
 
 const MoreBar = () => {
   return (
-    <div className="moreBar">
+    <div className="morebar">
         <div className='price'>
             <div className='price-title'>
                 <span>价格区间</span>

@@ -7,7 +7,7 @@ const Forum=()=>{
     return (
         <div className="forum-container">
             <div className="navbar">
-                <Navbar title="校园墙" backActive={false}/>
+                <Navbar title="校园墙"/>
             </div>
 
             <div className="content">

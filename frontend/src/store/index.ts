@@ -1,6 +1,3 @@
-export { default as useUserStore } from './userStore'
-export { default as usePostStore } from './postStore'
-export { default as useAuthStore } from './authStore'
-export { default as useFavoriteStore } from './favoriteStore'
-export { default as useHistoryStore} from './historyStore'
-export { default as useMessageStore } from './messageStore'
+export { default as useUserStore } from './userStore' // auth、user、admin
+export { default as useMainStore } from './mainStore' // market、forum
+export { default as useRecordStore } from './recordStore' // messages、favorites、history

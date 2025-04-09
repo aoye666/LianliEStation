@@ -165,7 +165,7 @@ VALUES
 (3, 12, '误删帖子，申请恢复', 'pending', '2025-01-15 09:00:00');
 
 -- 帖子图片表数据插入示例
-INSERT INTO `post_images` (`post_id`, `image_url`, `created_at`)
+INSERT INTO `goods_images` (`goods_id`, `image_url`, `created_at`)
 VALUES
 (1, '/uploads/images/image1.jpg', '2025-01-01 10:30:00');
 
