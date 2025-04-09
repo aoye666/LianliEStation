@@ -597,7 +597,7 @@ PUT /api/users/profile/image?type=avatar
 
 - 成功响应 (状态码：200)
 
-    ```json
+  ```json
   {
     "message": "更新成功",
     "url": "/uploads/avatar123.jpg",
@@ -803,7 +803,10 @@ GET /api/goods?keyword=电脑&campus_id=1&min_price=1000&max_price=5000&page=1&l
         "author_id": 456,
         "likes": 5,
         "complaints": 0,
-        "images": ["/uploads/image1.jpg", "/uploads/image2.jpg"]
+        "images": ["/uploads/image1.jpg", "/uploads/image2.jpg"],
+        "author_qq_id": "123456789",
+        "author_nickname": "User1",
+        "author_avatar": "/uploads/avatar1.png"
       }
       // 更多商品...
     ]

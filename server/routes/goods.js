@@ -173,18 +173,39 @@ router.get("/", async (req, res) => {
       return map;
     }, {});
 
-    // 组装商品与图片
-    const postsWithImages = rows.map((post) => {
+    const authorIds = rows.map((p) => p.author_id);
+    const [authorRows] = await db.query("SELECT id, qq_id, nickname, avatar FROM users WHERE id IN (?)", [authorIds]);
+
+    // 创建作者信息映射表
+    const authorsMap = authorRows.reduce((map, author) => {
+      map[author.id] = {
+        qq_id: author.qq_id,
+        nickname: author.nickname,
+        avatar: author.avatar,
+      };
+      return map;
+    }, {});
+
+    // 组装商品、图片和作者信息
+    const postsWithImagesAndAuthor = rows.map((post) => {
+      // 添加图片信息
       post.images = imagesMap[post.id] || [];
+
+      // 添加作者信息
+      const authorInfo = authorsMap[post.author_id] || { qq_id: null, avatar: null };
+      post.author_qq_id = authorInfo.qq_id;
+      post.author_nickname = authorInfo.nickname;
+      post.author_avatar = authorInfo.avatar;
+
       return post;
     });
 
     res.status(200).json({
       total,
-      count: postsWithImages.length,
+      count: postsWithImagesAndAuthor.length,
       page: page ? Number(page) : null,
       limit: limit ? Number(limit) : null,
-      goods: postsWithImages,
+      goods: postsWithImagesAndAuthor,
     });
   } catch (err) {
     console.error(err);
