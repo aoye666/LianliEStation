@@ -163,13 +163,13 @@ router.get("/", async (req, res) => {
     // 获取已查到商品ID列表
     const postIds = rows.map((p) => p.id);
     // 查询对应的图片
-    const [imageRows] = await db.query("SELECT post_id, image_url FROM post_images WHERE post_id IN (?)", [postIds]);
+    const [imageRows] = await db.query("SELECT goods_id, image_url FROM goods_images WHERE goods_id IN (?)", [postIds]);
 
     const imagesMap = imageRows.reduce((map, row) => {
-      if (!map[row.post_id]) {
-        map[row.post_id] = [];
+      if (!map[row.goods_id]) {
+        map[row.goods_id] = [];
       }
-      map[row.post_id].push(row.image_url);
+      map[row.goods_id].push(row.image_url);
       return map;
     }, {});
 
@@ -258,16 +258,16 @@ router.put("/:post_id", upload.array("images", 3), async (req, res) => {
     // 只在有新图片上传时才处理图片
     if (files && files.length > 0) {
       // 删除旧图片
-      const [oldImages] = await db.query("SELECT image_url FROM post_images WHERE post_id = ?", [post_id]);
+      const [oldImages] = await db.query("SELECT image_url FROM goods_images WHERE goods_id = ?", [post_id]);
       for (const img of oldImages) {
         const oldFilePath = "public" + img.image_url;
         await fs.promises.unlink(oldFilePath).catch(() => {});
       }
-      await db.query("DELETE FROM post_images WHERE post_id = ?", [post_id]);
+      await db.query("DELETE FROM goods_images WHERE goods_id = ?", [post_id]);
 
       // 插入新图片
       const imageUrls = files.map((file) => `/uploads/${file.filename}`);
-      const imagePromises = imageUrls.map((url) => db.query("INSERT INTO post_images (post_id, image_url) VALUES (?, ?)", [post_id, url]));
+      const imagePromises = imageUrls.map((url) => db.query("INSERT INTO goods_images (goods_id, image_url) VALUES (?, ?)", [post_id, url]));
       await Promise.all(imagePromises);
     }
 

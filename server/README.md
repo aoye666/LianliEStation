@@ -86,9 +86,9 @@ CREATE TABLE `appeals` (
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `post_images` (
+CREATE TABLE `goods_images` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `post_id` INT NOT NULL,
+    `goods_id` INT NOT NULL,
     `image_url` VARCHAR(255) NOT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -165,7 +165,7 @@ VALUES
 (3, 12, '误删帖子，申请恢复', 'pending', '2025-01-15 09:00:00');
 
 -- 帖子图片表数据插入示例
-INSERT INTO `post_images` (`post_id`, `image_url`, `created_at`)
+INSERT INTO `goods_images` (`goods_id`, `image_url`, `created_at`)
 VALUES
 (1, '/uploads/images/image1.jpg', '2025-01-01 10:30:00');
 
