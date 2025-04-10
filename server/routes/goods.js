@@ -174,13 +174,14 @@ router.get("/", async (req, res) => {
     }, {});
 
     const authorIds = rows.map((p) => p.author_id);
-    const [authorRows] = await db.query("SELECT id, qq_id, nickname, avatar FROM users WHERE id IN (?)", [authorIds]);
+    const [authorRows] = await db.query("SELECT id, qq_id, nickname, credit, avatar FROM users WHERE id IN (?)", [authorIds]);
 
     // 创建作者信息映射表
     const authorsMap = authorRows.reduce((map, author) => {
       map[author.id] = {
         qq_id: author.qq_id,
         nickname: author.nickname,
+        credit: author.credit,
         avatar: author.avatar,
       };
       return map;
@@ -195,6 +196,7 @@ router.get("/", async (req, res) => {
       const authorInfo = authorsMap[post.author_id] || { qq_id: null, avatar: null };
       post.author_qq_id = authorInfo.qq_id;
       post.author_nickname = authorInfo.nickname;
+      post.author_credit = authorInfo.credit;
       post.author_avatar = authorInfo.avatar;
 
       return post;

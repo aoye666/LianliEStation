@@ -786,29 +786,30 @@ GET /api/goods?keyword=电脑&campus_id=1&min_price=1000&max_price=5000&page=1&l
 
   ```json
   {
-    "total": 25,
-    "count": 10,
+    "total": 3,
+    "count": 1,
     "page": 1,
-    "limit": 10,
+    "limit": 1,
     "goods": [
       {
-        "id": 123,
-        "title": "二手笔记本电脑",
-        "content": "9成新笔记本电脑，性能良好...",
-        "price": 3000,
+        "id": 3,
+        "title": "开发区校区代取快递",
+        "content": "大件3元/件，小件2元/件（20:00前可预约）",
+        "goods_type": "receive",
+        "tag": "服务",
+        "author_id": 3,
+        "created_at": "2025-01-03T04:00:00.000Z",
+        "status": "active",
+        "price": "2.00",
         "campus_id": 1,
-        "status": "available",
-        "goods_type": "electronic",
-        "tag": "computer",
-        "author_id": 456,
-        "likes": 5,
+        "likes": 0,
         "complaints": 0,
-        "images": ["/uploads/image1.jpg", "/uploads/image2.jpg"],
-        "author_qq_id": "123456789",
-        "author_nickname": "User1",
-        "author_avatar": "/uploads/avatar1.png"
+        "images": [],
+        "author_qq_id": "12345",
+        "author_nickname": "晁慧",
+        "author_credit": 100,
+        "author_avatar": "/uploads/default.png"
       }
-      // 更多商品...
     ]
   }
   ```
