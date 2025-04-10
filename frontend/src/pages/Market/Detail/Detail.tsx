@@ -1,6 +1,7 @@
 import { useMainStore } from "../../../store";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom"; // 使用 useParams 从路由获取参数
+import axios from "axios";
 import "./Detail.scss";
 import copy from "../../../assets/copy.png";
 import stars from "../../../assets/stars.png";
@@ -100,12 +101,27 @@ const Detail = () => {
     }
   };
 
-  const handleLike = () => {
-    console.log("点赞功能正在开发，暂不支持");
+  // 处理点赞、举报，待设计完善
+  const handleLike = async () => {
+    try {
+      axios.put(`http://localhost:5000/api/goods/like/${ID}`, {
+        value: true,
+      });
+    }
+    catch (error) {
+      console.error("Error handling like:", error);
+    }
   };
 
   const handleDislike = () => {
-    console.log("不喜欢功能正在开发，暂不支持");
+    try {
+      axios.put(`http://localhost:5000/api/goods/complaint/${ID}`, {
+        value: true,
+      });
+    }
+    catch (error) {
+      console.error("Error handling complaint:", error);
+    }
   };
 
   // 处理时间格式化

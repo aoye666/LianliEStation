@@ -1,6 +1,6 @@
 import Navbar from "../../../../components/Navbar/Navbar";
 import "./Reset.scss";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, useNavigate } from "react-router-dom";
 import { useUserStore } from "../../../../store";
 import { useState } from "react";
 import Forget from "../Forget/Forget";
@@ -32,6 +32,7 @@ const Reset = () => {
   };
   const [profile, setProfile] = useState<Profile>(defaultProfile);
   const { type } = useParams();
+  const navigate = useNavigate();
 
   const handleChange =
     (key: keyof Profile) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,28 +64,33 @@ const Reset = () => {
       profile?.campus_id || 1,
       profile?.qq_id || ""
     );
+    navigate("/user/settings");
   };
 
   const handleBannerSubmit = () => {
     if (profile?.banner_url) {
       changeImage("banner", profile.banner_url); // 传递文件对象
     }
+    navigate("/user/settings");
   };
 
   const handleBackgroundSubmit = () => {
     if (profile?.background_url) {
       changeImage("background", profile.background_url); // 传递文件对象
     }
+    navigate("/user/settings");
   };
 
   const handleAvatarSubmit = () => {
     if (profile?.avatar) {
       changeImage("avatar", profile.avatar); // 传递文件对象
     }
+    navigate("/user/settings");
   };
 
   const handleThemeSubmit = () => {
     changeProfile(currentUser?.nickname || "", currentUser?.campus_id || 1, currentUser?.qq || "", profile?.theme_id || 1);
+    navigate("/user/settings");
   };
 
   switch (type) {

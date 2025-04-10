@@ -52,7 +52,7 @@ const Settings = () => {
         <div className="settings-item" onClick={() => navigate('/user/settings/reset/theme_id')}>
           <div className="item-text">主题风格</div><img src={right} alt="详情" className="right-icon"></img>
         </div>
-        <div className="settings-item" style={{ marginTop: "3px" }} onClick={() => navigate('/')}>
+        <div className="settings-item" style={{ marginTop: "3px" }} onClick={() => navigate('/user/settings/about')}>
           <div className="item-text">关于连理e站</div><img src={about} alt="详情" className="right-icon"></img>
         </div>
       <div className="logout-container" onClick={handleLogout}>

@@ -1,4 +1,3 @@
-import { use } from "react";
 // user、auth、admin 相关的状态管理
 
 import { create } from "zustand";
@@ -244,7 +243,6 @@ const useUserStore = create<UserState>()(
         qq_id: string,
         theme_id?: number
       ) => {
-        console.log(token);
         try {
           // 动态构建请求体
           const requestBody: any = {

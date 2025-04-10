@@ -19,6 +19,7 @@ const User = React.lazy(() => import("./pages/User/User"));
 const Forum = React.lazy(() => import("./pages/Forum/Forum"));
 const ForumDisable = React.lazy(() => import("./pages/ForumDisable/Forum"));
 const Settings = React.lazy(() => import("./pages/User/Settings/Settings"));
+const About = React.lazy(() => import("./pages/User/Settings/About/About"));
 const Favorites = React.lazy(() => import("./pages/User/Favorites/Favorites"));
 const Messages = React.lazy(() => import("./pages/User/Messages/Messages"));
 const History = React.lazy(() => import("./pages/User/History/History"));
@@ -83,6 +84,14 @@ const App: React.FC = () => {
     {
       path: "/user/settings/reset/:type",
       element: <Reset />,
+    },
+    {
+      path: "/user/settings/about",
+      element: (
+        <ProtectedRoute>
+          <About />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "/market",

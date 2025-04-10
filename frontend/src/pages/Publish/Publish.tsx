@@ -34,7 +34,7 @@ const Publish: React.FC = () => {
 
   // 将图片转换为Base64并存储到localStorage  
     const storeImagesInLocalStorage = async () => {  
-      const backgroundUrl = currentUser?.background_url ? `http://localhost:5000${currentUser.background_url}` : null;  
+      const backgroundUrl = currentUser?.background_url ? `http://localhost:5000/api/images/${currentUser.background_url}` : null;  
   
       if (backgroundUrl) {  
         const backgroundBase64: any = await fetchImageAsBase64(backgroundUrl);  
