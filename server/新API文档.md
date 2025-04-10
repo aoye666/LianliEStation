@@ -1197,7 +1197,7 @@ Authorization: Bearer {token}
 
 基本信息
 
-- **路径**: `/api/goods`
+- **路径**: `/api/publish/goods`
 - **方法**: `POST`
 - **描述**: 发布新商品信息，包括文本信息和可选的图片（最多 3 张）
 
@@ -1305,7 +1305,7 @@ images: [文件1.jpg, 文件2.jpg]
 
 基本信息
 
-- **路径**: `/api/template`
+- **路径**: `/api/publish/template`
 - **方法**: `POST`
 - **描述**: 基于用户输入的文本，使用 AI 生成商品信息模板
 

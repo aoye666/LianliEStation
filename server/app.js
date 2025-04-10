@@ -18,7 +18,7 @@ import usersRouter from "./routes/users.js";
 //import adminRouter from "./routes/admin.js";
 //import historyRouter from "./routes/history.js";
 //import messagesRouter from "./routes/messages.js";
-//import publishRouter from "./routes/publish.js";
+import publishRouter from "./routes/publish.js";
 
 let app = express();
 
@@ -46,8 +46,7 @@ app.use("/api/aiTemplate", aiTemplateRouter);
 // app.use("/api/admin", adminRouter);
 // app.use("/api/history", historyRouter);
 // app.use("/api/messages", messagesRouter);
-// app.use("/api/publish", publishRouter);
-
+app.use("/api/publish", publishRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
