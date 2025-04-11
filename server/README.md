@@ -82,7 +82,8 @@ CREATE TABLE `appeals` (
     `author_id` INT NOT NULL,
     `post_id` INT NOT NULL,
     `content` TEXT NOT NULL,
-    `status` ENUM('pending', 'resolved', 'deleted') DEFAULT 'pending',
+    `type` ENUM('post', 'goods') DEFAULT 'goods',
+    `status` ENUM('pending', 'resolved', 'deleted', 'read') DEFAULT 'pending',
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -118,8 +119,6 @@ CREATE TABLE `responses` (
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP -- 创建时间，默认当前时间
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
-
 CREATE TABLE `admins` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,  -- 管理员 ID
   `username` VARCHAR(100) NOT NULL,     -- 管理员用户名
@@ -127,7 +126,7 @@ CREATE TABLE `admins` (
   `email` VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE `campus_wall_posts` (
+CREATE TABLE `posts` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `title` VARCHAR(255) NOT NULL,
     `content` TEXT NOT NULL,
@@ -137,7 +136,7 @@ CREATE TABLE `campus_wall_posts` (
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `campus_wall_images` (
+CREATE TABLE `post_image` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `post_id` INT NOT NULL,
     `image_url` VARCHAR(255) NOT NULL,
@@ -158,11 +157,11 @@ VALUES
 (3, '开发区校区代取快递', '大件3元/件，小件2元/件（20:00前可预约）', 'receive', '服务', '2025-01-03 12:00:00', 'active', 2.00, 1);
 
 -- 申诉表数据插入示例
-INSERT INTO `appeals` (`author_id`, `post_id`, `content`, `status`, `created_at`)
+INSERT INTO `appeals` (`author_id`, `post_id`, `content`, `type`, `status`, `created_at`)
 VALUES
-(1, 5, '帖子内容不符合事实，请求审核', 'pending', '2024-03-01 14:30:00'),
-(2, 8, '已与发布者协商解决', 'resolved', CURRENT_TIMESTAMP),
-(3, 12, '误删帖子，申请恢复', 'pending', '2025-01-15 09:00:00');
+(1, 5, '帖子内容不符合事实，请求审核', 'goods', 'pending', '2024-03-01 14:30:00'),
+(2, 8, '已与发布者协商解决', 'post', 'resolved', CURRENT_TIMESTAMP),
+(3, 12, '误删帖子，申请恢复', 'post','pending', '2025-01-15 09:00:00');
 
 -- 帖子图片表数据插入示例
 INSERT INTO `goods_images` (`goods_id`, `image_url`, `created_at`)
@@ -177,14 +176,14 @@ VALUES
 (1, 4, '2025-01-03 14:00:00');
 
 -- 插入校园墙帖子示例数据
-INSERT INTO `campus_wall_posts` (`title`, `content`, `author_id`, `campus_id`, `created_at`)
+INSERT INTO `posts` (`title`, `content`, `author_id`, `campus_id`, `created_at`)
 VALUES
 ('期末复习小组招募', '正在找考研政治的复习小组，一起打卡学习，互相监督。', 1, 1, '2025-01-15 08:30:00'),
 ('晨跑小伙伴招募', '每天早上6:30体育场集合，欢迎加入晨跑队伍！', 2, 1, '2025-01-15 09:00:00'),
 ('图书馆捡到一张学生卡', '今天在图书馆三楼捡到一张学生卡，失主请联系我认领。', 1, 2, '2025-01-15 14:20:00');
 
 -- 插入对应的图片数据
-INSERT INTO `campus_wall_images` (`post_id`, `image_url`, `created_at`)
+INSERT INTO `post_image` (`post_id`, `image_url`, `created_at`)
 VALUES
 (1, '/uploads/wall/study_group.jpg', '2025-01-15 08:31:00'),
 (2, '/uploads/wall/morning_run1.jpg', '2025-01-15 09:01:00'),

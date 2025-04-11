@@ -1192,6 +1192,108 @@ Authorization: Bearer {token}
 - 管理员可以删除任何帖子，无论发布者是谁
 - 已软删除的帖子将不会出现在校园墙帖子列表中
 
+### 提交申诉
+
+基本信息
+
+- **路径**: `/api/appeals/publish`
+- **方法**: `POST`
+- **描述**: 提交新的申诉信息，包括文本内容和可选的图片（最多 3 张）
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+|-------|------|------|------|
+| id | Number | 是 | 申诉对象 ID（商品 ID 或帖子 ID） |
+| content | String | 是 | 申诉内容 |
+| type | String | 是 | 申诉类型，必须是以下值之一：`goods`（商品申诉）、`post`（帖子申诉） |
+| images | File[] | 否 | 申诉相关的图片文件，最多 3 张 |
+
+请求头
+
+```
+Authorization: Bearer {token}
+Content-Type: multipart/form-data
+```
+
+请求体示例
+
+```
+POST /api/appeals/publish
+Content-Type: multipart/form-data
+
+id: 123
+content: "商品存在问题，描述与实际不符"
+type: "goods"
+images: [file1.jpg, file2.jpg]
+```
+
+响应参数
+| 状态码 | 内容类型 | 描述 |
+|------|----------|------|
+| 201 | application/json | 申诉提交成功 |
+| 400 | application/json | 缺少必要参数 |
+| 401 | application/json | 未提供 Token |
+| 404 | application/json | 商品或帖子不存在 |
+| 500 | application/json | 服务器错误 |
+
+响应示例
+
+- 成功响应 (状态码：201)
+
+  ```json
+  {
+    "message": "申诉提交成功"
+  }
+  ```
+
+- 参数错误 (状态码：400)
+
+  ```json
+  {
+    "message": "缺少必要参数"
+  }
+  ```
+
+- Token 未提供 (状态码：401)
+
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- 商品不存在 (状态码：404)
+
+  ```json
+  {
+    "message": "商品不存在"
+  }
+  ```
+
+- 帖子不存在 (状态码：404)
+
+  ```json
+  {
+    "message": "帖子不存在"
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 此 API 用于用户提交对商品或帖子的申诉
+- 必须提供有效的 JWT 令牌进行身份验证
+- 申诉类型(type)决定了申诉对象是商品还是帖子
+- 图片上传为可选项，最多支持 3 张图片
+- 上传的图片将保存在服务器的`/uploads/`目录
+- 若申诉提交失败，已上传的图片将被自动删除
+
 ## publishRoutes
 
 ### 发布商品
