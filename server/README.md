@@ -83,7 +83,8 @@ CREATE TABLE `appeals` (
     `post_id` INT NOT NULL,
     `content` TEXT NOT NULL,
     `type` ENUM('post', 'goods') DEFAULT 'goods',
-    `status` ENUM('pending', 'resolved', 'deleted', 'read') DEFAULT 'pending',
+    `status` ENUM('pending', 'resolved', 'deleted') DEFAULT 'pending',
+    `read_status` ENUM('unread', 'read') NOT NULL DEFAULT 'unread',
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -189,6 +190,13 @@ VALUES
 (2, '/uploads/wall/morning_run1.jpg', '2025-01-15 09:01:00'),
 (2, '/uploads/wall/morning_run2.jpg', '2025-01-15 09:01:00'),
 (3, '/uploads/wall/student_card.jpg', '2025-01-15 14:21:00');
+
+INSERT INTO `responses` (`user_id`, `response_type`, `related_id`, `content`, `read_status`)
+VALUES
+(1, 'appeal', 1, '您的申诉已通过，我们已恢复您的商品展示。感谢您的耐心等待！', 'unread'),
+(3, 'violation', 1, '您的帖子因包含广告内容被移除，这违反了我们的社区规则第3.2条。', 'read'),
+(3, 'appeal', 1, '我们已收到您的申诉，经审核后认为您的帖子不违反社区规定，已恢复显示。', 'unread'),
+(3, 'violation', 1, '您的账户因多次违规已被临时限制发布内容，限制期为7天。', 'unread');
 ```
 
 ##
