@@ -39,6 +39,7 @@ interface Filters {
 }
 
 interface MainState {
+  maxMarketPage: boolean; 
   marketPage: number;
   forumPage: number;
   goods: Goods[];
@@ -60,6 +61,7 @@ const useMainStore = create<MainState>()(
       marketPage: 1,
       forumPage: 1,
       goods: [],
+      maxMarketPage: false,
       posts: [],
       filters: {
         searchTerm: "",
@@ -69,9 +71,11 @@ const useMainStore = create<MainState>()(
         campus_id: null,
       },
       setMarketPage: () => {
-        set((preState) => ({
-          marketPage: preState.marketPage + 1,
-        }));
+        if(!get().maxMarketPage){
+          set((preState) => ({
+            marketPage: preState.marketPage + 1,
+          }));
+        }
       },
       setForumPage: () => {
         set((preState) => ({
@@ -81,7 +85,7 @@ const useMainStore = create<MainState>()(
       fetchGoods: async () => {
         try {
           const response = await axios.get(
-            "http://localhost:5000/api/posts/search",
+            "http://localhost:5000/api/goods",
             {
               params: {
                 page: get().marketPage,
@@ -102,6 +106,7 @@ const useMainStore = create<MainState>()(
             set((state) => ({
               goods: [...data], // 更新 goods 状态
             }));
+            console.log(get().maxMarketPage);
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
             console.log("No goods available or unexpected response status");
@@ -117,7 +122,8 @@ const useMainStore = create<MainState>()(
       },
       clear: () =>
         set(() => ({
-          goods: [],
+          // goods: [],
+          maxMarketPage: false,
           page: 1,
           filters: {
             searchTerm: "",
@@ -150,13 +156,13 @@ const useMainStore = create<MainState>()(
       updateGoods: async () => {
         try {
           const response = await axios.get(
-            "http://localhost:5000/api/posts/search",
+            "http://localhost:5000/api/goods",
             {
               params: {
                 page: get().marketPage,
                 limit: 12,
                 keyword: get().filters.searchTerm,
-                post_type: get().filters.goods_type,
+                goods_type: get().filters.goods_type,
                 tag: get().filters.tag,
                 min_price: get().filters.priceRange[0],
                 max_price: get().filters.priceRange[1],
@@ -166,12 +172,20 @@ const useMainStore = create<MainState>()(
           );
 
           // 检查返回数据是否有效
-          if (response.status === 200 && response.data) {
-            const data = response.data.posts;
+          if (response.status === 200 && response.data.goods.length > 0) {
+            const data = response.data.goods;
             set((state) => ({
               goods: [...state.goods, ...data], // 更新 posts 状态
             }));
-          } else {
+          }
+          else if(response.status === 200 && response.data.goods.length === 0){
+            console.log("No more goods available");
+            set((state) => ({
+              maxMarketPage: true,
+              marketPage: state.marketPage - 1,
+            }));
+          }
+           else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
             console.log("No posts available or unexpected response status");
           }
