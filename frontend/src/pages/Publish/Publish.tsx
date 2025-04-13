@@ -272,7 +272,7 @@ const Publish: React.FC = () => {
           发布
         </button>
       </div>
-      <Tabbar />
+      <Tabbar initialIndex={2} />
     </div>
   );
 };

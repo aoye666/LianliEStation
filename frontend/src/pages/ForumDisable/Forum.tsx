@@ -11,7 +11,7 @@ const Forum = () => {
         <div className="notice-img"><img src={forum} alt="forum" /></div>
         <div className="notice-text">校园墙功能即将推出！</div>
       </div>
-      <Tabbar />
+      <Tabbar initialIndex={1} />
     </div>
   )
 }

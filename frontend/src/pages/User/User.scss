@@ -65,10 +65,19 @@ $bg: #ededed;
       background: white;
       border-top: 1px solid $bg;
       .item-icon {
+        width: 24px;
+        height: 24px;
         margin-left: 15px;
         margin-right: 10px;
       }
+      .item-text {
+        align-self: center;
+        justify-content: center;
+        align-items: center;
+      }
       .right-icon {
+        width: 24px;
+        height: 24px;
         position: absolute;
         right: 10px;
       }

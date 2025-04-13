@@ -15,7 +15,7 @@ const Forum=()=>{
             </div>
 
             <div className="tabbar">
-                <Tabbar />
+                <Tabbar initialIndex={1} />
             </div>
         </div>
     )

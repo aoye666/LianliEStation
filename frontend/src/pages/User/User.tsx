@@ -2,11 +2,11 @@ import Tabbar from "../../components/Tabbar/Tabbar";
 import "./User.scss";  
 import { useUserStore } from "../../store";  
 import { useNavigate } from "react-router-dom";  
-import stars from "../../assets/stars.png";  
-import history from "../../assets/history.png";  
-import messages from "../../assets/messages.png";  
-import settings from "../../assets/settings.png";  
-import right from "../../assets/right.png";  
+import stars from "../../assets/favorites.svg";  
+import history from "../../assets/history.svg";  
+import messages from "../../assets/messages.svg";  
+import settings from "../../assets/settings.svg";  
+import right from "../../assets/right.svg";  
 import { useEffect } from "react";
 import Cookies from "js-cookie"; 
 
@@ -96,7 +96,7 @@ const User = () => {
           <img src={right} alt="右箭头" className="right-icon" />  
         </div>  
       </div>  
-      <Tabbar />  
+      <Tabbar initialIndex={3} />  
     </div>  
   );  
 };  

@@ -5,7 +5,7 @@
 //      3、可选的回退按钮参数 backActive 和 backPath，默认值为 false 和 "market"，需补充完整路径。
 
 import "./Navbar.scss";
-import left from '../../assets/left.png';
+import left from '../../assets/left.svg';
 import { useNavigate } from "react-router-dom";
 
 interface NavbarProps {

@@ -210,7 +210,7 @@ const Market = () => {
       </div>
 
       <div className='market-tabbar'>   
-        <Tabbar />
+        <Tabbar initialIndex={0} />
       </div>
 
     </div>
