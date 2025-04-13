@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, use } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserStore } from "../../../store";
 import "./Login.scss";
@@ -25,7 +25,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState<ErrorType | null>(null);
 
   const navigate = useNavigate();
-  const { login } = useUserStore();
+  const { login,token,isAuthenticated } = useUserStore();
   const { fetchUserProfile } = useUserStore();
 
   // 设置用户信息
@@ -39,8 +39,7 @@ const Login: React.FC = () => {
     e.preventDefault();
     try {
       await login(inputs.identifier, inputs.password); // 调用 login 方法
-      await fetchUserProfile(); // 调用 fetchUserProfile 方法，设置 currentUser
-      navigate("/market");
+      //await fetchUserProfile(); // 调用 fetchUserProfile 方法，设置 currentUser
     } catch (err: any) {
       if (err.response) {
         setError(err.response.data);
@@ -49,6 +48,12 @@ const Login: React.FC = () => {
       }
     }
   };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/market");
+    }
+  }, [isAuthenticated]);
 
   return (
     <div className="login-container">
@@ -82,10 +87,10 @@ const Login: React.FC = () => {
           <button type="submit">登录</button>
           {error && <div>{error.message}</div>}
           <div className="register-forget">
-            <Link className="link" to="/register">
+            <Link className="link" to="/auth/register">
               立即注册！
             </Link>
-            <Link className="link" to="/forget">
+            <Link className="link" to="/user/settings/reset/password">
               忘记密码?
             </Link>
           </div>

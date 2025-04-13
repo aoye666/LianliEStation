@@ -25,6 +25,9 @@ const Messages = React.lazy(() => import("./pages/User/Messages/Messages"));
 const History = React.lazy(() => import("./pages/User/History/History"));
 
 const App: React.FC = () => {
+  // 检查是否登录并获取用户信息
+  const { isAuthenticated, fetchUserProfile } = useUserStore();
+
   // 锁定竖屏
   const lockOrientation = () => {
     if (window.screen.orientation && window.screen.orientation.lock) {
@@ -54,13 +57,9 @@ const App: React.FC = () => {
     };
   }, []);
 
-  // 检查是否登录并获取用户信息
-  const { isAuthenticated } = useUserStore();
-  const { fetchUserProfile } = useUserStore();
   useEffect(() => {
     if (isAuthenticated) {
       fetchUserProfile(); // 初始化 currentUser
-      // console.log("已登录，获取用户信息");
     }
   }, [isAuthenticated]);
 

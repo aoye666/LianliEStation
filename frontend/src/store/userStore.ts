@@ -1,3 +1,4 @@
+import { use } from 'react';
 // user、auth、admin 相关的状态管理
 
 import { create } from "zustand";
@@ -117,7 +118,7 @@ const useUserStore = create<UserState>()(
       },
       logout: () => {
         Cookies.remove("auth-token"); // 登出时移除 cookie
-        set({ isAuthenticated: false, token: null });
+        set({ isAuthenticated: false, token: null, currentUser: null, isAdmin: false, users: [] });
       },
       deleteUser: async (username: string) => {
         try {
@@ -175,9 +176,9 @@ const useUserStore = create<UserState>()(
           );
           const { isAdmin } = get();
 
-          // 管理员获取所有用户信息
-          if (isAdmin) set({ currentUser: res.data });
           // 一般用户获取自己的信息
+          if (!isAdmin) set({ currentUser: res.data });
+          // 管理员获取所有用户信息
           else set({ users: res.data });
         } catch (error: any) {
           if (error.response) console.error(error.response.data.message);
