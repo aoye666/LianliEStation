@@ -14,27 +14,47 @@ import { Navigate } from 'react-router-dom'
 const Market = () => {
   const [searchInputs, setSearchInputs]=useState('')
   const [showMore, setShowMore] = useState(false);
-  const { marketPage, goods, setMarketPage, filters, setFilters, updateGoods, clearGoods, clear, fetchGoods, clearFilters } = useMainStore();
+  const { maxMarketPage, goods, setMarketPage, filters, setFilters, updateGoods, clearGoods, clear, fetchGoods, clearFilters } = useMainStore();
   const scrollRef = useRef<HTMLDivElement|null>(null);
   const navigate = useNavigate();
   
-  useEffect(() => {
-    fetchGoods();
-  },[])
-
   window.addEventListener('beforeunload', () => {
     clear();
   });
+
+  useEffect(() => {
+    if(goods.length === 0){
+      fetchGoods();
+      console.log(filters)
+    }
+  },[])
+
+  // useEffect(() => {
+  //   return () => {
+  //     if (scrollRef.current) {
+  //       sessionStorage.setItem('market-scroll', scrollRef.current.scrollTop.toString());
+  //     }
+  //   };
+  // }, []);
+  
+  // // 回来后恢复位置
+  // useEffect(() => {
+  //   const savedScroll = sessionStorage.getItem('market-scroll');
+  //   if (scrollRef.current && savedScroll) {
+  //     scrollRef.current.scrollTop = parseInt(savedScroll);
+  //   }
+  // }, []);
 
   const handleScroll = () => {
     if (scrollRef.current) {
       const { scrollHeight, scrollTop, clientHeight } = scrollRef.current;
 
       // 判断该部件是否滚动到底部
-      if (scrollTop + clientHeight >= scrollHeight) {
+      if (scrollTop + clientHeight >= scrollHeight && !maxMarketPage) {
         setMarketPage();
         updateGoods();
-      }
+      } 
+    
     }
   };
 
@@ -44,7 +64,6 @@ const Market = () => {
 
   const handleSearch = async () => {
     try {
-      console.log(filters)
       filters.searchTerm = searchInputs;
       await setFilters(filters); 
       clearGoods(); 
@@ -59,6 +78,7 @@ const Market = () => {
     clearGoods();
     setShowMore(false);
     updateGoods();
+    console.log(filters)
   }
 
   return (
@@ -98,6 +118,12 @@ const Market = () => {
                       setFilters({goods_type:'receive'})
                       handleOnConfirm();
                       }}>收</button>
+                  </div>
+                  <div className='all'>
+                    <button onClick={async() => {
+                      setFilters({goods_type:null})
+                      handleOnConfirm();
+                      }}>全部</button>
                   </div>
                 </div>
                 <div className='commodity-type'>
