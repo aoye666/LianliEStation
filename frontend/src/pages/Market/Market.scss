@@ -35,6 +35,14 @@ $shadow-color: rgba(0, 0, 0, 0.1);
         width: 100vw;
         overflow: hidden;
 
+        .active-button{
+            button{
+                @extend.button-basic;
+                transform: translateY(-3px);
+                background-color: #4080bf;
+            }
+        }
+
         input:focus {
             border-color: #007bff; /* 聚焦时的边框颜色 */
             box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* 聚焦时的阴影效果 */
@@ -93,7 +101,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
                     justify-content: center;
                     align-items: center;
                     img{
-                        width: 200px;
+                        width: 80%;
                     }
                 }
 
@@ -122,14 +130,14 @@ $shadow-color: rgba(0, 0, 0, 0.1);
                                 }
                             }
     
-                            .buy{
+                            .receive{
                                 button{
                                     background-color: #edeb82;
                                     @extend.button-basic;
                                 }
                             }
 
-                            .all{
+                            .null{
                                 button{
                                     background-color: #9f9f9f;
                                     @extend.button-basic;

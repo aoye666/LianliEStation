@@ -3,7 +3,7 @@ import "./Market.scss"
 import Tabbar from '../../components/Tabbar/Tabbar'
 import more from '../../assets/more.png'
 import close from '../../assets/close.png'
-import topLogo from '../../assets/topLogo.png'
+import topLogo from '../../assets/banner2.png'
 import logo from '../../assets/logo.png'
 import search from '../../assets/search.png'
 import takePlace from '../../assets/takePlace.png'
@@ -15,6 +15,9 @@ const Market = () => {
   const [searchInputs, setSearchInputs]=useState('')
   const [showMore, setShowMore] = useState(false);
   const { maxMarketPage, goods, setMarketPage, filters, setFilters, updateGoods, clearGoods, clear, fetchGoods, clearFilters } = useMainStore();
+  const [marketTypeState, setMarketTypeState] = useState<string|null>(null);
+  const [commodityTypeState, setCommodityTypeState] = useState<string|null>(null);
+  const [campusState, setCampusState]=useState<string|null>(null);
   const scrollRef = useRef<HTMLDivElement|null>(null);
   const navigate = useNavigate();
   
@@ -107,43 +110,49 @@ const Market = () => {
           <div className='tag'>
               <div className='tag-item'>
                 <div className='market-type'>
-                  <div className='sell'>
+                  <div className={marketTypeState === 'sell'? 'active-button' : 'sell'}>
                     <button onClick={async() => {
                       setFilters({goods_type:'sell'})
                       handleOnConfirm();
+                      setMarketTypeState('sell');
                       }}>出</button>
                   </div>
-                  <div className='buy'>
+                  <div className={marketTypeState ==='receive'? 'active-button' :'receive'}>
                     <button onClick={async() => {
                       setFilters({goods_type:'receive'})
                       handleOnConfirm();
+                      setMarketTypeState('receive');
                       }}>收</button>
                   </div>
-                  <div className='all'>
+                  <div className={marketTypeState === null? 'active-button' : 'null'}>
                     <button onClick={async() => {
                       setFilters({goods_type:null})
                       handleOnConfirm();
+                      setMarketTypeState(null);
                       }}>全部</button>
                   </div>
                 </div>
                 <div className='commodity-type'>
                   <div className='detail'>
-                    <div>
+                    <div className={commodityTypeState === '跑腿代课'? 'active-button' : '跑腿代课'}>
                       <button onClick={async() => {
                         setFilters({tag: '跑腿代课'})
                         handleOnConfirm();
+                        setCommodityTypeState('跑腿代课');
                         }}>跑腿</button>
                     </div>
-                    <div>
+                    <div className={commodityTypeState === '数码电子'? 'active-button' : '数码电子'}>
                       <button onClick={async() => {
                         setFilters({tag: '数码电子'})
                         handleOnConfirm();
+                        setCommodityTypeState('数码电子');
                       }}>数码</button>
                     </div>
-                    <div>
+                    <div className={commodityTypeState === null? 'active-button' : 'null'}>
                       <button onClick={async() => {
                         setFilters({tag: null})
                         handleOnConfirm();
+                        setCommodityTypeState(null);
                       }}>全部</button>
                     </div>
                   </div>  

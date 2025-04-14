@@ -176,6 +176,7 @@ const useMainStore = create<MainState>()(
             const data = response.data.goods;
             set((state) => ({
               goods: [...state.goods, ...data], // 更新 posts 状态
+              maxMarketPage: false,
             }));
           }
           else if(response.status === 200 && response.data.goods.length === 0){
