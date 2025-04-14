@@ -6,6 +6,7 @@ dist/
 build/
 out/
 *.log
+public/
 
 # 忽略本地环境变量文件
 .env

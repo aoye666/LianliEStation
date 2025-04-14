@@ -1098,7 +1098,7 @@ images: [文件1.jpg, 文件2.jpg]
 
 ## forumRoutes
 
-### 删除校园墙帖子
+### 删除帖子
 
 基本信息
 
@@ -1107,9 +1107,10 @@ images: [文件1.jpg, 文件2.jpg]
 - **描述**: 删除校园墙帖子，管理员可硬删除（彻底删除数据及图片），普通用户只能软删除（修改状态）
 
 请求参数
-| 参数名 | 类型 | 必选 | 描述 |
-|-------|------|------|------|
-| post_id | String | 是 | 帖子 ID，作为 URL 路径参数提供 |
+
+| 参数名  | 类型   | 必选 | 描述                        |
+| ------- | ------ | ---- | --------------------------- |
+| post_id | String | 是   | 帖子ID，作为URL路径参数提供 |
 
 请求头
 
@@ -1118,79 +1119,83 @@ Authorization: Bearer {token}
 ```
 
 响应参数
-| 状态码 | 内容类型 | 描述 |
-|------|----------|------|
-| 200 | application/json | 删除成功 |
-| 401 | application/json | 未提供 Token 或 Token 无效 |
-| 403 | application/json | 没有权限删除此帖子（针对普通用户） |
-| 404 | application/json | 帖子不存在（针对管理员） |
-| 500 | application/json | 服务器错误 |
+
+| 状态码 | 内容类型         | 描述                               |
+| ------ | ---------------- | ---------------------------------- |
+| 200    | application/json | 删除成功                           |
+| 401    | application/json | 未提供Token或Token无效             |
+| 403    | application/json | 没有权限删除此帖子（针对普通用户） |
+| 404    | application/json | 帖子不存在（针对管理员）           |
+| 500    | application/json | 服务器错误                         |
 
 响应示例
 
 - 普通用户删除成功 (状态码：200)
 
-  ```json
-  {
-    "message": "删除成功"
-  }
-  ```
+	```json
+	{
+	  "message": "删除成功"
+	}
+	```
 
 - 管理员删除成功 (状态码：200)
 
-  ```json
-  {
-    "message": "管理员已完全删除帖子"
-  }
-  ```
+	```json
+	{
+	  "message": "管理员已完全删除帖子"
+	}
+	```
 
-- Token 未提供 (状态码：401)
+- Token未提供 (状态码：401)
 
-  ```json
-  {
-    "message": "未提供Token"
-  }
-  ```
+	```json
+	{
+	  "message": "未提供Token"
+	}
+	```
 
-- Token 无效 (状态码：401)
+- Token无效 (状态码：401)
 
-  ```json
-  {
-    "message": "无效的Token"
-  }
-  ```
+	```json
+	{
+	  "message": "无效的Token"
+	}
+	```
 
 - 权限不足 (状态码：403)
 
-  ```json
-  {
-    "message": "没有权限删除此帖子"
-  }
-  ```
+	```json
+	{
+	  "message": "没有权限删除此帖子"
+	}
+	```
 
 - 帖子不存在 (状态码：404)
 
-  ```json
-  {
-    "message": "帖子不存在"
-  }
-  ```
+	```json
+	{
+	  "message": "帖子不存在"
+	}
+	```
 
 - 服务器错误 (状态码：500)
-  ```json
-  {
-    "message": "服务器错误"
-  }
-  ```
+
+	```json
+	{
+	  "message": "服务器错误"
+	}
+	```
 
 **备注**
 
 - 该接口根据用户角色执行不同的删除操作：
-  - 管理员：执行硬删除，会彻底删除数据库记录及相关图片文件
-  - 普通用户：执行软删除，仅将帖子状态更新为"deleted"
+	- 管理员：执行硬删除，会彻底删除数据库记录及相关图片文件
+	- 普通用户：执行软删除，仅将帖子状态更新为"deleted"
 - 普通用户只能删除自己发布的帖子
 - 管理员可以删除任何帖子，无论发布者是谁
-- 已软删除的帖子将不会出现在校园墙帖子列表中
+- 已软删除的帖子将不会出现在帖子列表中
+
+## appealsRoutes
 
 ### 提交申诉
 
@@ -1331,7 +1336,7 @@ title: "全新笔记本电脑"
 content: "原价5000元，用了不到3个月，因换新出售"
 price: 3500
 campus_id: 1
-goods_type: "electronic"
+goods_type: "sell"
 tag: "computer"
 images: [文件1.jpg, 文件2.jpg]
 ```
@@ -1496,3 +1501,98 @@ Content-Type: application/json
 - 发布类型选项包括：sell（出售）或 receive（求购）
 - 用户必须登录才能使用此功能
 - 响应内容可直接用于商品发布表单的预填充
+
+
+
+### 发布校园墙帖子
+
+基本信息
+
+- **路径**: `/api/publish/posts`
+- **方法**: `POST`
+- **描述**: 发布新的校园墙帖子，包括文本内容和可选的图片（最多5张）
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+|-------|------|------|------|
+| title | String | 是 | 帖子标题 |
+| content | String | 是 | 帖子内容 |
+| campus_id | Number | 是 | 校区ID |
+| images | File[] | 否 | 帖子相关图片，最多5张 |
+
+请求头
+
+```
+Authorization: Bearer {token}
+Content-Type: multipart/form-data
+```
+
+请求体示例
+
+```
+FormData:
+title: "求推荐开发区美食"
+content: "最近搬到开发区，有什么好吃的餐厅推荐吗？"
+campus_id: 1
+images: [图片1.jpg, 图片2.jpg]
+```
+
+响应参数
+| 状态码 | 内容类型 | 描述 |
+|------|----------|------|
+| 201 | application/json | 发布成功 |
+| 400 | application/json | 缺少必要参数 |
+| 401 | application/json | 未提供Token或Token无效 |
+| 500 | application/json | 服务器错误 |
+
+响应示例
+
+- 成功响应 (状态码：201)
+
+  ```json
+  {
+    "message": "发布成功",
+    "image_urls": ["/uploads/image1.jpg", "/uploads/image2.jpg"]
+  }
+  ```
+
+- 参数错误 (状态码：400)
+
+  ```json
+  {
+    "message": "缺少必要参数"
+  }
+  ```
+
+- Token未提供 (状态码：401)
+
+  ```json
+  {
+    "message": "未提供Token"
+  }
+  ```
+
+- Token无效 (状态码：401)
+
+  ```json
+  {
+    "message": "无效的Token"
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 用户必须登录才能发布帖子
+- 图片上传字段名必须为"images"，最多允许上传5张图片
+- 图片将保存在服务器的`/uploads/`目录，并通过post_image表与帖子关联
+- 发布成功后，响应中会包含上传图片的URL路径
+- 如果服务器处理过程中出现错误，已上传的图片会被自动删除
+- 帖子创建时默认状态为"active"
+
