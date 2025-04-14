@@ -25,14 +25,14 @@ router.delete("/:post_id", async (req, res) => {
     // 如果是管理员，执行硬删除
     if (isAdmin) {
       // 先查询帖子是否存在
-      const [postRows] = await db.query("SELECT * FROM campus_wall_posts WHERE id = ?", [post_id]);
+      const [postRows] = await db.query("SELECT * FROM posts WHERE id = ?", [post_id]);
 
       if (postRows.length === 0) {
         return res.status(404).json({ message: "帖子不存在" });
       }
 
       // 查询帖子关联的所有图片
-      const [imageRows] = await db.query("SELECT image_url FROM campus_wall_images WHERE post_id = ?", [post_id]);
+      const [imageRows] = await db.query("SELECT image_url FROM post_image WHERE post_id = ?", [post_id]);
 
       // 删除文件系统中的图片文件
       const deleteImagePromises = imageRows.map(async (image) => {
@@ -49,8 +49,8 @@ router.delete("/:post_id", async (req, res) => {
       await Promise.all(deleteImagePromises);
 
       // 删除数据库中的记录
-      await db.query("DELETE FROM campus_wall_images WHERE post_id = ?", [post_id]);
-      await db.query("DELETE FROM campus_wall_posts WHERE id = ?", [post_id]);
+      await db.query("DELETE FROM post_image WHERE post_id = ?", [post_id]);
+      await db.query("DELETE FROM posts WHERE id = ?", [post_id]);
 
       return res.status(200).json({ message: "管理员已完全删除帖子" });
     } 
@@ -58,14 +58,14 @@ router.delete("/:post_id", async (req, res) => {
     // 普通用户，检查归属权并执行软删除
     else {
       // 验证帖子归属权
-      const [rows] = await db.query("SELECT * FROM campus_wall_posts WHERE id = ? AND author_id = ?", [post_id, author_id]);
+      const [rows] = await db.query("SELECT * FROM posts WHERE id = ? AND author_id = ?", [post_id, author_id]);
 
       if (rows.length === 0) {
         return res.status(403).json({ message: "没有权限删除此帖子" });
       }
 
       // 软删除帖子
-      await db.query("UPDATE campus_wall_posts SET status = 'deleted' WHERE id = ?", [post_id]);
+      await db.query("UPDATE posts SET status = 'deleted' WHERE id = ?", [post_id]);
 
       res.status(200).json({ message: "删除成功" });
     }

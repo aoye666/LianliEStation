@@ -129,4 +129,75 @@ router.post("/template", async (req, res) => {
   }
 });
 
+// 发布校园墙帖子
+router.post("/posts", upload.array("images", 5), async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  const files = req.files;
+
+  if (!token) {
+    if (files && files.length) {
+      for (const file of files) {
+        await fs.promises.unlink(file.path).catch(() => {});
+      }
+    }
+    return res.status(401).json({ message: "未提供Token" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const author_id = decoded.user_id;
+    const { title, content, campus_id } = req.body;
+
+    // 检查必需参数
+    if (!title || !content || !campus_id) {
+      if (files && files.length) {
+        for (const file of files) {
+          await fs.promises.unlink(file.path).catch(() => {});
+        }
+      }
+      return res.status(400).json({ message: "缺少必要参数" });
+    }
+
+    // 插入帖子
+    const [result] = await db.query(
+      "INSERT INTO posts (title, content, author_id, campus_id) VALUES (?, ?, ?, ?)", 
+      [title, content, author_id, campus_id]
+    );
+
+    const postId = result.insertId;
+    if (!postId) {
+      if (files && files.length) {
+        for (const file of files) {
+          await fs.promises.unlink(file.path).catch(() => {});
+        }
+      }
+      return res.status(500).json({ message: "帖子插入失败，无法获取postId" });
+    }
+
+    // 处理图片上传
+    let imageUrls = [];
+    if (files && Array.isArray(files) && files.length > 0) {
+      imageUrls = files.map((file) => `/uploads/${file.filename}`);
+      const imagePromises = imageUrls.map((url) => 
+        db.query("INSERT INTO post_image (post_id, image_url) VALUES (?, ?)", [postId, url])
+      );
+      await Promise.all(imagePromises);
+    }
+
+    // 返回成功信息
+    res.status(201).json({ message: "发布成功", image_urls: imageUrls });
+  } catch (err) {
+    console.error(err);
+    if (files && files.length) {
+      for (const file of files) {
+        await fs.promises.unlink(file.path).catch(() => {});
+      }
+    }
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "无效的Token" });
+    }
+    res.status(500).json({ message: "服务器错误" });
+  }
+});
+
 export default router;
