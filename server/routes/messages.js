@@ -56,7 +56,7 @@ router.put("/status/:message_id", async (req, res) => {
 
     let result;
     if (type === "appeal") {
-      // 检查是否是该用户的通知
+      // 检查是否是该用户的申诉
       const [appealCheck] = await db.query("SELECT * FROM appeals WHERE id = ? AND author_id = ?", [message_id, userId]);
 
       if (!appealCheck || appealCheck.length === 0) {

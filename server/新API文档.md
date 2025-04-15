@@ -1108,9 +1108,9 @@ images: [文件1.jpg, 文件2.jpg]
 
 请求参数
 
-| 参数名  | 类型   | 必选 | 描述                        |
-| ------- | ------ | ---- | --------------------------- |
-| post_id | String | 是   | 帖子ID，作为URL路径参数提供 |
+| 参数名  | 类型   | 必选 | 描述                           |
+| ------- | ------ | ---- | ------------------------------ |
+| post_id | String | 是   | 帖子 ID，作为 URL 路径参数提供 |
 
 请求头
 
@@ -1123,7 +1123,7 @@ Authorization: Bearer {token}
 | 状态码 | 内容类型         | 描述                               |
 | ------ | ---------------- | ---------------------------------- |
 | 200    | application/json | 删除成功                           |
-| 401    | application/json | 未提供Token或Token无效             |
+| 401    | application/json | 未提供 Token 或 Token 无效         |
 | 403    | application/json | 没有权限删除此帖子（针对普通用户） |
 | 404    | application/json | 帖子不存在（针对管理员）           |
 | 500    | application/json | 服务器错误                         |
@@ -1132,65 +1132,65 @@ Authorization: Bearer {token}
 
 - 普通用户删除成功 (状态码：200)
 
-	```json
-	{
-	  "message": "删除成功"
-	}
-	```
+  ```json
+  {
+    "message": "删除成功"
+  }
+  ```
 
 - 管理员删除成功 (状态码：200)
 
-	```json
-	{
-	  "message": "管理员已完全删除帖子"
-	}
-	```
+  ```json
+  {
+    "message": "管理员已完全删除帖子"
+  }
+  ```
 
-- Token未提供 (状态码：401)
+- Token 未提供 (状态码：401)
 
-	```json
-	{
-	  "message": "未提供Token"
-	}
-	```
+  ```json
+  {
+    "message": "未提供Token"
+  }
+  ```
 
-- Token无效 (状态码：401)
+- Token 无效 (状态码：401)
 
-	```json
-	{
-	  "message": "无效的Token"
-	}
-	```
+  ```json
+  {
+    "message": "无效的Token"
+  }
+  ```
 
 - 权限不足 (状态码：403)
 
-	```json
-	{
-	  "message": "没有权限删除此帖子"
-	}
-	```
+  ```json
+  {
+    "message": "没有权限删除此帖子"
+  }
+  ```
 
 - 帖子不存在 (状态码：404)
 
-	```json
-	{
-	  "message": "帖子不存在"
-	}
-	```
+  ```json
+  {
+    "message": "帖子不存在"
+  }
+  ```
 
 - 服务器错误 (状态码：500)
 
-	```json
-	{
-	  "message": "服务器错误"
-	}
-	```
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
 
 **备注**
 
 - 该接口根据用户角色执行不同的删除操作：
-	- 管理员：执行硬删除，会彻底删除数据库记录及相关图片文件
-	- 普通用户：执行软删除，仅将帖子状态更新为"deleted"
+  - 管理员：执行硬删除，会彻底删除数据库记录及相关图片文件
+  - 普通用户：执行软删除，仅将帖子状态更新为"deleted"
 - 普通用户只能删除自己发布的帖子
 - 管理员可以删除任何帖子，无论发布者是谁
 - 已软删除的帖子将不会出现在帖子列表中
@@ -1298,6 +1298,121 @@ images: [file1.jpg, file2.jpg]
 - 图片上传为可选项，最多支持 3 张图片
 - 上传的图片将保存在服务器的`/uploads/`目录
 - 若申诉提交失败，已上传的图片将被自动删除
+
+### 查询申诉
+
+基本信息
+
+- 路径: `/api/appeals/search`
+- 方法: `GET`
+- 描述: 查询用户提交的申诉记录
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ------ | ------ | ---- | ---------------------- |
+| status | String | 否 | 过滤申诉状态(`pending`或`resolved`)，不提供则返回所有状态的申诉 |
+
+请求头
+| 参数名 | 类型 | 必选 | 描述 |
+| ------------ | ------ | ---- | ------------------------- |
+| Authorization | String | 是 | 身份验证令牌，格式为`Bearer {token}` |
+
+请求示例
+
+```
+GET /api/appeal/search?status=pending
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                       |
+| ------ | ---------------- | -------------------------- |
+| 200    | application/json | 查询成功，返回申诉列表     |
+| 401    | application/json | 未提供 Token 或 Token 无效 |
+| 404    | application/json | 用户不存在                 |
+| 500    | application/json | 服务器错误                 |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "查询成功",
+    "data": [
+      {
+        "id": 5,
+        "author_id": 3,
+        "post_id": 3,
+        "content": "测试测试测试",
+        "type": "post",
+        "status": "pending",
+        "read_status": "unread",
+        "created_at": "2025-04-14T20:50:52.000Z",
+        "images": ["/uploads/1744692652944-mtflasewzvs.jpg", "/uploads/1744692652935-5e4lmlppy77.jpg"]
+      },
+      {
+        "id": 3,
+        "author_id": 3,
+        "post_id": 12,
+        "content": "误删帖子，申请恢复",
+        "type": "post",
+        "status": "pending",
+        "read_status": "unread",
+        "created_at": "2025-01-15T01:00:00.000Z",
+        "images": ["/uploads/wall/student_card.jpg"]
+      }
+    ]
+  }
+  ```
+
+- 查询结果为空 (状态码：200)
+
+  ```json
+  {
+    "message": "查询成功",
+    "data": []
+  }
+  ```
+
+- 未提供 Token (状态码：401)
+
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token 无效 (状态码：401)
+
+  ```json
+  {
+    "message": "无效的 Token"
+  }
+  ```
+
+- 用户不存在 (状态码：404)
+
+  ```json
+  {
+    "message": "用户不存在"
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 该接口需要用户登录，并通过 Authorization 头部提供有效的 JWT 令牌
+- 返回的申诉列表按创建时间降序排序
+- 每条申诉记录包含相关图片的 URL 列表
+- 申诉状态可能的值包括：pending（待处理）、resolved（已处理）
+- 并不筛选是否已读，由`read_status`标识并交由前端结构
 
 ## publishRoutes
 
@@ -1502,23 +1617,21 @@ Content-Type: application/json
 - 用户必须登录才能使用此功能
 - 响应内容可直接用于商品发布表单的预填充
 
-
-
 ### 发布校园墙帖子
 
 基本信息
 
 - **路径**: `/api/publish/posts`
 - **方法**: `POST`
-- **描述**: 发布新的校园墙帖子，包括文本内容和可选的图片（最多5张）
+- **描述**: 发布新的校园墙帖子，包括文本内容和可选的图片（最多 5 张）
 
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
 |-------|------|------|------|
 | title | String | 是 | 帖子标题 |
 | content | String | 是 | 帖子内容 |
-| campus_id | Number | 是 | 校区ID |
-| images | File[] | 否 | 帖子相关图片，最多5张 |
+| campus_id | Number | 是 | 校区 ID |
+| images | File[] | 否 | 帖子相关图片，最多 5 张 |
 
 请求头
 
@@ -1542,7 +1655,7 @@ images: [图片1.jpg, 图片2.jpg]
 |------|----------|------|
 | 201 | application/json | 发布成功 |
 | 400 | application/json | 缺少必要参数 |
-| 401 | application/json | 未提供Token或Token无效 |
+| 401 | application/json | 未提供 Token 或 Token 无效 |
 | 500 | application/json | 服务器错误 |
 
 响应示例
@@ -1564,7 +1677,7 @@ images: [图片1.jpg, 图片2.jpg]
   }
   ```
 
-- Token未提供 (状态码：401)
+- Token 未提供 (状态码：401)
 
   ```json
   {
@@ -1572,7 +1685,7 @@ images: [图片1.jpg, 图片2.jpg]
   }
   ```
 
-- Token无效 (状态码：401)
+- Token 无效 (状态码：401)
 
   ```json
   {
@@ -1590,9 +1703,208 @@ images: [图片1.jpg, 图片2.jpg]
 **备注**
 
 - 用户必须登录才能发布帖子
-- 图片上传字段名必须为"images"，最多允许上传5张图片
-- 图片将保存在服务器的`/uploads/`目录，并通过post_image表与帖子关联
-- 发布成功后，响应中会包含上传图片的URL路径
+- 图片上传字段名必须为"images"，最多允许上传 5 张图片
+- 图片将保存在服务器的`/uploads/`目录，并通过 post_image 表与帖子关联
+- 发布成功后，响应中会包含上传图片的 URL 路径
 - 如果服务器处理过程中出现错误，已上传的图片会被自动删除
 - 帖子创建时默认状态为"active"
 
+## messageRoutes
+
+### 获取通知
+
+基本信息
+
+- 路径: `/api/message/`
+- 方法: `GET`
+- 描述: 获取用户的所有通知消息
+
+请求头
+| 参数名 | 类型 | 必选 | 描述 |
+| ------------ | ------ | ---- | ------------------------- |
+| Authorization | String | 是 | 身份验证令牌，格式为`Bearer {token}` |
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                       |
+| ------ | ---------------- | -------------------------- |
+| 200    | application/json | 成功，返回通知列表         |
+| 401    | application/json | 未提供 Token 或 Token 无效 |
+| 500    | application/json | 服务器错误                 |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  [
+    {
+      "id": 14,
+      "user_id": 3,
+      "response_type": "violation",
+      "related_id": 1,
+      "content": "您的帖子因包含广告内容被移除，这违反了我们的社区规则第3.2条。",
+      "read_status": "read",
+      "created_at": "2025-04-14T20:42:47.000Z"
+    },
+    {
+      "id": 15,
+      "user_id": 3,
+      "response_type": "appeal",
+      "related_id": 1,
+      "content": "我们已收到您的申诉，经审核后认为您的帖子不违反社区规定，已恢复显示。",
+      "read_status": "unread",
+      "created_at": "2025-04-14T20:42:47.000Z"
+    },
+    {
+      "id": 16,
+      "user_id": 3,
+      "response_type": "violation",
+      "related_id": 1,
+      "content": "您的账户因多次违规已被临时限制发布内容，限制期为7天。",
+      "read_status": "unread",
+      "created_at": "2025-04-14T20:42:47.000Z"
+    }
+  ]
+  ```
+
+- 未提供 Token (状态码：401)
+
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token 无效 (状态码：401)
+
+  ```json
+  {
+    "message": "Token 无效"
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 该接口需要用户登录，并通过 Authorization 头部提供有效的 JWT 令牌
+- 返回的通知列表按创建时间降序排序
+
+---
+
+### 修改通知状态
+
+基本信息
+
+- 路径: `/api/message/status/:message_id`
+- 方法: `PUT`
+- 描述: 修改指定通知的状态（已读/未读）
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ------ | ------ | ---- | ------------------------ |
+| message_id | Number | 是 | 通知 ID (URL 参数) |
+| type | String | 是 | 通知类型，"appeal"或"response" |
+| status | Number | 是 | 状态值，unread 表示未读，read 表示已读 |
+
+请求头
+| 参数名 | 类型 | 必选 | 描述 |
+| ------------ | ------ | ---- | ------------------------- |
+| Authorization | String | 是 | 身份验证令牌，格式为`Bearer {token}` |
+
+请求体示例
+
+```json
+{
+  "type": "response",
+  "status": 1
+}
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                         |
+| ------ | ---------------- | ---------------------------- |
+| 200    | application/json | 通知状态更新成功             |
+| 400    | application/json | 缺少必要参数或无效的通知类型 |
+| 401    | application/json | 未提供 Token 或 Token 无效   |
+| 403    | application/json | 无权限修改此通知             |
+| 404    | application/json | 通知不存在或无更新           |
+| 500    | application/json | 服务器错误                   |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "通知状态更新成功"
+  }
+  ```
+
+- 缺少必要参数 (状态码：400)
+
+  ```json
+  {
+    "message": "缺少必要参数"
+  }
+  ```
+
+- 无效的通知类型 (状态码：400)
+
+  ```json
+  {
+    "message": "无效的通知类型"
+  }
+  ```
+
+- 未提供 Token (状态码：401)
+
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token 无效 (状态码：401)
+
+  ```json
+  {
+    "message": "Token 无效"
+  }
+  ```
+
+- 无权限 (状态码：403)
+
+  ```json
+  {
+    "message": "无权限修改此通知"
+  }
+  ```
+
+- 通知不存在 (状态码：404)
+
+  ```json
+  {
+    "message": "通知不存在或无更新"
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 该接口需要用户登录，并通过 Authorization 头部提供有效的 JWT 令牌
+- 用户只能修改属于自己的通知状态
+- type 参数指定通知类型，必须为"appeal"或"response"

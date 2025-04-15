@@ -96,4 +96,81 @@ router.post("/publish", upload.array("images", 3), async (req, res) => {
   }
 });
 
+// 查询申诉
+router.get("/search", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  const { status } = req.query;
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  if (status && status !== "pending" && status !== "resolved") {
+    return res.status(400).json({ message: "无效的状态参数，只能为pending或resolved" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const user_id = decoded.user_id;
+
+    // 检查用户是否存在
+    const [userCheck] = await db.query("SELECT id FROM users WHERE id = ?", [user_id]);
+    if (userCheck.length === 0) {
+      return res.status(404).json({ message: "用户不存在" });
+    }
+
+    let appeals;
+
+    if (status) {
+      [appeals] = await db.query(
+        `SELECT a.* FROM appeals a
+         WHERE a.author_id = ? AND a.status = ? AND a.status != 'deleted'
+         ORDER BY a.created_at DESC`,
+        [user_id, status]
+      );
+    } else {
+      [appeals] = await db.query(
+        `SELECT a.* FROM appeals a
+         WHERE a.author_id = ? AND a.status != 'deleted'
+         ORDER BY a.created_at DESC`,
+        [user_id]
+      );
+    }
+
+    if (appeals.length === 0) {
+      return res.status(200).json({
+        message: "查询成功",
+        data: [],
+      });
+    }
+    const appealIds = appeals.map((appeal) => appeal.id);
+
+    const [imageRows] = await db.query("SELECT appeal_id, image_url FROM appeal_images WHERE appeal_id IN (?)", [appealIds]);
+
+    const imagesMap = imageRows.reduce((map, row) => {
+      if (!map[row.appeal_id]) {
+        map[row.appeal_id] = [];
+      }
+      map[row.appeal_id].push(row.image_url);
+      return map;
+    }, {});
+
+    const result = appeals.map((appeal) => ({
+      ...appeal,
+      images: imagesMap[appeal.id] || [],
+    }));
+
+    res.status(200).json({
+      message: "查询成功",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "无效的 Token" });
+    }
+    res.status(500).json({ message: "服务器错误" });
+  }
+});
+
 export default router;

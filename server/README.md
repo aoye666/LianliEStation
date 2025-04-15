@@ -197,6 +197,14 @@ VALUES
 (3, 'violation', 1, '您的帖子因包含广告内容被移除，这违反了我们的社区规则第3.2条。', 'read'),
 (3, 'appeal', 1, '我们已收到您的申诉，经审核后认为您的帖子不违反社区规定，已恢复显示。', 'unread'),
 (3, 'violation', 1, '您的账户因多次违规已被临时限制发布内容，限制期为7天。', 'unread');
+
+-- 插入对应的图片数据
+INSERT INTO `appeal_image` (`appeal_id`, `image_url`, `created_at`)
+VALUES
+(1, '/uploads/wall/study_group.jpg', '2025-01-15 08:31:00'),
+(2, '/uploads/wall/morning_run1.jpg', '2025-01-15 09:01:00'),
+(2, '/uploads/wall/morning_run2.jpg', '2025-01-15 09:01:00'),
+(3, '/uploads/wall/student_card.jpg', '2025-01-15 14:21:00');
 ```
 
 ##
