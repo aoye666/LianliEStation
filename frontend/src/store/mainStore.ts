@@ -122,7 +122,7 @@ const useMainStore = create<MainState>()(
       },
       clear: () =>
         set(() => ({
-          // goods: [],
+          goods: [],
           maxMarketPage: false,
           page: 1,
           filters: {

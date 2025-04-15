@@ -113,10 +113,18 @@ router.post("/template", async (req, res) => {
         },
       ],
     });
+    let content = completion.choices[0].message.content.trim();
+    if (content.startsWith("```")) {
+      content = content.replace(/^```json\s*|\s*```$/g, "");
+    }
+    let responseData
 
-    if (completion?.choices?.[0]?.message?.content) {
-      const responseData = JSON.parse(completion.choices[0].message.content);
+    try {
+      responseData = JSON.parse(content);
       return res.status(200).json(responseData);
+    } catch (err) {
+      console.error("JSON 解析失败:", err);
+      return res.status(500).json({ message: "AI 返回格式错误，无法解析 JSON" });
     }
 
     throw new Error("生成失败");

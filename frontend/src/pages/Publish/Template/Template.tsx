@@ -228,7 +228,7 @@ const Template = () => {
     formData.append('status', 'active');
     formData.append('price', price.toString());
     formData.append('campus_id', campus_id.toString());
-    formData.append('post_type', post_type);
+    formData.append('goods_type', post_type);
     formData.append('tag', tag);
     images.forEach((image) => {
       formData.append('images', image);

@@ -1,4 +1,5 @@
-import { Router } from "express";
+import express from 'express';
+const { Router, text } = express;
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken"; // 用于生成 JWT
 import OpenAI from "openai";
@@ -55,6 +56,7 @@ router.post("/generate", async (req, res) => {
     throw new Error("生成失败");
   } catch (error) {
     console.error("AI 生成错误:", error);
+    console.error("req.body:", req.body);
     if (error.name === "JsonWebTokenError") {
       return res.status(401).json({ message: "无效的 Token" });
     }
