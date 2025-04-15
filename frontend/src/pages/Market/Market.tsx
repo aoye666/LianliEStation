@@ -134,18 +134,18 @@ const Market = () => {
                 </div>
                 <div className='commodity-type'>
                   <div className='detail'>
-                    <div className={commodityTypeState === '跑腿代课'? 'active-button' : '跑腿代课'}>
+                    <div className={commodityTypeState === '服务'? 'active-button' : '服务'}>
                       <button onClick={async() => {
-                        setFilters({tag: '跑腿代课'})
+                        setFilters({tag: '服务'})
                         handleOnConfirm();
-                        setCommodityTypeState('跑腿代课');
-                        }}>跑腿</button>
+                        setCommodityTypeState('服务');
+                        }}>服务</button>
                     </div>
-                    <div className={commodityTypeState === '数码电子'? 'active-button' : '数码电子'}>
+                    <div className={commodityTypeState === '电子产品'? 'active-button' : '电子产品'}>
                       <button onClick={async() => {
-                        setFilters({tag: '数码电子'})
+                        setFilters({tag: '电子产品'})
                         handleOnConfirm();
-                        setCommodityTypeState('数码电子');
+                        setCommodityTypeState('电子产品');
                       }}>数码</button>
                     </div>
                     <div className={commodityTypeState === null? 'active-button' : 'null'}>
@@ -202,10 +202,10 @@ const Market = () => {
                               <span>类别</span>
                           </div>
                           <div className='sort-list'>
-                              <div className='item' onClick={() => {setFilters({tag: '学业资料'})}}>学业资料</div>
-                              <div className='item' onClick={() => {setFilters({tag: '跑腿代课'})}}>跑腿代课</div>
+                              <div className='item' onClick={() => {setFilters({tag: '教材'})}}>教材</div>
+                              <div className='item' onClick={() => {setFilters({tag: '服务'})}}>服务</div>
                               <div className='item' onClick={() => {setFilters({tag: '生活用品'})}}>生活用品</div>
-                              <div className='item' onClick={() => {setFilters({tag: '数码电子'})}}>数码电子</div>
+                              <div className='item' onClick={() => {setFilters({tag: '电子产品'})}}>电子产品</div>
                               <div className='item' onClick={() => {setFilters({tag: '拼单组队'})}}>拼单组队</div>
                               <div className='item' onClick={() => {setFilters({tag: '捞人询问'})}}>捞人询问</div>
                               <div className='item' onClick={() => {setFilters({tag: "其他"})}}>其他</div>

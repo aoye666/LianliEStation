@@ -11,6 +11,7 @@ import close from "../../../assets/close.svg";
 import drop from "../../../assets/drop.svg";
 import share from "../../../assets/share.svg";
 import left from "../../../assets/left.svg";
+import takePlace from "../../../assets/takePlace.png";
 
 interface Goods {
   id: number;
@@ -176,7 +177,9 @@ const Detail = () => {
         <div className="slider-container">
           <img
             className="slider-item"
-            src={currentGoods?.images[currentIndex]}
+            src={currentGoods?.images?.[currentIndex]
+              ? `http://localhost:5000${currentGoods.images[currentIndex]}`
+              : takePlace}
             alt={`${currentIndex + 1}`}
           />
           <div className="slider-index">

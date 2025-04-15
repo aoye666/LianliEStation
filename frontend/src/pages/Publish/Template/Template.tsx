@@ -298,11 +298,11 @@ const Template = () => {
             <div className='dropdown-category'>
               <button className="dropdown-button">{`${tag}`}</button>
                 <div className="dropdown-menu">
-                  <div className="dropdown-item" onClick={(e) => setTag(e)}>跑腿代课</div>
-                  <div className="dropdown-item" onClick={(e) => setTag(e)}>数码电子</div>
+                  <div className="dropdown-item" onClick={(e) => setTag(e)}>服务</div>
+                  <div className="dropdown-item" onClick={(e) => setTag(e)}>电子产品</div>
                   <div className="dropdown-item" onClick={(e) => setTag(e)}>生活用品</div>
                   <div className="dropdown-item" onClick={(e) => setTag(e)}>拼单组队</div>
-                  <div className="dropdown-item" onClick={(e) => setTag(e)}>学业资料</div>
+                  <div className="dropdown-item" onClick={(e) => setTag(e)}>教材</div>
                   <div className="dropdown-item" onClick={(e) => setTag(e)}>捞人询问</div>
                   <div className="dropdown-item" onClick={(e) => setTag(e)}>其他</div>
                 </div>
