@@ -2,7 +2,7 @@ import Navbar from "../../../../components/Navbar/Navbar";
 import "./Reset.scss";
 import { useParams, Navigate, useNavigate } from "react-router-dom";
 import { useUserStore } from "../../../../store";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Forget from "../Forget/Forget";
 
 interface Profile {
@@ -25,14 +25,19 @@ const Reset = () => {
     nickname: currentUser?.nickname || "",
     campus_id: currentUser?.campus_id || 1,
     qq_id: currentUser?.qq || "",
-    avatar: undefined,
+    avatar: undefined, // file类型
     theme_id: currentUser?.theme_id,
-    background_url: undefined,
-    banner_url: undefined,
+    background_url: undefined, // file类型
+    banner_url: undefined, // file类型
   };
   const [profile, setProfile] = useState<Profile>(defaultProfile);
   const { type } = useParams();
   const navigate = useNavigate();
+
+
+  useEffect(() => {
+    console.log(profile)
+  }, [currentUser]);
 
   const handleChange =
     (key: keyof Profile) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,6 +63,7 @@ const Reset = () => {
       }
     };
 
+  // 设置个人信息（非图片）
   const handleProfileSubmit = async () => {
     changeProfile(
       profile?.nickname || "",
@@ -67,20 +73,19 @@ const Reset = () => {
     navigate("/user/settings");
   };
 
+  // 设置图片
   const handleBannerSubmit = () => {
     if (profile?.banner_url) {
       changeImage("banner", profile.banner_url); // 传递文件对象
     }
     navigate("/user/settings");
   };
-
   const handleBackgroundSubmit = () => {
     if (profile?.background_url) {
       changeImage("background", profile.background_url); // 传递文件对象
     }
     navigate("/user/settings");
   };
-
   const handleAvatarSubmit = () => {
     if (profile?.avatar) {
       changeImage("avatar", profile.avatar); // 传递文件对象
@@ -88,6 +93,7 @@ const Reset = () => {
     navigate("/user/settings");
   };
 
+  // 设置主题
   const handleThemeSubmit = () => {
     changeProfile(currentUser?.nickname || "", currentUser?.campus_id || 1, currentUser?.qq || "", profile?.theme_id || 1);
     navigate("/user/settings");

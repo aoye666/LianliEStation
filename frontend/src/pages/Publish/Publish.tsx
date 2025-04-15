@@ -28,18 +28,21 @@ const Publish: React.FC = () => {
     Array<{ role: string; content: string }>
   >([]);
   const [previousText, setPreviousText] = useState<string>("");
+  const [backgroundFile, setBackgroundFile] = useState<string | undefined>();
 
   const token = Cookies.get("auth-token");
   const { currentUser } =  useUserStore();
 
   // 将图片转换为Base64并存储到localStorage  
     const storeImagesInLocalStorage = async () => {  
-      const backgroundUrl = currentUser?.background_url ? `http://localhost:5000/api/images/${currentUser.background_url}` : null;  
-  
-      if (backgroundUrl) {  
-        const backgroundBase64: any = await fetchImageAsBase64(backgroundUrl);  
+      if (currentUser&&currentUser.background_url&&currentUser.background_url!== "/uploads/default_background.png") {  
+        const backgroundBase64: any = await fetchImageAsBase64(`http://localhost:5000${currentUser.background_url}`);  
         localStorage.setItem("userBackground", backgroundBase64);  
-      }  
+      } 
+
+      // 获取localStorage中的图片  
+      let backgroundTemp = getImageFromLocalStorage("userBackground") || undefined;
+      setBackgroundFile(backgroundTemp);
     };  
     
     // 从URL获取Base64  
@@ -57,15 +60,12 @@ const Publish: React.FC = () => {
       // 存储请求到的图片  
       if (!localStorage.getItem("userBackground"))
       storeImagesInLocalStorage();  
-    }, [token]);  
+    }, [token, currentUser?.background_url,backgroundFile]);  
   
     // 从localStorage获取图片的函数  
     const getImageFromLocalStorage = (key: string) => {  
       return localStorage.getItem(key) || null; // 如果不存在返回 null  
     };  
-  
-    // 获取发布页背景图片  
-    const backgroundSrc = getImageFromLocalStorage("userBackground") || undefined;  
 
   // 设置对话框自适应高度
   const handleHeight = () => {
@@ -81,13 +81,11 @@ const Publish: React.FC = () => {
       alert("请输入商品信息");
       return;
     }
-
     // 添加用户对话框
     setDialogHistory((prevHistory) => [
       ...prevHistory,
       { role: "user", content: text },
     ]);
-
     // 调用API生成模板
     try {
       const res = await axios.post(
@@ -99,7 +97,6 @@ const Publish: React.FC = () => {
           },
         }
       );
-
       if (res) {
         // 添加AI对话框
         setDialogHistory((prevHistory) => [
@@ -122,7 +119,6 @@ const Publish: React.FC = () => {
       }
       alert("生成失败，请重试");
     }
-
     // 清空文本框,重置高度
     if (textareaValue) {
       setPreviousText(textareaValue);
@@ -185,9 +181,9 @@ const Publish: React.FC = () => {
     <div className="publish-container">
       <Navbar title="发布助手小e" />
       <div className="dialog-container" ref={containerRef}>
-        {currentUser?.background_url ? (
+        {backgroundFile ? (
           <img
-            src={backgroundSrc}
+            src={backgroundFile}
             alt="背景"
             className="dialog-bg"
           ></img>

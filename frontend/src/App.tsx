@@ -26,7 +26,7 @@ const History = React.lazy(() => import("./pages/User/History/History"));
 
 const App: React.FC = () => {
   // 检查是否登录并获取用户信息
-  const { isAuthenticated, fetchUserProfile } = useUserStore();
+  const { token, isAuthenticated, fetchUserProfile, currentUser } = useUserStore();
 
   // 锁定竖屏
   const lockOrientation = () => {
@@ -56,12 +56,6 @@ const App: React.FC = () => {
       window.removeEventListener("orientationchange", handleOrientationChange);
     };
   }, []);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchUserProfile(); // 初始化 currentUser
-    }
-  }, [isAuthenticated]);
 
   const router = createBrowserRouter([
     {

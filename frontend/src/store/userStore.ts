@@ -118,6 +118,7 @@ const useUserStore = create<UserState>()(
       logout: () => {
         Cookies.remove("auth-token"); // 登出时移除 cookie
         set({ isAuthenticated: false, token: null, currentUser: null, isAdmin: false, users: [] });
+        localStorage.clear(); // 登出时清除 localStorage
       },
       deleteUser: async (username: string) => {
         try {
@@ -231,6 +232,17 @@ const useUserStore = create<UserState>()(
             },
           }));
 
+          // 更新 localStorage
+          let localStorageKey = "";
+          if (type === "background") {
+            localStorageKey = "userBackground";
+          } else if (type === "banner") {
+            localStorageKey = "userBanner";
+          } else if (type === "avatar") {
+            localStorageKey = "userAvatar";
+          }
+          localStorage.removeItem(localStorageKey)
+
           console.log(res.data);
         } catch (error: any) {
           if (error.response) console.error(error.response.data.message);
@@ -316,7 +328,7 @@ const useUserStore = create<UserState>()(
       // },
     }),
     {
-      name: "user-storage",
+      name: "userStore",
     }
   )
 );
