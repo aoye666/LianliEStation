@@ -235,7 +235,7 @@ const Template = () => {
     });
     formData.append('likes', likes.toString());
     formData.append('complints', complints.toString());
-    axios.post('http://localhost:5000/api/posts/publish', formData,{
+    axios.post('http://localhost:5000/api/publish/goods', formData,{
       headers: {
         'Content-Type': 'multipart/form-data',
         'Authorization': `Bearer ${token}`

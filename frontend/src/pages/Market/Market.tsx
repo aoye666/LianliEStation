@@ -3,7 +3,7 @@ import "./Market.scss"
 import Tabbar from '../../components/Tabbar/Tabbar'
 import more from '../../assets/more.png'
 import close from '../../assets/close.png'
-import topLogo from '../../assets/banner2.png'
+import topLogo from '../../assets/banner3.png'
 import logo from '../../assets/logo.png'
 import search from '../../assets/search.png'
 import takePlace from '../../assets/takePlace.png'
@@ -89,9 +89,9 @@ const Market = () => {
 
       <div className='market-navbar'>   
 
-      <div className='logo'><img src={logo} alt='logo' /></div>
-        <input type="text" placeholder="搜好物" value={searchInputs} onChange={handleChange} />
-      <div className="icon" onClick={handleSearch}><img src={search} alt='search' /></div>
+        <div className='logo'><img src={logo} alt='logo' /></div>
+          <input type="text" placeholder="搜好物" value={searchInputs} onChange={handleChange} />
+        <div className="icon" onClick={handleSearch}><img src={search} alt='search' /></div>
 
       </div>
     

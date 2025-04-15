@@ -196,15 +196,24 @@ const useRecordStore = create<RecordState>((set, get) => ({
   favoritesGoods: [],
   favoritePosts: [],
   getFavoritesGoods: async () => {
-    const { data } = await axios.get<FavoriteGoods[]>(
-      "http://localhost:5000/api/favorites/user/favorites",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    set({ favoritesGoods: data });
+    // try{
+    //   const res = await axios.get<FavoriteGoods[]>(
+    //     "http://localhost:5000/api/favorites/user/favorites",
+    //     {
+    //       headers: {
+    //         Authorization: `Bearer ${token}`,
+    //       },
+    //     }
+    //   );
+
+    //   if(res.status === 200 && res.data){
+    //     set({ favoritesGoods: res.data });
+    //   }else {
+    //     // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
+    //     console.log("No goods available or unexpected response status");
+    //   }
+    // }
+
   },
   addFavoriteGoods: (favoriteGoods) => {
     axios.post("http://localhost:5000/api/favorites/add", favoriteGoods.id, {
