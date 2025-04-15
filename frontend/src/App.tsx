@@ -101,7 +101,7 @@ const App: React.FC = () => {
       ),
     },
     {
-      path: "/market/:postId",
+      path: "/market/:goodsId",
       element: (
         <ProtectedRoute>
           <Detail />

@@ -3,14 +3,14 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom"; // 使用 useParams 从路由获取参数
 import axios from "axios";
 import "./Detail.scss";
-import copy from "../../../assets/copy.png";
-import stars from "../../../assets/stars.png";
-import like from "../../../assets/like.png";
-import dislike from "../../../assets/dislike.png";
-import close from "../../../assets/close.png";
-import drop from "../../../assets/drop.png";
-import share from "../../../assets/share.png";
-import left from "../../../assets/left.png";
+import copy from "../../../assets/copy.svg";
+import stars from "../../../assets/favorites.svg";
+import like from "../../../assets/like.svg";
+import dislike from "../../../assets/dislike.svg";
+import close from "../../../assets/close.svg";
+import drop from "../../../assets/drop.svg";
+import share from "../../../assets/share.svg";
+import left from "../../../assets/left.svg";
 
 interface Goods {
   id: number;
@@ -59,11 +59,9 @@ const Detail = () => {
   const handleTouchStart = (e: any) => {
     touchStartX.current = e.touches[0].clientX; // 记录触摸起始位置
   };
-
   const handleTouchMove = (e: any) => {
     touchEndX.current = e.touches[0].clientX; // 记录触摸结束位置
   };
-
   const handleTouchEnd = () => {
     const distance = touchStartX.current - touchEndX.current; // 计算滑动距离
     if (distance > 50) {
@@ -77,7 +75,6 @@ const Detail = () => {
     if (currentGoods?.images.length)
     setCurrentIndex((prevIndex) => (prevIndex + 1) % currentGoods?.images.length);
   };
-
   const prevImage = () => {
     if (currentGoods?.images.length)
     setCurrentIndex(
@@ -112,7 +109,6 @@ const Detail = () => {
       console.error("Error handling like:", error);
     }
   };
-
   const handleDislike = () => {
     try {
       axios.put(`http://localhost:5000/api/goods/complaint/${ID}`, {
@@ -129,12 +125,10 @@ const Detail = () => {
     if (!dateTime) return ""; // 如果没有时间字符串，返回空
     const datePart = dateTime.split("T")[0]; // 获取日期部分
     const timePart = dateTime.split("T")[1].split(":"); // 获取时间部分并分割为数组
-
     const month = datePart.split("-")[1]; // 获取月份
     const day = datePart.split("-")[2]; // 获取日期
     const hour = timePart[0]; // 获取小时
     const minute = timePart[1]; // 获取分钟
-
     return `${month}-${day} ${hour}:${minute}`; // 返回格式化后的字符串
   };
 
@@ -226,14 +220,14 @@ const Detail = () => {
         {currentAlter === "user" && (
           <div className="alter-user">
             <div className="user-like">
-              <img className="like-icon" src={like} alt="喜欢" />
+              <img className="like-icon" src={like} alt="喜欢" onClick={handleLike}/>
               <div className="like-text">{currentGoods?.likes}</div>
             </div>
             <div
               className="user-dislike"
               onClick={() => setCurrentAlter("appeal")}
             >
-              <img className="dislike-icon" src={dislike} alt="不喜欢" />
+              <img className="dislike-icon" src={dislike} alt="不喜欢" onClick={handleDislike}/>
               <div className="dislike-text">{currentGoods?.complaints}</div>
             </div>
           </div>

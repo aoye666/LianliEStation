@@ -15,6 +15,10 @@
     align-items: center;
     width: 300px;
     height: 40px;
+    .navbar-icon {
+      width: 32px;
+      height: 32px;
+    }
     .navbar-icon:nth-child(2) {
       margin-left: 190px;
     }
@@ -207,19 +211,18 @@
       }
     }
     .alter-appeal {
-      margin-top: 20px;
+      margin-top: 25px;
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: center;
       .appeal-cancel {
-        width: 20px;
-        height: 20px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
-        background: #ccc;
         position: absolute;
         left: 30px;
-        margin-top: -80px;
+        margin-top: -90px;
       }
       .appeal-area {
         word-break: break-all;
@@ -320,8 +323,8 @@
       background: #f78441;
       border-radius: 5px;
       .qqBtn-icon {
-        width: 25px;
-        height: 25px;
+        width: 24px;
+        height: 24px;
         margin-left: 5px;
       }
       .qqBtn-text {
@@ -339,8 +342,8 @@
       background: #f79941;
       border-radius: 5px;
       .starBtn-icon {
-        width: 25px;
-        height: 25px;
+        width: 24px;
+        height: 24px;
       }
       .starBtn-text {
         color: white;
