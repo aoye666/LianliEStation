@@ -102,7 +102,7 @@ const Detail = () => {
   // 处理点赞、举报，待设计完善
   const handleLike = async () => {
     try {
-      axios.put(`http://localhost:5000/api/goods/like/${ID}`, {
+      axios.put(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods/like/${ID}`, {
         value: true,
       });
     }
@@ -112,7 +112,7 @@ const Detail = () => {
   };
   const handleDislike = () => {
     try {
-      axios.put(`http://localhost:5000/api/goods/complaint/${ID}`, {
+      axios.put(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods/complaint/${ID}`, {
         value: true,
       });
     }
@@ -178,7 +178,7 @@ const Detail = () => {
           <img
             className="slider-item"
             src={currentGoods?.images?.[currentIndex]
-              ? `http://localhost:5000${currentGoods.images[currentIndex]}`
+              ? `${process.env.REACT_APP_API_URL||"http://localhost:5000"}${currentGoods.images[currentIndex]}`
               : takePlace}
             alt={`${currentIndex + 1}`}
           />

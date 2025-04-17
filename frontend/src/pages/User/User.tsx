@@ -38,7 +38,7 @@ const User = () => {
       currentUser.avatar
     ) {
       const avatarBase64: any = await fetchImageAsBase64(
-        `http://localhost:5000${currentUser.avatar}`
+        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}${currentUser.avatar}`
       );
       localStorage.setItem("userAvatar", avatarBase64);
     }
@@ -48,7 +48,7 @@ const User = () => {
       currentUser.banner_url
     ) {
       const bannerBase64: any = await fetchImageAsBase64(
-        `http://localhost:5000${currentUser.banner_url}`
+        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}${currentUser.banner_url}`
       );
       localStorage.setItem("userBanner", bannerBase64);
     }

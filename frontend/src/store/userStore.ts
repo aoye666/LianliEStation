@@ -85,7 +85,7 @@ const useUserStore = create<UserState>()(
       // searchedUser: null,
       login: async (identifier: string, password: string) => {
         try {
-          const res = await axios.post("http://localhost:5000/api/auth/login", {
+          const res = await axios.post(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/auth/login`, {
             identifier,
             password,
           });
@@ -107,7 +107,7 @@ const useUserStore = create<UserState>()(
       }) => {
         try {
           const res = await axios.post(
-            "http://localhost:5000/api/auth/register",
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/auth/register`,
             userData
           );
           console.log(res.data.message); // 注册成功
@@ -123,7 +123,7 @@ const useUserStore = create<UserState>()(
       deleteUser: async (username: string) => {
         try {
           const res = await axios.delete(
-            "http://localhost:5000/api/users/profile",
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/users/profile`,
             { data: { username } }
           );
           console.log(res.data.message); // 账户已删除
@@ -136,7 +136,7 @@ const useUserStore = create<UserState>()(
       requestVerification: async (email: string) => {
         try {
           const res = await axios.post(
-            "http://localhost:5000/api/auth/verification",
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/auth/verification`,
             { email }
           );
           if (res.status === 200) {
@@ -153,7 +153,7 @@ const useUserStore = create<UserState>()(
       ) => {
         try {
           const res = await axios.put(
-            "http://localhost:5000/api/auth/change-password",
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/auth/change-password`,
             { email, verificationCode, newPassword }
           );
           if (res.status === 200) {
@@ -167,7 +167,7 @@ const useUserStore = create<UserState>()(
       fetchUserProfile: async () => {
         try {
           const res = await axios.get(
-            "http://localhost:5000/api/users/profile",
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/users/profile`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -188,7 +188,7 @@ const useUserStore = create<UserState>()(
       // fetchByQQ: async (qq: string) => {
       //   try {
       //     const res = await axios.post(
-      //       "http://localhost:5000/api/users/searchByQQ",
+      //       "${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/users/searchByQQ",
       //       {
       //         params: {
       //           qq_id: qq,
@@ -212,7 +212,7 @@ const useUserStore = create<UserState>()(
           formData.append("image", image);
 
           const res = await axios.put(
-            "http://localhost:5000/api/users/profile/image",
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/users/profile/image`,
             formData,
             {
               headers: {
@@ -268,7 +268,7 @@ const useUserStore = create<UserState>()(
           }
 
           const res = await axios.put(
-            "http://localhost:5000/api/users/profile",
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/users/profile`,
             requestBody,
             {
               headers: {
@@ -299,7 +299,7 @@ const useUserStore = create<UserState>()(
       // updateCredit: async (qq_id: string, credit: number) => {
       //   try {
       //     const res = await axios.put(
-      //       "http://localhost:5000/api/users/searchByQQ",
+      //       "${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/users/searchByQQ",
       //       {
       //         params: {
       //           qq_id: qq_id,

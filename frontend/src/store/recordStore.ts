@@ -118,7 +118,7 @@ const useRecordStore = create<RecordState>((set, get) => ({
   initialHistoryGoods: async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/goods/user-history",
+        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods/user-history`,
         {
           params: {
             page: get().page,
@@ -152,7 +152,7 @@ const useRecordStore = create<RecordState>((set, get) => ({
   getHistoryGoods: async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/goods/user-history",
+        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods/user-history`,
         {
           params: {
             page: get().page,
@@ -184,7 +184,7 @@ const useRecordStore = create<RecordState>((set, get) => ({
     }
   },
   removeHistoryGoods: (id) => {
-    axios.delete(`http://localhost:5000/api/goods/${id}`, {
+    axios.delete(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -198,7 +198,7 @@ const useRecordStore = create<RecordState>((set, get) => ({
   getFavoritesGoods: async () => {
     // try{
     //   const res = await axios.get<FavoriteGoods[]>(
-    //     "http://localhost:5000/api/favorites/user/favorites",
+    //     "${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/favorites/user/favorites",
     //     {
     //       headers: {
     //         Authorization: `Bearer ${token}`,
@@ -216,14 +216,14 @@ const useRecordStore = create<RecordState>((set, get) => ({
 
   },
   addFavoriteGoods: (favoriteGoods) => {
-    axios.post("http://localhost:5000/api/favorites/add", favoriteGoods.id, {
+    axios.post(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/favorites/add`, favoriteGoods.id, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
   },
   removeFavoriteGoods: (favoriteId: number) => {
-    axios.post("http://localhost:5000/api/favorites/add", favoriteId, {
+    axios.post(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/favorites/add`, favoriteId, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -236,7 +236,7 @@ const useRecordStore = create<RecordState>((set, get) => ({
   typedResponses: [],
   fetchAppeals: async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/appeals");
+      const response = await axios.get(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals`);
       set({ appeals: response.data }); // 更新申诉列表
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -252,7 +252,7 @@ const useRecordStore = create<RecordState>((set, get) => ({
   submitAppeal: async (goods_id: number, content: string, images: string[]) => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/appeals/publish",
+        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals/publish`,
         { goods_id, content, images: [] }
       );
       console.log(response.data.message); // 申诉提交成功
@@ -271,7 +271,7 @@ const useRecordStore = create<RecordState>((set, get) => ({
   searchAppeals: async (status: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/appeals/search/${status}`
+        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals/search/${status}`
       );
       set({ appeals: response.data }); // 更新申诉列表
     } catch (error) {
@@ -288,7 +288,7 @@ const useRecordStore = create<RecordState>((set, get) => ({
   updateAppealStatus: async (appeal_id: number, status: string) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/appeals/${appeal_id}`,
+        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals/${appeal_id}`,
         { status }
       );
       console.log(response.data.message); // 状态修改成功
@@ -307,7 +307,7 @@ const useRecordStore = create<RecordState>((set, get) => ({
   deleteAppeal: async (appeal_id: number) => {
     try {
       const response = await axios.delete(
-        `http://localhost:5000/api/appeals/${appeal_id}`
+        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals/${appeal_id}`
       );
       console.log(response.data.message); // 申诉删除成功
       await useRecordStore.getState().fetchAppeals(); // 重新获取申诉列表
@@ -324,7 +324,7 @@ const useRecordStore = create<RecordState>((set, get) => ({
   },
   fetchResponses: async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/responses/");
+      const response = await axios.get(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/responses/`);
       set({ responses: response.data }); // 更新回复列表
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -345,7 +345,7 @@ const useRecordStore = create<RecordState>((set, get) => ({
   ) => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/responses/",
+        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/responses/`,
         {
           user_id,
           response_type,
@@ -374,7 +374,7 @@ const useRecordStore = create<RecordState>((set, get) => ({
   markResponse: async (response_id: number) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/responses/${response_id}/read`,
+        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/responses/${response_id}/read`,
         {},
         {
           headers: {
@@ -398,7 +398,7 @@ const useRecordStore = create<RecordState>((set, get) => ({
   searchResponses: async (read_status: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/responses/${read_status}`
+        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/responses/${read_status}`
       );
       set({ typedResponses: response.data }); // 更新回复列表
     } catch (error) {

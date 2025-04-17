@@ -225,7 +225,7 @@ const Market = () => {
           goods.map((item) => (
             <div className='commodity-item' key={item.id} onClick={() => {navigate(`/market/${item.id}`)}}>
               <div className='commodity-img'>
-                <img src={item.images[0]?`http://localhost:5000${item.images[0]}`:takePlace} alt="takePlace" />
+                <img src={item.images[0]?`${process.env.REACT_APP_API_URL||"http://localhost:5000"}${item.images[0]}`:takePlace} alt="takePlace" />
               </div>
               <div className='commodity-title'>
                 {item.title}

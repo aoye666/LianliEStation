@@ -89,7 +89,7 @@ const History = () => {
                 <img
                   src={
                     goods.images[0]
-                      ? `http://localhost:5000${goods.images[0]}`
+                      ? `${process.env.REACT_APP_API_URL||"http://localhost:5000"}${goods.images[0]}`
                       : takePlace
                   }
                   alt=""

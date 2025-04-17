@@ -36,7 +36,7 @@ const Publish: React.FC = () => {
   // 将图片转换为Base64并存储到localStorage  
     const storeImagesInLocalStorage = async () => {  
       if (currentUser&&currentUser.background_url&&currentUser.background_url!== "/uploads/default_background.png") {  
-        const backgroundBase64: any = await fetchImageAsBase64(`http://localhost:5000${currentUser.background_url}`);  
+        const backgroundBase64: any = await fetchImageAsBase64(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}${currentUser.background_url}`);  
         localStorage.setItem("userBackground", backgroundBase64);  
       } 
 
@@ -89,7 +89,7 @@ const Publish: React.FC = () => {
     // 调用API生成模板
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/publish/template",
+        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/publish/template`,
         { text: text },
         {
           headers: {

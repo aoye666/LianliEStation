@@ -85,7 +85,7 @@ const useMainStore = create<MainState>()(
       fetchGoods: async () => {
         try {
           const response = await axios.get(
-            "http://localhost:5000/api/goods",
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods`,
             {
               params: {
                 page: get().marketPage,
@@ -156,7 +156,7 @@ const useMainStore = create<MainState>()(
       updateGoods: async () => {
         try {
           const response = await axios.get(
-            "http://localhost:5000/api/goods",
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods`,
             {
               params: {
                 page: get().marketPage,
