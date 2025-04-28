@@ -134,8 +134,11 @@ CREATE TABLE `posts` (
     `author_id` INT NOT NULL,
     `campus_id` INT NOT NULL,
     `status` ENUM('active', 'deleted') DEFAULT 'active',
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `likes` INT DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 
 CREATE TABLE `post_image` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -144,67 +147,17 @@ CREATE TABLE `post_image` (
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 用户表数据插入示例
-INSERT INTO `users` (`nickname`, `username`, `email`, `password`, `qq_id`, `campus_id`, `credit`, `avatar`)
-VALUES
-('User1', 'user1', 'user1@example.com', 'hashed_password1', '123456789', 1, 100, '/uploads/avatar1.png'),
-('User2', 'user2', 'user2@example.com', 'hashed_password2', '987654321', 2, 100, '/uploads/avatar2.png');
 
--- 帖子表数据插入示例
-INSERT INTO `goods` (`author_id`, `title`, `content`, `goods_type`, `tag`, `created_at`, `status`, `price`, `campus_id`)
-VALUES
-(1, '二手数学分析教材', '浙江大学版教材，无字迹破损，附习题解答', 'sell', '教材', '2025-01-01 10:00:00', 'active', 35.50, 1),
-(2, '九成新机械键盘', 'Cherry MX红轴，RGB背光，包装齐全', 'sell', '电子产品', '2025-01-02 11:00:00', 'active', 299.00, 1),
-(3, '开发区校区代取快递', '大件3元/件，小件2元/件（20:00前可预约）', 'receive', '服务', '2025-01-03 12:00:00', 'active', 2.00, 1);
+CREATE TABLE `post_comments` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `post_id` INT NOT NULL,          
+  `user_id` INT NOT NULL,           
+  `content` TEXT NOT NULL,          
+  `parent_id` INT DEFAULT NULL,     
+  `status` ENUM('active', 'deleted') DEFAULT 'active',  
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP     
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 申诉表数据插入示例
-INSERT INTO `appeals` (`author_id`, `post_id`, `content`, `type`, `status`, `created_at`)
-VALUES
-(1, 5, '帖子内容不符合事实，请求审核', 'goods', 'pending', '2024-03-01 14:30:00'),
-(2, 8, '已与发布者协商解决', 'post', 'resolved', CURRENT_TIMESTAMP),
-(3, 12, '误删帖子，申请恢复', 'post','pending', '2025-01-15 09:00:00');
-
--- 帖子图片表数据插入示例
-INSERT INTO `goods_images` (`goods_id`, `image_url`, `created_at`)
-VALUES
-(1, '/uploads/images/image1.jpg', '2025-01-01 10:30:00');
-
--- 用户收藏表数据插入示例
-INSERT INTO `user_favorites` (`user_id`, `post_id`, `created_at`)
-VALUES
-(1, 1, '2025-01-01 11:00:00'),
-(2, 3, '2025-01-02 13:00:00'),
-(1, 4, '2025-01-03 14:00:00');
-
--- 插入校园墙帖子示例数据
-INSERT INTO `posts` (`title`, `content`, `author_id`, `campus_id`, `created_at`)
-VALUES
-('期末复习小组招募', '正在找考研政治的复习小组，一起打卡学习，互相监督。', 1, 1, '2025-01-15 08:30:00'),
-('晨跑小伙伴招募', '每天早上6:30体育场集合，欢迎加入晨跑队伍！', 2, 1, '2025-01-15 09:00:00'),
-('图书馆捡到一张学生卡', '今天在图书馆三楼捡到一张学生卡，失主请联系我认领。', 1, 2, '2025-01-15 14:20:00');
-
--- 插入对应的图片数据
-INSERT INTO `post_image` (`post_id`, `image_url`, `created_at`)
-VALUES
-(1, '/uploads/wall/study_group.jpg', '2025-01-15 08:31:00'),
-(2, '/uploads/wall/morning_run1.jpg', '2025-01-15 09:01:00'),
-(2, '/uploads/wall/morning_run2.jpg', '2025-01-15 09:01:00'),
-(3, '/uploads/wall/student_card.jpg', '2025-01-15 14:21:00');
-
-INSERT INTO `responses` (`user_id`, `response_type`, `related_id`, `content`, `read_status`)
-VALUES
-(1, 'appeal', 1, '您的申诉已通过，我们已恢复您的商品展示。感谢您的耐心等待！', 'unread'),
-(3, 'violation', 1, '您的帖子因包含广告内容被移除，这违反了我们的社区规则第3.2条。', 'read'),
-(3, 'appeal', 1, '我们已收到您的申诉，经审核后认为您的帖子不违反社区规定，已恢复显示。', 'unread'),
-(3, 'violation', 1, '您的账户因多次违规已被临时限制发布内容，限制期为7天。', 'unread');
-
--- 插入对应的图片数据
-INSERT INTO `appeal_image` (`appeal_id`, `image_url`, `created_at`)
-VALUES
-(1, '/uploads/wall/study_group.jpg', '2025-01-15 08:31:00'),
-(2, '/uploads/wall/morning_run1.jpg', '2025-01-15 09:01:00'),
-(2, '/uploads/wall/morning_run2.jpg', '2025-01-15 09:01:00'),
-(3, '/uploads/wall/student_card.jpg', '2025-01-15 14:21:00');
 ```
 
 ##

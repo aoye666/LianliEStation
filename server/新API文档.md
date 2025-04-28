@@ -1195,6 +1195,258 @@ Authorization: Bearer {token}
 - 管理员可以删除任何帖子，无论发布者是谁
 - 已软删除的帖子将不会出现在帖子列表中
 
+
+
+### 处理帖子互动
+
+基本信息
+
+- 路径: `/posts/interact/:post_id`
+- 方法: `POST`
+- 描述: 处理用户对帖子进行的交互，包括点赞和评论。
+
+请求参数
+
+| 参数名    | 类型    | 必选 | 描述                                                         |
+| --------- | ------- | ---- | ------------------------------------------------------------ |
+| post_id   | Number  | 是   | 帖子 ID (URL 参数)                                           |
+| action    | String  | 是   | 交互类型，"like" 或 "comment"                                |
+| content   | String  | 否   | 评论内容，仅在 action 为 "comment" 时需要                    |
+| parent_id | Number  | 否   | 如果是回复评论，则提供父评论的 ID                            |
+| value     | Boolean | 否   | 点赞状态，仅在 action 为 "like" 时需要 (true 为点赞, false 为取消点赞) |
+
+请求头
+
+| 参数名        | 类型   | 必选 | 描述                                  |
+| ------------- | ------ | ---- | ------------------------------------- |
+| Authorization | String | 是   | 身份验证令牌，格式为 `Bearer {token}` |
+
+请求体示例
+
+- 点赞请求
+
+```json
+{
+  "action": "like",
+  "value": true
+}
+```
+
+- 评论请求
+
+```json
+{
+  "action": "comment",
+  "content": "这是一个评论内容",
+  "parent_id": 123
+}
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                       |
+| ------ | ---------------- | -------------------------- |
+| 200    | application/json | 点赞成功或取消点赞成功     |
+| 201    | application/json | 评论发布成功               |
+| 400    | application/json | 缺少必要参数或无效的参数   |
+| 401    | application/json | 未提供 Token 或 Token 无效 |
+| 404    | application/json | 帖子或评论不存在           |
+| 500    | application/json | 服务器错误                 |
+
+响应示例
+
+- 点赞成功 (状态码：200)
+
+```json
+{
+  "message": "点赞成功"
+}
+```
+
+- 取消点赞成功 (状态码：200)
+
+```json
+{
+  "message": "取消点赞成功"
+}
+```
+
+- 评论发布成功 (状态码：201)
+
+```json
+{
+  "message": "评论发布成功",
+  "comment": {
+    "id": 123,
+    "content": "这是一个评论内容",
+    "created_at": "2025-04-28T00:00:00Z",
+    "parent_id": null,
+    "user": {
+      "id": 1,
+      "nickname": "张三",
+      "avatar": "https://example.com/avatar.jpg"
+    }
+  }
+}
+```
+
+- 缺少参数 (状态码：400)
+
+```json
+{
+  "message": "评论内容不能为空"
+}
+```
+
+- 帖子不存在或已删除 (状态码：404)
+
+```json
+{
+  "message": "帖子不存在或已被删除"
+}
+```
+
+- Token 无效 (状态码：401)
+
+```json
+{
+  "message": "无效的Token"
+}
+```
+
+- 服务器错误 (状态码：500)
+
+```json
+{
+  "message": "服务器错误"
+}
+```
+
+
+
+
+
+### 条件查询帖子
+
+基本信息
+
+- 路径: `/posts`
+- 方法: `GET`
+- 描述: 获取帖子列表，并可以选择是否包含评论。
+
+请求参数
+
+| 参数名        | 类型    | 必选 | 描述                                                |
+| ------------- | ------- | ---- | --------------------------------------------------- |
+| campus_id     | Number  | 否   | 校区 ID                                             |
+| author_id     | Number  | 否   | 作者 ID                                             |
+| keyword       | String  | 否   | 根据标题和内容进行关键词搜索                        |
+| status        | String  | 否   | 帖子状态，默认为 `active`，可选 `inactive` 或 `all` |
+| page          | Number  | 否   | 页码，默认为 `1`                                    |
+| limit         | Number  | 否   | 每页数量，默认为 `10`                               |
+| with_comments | Boolean | 否   | 是否包含评论，默认为 `false`，可以设置为 `true`     |
+
+请求头
+
+| 参数名        | 类型   | 必选 | 描述                                  |
+| ------------- | ------ | ---- | ------------------------------------- |
+| Authorization | String | 是   | 身份验证令牌，格式为 `Bearer {token}` |
+
+请求体示例
+
+```json
+http://localhost:5000/api/forum/posts?page=1&limit=5&with_comments=true
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                     |
+| ------ | ---------------- | ------------------------ |
+| 200    | application/json | 返回帖子列表及其相关数据 |
+| 500    | application/json | 服务器错误               |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+```json
+{
+    "total": 2,
+    "page": 1,
+    "limit": 5,
+    "pages": 1,
+    "posts": [
+        {
+            "id": 2,
+            "title": "好啊",
+            "content": "好",
+            "author_id": 1,
+            "campus_id": 1,
+            "status": "active",
+            "created_at": "2025-04-28T02:26:53.000Z",
+            "likes": 0,
+            "author_name": "DUTers",
+            "author_avatar": "/uploads/default.png",
+            "comment_count": 0,
+            "images": [
+                "/uploads/1745807213371-kmzx9tsmz2m.jpg"
+            ],
+            "comments": []
+        },
+        {
+            "id": 1,
+            "title": "好啊",
+            "content": "好",
+            "author_id": 1,
+            "campus_id": 1,
+            "status": "active",
+            "created_at": "2025-04-28T02:26:33.000Z",
+            "likes": 1,
+            "author_name": "DUTers",
+            "author_avatar": "/uploads/default.png",
+            "comment_count": 2,
+            "images": [],
+            "comments": [
+                {
+                    "id": 1,
+                    "content": "这是一条评论",
+                    "created_at": "2025-04-28T02:34:22.000Z",
+                    "user": {
+                        "id": 1,
+                        "nickname": "DUTers",
+                        "avatar": "/uploads/default.png"
+                    },
+                    "replies": [
+                        {
+                            "id": 2,
+                            "content": "这是一条评论2",
+                            "created_at": "2025-04-28T02:35:54.000Z",
+                            "user": {
+                                "id": 1,
+                                "nickname": "DUTers",
+                                "avatar": "/uploads/default.png"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+```
+
+- 服务器错误 (状态码：500)
+
+```json
+{
+  "message": "服务器错误"
+}
+```
+
+
+
+
+
 ## appealsRoutes
 
 ### 提交申诉
@@ -1709,6 +1961,11 @@ images: [图片1.jpg, 图片2.jpg]
 - 如果服务器处理过程中出现错误，已上传的图片会被自动删除
 - 帖子创建时默认状态为"active"
 
+---
+
+
+
+
 ## messageRoutes
 
 ### 获取通知
@@ -1908,3 +2165,7 @@ images: [图片1.jpg, 图片2.jpg]
 - 该接口需要用户登录，并通过 Authorization 头部提供有效的 JWT 令牌
 - 用户只能修改属于自己的通知状态
 - type 参数指定通知类型，必须为"appeal"或"response"
+
+
+
+
