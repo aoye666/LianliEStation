@@ -117,7 +117,7 @@ router.post("/template", async (req, res) => {
     if (content.startsWith("```")) {
       content = content.replace(/^```json\s*|\s*```$/g, "");
     }
-    let responseData
+    let responseData;
 
     try {
       responseData = JSON.parse(content);
@@ -167,10 +167,7 @@ router.post("/posts", upload.array("images", 5), async (req, res) => {
     }
 
     // 插入帖子
-    const [result] = await db.query(
-      "INSERT INTO posts (title, content, author_id, campus_id) VALUES (?, ?, ?, ?)", 
-      [title, content, author_id, campus_id]
-    );
+    const [result] = await db.query("INSERT INTO posts (title, content, author_id, campus_id) VALUES (?, ?, ?, ?)", [title, content, author_id, campus_id]);
 
     const postId = result.insertId;
     if (!postId) {
@@ -186,9 +183,7 @@ router.post("/posts", upload.array("images", 5), async (req, res) => {
     let imageUrls = [];
     if (files && Array.isArray(files) && files.length > 0) {
       imageUrls = files.map((file) => `/uploads/${file.filename}`);
-      const imagePromises = imageUrls.map((url) => 
-        db.query("INSERT INTO post_image (post_id, image_url) VALUES (?, ?)", [postId, url])
-      );
+      const imagePromises = imageUrls.map((url) => db.query("INSERT INTO post_image (post_id, image_url) VALUES (?, ?)", [postId, url]));
       await Promise.all(imagePromises);
     }
 

@@ -13,10 +13,10 @@ import favoritesRouter from "./routes/favorites.js";
 import goodsRouter from "./routes/goods.js";
 // import postsRouter from "./routes/posts.js";
 // import responsesRouter from "./routes/responses.js";
-import usersRouter from "./routes/users.js";
 import forumRouter from "./routes/forum.js";
+import usersRouter from "./routes/users.js";
 //import adminRouter from "./routes/admin.js";
-//import historyRouter from "./routes/history.js";
+import historyRouter from "./routes/history.js";
 import messagesRouter from "./routes/messages.js";
 import publishRouter from "./routes/publish.js";
 
@@ -44,7 +44,7 @@ app.use("/api/aiTemplate", aiTemplateRouter);
 // app.use("/api/campusWall", campusWallRouter);
 app.use("/api/forum", forumRouter);
 // app.use("/api/admin", adminRouter);
-// app.use("/api/history", historyRouter);
+app.use("/api/history", historyRouter);
 app.use("/api/messages", messagesRouter);
 app.use("/api/publish", publishRouter);
 
