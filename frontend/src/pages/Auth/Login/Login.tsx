@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserStore } from "../../../store";
 import "./Login.scss";
@@ -25,8 +25,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState<ErrorType | null>(null);
 
   const navigate = useNavigate();
-  const { login,token,isAuthenticated } = useUserStore();
-  const { fetchUserProfile } = useUserStore();
+  const { login, token, isAuthenticated } = useUserStore();
 
   // 设置用户信息
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +38,6 @@ const Login: React.FC = () => {
     e.preventDefault();
     try {
       await login(inputs.identifier, inputs.password); // 调用 login 方法
-      await fetchUserProfile(); // 调用 fetchUserProfile 方法，设置 currentUser
     } catch (err: any) {
       if (err.response) {
         setError(err.response.data);

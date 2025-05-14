@@ -1,10 +1,12 @@
 // messages、history、favorites 的状态管理
 
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import axios from "axios";
 import Cookies from "js-cookie"; // 从 cookie 中获取 token
 
-const token = Cookies.get("token"); // 获取 token
+// 获取 token
+const token = Cookies.get("token");
 
 interface Response {
   user_id: number;
@@ -14,6 +16,7 @@ interface Response {
   read_status: string;
   created_at: string;
 }
+
 interface Appeal {
   author_id: number;
   goods_id: number;
@@ -22,6 +25,7 @@ interface Appeal {
   created_at: string;
   image_url: string[];
 }
+
 interface FavoriteGoods {
   id: number;
   title: string;
@@ -35,18 +39,21 @@ interface FavoriteGoods {
   campus_id: number;
   images: string[];
 }
+
 interface FavoritePost {
   id: number;
   title: string;
   content: string | null;
   // 待具体开发时补充
 }
+
 interface HistoryPost {
   id: number;
   title: string;
   content: string | null;
   // 待具体实现时补充
 }
+
 interface HistoryGoods {
   id: number;
   title: string;
@@ -103,315 +110,351 @@ interface RecordState {
   searchResponses: (read_status: string) => Promise<void>; // 查询回复
 }
 
-const useRecordStore = create<RecordState>((set, get) => ({
-  // history 相关的状态管理及方法具体实现
-  historyGoods: [],
-  page: 1,
-  setPage: () =>
-    set((preState) => ({
-      page: preState.page + 1,
-    })),
-  clear: () =>
-    set(() => ({
+const useRecordStore = create<RecordState>()(
+  persist(
+    (set, get) => ({
       historyGoods: [],
-    })),
-  initialHistoryGoods: async () => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods/user-history`,
-        {
-          params: {
-            page: get().page,
-            limit: 12,
-          },
-          headers: {
+      historyPosts: [],
+      favoritesGoods: [],
+      favoritePosts: [],
+      appeals: [],
+      responses: [],
+      typedResponses: [],
+      page: 1,
+
+      setPage: () =>
+        set((preState) => ({
+          page: preState.page + 1,
+        })),
+
+      clear: () =>
+        set(() => ({
+          historyGoods: [],
+        })),
+
+      initialHistoryGoods: async () => {
+        try {
+          const response = await axios.get(
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods/user-history`,
+            {
+              params: {
+                page: get().page,
+                limit: 12,
+              },
+              headers: {
             Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+              },
+            }
+          );
 
-      // 检查返回数据是否有效
-      if (response.status === 200 && response.data) {
-        const data = response.data.goods;
-        set((state) => ({
-          historyGoods: [...data], // 更新 goods 状态
-        }));
-      } else {
-        // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
-        console.log("No goods available or unexpected response status");
-      }
-    } catch (error) {
-      // 捕获请求失败的错误（如 404 或网络问题）
-      if (error instanceof Error) {
-        console.error("Error fetching goods:", error.message);
-      } else {
-        console.error("Error fetching goods:", error);
-      }
-    }
-  },
-  getHistoryGoods: async () => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods/user-history`,
-        {
-          params: {
-            page: get().page,
-            limit: 12,
-          },
-          headers: {
+          // 检查返回数据是否有效
+          if (response.status === 200 && response.data) {
+            const data = response.data.goods;
+            set((state) => ({
+              historyGoods: [...data], // 更新 goods 状态
+            }));
+          } else {
+            // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
+            console.log("No goods available or unexpected response status");
+          }
+        } catch (error) {
+          // 捕获请求失败的错误（如 404 或网络问题）
+          if (error instanceof Error) {
+            console.error("Error fetching goods:", error.message);
+          } else {
+            console.error("Error fetching goods:", error);
+          }
+        }
+      },
+
+      getHistoryGoods: async () => {
+        try {
+          const response = await axios.get(
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods/user-history`,
+            {
+              params: {
+                page: get().page,
+                limit: 12,
+              },
+              headers: {
             Authorization: `Bearer ${token}`,
-          },
+              },
+            }
+          );
+
+          // 检查返回数据是否有效
+          if (response.status === 200 && response.data) {
+            const data = response.data.goods;
+            set((state) => ({
+              historyGoods: [...state.historyGoods, ...data], // 更新 goods 状态
+            }));
+          } else {
+            // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
+            console.log("No goods available or unexpected response status");
+          }
+        } catch (error) {
+          // 捕获请求失败的错误（如 404 或网络问题）
+          if (error instanceof Error) {
+            console.error("Error fetching goods:", error.message);
+          } else {
+            console.error("Error fetching goods:", error);
+          }
         }
-      );
-
-      // 检查返回数据是否有效
-      if (response.status === 200 && response.data) {
-        const data = response.data.goods;
-        set((state) => ({
-          historyGoods: [...state.historyGoods, ...data], // 更新 goods 状态
-        }));
-      } else {
-        // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
-        console.log("No goods available or unexpected response status");
-      }
-    } catch (error) {
-      // 捕获请求失败的错误（如 404 或网络问题）
-      if (error instanceof Error) {
-        console.error("Error fetching goods:", error.message);
-      } else {
-        console.error("Error fetching goods:", error);
-      }
-    }
-  },
-  removeHistoryGoods: (id) => {
-    axios.delete(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
       },
-    });
-  },
 
-  // favorites 相关的状态管理及方法具体实现
-  historyPosts: [],
-  favoritesGoods: [],
-  favoritePosts: [],
-  getFavoritesGoods: async () => {
-    // try{
-    //   const res = await axios.get<FavoriteGoods[]>(
-    //     "${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/favorites/user/favorites",
-    //     {
-    //       headers: {
-    //         Authorization: `Bearer ${token}`,
-    //       },
-    //     }
-    //   );
-
-    //   if(res.status === 200 && res.data){
-    //     set({ favoritesGoods: res.data });
-    //   }else {
-    //     // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
-    //     console.log("No goods available or unexpected response status");
-    //   }
-    // }
-
-  },
-  addFavoriteGoods: (favoriteGoods) => {
-    axios.post(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/favorites/add`, favoriteGoods.id, {
-      headers: {
+      removeHistoryGoods: (id) => {
+        axios.delete(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods/${id}`, {
+          headers: {
         Authorization: `Bearer ${token}`,
+          },
+        });
       },
-    });
-  },
-  removeFavoriteGoods: (favoriteId: number) => {
+
+      getFavoritesGoods: async () => {
+        // try {
+        //   const res = await axios.get<FavoriteGoods[]>(
+        //     `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/favorites/user/favorites`,
+        //     {
+        //       headers: {
+        //         Authorization: `Bearer ${token}`, 
+        //       },
+        //     }
+        //   );
+
+        //   if (res.status === 200 && res.data) {
+        //     set({ favoritesGoods: res.data });
+        //   } else {
+        //     // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
+        //     console.log("No goods available or unexpected response status");
+        //   }
+        // } catch (error) {
+        //   if (axios.isAxiosError(error)) {
+        //     console.error(
+        //       "查询收藏失败:",
+        //       error.response?.data.message || "服务器错误"
+        //     );
+        //   } else {
+        //     console.error("未知错误:", error);
+        //   }
+        // }
+      },
+
+      addFavoriteGoods: (favoriteGoods) => {
+        axios.post(
+          `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/favorites/add`,
+          { id: favoriteGoods.id },
+          {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("token")}`, // 使用Cookies.get获取最新的token
+            },
+          }
+        );
+      },
+
+      removeFavoriteGoods: (favoriteId: number) => {
     axios.post(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/favorites/add`, favoriteId, {
-      headers: {
+            headers: {
         Authorization: `Bearer ${token}`,
-      },
+            },
     });
-  },
+      },
 
-  // messages 相关的状态管理及方法具体实现
-  appeals: [],
-  responses: [],
-  typedResponses: [],
-  fetchAppeals: async () => {
-    try {
+      fetchAppeals: async () => {
+        try {
       const response = await axios.get(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals`);
-      set({ appeals: response.data }); // 更新申诉列表
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error(
-          "获取申诉失败:",
-          error.response?.data.message || "服务器错误"
-        );
-      } else {
-        console.error("未知错误:", error);
-      }
-    }
-  },
-  submitAppeal: async (goods_id: number, content: string, images: string[]) => {
-    try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals/publish`,
+          set({ appeals: response.data }); // 更新申诉列表
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            console.error(
+              "获取申诉失败:",
+              error.response?.data.message || "服务器错误"
+            );
+          } else {
+            console.error("未知错误:", error);
+          }
+        }
+      },
+
+      submitAppeal: async (goods_id: number, content: string, images: string[]) => {
+        try {
+          const response = await axios.post(
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals/publish`,
         { goods_id, content, images: [] }
-      );
-      console.log(response.data.message); // 申诉提交成功
-      await useRecordStore.getState().fetchAppeals(); // 重新获取申诉列表
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error(
-          "提交申诉失败:",
-          error.response?.data.message || "服务器错误"
-        );
-      } else {
-        console.error("未知错误:", error);
-      }
-    }
-  },
-  searchAppeals: async (status: string) => {
-    try {
-      const response = await axios.get(
+          );
+          console.log(response.data.message); // 申诉提交成功
+          await get().fetchAppeals(); // 重新获取申诉列表
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            console.error(
+              "提交申诉失败:",
+              error.response?.data.message || "服务器错误"
+            );
+          } else {
+            console.error("未知错误:", error);
+          }
+        }
+      },
+
+      searchAppeals: async (status: string) => {
+        try {
+          const response = await axios.get(
         `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals/search/${status}`
-      );
-      set({ appeals: response.data }); // 更新申诉列表
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error(
-          "查询申诉失败:",
-          error.response?.data.message || "服务器错误"
-        );
-      } else {
-        console.error("未知错误:", error);
-      }
-    }
-  },
-  updateAppealStatus: async (appeal_id: number, status: string) => {
-    try {
-      const response = await axios.put(
-        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals/${appeal_id}`,
+          );
+          set({ appeals: response.data }); // 更新申诉列表
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            console.error(
+              "查询申诉失败:",
+              error.response?.data.message || "服务器错误"
+            );
+          } else {
+            console.error("未知错误:", error);
+          }
+        }
+      },
+
+      updateAppealStatus: async (appeal_id: number, status: string) => {
+        try {
+          const response = await axios.put(
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals/${appeal_id}`,
         { status }
-      );
-      console.log(response.data.message); // 状态修改成功
-      await useRecordStore.getState().fetchAppeals(); // 重新获取申诉列表
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error(
-          "修改申诉状态失败:",
-          error.response?.data.message || "服务器错误"
-        );
-      } else {
-        console.error("未知错误:", error);
-      }
-    }
-  },
-  deleteAppeal: async (appeal_id: number) => {
-    try {
-      const response = await axios.delete(
+          );
+          console.log(response.data.message); // 状态修改成功
+          await get().fetchAppeals(); // 重新获取申诉列表
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            console.error(
+              "修改申诉状态失败:",
+              error.response?.data.message || "服务器错误"
+            );
+          } else {
+            console.error("未知错误:", error);
+          }
+        }
+      },
+
+      deleteAppeal: async (appeal_id: number) => {
+        try {
+          const response = await axios.delete(
         `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals/${appeal_id}`
-      );
-      console.log(response.data.message); // 申诉删除成功
-      await useRecordStore.getState().fetchAppeals(); // 重新获取申诉列表
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error(
-          "删除申诉失败:",
-          error.response?.data.message || "服务器错误"
-        );
-      } else {
-        console.error("未知错误:", error);
-      }
-    }
-  },
-  fetchResponses: async () => {
-    try {
+          );
+          console.log(response.data.message); // 申诉删除成功
+          await get().fetchAppeals(); // 重新获取申诉列表
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            console.error(
+              "删除申诉失败:",
+              error.response?.data.message || "服务器错误"
+            );
+          } else {
+            console.error("未知错误:", error);
+          }
+        }
+      },
+
+      fetchResponses: async () => {
+        try {
       const response = await axios.get(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/responses/`);
-      set({ responses: response.data }); // 更新回复列表
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error(
-          "获取回复失败:",
-          error.response?.data.message || "服务器错误"
-        );
-      } else {
-        console.error("未知错误:", error);
-      }
-    }
-  },
-  submitResponse: async (
-    user_id: number,
-    response_type: string,
-    related_id: number,
-    content: string
-  ) => {
-    try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/responses/`,
-        {
-          user_id,
-          response_type,
-          related_id,
-          content,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // 必须添加JWT token
-          },
+          set({ responses: response.data }); // 更新回复列表
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            console.error(
+              "获取回复失败:",
+              error.response?.data.message || "服务器错误"
+            );
+          } else {
+            console.error("未知错误:", error);
+          }
         }
-      );
-      console.log(response.data.message); // 回复提交成功
-      await useRecordStore.getState().fetchResponses(); // 重新获取回复列表
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error(
-          "提交回复失败:",
-          error.response?.data.message || "服务器错误"
-        );
-      } else {
-        console.error("未知错误:", error);
-      }
-    }
-  },
-  markResponse: async (response_id: number) => {
-    try {
-      const response = await axios.put(
-        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/responses/${response_id}/read`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // 必须添加JWT token
-          },
+      },
+
+      submitResponse: async (
+        user_id: number,
+        response_type: string,
+        related_id: number,
+        content: string
+      ) => {
+        try {
+          const response = await axios.post(
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/responses/`,
+            {
+              user_id,
+              response_type,
+              related_id,
+              content,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`, // 使用Cookies.get获取最新的token
+              },
+            }
+          );
+          console.log(response.data.message); // 回复提交成功
+          await get().fetchResponses(); // 重新获取回复列表
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            console.error(
+              "提交回复失败:",
+              error.response?.data.message || "服务器错误"
+            );
+          } else {
+            console.error("未知错误:", error);
+          }
         }
-      );
-      console.log(response.data.message); // 回复标记为已读成功
-      await useRecordStore.getState().fetchResponses(); // 重新获取回复列表
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error(
-          "标记回复为已读失败:",
-          error.response?.data.message || "服务器错误"
-        );
-      } else {
-        console.error("未知错误:", error);
-      }
+      },
+
+      markResponse: async (response_id: number) => {
+        try {
+          const response = await axios.put(
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/responses/${response_id}/read`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${token}`, // 使用Cookies.get获取最新的token
+              },
+            }
+          );
+          console.log(response.data.message); // 回复标记为已读成功
+          await get().fetchResponses(); // 重新获取回复列表
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            console.error(
+              "标记回复为已读失败:",
+              error.response?.data.message || "服务器错误"
+            );
+          } else {
+            console.error("未知错误:", error);
+          }
+        }
+      },
+
+      searchResponses: async (read_status: string) => {
+        try {
+          const response = await axios.get(
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/responses/${read_status}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`, // 使用Cookies.get获取最新的token
+              },
+            }
+          );
+          set({ typedResponses: response.data }); // 更新回复列表
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            console.error(
+              "获取回复失败:",
+              error.response?.data.message || "服务器错误"
+            );
+          } else {
+            console.error("未知错误:", error);
+          }
+        }
+      },
+    }),
+    {
+      name: "recordStore", // 储存的唯一名称
     }
-  },
-  searchResponses: async (read_status: string) => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/responses/${read_status}`
-      );
-      set({ typedResponses: response.data }); // 更新回复列表
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error(
-          "获取回复失败:",
-          error.response?.data.message || "服务器错误"
-        );
-      } else {
-        console.error("未知错误:", error);
-      }
-    }
-  },
-}));
+  )
+);
 
 export default useRecordStore;

@@ -93,6 +93,8 @@ const useUserStore = create<UserState>()(
           const isAdmin = res.data.isAdmin;
           Cookies.set("auth-token", token, { expires: 7 });
           set({ isAuthenticated: true, token, isAdmin });
+
+          await get().fetchUserProfile(); // 获取当前用户信息
         } catch (error: any) {
           if (error.response) console.error(error.response.data.message);
         }
@@ -170,7 +172,7 @@ const useUserStore = create<UserState>()(
             `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/users/profile`,
             {
               headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${get().token}`,
               },
             }
           );
@@ -196,7 +198,7 @@ const useUserStore = create<UserState>()(
       //       },
       //       {
       //         headers: {
-      //           Authorization: `Bearer ${token}`,
+      //           Authorization: `Bearer ${get().token}`,
       //         },
       //       }
       //     );

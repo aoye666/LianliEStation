@@ -57,8 +57,6 @@ const Publish: React.FC = () => {
     };  
   
     useEffect(() => {  
-      // 存储请求到的图片  
-      if (!localStorage.getItem("userBackground"))
       storeImagesInLocalStorage();  
     }, [token, currentUser?.background_url,backgroundFile]);  
   
