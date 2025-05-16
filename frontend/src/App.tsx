@@ -28,34 +28,34 @@ const App: React.FC = () => {
   // 检查是否登录并获取用户信息
   const { isAuthenticated } = useUserStore();
 
-  // 锁定竖屏
-  const lockOrientation = () => {
-    if (window.screen.orientation && window.screen.orientation.lock) {
-      window.screen.orientation.lock("portrait").catch((err) => {
-        console.error("锁定竖屏失败:", err);
-      });
-    }
-  };
+  // // 锁定竖屏
+  // const lockOrientation = () => {
+  //   if (window.screen.orientation && window.screen.orientation.lock) {
+  //     window.screen.orientation.lock("portrait").catch((err) => {
+  //       console.error("锁定竖屏失败:", err);
+  //     });
+  //   }
+  // };
 
-  // 监听屏幕方向变化
-  useEffect(() => {
-    const handleOrientationChange = () => {
-      if (window.matchMedia("(orientation: landscape)").matches) {
-        alert("请将设备旋转到竖屏模式以获得最佳体验。");
-        lockOrientation(); // 尝试锁定竖屏
-      }
-    };
+  // // 监听屏幕方向变化
+  // useEffect(() => {
+  //   const handleOrientationChange = () => {
+  //     if (window.matchMedia("(orientation: landscape)").matches) {
+  //       alert("请将设备旋转到竖屏模式以获得最佳体验。");
+  //       lockOrientation(); // 尝试锁定竖屏
+  //     }
+  //   };
 
-    // 绑定事件监听器
-    window.addEventListener("resize", handleOrientationChange);
-    window.addEventListener("orientationchange", handleOrientationChange);
+  //   // 绑定事件监听器
+  //   window.addEventListener("resize", handleOrientationChange);
+  //   window.addEventListener("orientationchange", handleOrientationChange);
 
-    // 在组件卸载时移除监听器
-    return () => {
-      window.removeEventListener("resize", handleOrientationChange);
-      window.removeEventListener("orientationchange", handleOrientationChange);
-    };
-  }, []);
+  //   // 在组件卸载时移除监听器
+  //   return () => {
+  //     window.removeEventListener("resize", handleOrientationChange);
+  //     window.removeEventListener("orientationchange", handleOrientationChange);
+  //   };
+  // }, []);
 
   const router = createBrowserRouter([
     {

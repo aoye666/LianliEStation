@@ -10,7 +10,7 @@
         height: 500px;
         .dialog-bg {
             width: 100%;
-            height: 550px;
+            height: calc(100vh - 150px);
             position: absolute;
             z-index: -1;
             opacity: 0.8;
@@ -114,18 +114,18 @@
         height: auto;
         min-height: 40px;
         position: fixed;
-        bottom: 50px;
+        bottom: 55px;
         background-color: #f2f2f2;
         display: flex;
         flex-direction: row;
-        gap: 10px;
+        gap: 7px;
         align-items: center;
         justify-content: center;
         .input-text { 
-            font-size: 16px;
+            font-size: 18px;
             box-sizing: border-box;
             white-space: pre-wrap;
-            width: 260px;
+            width: 78vw;
             height: auto;
             min-height: 17px;
             margin-top: 10px;
@@ -133,7 +133,7 @@
             padding: 3px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            background-color: #f2f2f2;
+            background-color: white;
             resize : none;
             overflow: hidden;
             &:focus {
@@ -142,7 +142,7 @@
             }
         }
         .input-btn {
-            width: 40px;
+            width: 60px;
             height: 30px;
             font-size: 15px;
             align-self: center;

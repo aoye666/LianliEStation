@@ -39,9 +39,8 @@ $bg:#EDEDED;
         align-items: center;
         justify-content: center;
         width: 100%;
-        height: 45px;
-        border: 2px solid $bg;
-        background: white;
+        height: 50px;
+        background: rgb(202, 82, 82);
         .logout-icon {
             width: 24px;
             height: 24px;
@@ -56,6 +55,7 @@ $bg:#EDEDED;
             width: 100px;
             height: 38px;
             align-content: center;
+            color: white;
         }
     }
 }

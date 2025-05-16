@@ -16,11 +16,7 @@ interface Profile {
 } // 其中主题中的三张图片是指当前临时图片，类型为 File 而不是 string ，不从 userTheme 中调用
 
 const Reset = () => {
-  const {
-    currentUser,
-    changeProfile,
-    changeImage
-  } = useUserStore();
+  const { currentUser, changeProfile, changeImage } = useUserStore();
   const defaultProfile: Profile = {
     nickname: currentUser?.nickname || "",
     campus_id: currentUser?.campus_id || 1,
@@ -34,9 +30,8 @@ const Reset = () => {
   const { type } = useParams();
   const navigate = useNavigate();
 
-
   useEffect(() => {
-    console.log(profile)
+    console.log(profile);
   }, [currentUser]);
 
   const handleChange =
@@ -95,7 +90,12 @@ const Reset = () => {
 
   // 设置主题
   const handleThemeSubmit = () => {
-    changeProfile(currentUser?.nickname || "", currentUser?.campus_id || 1, currentUser?.qq || "", profile?.theme_id || 1);
+    changeProfile(
+      currentUser?.nickname || "",
+      currentUser?.campus_id || 1,
+      currentUser?.qq || "",
+      profile?.theme_id || 1
+    );
     navigate("/user/settings");
   };
 
@@ -103,76 +103,112 @@ const Reset = () => {
     case "nickname":
       return (
         <div className="reset-container">
-          <Navbar title="重置昵称" backActive={true} backPath="/user/settings" />
-          <input
-            className="reset-text"
-            type="text"
-            placeholder="请输入新的昵称"
-            onChange={handleChange("nickname")}
+          <Navbar
+            title="重置昵称"
+            backActive={true}
+            backPath="/user/settings"
           />
-          <button className="text-submit" onClick={handleProfileSubmit}>
-            保存
-          </button>
+          <div className="reset-warning">
+            警告：互联网不是法外之地，请注意遵守法律法规与公序良俗！对于违法违规的个性化设置我们将进行警告、封号等处罚，严重者上报至公安机关！
+          </div>
+          <div className="reset-box">
+            <input
+              className="reset-text"
+              type="text"
+              placeholder="请输入新的昵称"
+              onChange={handleChange("nickname")}
+            />
+            <button className="text-submit" onClick={handleProfileSubmit}>
+              保存
+            </button>
+          </div>
         </div>
       );
     case "campus_id":
       return (
         <div className="reset-container">
-          <Navbar title="重置默认校区" backActive={true} backPath="/user/settings" />
-          <input
-            className="reset-text"
-            type="text"
-            placeholder="请输入默认校区"
-            onChange={handleChange("campus_id")}
+          <Navbar
+            title="重置默认校区"
+            backActive={true}
+            backPath="/user/settings"
           />
-          <button className="text-submit" onClick={handleProfileSubmit}>
-            保存
-          </button>
+          <div className="reset-box">
+            <input
+              className="reset-text"
+              type="text"
+              placeholder="请输入默认校区"
+              onChange={handleChange("campus_id")}
+            />
+            <button className="text-submit" onClick={handleProfileSubmit}>
+              保存
+            </button>
+          </div>
         </div>
       );
     case "qq_id":
       return (
         <div className="reset-container">
-          <Navbar title="重置绑定QQ" backActive={true} backPath="/user/settings" />
-          <input
-            className="reset-text"
-            type="text"
-            placeholder="请输入要绑定的QQ号"
-            onChange={handleChange("qq_id")}
+          <Navbar
+            title="重置绑定QQ"
+            backActive={true}
+            backPath="/user/settings"
           />
-          <button className="text-submit" onClick={handleProfileSubmit}>
-            保存
-          </button>
+          <div className="reset-box">
+            <input
+              className="reset-text"
+              type="text"
+              placeholder="请输入要绑定的QQ号"
+              onChange={handleChange("qq_id")}
+            />
+            <button className="text-submit" onClick={handleProfileSubmit}>
+              保存
+            </button>
+          </div>
         </div>
       );
     case "avatar":
       return (
         <div className="reset-container">
-          <Navbar title="重置头像" backActive={true} backPath="/user/settings" />
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleChange("avatar")}
-            className="reset-img"
+          <Navbar
+            title="重置头像"
+            backActive={true}
+            backPath="/user/settings"
           />
-          <button className="text-submit" onClick={handleAvatarSubmit}>
-            保存
-          </button>
+          <div className="reset-warning">
+            警告：互联网不是法外之地，请注意遵守法律法规与公序良俗！对于违法违规的个性化设置我们将进行警告、封号等处罚，严重者上报至公安机关！
+          </div>
+          <div className="reset-box">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleChange("avatar")}
+              className="reset-img"
+            />
+            <button className="text-submit" onClick={handleAvatarSubmit}>
+              保存
+            </button>
+          </div>
         </div>
       );
     case "theme_id":
       return (
         <div className="reset-container">
-          <Navbar title="重置主题风格" backActive={true} backPath="/user/settings" />
-          <input
-            type="text"
-            placeholder="请输入主题 ID"
-            onChange={handleChange("theme_id")}
-            className="reset-text"
+          <Navbar
+            title="重置主题风格"
+            backActive={true}
+            backPath="/user/settings"
           />
-          <button className="text-submit" onClick={handleThemeSubmit}>
-            保存
-          </button>
+          <div className="reset-box">
+            <input
+              type="text"
+              placeholder="请输入主题 ID"
+              onChange={handleChange("theme_id")}
+              className="reset-text"
+            />
+            <button className="text-submit" onClick={handleThemeSubmit}>
+              保存
+            </button>
+          </div>
         </div>
       );
     case "background":
@@ -183,15 +219,20 @@ const Reset = () => {
             backActive={true}
             backPath="/user/settings"
           />
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleChange("background_url")}
-            className="reset-img"
-          />
-          <button className="text-submit" onClick={handleBackgroundSubmit}>
-            保存
-          </button>
+          <div className="reset-warning">
+            警告：互联网不是法外之地，请注意遵守法律法规与公序良俗！对于违法违规的个性化设置我们将进行警告、封号等处罚，严重者上报至公安机关！
+          </div>
+          <div className="reset-box">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleChange("background_url")}
+              className="reset-img"
+            />
+            <button className="text-submit" onClick={handleBackgroundSubmit}>
+              保存
+            </button>
+          </div>
         </div>
       );
     case "banner":
@@ -202,15 +243,20 @@ const Reset = () => {
             backActive={true}
             backPath="/user/settings"
           />
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleChange("banner_url")}
-            className="reset-img"
-          />
-          <button className="text-submit" onClick={handleBannerSubmit}>
-            保存
-          </button>
+          <div className="reset-warning">
+            警告：互联网不是法外之地，请注意遵守法律法规与公序良俗！对于违法违规的个性化设置我们将进行警告、封号等处罚，严重者上报至公安机关！
+          </div>
+          <div className="reset-box">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleChange("banner_url")}
+              className="reset-img"
+            />
+            <button className="text-submit" onClick={handleBannerSubmit}>
+              保存
+            </button>
+          </div>
         </div>
       );
     case "password":

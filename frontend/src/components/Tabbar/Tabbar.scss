@@ -1,16 +1,18 @@
 $dark: black;
 $light: white;
+$blue: #0674C1;
 .tabbar-container {
   border-top: 1px solid #EDEDED;
+  border-radius: 10px 10px 0 0;
   width: 100%;
-  height: 50px;
+  height: 55px;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
   position: fixed;
   bottom: 0;
-  background: $light;
+  background: $blue;
   .tabbar-item {
     width: 100%;
     height: 45px;
@@ -36,8 +38,8 @@ $light: white;
       font-size: 12px;
       width: 60px;
       height: 12px;
-      margin-bottom: 5px;
-      color: #333;
+      margin-bottom: 10px;
+      color: $light;
     }
   }
 }

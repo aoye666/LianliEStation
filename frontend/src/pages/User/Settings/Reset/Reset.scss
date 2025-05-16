@@ -1,17 +1,33 @@
 .reset-container {
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     height: 100vh;
-    .reset-text {
+    .reset-warning {
         margin-top: 70px;
+        width: 275px;
+        color: red;
+        border: 1px solid red;
+        border-radius: 5px;
+        padding: 10px;
+    }
+    .reset-box {
+        margin-top: 100px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+    .reset-text {
         width: 200px;
         height: 25px;
         padding: 3px;
+        padding-left: 10px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        font-size: 18px;
     }
     .text-submit {
-        margin-top: 70px;
-        width: 50px;
+        width: 60px;
         height: 35px;
         margin-left: 10px;
         border: none;
@@ -22,7 +38,7 @@
     }
     .reset-img {
         width: 200px;
-        height: 200px;
-        margin-top: 70px;
+        height: 30px;
+    }
     }
 }

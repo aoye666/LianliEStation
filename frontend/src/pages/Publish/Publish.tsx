@@ -6,7 +6,6 @@ import Cookies from "js-cookie";
 import "./Publish.scss";
 import Navbar from "../../components/Navbar/Navbar";
 import Tabbar from "../../components/Tabbar/Tabbar";
-import user from "../../assets/user.png";
 import logo from "../../assets/logo.png";
 import accept from "../../assets/accept.png";
 import refresh from "../../assets/refresh.png";
@@ -28,6 +27,7 @@ const Publish: React.FC = () => {
     Array<{ role: string; content: string }>
   >([]);
   const [previousText, setPreviousText] = useState<string>("");
+  const [avatarFile, setAvatarFile] = useState<string | undefined>();
   const [backgroundFile, setBackgroundFile] = useState<string | undefined>();
 
   const token = Cookies.get("auth-token");
@@ -43,6 +43,15 @@ const Publish: React.FC = () => {
       // 获取localStorage中的图片  
       let backgroundTemp = getImageFromLocalStorage("userBackground") || undefined;
       setBackgroundFile(backgroundTemp);
+
+      if (currentUser&&currentUser.avatar&&currentUser.avatar!== "/uploads/default_avatar.png") {  
+        const avatarBase64: any = await fetchImageAsBase64(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}${currentUser.avatar}`);  
+        localStorage.setItem("userAvatar", avatarBase64);  
+      } 
+
+      // 获取localStorage中的图片  
+      let avatarTemp = getImageFromLocalStorage("userAvatar") || undefined;
+      setAvatarFile(avatarTemp);
     };  
     
     // 从URL获取Base64  
@@ -58,7 +67,7 @@ const Publish: React.FC = () => {
   
     useEffect(() => {  
       storeImagesInLocalStorage();  
-    }, [token, currentUser?.background_url,backgroundFile]);  
+    }, [token, currentUser?.background_url,backgroundFile,currentUser?.avatar,avatarFile]);  
   
     // 从localStorage获取图片的函数  
     const getImageFromLocalStorage = (key: string) => {  
@@ -204,7 +213,7 @@ const Publish: React.FC = () => {
             className={dialog.role === "user" ? "dialog-user" : "dialog-ai"}
           >
             <div className="dialog-face">
-              <img src={dialog.role === "user" ? user : logo} alt="头像"></img>
+              <img src={dialog.role === "user" ? avatarFile : logo} alt="头像"></img>
             </div>
             <div className="dialog-content">
               {dialog.role === "user" ? (
@@ -263,7 +272,7 @@ const Publish: React.FC = () => {
           onChange={(e) => setTextareaValue(e.target.value)}
         ></textarea>
         <button className="input-btn" onClick={handlePost}>
-          发布
+          发送
         </button>
       </div>
       <Tabbar initialIndex={2} />

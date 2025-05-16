@@ -2,9 +2,9 @@ import { useNavigate } from "react-router-dom";
 import "./Settings.scss";
 import { useUserStore } from "../../../store";
 import Navbar from "../../../components/Navbar/Navbar";
-import logoutIcon from "../../../assets/logout.svg"
-import right from "../../../assets/right.svg"
-import about from "../../../assets/about.svg"
+import logoutIcon from "../../../assets/logout-white.svg"
+import right from "../../../assets/right-black.svg"
+import about from "../../../assets/about-black.svg"
 
 const Settings = () => {
   const navigate = useNavigate();
