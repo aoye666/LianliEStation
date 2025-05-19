@@ -4,387 +4,435 @@ $background-color: #ffffff;
 $text-color: #333;
 $border-radius: 8px;
 $shadow-color: rgba(0, 0, 0, 0.1);
-    
-    .button-basic {
-    border: none;
-    border-radius: 8px; /* 增加圆角 */
-    font-size: 16px; /* 调整字体大小 */
-    font-weight: 380;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s ; /* 按钮的过渡效果 */
-    width: 40px;
-   
-    // &:hover {
-    //     background-color: #0056b3; /* 悬停时变为深蓝色 */
-    //     transform: translateY(-2px); /* 悬停时按钮稍微上移 */
-    //     box-shadow: 0 4px 10px rgba(0, 0, 255, 0.2); /* 增加阴影效果 */
-    //    }
 
-    &:active {
-        background-color: #003366; /* 按下时的颜色 */
-        transform: scale(0.9); 
+.button-basic {
+  border-radius: 8px; /* 增加圆角 */
+  border: none;
+  color: #7b7777;
+  font-size: 16px; /* 调整字体大小 */
+  font-weight: 380;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s; /* 按钮的过渡效果 */
+  padding-left: 4px;
+  padding-right: 4px;
+  background: #dbd9d9;
+
+  // &:hover {
+  //     background-color: #0056b3; /* 悬停时变为深蓝色 */
+  //     transform: translateY(-2px); /* 悬停时按钮稍微上移 */
+  //     box-shadow: 0 4px 10px rgba(0, 0, 255, 0.2); /* 增加阴影效果 */
+  //    }
+
+  &:active {
+    //background-color: #003366; /* 按下时的颜色 */
+    transform: scale(0.9);
+  }
+}
+
+.market-container {
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 55px);
+  width: 100vw;
+  overflow: hidden;
+
+  .active-button {
+    button {
+      @extend.button-basic;
+      //transform: translateY(-3px);
+      //background-color: #4080bf;
+      color: #0674c1;
+      border: 1px solid #0674c1;
+      background: #dbeaf5;
     }
-   }
-   
-   .market-container {
-        background-color: #f5f5f5;
+  }
+
+  input:focus {
+    border-color: #007bff; /* 聚焦时的边框颜色 */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* 聚焦时的阴影效果 */
+  }
+
+  .market-navbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #0674c1;
+    transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0.5s;
+    width: 100vw;
+    height: 50px;
+    .logo {
+      display: flex;
+      width: 35px;
+      height: 35px;
+      margin-right: 15px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    input {
+      border: 1px solid #ccc;
+      width: 60vw;
+      height: 20px;
+      border-radius: 10px;
+      outline: none;
+      padding: 3px;
+      padding-left: 10px;
+    }
+
+    input:focus {
+      border-color: #007bff; /* 聚焦时的边框颜色 */
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+    .icon {
+      display: flex;
+      width: 30px;
+      height: 30px;
+      margin-left: 10px;
+    }
+  }
+
+  .market-body {
+    display: flex;
+    flex-direction: column;
+
+    .un-content {
+      display: flex;
+      flex-direction: column;
+      //background: #0674C1;
+      padding-bottom: 10px;
+      //box-shadow: #bfbfbf 0px 3px 5px;
+      border-bottom: 1px solid #bfbfbf;
+
+      .img {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        img {
+          width: 100vw;
+          aspect-ratio: 3.2;
+        }
+        margin-bottom: 10px;
+      }
+
+      .tag {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        height: 25px;
+
+        .tag-item {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          .market-type {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding-right: 10px;
+            margin-right: 10px;
+            border-right: 2px solid #656565;
+
+            .sell {
+              button {
+                //background-color: #e46161e7;
+                @extend.button-basic;
+              }
+            }
+
+            .receive {
+              button {
+                //background-color: #99d889;
+                @extend.button-basic;
+              }
+            }
+
+            .null {
+              button {
+                //background-color: #95c6e8;
+                @extend.button-basic;
+              }
+            }
+          }
+
+          .commodity-type {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+
+            .detail {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              gap: 10px;
+
+              button {
+                @extend.button-basic;
+              }
+
+              .active-button {
+                button {
+                  @extend.button-basic;
+                  color: #0674c1;
+                  border: 1px solid #0674c1;
+                  background: #dbeaf5;
+                }
+              }
+            }
+          }
+        }
+
+        .more {
+          display: flex;
+          img {
+            width: 25px;
+          }
+        }
+      }
+    }
+
+    .market-more {
+      display: flex;
+      position: absolute;
+      z-index: 100;
+      left: 0;
+      bottom: 55px;
+      width: 100vw;
+      border-radius: 10px; /* 更圆滑的边角 */
+      border: 1px solid #e0e0e0; /* 使用更柔和的灰色边框 */
+      flex-direction: column;
+      //box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      background-color: #f9f9f9;
+      position: absolute;
+
+      input {
+        outline: none;
+      }
+
+      input:focus {
+        border-color: #007bff; /* 聚焦时的边框颜色 */
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* 聚焦时的阴影效果 */
+      }
+
+      .price {
         display: flex;
         flex-direction: column;
-        height: 100vh;
+        margin-bottom: 10px;
+        margin-top: 10px;
         width: 100vw;
-        overflow: hidden;
-
-        .active-button{
-            button{
-                @extend.button-basic;
-                transform: translateY(-3px);
-                background-color: #4080bf;
-            }
+        .price-title {
+          font-size: 18px;
+          font-weight: bold;
+          margin-bottom: 10px;
+          margin-left: 10px;
         }
 
-        input:focus {
-            border-color: #007bff; /* 聚焦时的边框颜色 */
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* 聚焦时的阴影效果 */
+        .price-unit {
+          display: flex;
+          gap: 10px;
+          justify-content: center;
+          input {
+            width: 80px;
+            height: 25px;
+            border: 1px solid #c4c2c2;
+            border-radius: 10px;
+            padding-left: 10px;
+          }
         }
-        
-        .market-navbar{
+      }
+
+      .location {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 10px;
+        width: 100vw;
+
+        .location-title {
+          font-size: 18px;
+          font-weight: bold;
+          margin-bottom: 10px;
+          margin-left: 10px;
+        }
+
+        .location-list {
+          display: flex;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 15px;
+          .item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin: 10px 25px 0 25px;
-            transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0.5s;
-            height: 5%;
-            .logo{
-                display: flex;
-                width: 40px;
-                height: 40px;
-                margin-right: 10px;
-            }
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 80px;
+            border-radius: 10px;
+            color: #7b7777;
+          }
 
-            input{
-                border: 1px solid #ccc;
-                width: 220px;
-                height: 20px;
-                border-radius: 10px;
-                outline: none;
-                padding-left: 3px;
-            }
-
-            input:focus{
-                border-color: #007bff; /* 聚焦时的边框颜色 */
-                box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-            }
-
-            .icon{
-                display: flex;
-                width: 30px;
-                height: 30px;
-            }
-        }
-
-        .market-body {
+          .item-active {
             display: flex;
-            flex-direction: column;
-            height: 95%;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 80px;
+            border-radius: 10px;
+            color: #0674c1;
+            text-decoration: underline;
+            text-decoration-color: #0674c1;
+          }
 
-            .un-content{
-                display: flex;
-                flex-direction: column;
-                border-bottom: 2px solid #bfbfbf;
-                padding-bottom: 10px;
-                box-shadow: #bfbfbf 0px 3px 5px;
-                height: 20%;
+          .item:active {
+            transform: scale(0.9);
+          }
+        }
+      }
 
-                .img{
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    img{
-                        // width: 300px;
-                        height: 80px;
-                    }
-                    margin-bottom: 5px;
-                }
+      .confirm {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        button {
+          color: white;
+          margin-top: 20px;
+          margin-bottom: 20px;
+          width: 130px;
+          height: 30px;
+          font-size: 16px;
+          cursor: pointer;
+          background-color: $primary-color;
+          border: none;
+          border-radius: 5px;
+          //box-shadow: $primary-color 0px 2px 5px;
+          //transition: all 0.2s ease;
 
-                .tag{
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    gap: 10px;
+          //   &:active {
+          //     transform: translateY(2px);
+          //     background-color: $hover-color;
+          //   }
+        }
+      }
 
-                    .tag-item{
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        .market-type{
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            gap: 10px;
-                            padding-right: 10px;
-                            border-right:2px solid #656565;
-    
-                            .sell{
-                                button{
-                                    background-color: #28a0b5e7;
-                                    @extend.button-basic;
-                                }
-                            }
-    
-                            .receive{
-                                button{
-                                    background-color: #edeb82;
-                                    @extend.button-basic;
-                                }
-                            }
-
-                            .null{
-                                button{
-                                    background-color: #9f9f9f;
-                                    @extend.button-basic;
-                                }
-                            }
-                        }
-    
-                        .commodity-type{
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            gap: 10px;
-    
-                            .detail{
-                                display: flex;
-                                justify-content: center;
-                                align-items: center;
-                                gap: 10px;
-    
-                                button{
-                                    @extend.button-basic;
-                                }
-                            }
-                        }
-                    }
-
-                    .more{
-                        display: flex;
-                        img{
-                            width: 25px;
-                        }
-                    }
-                }
-            }
-
-            .market-more{
-                display: flex;
-                position: absolute;
-                z-index: 100;
-                left: 0;
-                background-color: #bfbfbf; /* 更柔和的背景色 */
-                border-radius: 10px; /* 更圆滑的边角 */
-                border: 1px solid #e0e0e0; /* 使用更柔和的灰色边框 */
-                flex-direction: column;
-                padding: 20px; /* 适当的内边距 */
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                overflow: hidden;
-                background-color: #f9f9f9;
-                position: absolute;
-
-                input{
-                    outline:none;
-                }
-
-                input:focus {
-                    border-color: #007bff; /* 聚焦时的边框颜色 */
-                    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* 聚焦时的阴影效果 */
-                }
-
-                .price{
-                    display: flex;
-                    flex-direction: column;
-                    margin-left: 5px;
-                    margin-bottom: 10px;
-                    .price-title{  
-                        font-size: 18px;
-                        font-weight: bold;
-                        margin-bottom: 10px;
-                    }
-
-                    .price-unit{
-                        display: flex;
-                        gap: 10px;
-                        justify-content: center;
-                        input{
-                            width: 100px;
-                            height: 30px;
-                            border: 1px solid #c4c2c2;
-                            border-radius: 10px;
-                        }
-                    }
-                }
-
-                .location{
-                    display: flex;
-                    flex-direction: column;
-                    margin-left: 5px;
-                    margin-bottom: 10px;
-
-                    .location-title{  
-                        font-size: 18px;
-                        font-weight: bold;
-                        margin-bottom: 10px;
-                    }
-
-                    .location-list{
-                        display: flex;
-                        justify-content: center;
-                        width: 200px;
-                        flex-wrap: wrap;
-                        gap: 15px;
-                        .item{
-                            display: flex;
-                            font-size: 16px;
-                            cursor: pointer;
-                            transition: all 0.2s ease;
-                            width: 80px;
-                            border-radius: 10px;
-                        }
-
-                        .item:active{
-                            background-color: #003366; /* 按下时的颜色 */
-                            transform: scale(0.9);
-                        }
-                    }
-                }
-
-                .confirm{
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    button{
-                        margin-top: 20px;
-                        width: 150px;
-                        height: 30px;
-                        cursor: pointer;
-                        background-color: $primary-color;
-                        border: none;
-                        border-radius: 7px;
-                        box-shadow: $primary-color 0px 2px 5px;
-                        transition: all 0.2s ease;
-
-                        &:active{
-                            transform: translateY(2px);
-                            background-color: $hover-color;
-                        }
-                    }
-                }
-
-                .sort{
-                    display: flex;
-                    margin-left: 5px;
-                    flex-direction: column;
-                    width: 200px;
-                    .sort-title{  
-                        font-size: 18px;
-                        font-weight: bold;
-                        margin-bottom: 10px;
-                    }
-
-                    .sort-list{
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        gap: 15px;
-                        border-bottom: 1px solid #c4c2c2;
-                        .item{
-                            display: flex;
-                            font-size: 16px;
-                            cursor: pointer;
-                            transition: all 0.2s ease;
-                            width: 80px;
-                            border-radius: 10px;
-                        }
-
-                        .item:active{
-                            background-color: #003366; /* 按下时的颜色 */
-                            transform: scale(0.9);
-                        }
-                    }
-
-                }
-            }
-
-            .content::-webkit-scrollbar {
-                display: none; /* 隐藏滚动条 */
-              }
-              
-            .content{
-                display: flex;
-                flex-direction: row;
-                gap: 5px;
-                flex-wrap: wrap;
-                overflow-y: scroll;
-                justify-content: space-between;
-                margin: 0 15px;
-                height: 70%;
-                .commodity-item{
-                    display: flex;
-                    flex-direction: column;
-                    border: 1px solid #acacac;
-                    width: 155px;
-                    height: 155px;
-                    margin: 2px;
-                    border-radius: 5px;
-                    padding: auto;
-                    overflow: hidden;
-                    flex-shrink: 1;
-
-                    .commodity-img{
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        margin-top: 6px;
-                        margin-bottom: 6px;
-
-                        img{
-                            width: 85px;
-                            height: 85px;
-                        }
-
-                    }
-
-                    .commodity-title{
-                        font-size: 15px;
-                        display: flex;
-                        justify-self: start;
-                        align-items: start;
-                        margin-bottom: 5px;
-                        margin-left: 10px;
-                    }
-
-                    .commodity-bottom{
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        padding: 0 10px;
-
-                        .commodity-tag{
-                            border: 1px solid #c7c7c7;
-                            border-radius: 5px;
-                            padding: 2px;
-                            font-size: 15px;
-                        }
-
-                        .commodity-price{
-                            font-size: 15px;
-                            font-weight: bold;
-                            color: $hover-color;
-                        }
-                    }
-
-                }
-            }
+      .sort {
+        display: flex;
+        flex-direction: column;
+        width: 100vw;
+        .sort-title {
+          font-size: 18px;
+          font-weight: bold;
+          margin-bottom: 10px;
+          margin-left: 10px;
         }
 
+        .sort-list {
+          display: flex;
+          justify-content: center;
+          width: 100%;
+          flex-wrap: wrap;
+          gap: 15px;
+          .item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 80px;
+            color: #7b7777;
+          }
+          .item-active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 80px;
+            color: #0674c1;
+            text-decoration: underline;
+            text-decoration-color: #0674c1;
+          }
+
+          .item:active {
+            transform: scale(0.9);
+          }
+        }
+      }
     }
 
+    .content {
+      display: flex;
+      flex-direction: row;
+      gap: 2px;
+      flex-wrap: wrap;
+      overflow-y: scroll;
+      justify-content: flex-start;
+      margin-left: 4px;
+      height: calc(100vh - 105px - 31.25vw - 45px);
+      width: 100vw;
+      .commodity-item {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #acacac;
+        width: 155px;
+        height: 155px;
+        margin-top: 2px;
+        border-radius: 5px;
+        padding: auto;
+        overflow: hidden;
+        flex-shrink: 1;
+
+        .commodity-img {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-top: 6px;
+          margin-bottom: 6px;
+
+          img {
+            width: 85px;
+            height: 85px;
+          }
+        }
+
+        .commodity-title {
+          font-size: 15px;
+          width: 140px;
+          display: flex;
+          justify-self: start;
+          align-items: start;
+          margin-bottom: 5px;
+          margin-left: 10px;
+        }
+
+        .commodity-bottom {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0 10px;
+
+          .commodity-tag {
+            border: 1px solid #c7c7c7;
+            border-radius: 5px;
+            padding: 2px;
+            font-size: 15px;
+          }
+
+          .commodity-price {
+            font-size: 15px;
+            font-weight: bold;
+            color: $hover-color;
+          }
+        }
+      }
+    }
+  }
+}

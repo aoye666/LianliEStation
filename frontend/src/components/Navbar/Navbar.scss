@@ -1,3 +1,5 @@
+$blue: #0674C1;
+$grey: #EDEDED;
 .navbar-container {
   display: flex;
   align-items: center;
@@ -9,7 +11,7 @@
   height: 50px;
   position: fixed;
   top: 0;
-  background: #EDEDED;
+  background: $blue;
 
   .left {
     width: 32px;
@@ -29,5 +31,6 @@
     width: auto;
     height: 24px;
     font-size: 18px;
+    color: white;
   }
 }

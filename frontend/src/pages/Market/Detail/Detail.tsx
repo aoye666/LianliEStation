@@ -3,14 +3,14 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom"; // 使用 useParams 从路由获取参数
 import axios from "axios";
 import "./Detail.scss";
-import copy from "../../../assets/copy.svg";
-import stars from "../../../assets/favorites.svg";
-import like from "../../../assets/like.svg";
-import dislike from "../../../assets/dislike.svg";
-import close from "../../../assets/close.svg";
-import drop from "../../../assets/drop.svg";
-import share from "../../../assets/share.svg";
-import left from "../../../assets/left.svg";
+import copy from "../../../assets/copy-black.svg";
+import stars from "../../../assets/favorites-black.svg";
+import like from "../../../assets/like-black.svg";
+import dislike from "../../../assets/dislike-black.svg";
+import close from "../../../assets/close-black.svg";
+import drop from "../../../assets/drop-black.svg";
+import share from "../../../assets/share-black.svg";
+import left from "../../../assets/left-black.svg";
 import takePlace from "../../../assets/takePlace.png";
 
 interface Goods {
@@ -210,7 +210,7 @@ const Detail = () => {
       <div className="detail-author">
         <img
           className="author-icon"
-          src={currentGoods?.author_avatar || ""}
+          src={`${process.env.REACT_APP_API_URL||"http://localhost:5000"}${currentGoods?.author_avatar}`}
           alt="发布者头像"
         />
         <div className="author-name">{currentGoods?.author_nickname}</div>
@@ -272,12 +272,11 @@ const Detail = () => {
           <img className="starBtn-icon" src={stars} alt="收藏" />
           <div className="starBtn-text">加入收藏</div>
         </div>
-        <div className="contact-btn">
+        <div className="contact-btn" onClick={handleCopy}>
           <img
             className="qqBtn-icon"
             src={copy}
             alt="发布者QQ号"
-            onClick={handleCopy}
           />
           <div className="qqBtn-text">立即联系！</div>
         </div>
