@@ -1,24 +1,19 @@
-import React from "react";
-import "./Forum.scss";
-import Navbar from "../../components/Navbar/Navbar";
-import Tabbar from "../../components/Tabbar/Tabbar";
+import Tabbar from "../../components/Tabbar/Tabbar"
+import "./Forum.scss"
+import forum from "../../assets/forum-later.png"
+import Navbar from "../../components/Navbar/Navbar"
 
-const Forum=()=>{
-    return (
-        <div className="forum-container">
-            <div className="navbar">
-                <Navbar title="校园墙"/>
-            </div>
-
-            <div className="content">
-
-            </div>
-
-            <div className="tabbar">
-                <Tabbar initialIndex={1} />
-            </div>
-        </div>
-    )
+const Forum = () => {
+  return (
+    <div className="forum-container">
+      <Navbar title="校园墙" />
+      <div className="notice-container">
+        <div className="notice-img"><img src={forum} alt="forum" /></div>
+        <div className="notice-text">校园墙功能即将推出！</div>
+      </div>
+      <Tabbar initialIndex={1} />
+    </div>
+  )
 }
 
 export default Forum

@@ -106,7 +106,7 @@ const App: React.FC = () => {
       path: "/forum",
       element: (
         <ProtectedRoute>
-          <ForumDisable />
+          <Forum />
         </ProtectedRoute>
       ),
     },
@@ -114,7 +114,7 @@ const App: React.FC = () => {
       path: "/forum-test",
       element: (
         <ProtectedRoute>
-          <Forum />
+          <ForumDisable />
         </ProtectedRoute>
       ),
     },
