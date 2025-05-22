@@ -68,6 +68,17 @@ interface HistoryGoods {
   images: string[];
 }
 
+interface ForumPost{
+  id:number;
+  title:string;
+  content:string;
+  author_id:number;
+  campust_id:number;
+  status:string;
+  created_at:string;
+  images:string[];
+}
+
 interface RecordState {
   // history 相关的状态管理及方法
   historyGoods: HistoryGoods[];
@@ -108,12 +119,17 @@ interface RecordState {
   ) => Promise<void>; // 提交回复
   markResponse: (response_id: number) => Promise<void>; // 标记回复为已读
   searchResponses: (read_status: string) => Promise<void>; // 查询回复
+
+  //forum相关的状态管理及方法
+  forumPosts: ForumPost[];
+  fetchForumPosts: () => Promise<void>; // 获取论坛帖子列表
 }
 
 const useRecordStore = create<RecordState>()(
   persist(
     (set, get) => ({
       historyGoods: [],
+      forumPosts: [],
       historyPosts: [],
       favoritesGoods: [],
       favoritePosts: [],
@@ -449,6 +465,29 @@ const useRecordStore = create<RecordState>()(
             console.error("未知错误:", error);
           }
         }
+      },
+      fetchForumPosts: async () => {
+        try{
+          const response =await axios.get(
+            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/campusWall`,
+          );
+          if (response.status === 200 && response.data) {
+            const data = response.data.posts;
+            set((state) => ({
+              forumPosts: [...data], // 更新 goods 状态
+            }));
+          } else {
+            // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
+            console.log("No posts available or unexpected response status");
+          }
+        } catch (error) {
+          // 捕获请求失败的错误（如 404 或网络问题）
+          if (error instanceof Error) {
+            console.error("Error fetching posts:", error.message);
+          } else {
+            console.error("Error fetching posts:", error);
+          }
+        }       
       },
     }),
     {

@@ -1,3 +1,77 @@
 .forum-container{
-    
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    background-color: #e4e4e4;
+
+    .content{
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        top: 50px;
+        height:calc(100vh - 105px) ;
+
+        .top-posts{
+            height:15%;
+            overflow: scroll;
+
+            .Row{
+                padding: 5px;
+                .Col{
+                    .Card{
+                        height: 30px;
+                        .ant-card-body {
+                          padding: 0; 
+                          display: flex;
+                          justify-content: center;
+                          align-items: center;
+                          height: 100%;
+                          font-size: 12px;
+                          overflow: hidden;
+                        }
+                    }
+                }
+            }
+        }
+
+        .posts{
+            display: flex;
+            flex-direction: column;
+            background-color:  rgb(228, 228, 228);
+            height:85%;
+            row-gap: 7px;
+            overflow: scroll;
+            margin-top: 10px;
+
+            .Row{
+                padding:0 5px;
+                .Col{
+                    .Card{
+                        border: false;
+
+                        .ant-card-body {
+                            padding: 15px;
+                            height: auto;
+                            white-space: normal;
+                            word-wrap: break-word;
+                        }
+
+                        .ant-card-head {
+                            padding: 15px;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            height: 100%;
+                        }
+                    }
+                }
+            }
+
+        }
+
+        // .top-posts{
+        //     height: 100px;
+        //     background-color: antiquewhite;
+        // }
+    }
 }
