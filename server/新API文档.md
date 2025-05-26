@@ -1195,8 +1195,6 @@ Authorization: Bearer {token}
 - 管理员可以删除任何帖子，无论发布者是谁
 - 已软删除的帖子将不会出现在帖子列表中
 
-
-
 ### 处理帖子互动
 
 基本信息
@@ -1207,12 +1205,12 @@ Authorization: Bearer {token}
 
 请求参数
 
-| 参数名    | 类型    | 必选 | 描述                                                         |
-| --------- | ------- | ---- | ------------------------------------------------------------ |
-| post_id   | Number  | 是   | 帖子 ID (URL 参数)                                           |
-| action    | String  | 是   | 交互类型，"like" 或 "comment"                                |
-| content   | String  | 否   | 评论内容，仅在 action 为 "comment" 时需要                    |
-| parent_id | Number  | 否   | 如果是回复评论，则提供父评论的 ID                            |
+| 参数名    | 类型    | 必选 | 描述                                                                   |
+| --------- | ------- | ---- | ---------------------------------------------------------------------- |
+| post_id   | Number  | 是   | 帖子 ID (URL 参数)                                                     |
+| action    | String  | 是   | 交互类型，"like" 或 "comment"                                          |
+| content   | String  | 否   | 评论内容，仅在 action 为 "comment" 时需要                              |
+| parent_id | Number  | 否   | 如果是回复评论，则提供父评论的 ID                                      |
 | value     | Boolean | 否   | 点赞状态，仅在 action 为 "like" 时需要 (true 为点赞, false 为取消点赞) |
 
 请求头
@@ -1322,10 +1320,6 @@ Authorization: Bearer {token}
 }
 ```
 
-
-
-
-
 ### 条件查询帖子
 
 基本信息
@@ -1371,67 +1365,65 @@ http://localhost:5000/api/forum/posts?page=1&limit=5&with_comments=true
 
 ```json
 {
-    "total": 2,
-    "page": 1,
-    "limit": 5,
-    "pages": 1,
-    "posts": [
+  "total": 2,
+  "page": 1,
+  "limit": 5,
+  "pages": 1,
+  "posts": [
+    {
+      "id": 2,
+      "title": "好啊",
+      "content": "好",
+      "author_id": 1,
+      "campus_id": 1,
+      "status": "active",
+      "created_at": "2025-04-28T02:26:53.000Z",
+      "likes": 0,
+      "author_name": "DUTers",
+      "author_avatar": "/uploads/default.png",
+      "comment_count": 0,
+      "images": ["/uploads/1745807213371-kmzx9tsmz2m.jpg"],
+      "comments": []
+    },
+    {
+      "id": 1,
+      "title": "好啊",
+      "content": "好",
+      "author_id": 1,
+      "campus_id": 1,
+      "status": "active",
+      "created_at": "2025-04-28T02:26:33.000Z",
+      "likes": 1,
+      "author_name": "DUTers",
+      "author_avatar": "/uploads/default.png",
+      "comment_count": 2,
+      "images": [],
+      "comments": [
         {
-            "id": 2,
-            "title": "好啊",
-            "content": "好",
-            "author_id": 1,
-            "campus_id": 1,
-            "status": "active",
-            "created_at": "2025-04-28T02:26:53.000Z",
-            "likes": 0,
-            "author_name": "DUTers",
-            "author_avatar": "/uploads/default.png",
-            "comment_count": 0,
-            "images": [
-                "/uploads/1745807213371-kmzx9tsmz2m.jpg"
-            ],
-            "comments": []
-        },
-        {
+          "id": 1,
+          "content": "这是一条评论",
+          "created_at": "2025-04-28T02:34:22.000Z",
+          "user": {
             "id": 1,
-            "title": "好啊",
-            "content": "好",
-            "author_id": 1,
-            "campus_id": 1,
-            "status": "active",
-            "created_at": "2025-04-28T02:26:33.000Z",
-            "likes": 1,
-            "author_name": "DUTers",
-            "author_avatar": "/uploads/default.png",
-            "comment_count": 2,
-            "images": [],
-            "comments": [
-                {
-                    "id": 1,
-                    "content": "这是一条评论",
-                    "created_at": "2025-04-28T02:34:22.000Z",
-                    "user": {
-                        "id": 1,
-                        "nickname": "DUTers",
-                        "avatar": "/uploads/default.png"
-                    },
-                    "replies": [
-                        {
-                            "id": 2,
-                            "content": "这是一条评论2",
-                            "created_at": "2025-04-28T02:35:54.000Z",
-                            "user": {
-                                "id": 1,
-                                "nickname": "DUTers",
-                                "avatar": "/uploads/default.png"
-                            }
-                        }
-                    ]
-                }
-            ]
+            "nickname": "DUTers",
+            "avatar": "/uploads/default.png"
+          },
+          "replies": [
+            {
+              "id": 2,
+              "content": "这是一条评论2",
+              "created_at": "2025-04-28T02:35:54.000Z",
+              "user": {
+                "id": 1,
+                "nickname": "DUTers",
+                "avatar": "/uploads/default.png"
+              }
+            }
+          ]
         }
-    ]
+      ]
+    }
+  ]
 }
 ```
 
@@ -1442,10 +1434,6 @@ http://localhost:5000/api/forum/posts?page=1&limit=5&with_comments=true
   "message": "服务器错误"
 }
 ```
-
-
-
-
 
 ## appealsRoutes
 
@@ -1963,9 +1951,6 @@ images: [图片1.jpg, 图片2.jpg]
 
 ---
 
-
-
-
 ## messageRoutes
 
 ### 获取通知
@@ -2166,6 +2151,264 @@ images: [图片1.jpg, 图片2.jpg]
 - 用户只能修改属于自己的通知状态
 - type 参数指定通知类型，必须为"appeal"或"response"
 
+## historyRoutes
 
+### 查询发布历史
 
+基本信息
 
+- **路径**: `/api/history/goods`
+- **方法**: `GET`
+- **描述**: 查询用户发布的商品和帖子历史记录，包括关联的图片信息
+
+请求参数
+
+无需请求参数
+
+请求头
+
+```
+Authorization: Bearer {token}
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                       |
+| ------ | ---------------- | -------------------------- |
+| 200    | application/json | 查询成功                   |
+| 401    | application/json | 未提供 Token 或 Token 无效 |
+| 500    | application/json | 服务器错误                 |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "goods": [
+      {
+        "id": 1,
+        "title": "全新笔记本电脑",
+        "content": "原价5000元，用了不到3个月，因换新出售",
+        "price": 3500,
+        "campus_id": 1,
+        "goods_type": "sell",
+        "tag": "computer",
+        "author_id": 3,
+        "status": "active",
+        "created_at": "2025-04-14T20:42:47.000Z",
+        "images": ["/uploads/image1.jpg", "/uploads/image2.jpg"]
+      }
+    ],
+    "posts": [
+      {
+        "id": 1,
+        "title": "求推荐开发区美食",
+        "content": "最近搬到开发区，有什么好吃的餐厅推荐吗？",
+        "campus_id": 1,
+        "author_id": 3,
+        "status": "active",
+        "created_at": "2025-04-14T20:42:47.000Z",
+        "images": ["/uploads/post1.jpg", "/uploads/post2.jpg"]
+      }
+    ]
+  }
+  ```
+
+- Token 未提供 (状态码：401)
+
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token 无效 (状态码：401)
+
+  ```json
+  {
+    "message": "无效的 Token"
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 用户必须登录才能查询发布历史
+- 返回结果按发布时间倒序排列（最新的在前）
+- 不返回状态为 'deleted' 的记录
+- 自动关联并返回商品和帖子的相关图片
+- 商品图片通过 goods_images 表关联，帖子图片通过 post_image 表关联
+- 返回对象包含 goods 和 posts 两个数组
+
+### 修改商品状态
+
+基本信息
+
+- **路径**: `/api/history/goods/:post_id`
+- **方法**: `PUT`
+- **描述**: 修改指定商品的交易状态
+
+请求参数
+
+| 参数名  | 类型   | 必选 | 描述                  |
+| ------- | ------ | ---- | --------------------- |
+| post_id | Number | 是   | 商品 ID (URL 参数)    |
+| status  | String | 是   | 商品状态 (请求体参数) |
+
+请求头
+
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+请求体示例
+
+```json
+{
+  "status": "sold"
+}
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                       |
+| ------ | ---------------- | -------------------------- |
+| 200    | application/json | 状态更新成功               |
+| 401    | application/json | 未提供 Token 或 Token 无效 |
+| 403    | application/json | 无权修改此商品             |
+| 500    | application/json | 服务器错误                 |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "商品状态已更新"
+  }
+  ```
+
+- Token 未提供 (状态码：401)
+
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token 无效 (状态码：401)
+
+  ```json
+  {
+    "message": "无效的 Token"
+  }
+  ```
+
+- 无权限 (状态码：403)
+
+  ```json
+  {
+    "message": "无权修改此商品"
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 用户必须登录才能修改商品状态
+- 只能修改自己发布的商品
+- 常见状态值包括：active（活跃）、sold（已售出）、reserved（已预订）等
+
+### 删除帖子
+
+基本信息
+
+- **路径**: `/api/history/posts/:post_id`
+- **方法**: `DELETE`
+- **描述**: 删除指定的校园墙帖子（软删除，将状态设置为 deleted）
+
+请求参数
+
+| 参数名  | 类型   | 必选 | 描述               |
+| ------- | ------ | ---- | ------------------ |
+| post_id | Number | 是   | 帖子 ID (URL 参数) |
+
+请求头
+
+```
+Authorization: Bearer {token}
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                       |
+| ------ | ---------------- | -------------------------- |
+| 200    | application/json | 删除成功                   |
+| 401    | application/json | 未提供 Token 或 Token 无效 |
+| 403    | application/json | 无权删除此帖子             |
+| 500    | application/json | 服务器错误                 |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "帖子已删除"
+  }
+  ```
+
+- Token 未提供 (状态码：401)
+
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token 无效 (状态码：401)
+
+  ```json
+  {
+    "message": "无效的 Token"
+  }
+  ```
+
+- 无权限 (状态码：403)
+
+  ```json
+  {
+    "message": "无权删除此帖子"
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 用户必须登录才能删除帖子
+- 只能删除自己发布的帖子
+- 采用软删除方式，将帖子状态设置为 'deleted'，不会物理删除数据
+- 删除后的帖子不会在查询发布历史接口中返回
