@@ -5,15 +5,44 @@ import { useUserStore } from "../../../../store";
 import { useState, useEffect } from "react";
 import Forget from "../Forget/Forget";
 
+// 引入 idb
+import { openDB } from "idb";
+
 interface Profile {
   nickname: string | undefined;
   campus_id: number | undefined;
   qq_id: string | undefined;
-  avatar: File | undefined; // 修改为 File 类型
+  avatar: File | undefined; // 文件类型
   theme_id: number | undefined;
-  background_url: File | undefined; // 修改为 File 类型
-  banner_url: File | undefined; // 修改为 File 类型
-} // 其中主题中的三张图片是指当前临时图片，类型为 File 而不是 string ，不从 userTheme 中调用
+  background_url: File | undefined;
+  banner_url: File | undefined;
+}
+
+const dbPromise = openDB('userImagesDB', 1, {
+  upgrade(db) {
+    if (!db.objectStoreNames.contains('images')) {
+      db.createObjectStore('images');
+    }
+  },
+});
+
+const storeImageInDB = async (key: string, file: File) => {
+  const db = await dbPromise;
+  const tx = db.transaction('images', 'readwrite');
+  const store = tx.objectStore('images');
+  await store.put(file, key);
+  await tx.done;
+};
+
+// 从indexedDB中获取缓存的图片，此页面暂不需要
+// const getImageFromDB = async (key: string): Promise<File | undefined> => {
+//   const db = await dbPromise;
+//   const tx = db.transaction('images', 'readonly');
+//   const store = tx.objectStore('images');
+//   const file = await store.get(key);
+//   await tx.done;
+//   return file;
+// };
 
 const Reset = () => {
   const { currentUser, changeProfile, changeImage } = useUserStore();
@@ -21,10 +50,10 @@ const Reset = () => {
     nickname: currentUser?.nickname || "",
     campus_id: currentUser?.campus_id || 1,
     qq_id: currentUser?.qq || "",
-    avatar: undefined, // file类型
+    avatar: undefined,
     theme_id: currentUser?.theme_id,
-    background_url: undefined, // file类型
-    banner_url: undefined, // file类型
+    background_url: undefined,
+    banner_url: undefined,
   };
   const [profile, setProfile] = useState<Profile>(defaultProfile);
   const { type } = useParams();
@@ -35,17 +64,19 @@ const Reset = () => {
   }, [currentUser]);
 
   const handleChange =
-    (key: keyof Profile) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    (key: keyof Profile) => async (e: React.ChangeEvent<HTMLInputElement>) => {
       if (
         key === "avatar" ||
         key === "background_url" ||
         key === "banner_url"
       ) {
-        const file = e.target.files?.[0]; // 获取文件对象
-        setProfile((prevProfile) => ({
-          ...prevProfile,
-          [key]: file,
-        }));
+        const file = e.target.files?.[0];
+        if (file) {
+          setProfile((prev) => ({
+            ...prev,
+            [key]: file,
+          }));
+        }
       } else {
         const newProfile: Profile = {
           ...defaultProfile,
@@ -58,8 +89,8 @@ const Reset = () => {
       }
     };
 
-  // 设置个人信息（非图片）
   const handleProfileSubmit = async () => {
+    // 提交个人信息
     changeProfile(
       profile?.nickname || "",
       profile?.campus_id || 1,
@@ -68,27 +99,32 @@ const Reset = () => {
     navigate("/user/settings");
   };
 
-  // 设置图片
-  const handleBannerSubmit = () => {
-    if (profile?.banner_url) {
-      changeImage("banner", profile.banner_url); // 传递文件对象
-    }
-    navigate("/user/settings");
-  };
-  const handleBackgroundSubmit = () => {
-    if (profile?.background_url) {
-      changeImage("background", profile.background_url); // 传递文件对象
-    }
-    navigate("/user/settings");
-  };
-  const handleAvatarSubmit = () => {
-    if (profile?.avatar) {
-      changeImage("avatar", profile.avatar); // 传递文件对象
+  const handleImageSubmission = async (key: string, file?: File) => {
+    if (file) {
+      await storeImageInDB(key, file); // 存储到IndexedDB
+      changeImage(key, file); // 调用修改图片的函数
     }
     navigate("/user/settings");
   };
 
-  // 设置主题
+  const handleBannerSubmit = () => {
+    if (profile?.banner_url) {
+      handleImageSubmission("banner", profile.banner_url);
+    }
+  };
+
+  const handleBackgroundSubmit = () => {
+    if (profile?.background_url) {
+      handleImageSubmission("background", profile.background_url);
+    }
+  };
+
+  const handleAvatarSubmit = () => {
+    if (profile?.avatar) {
+      handleImageSubmission("avatar", profile.avatar);
+    }
+  };
+
   const handleThemeSubmit = () => {
     changeProfile(
       currentUser?.nickname || "",
@@ -103,14 +139,7 @@ const Reset = () => {
     case "nickname":
       return (
         <div className="reset-container">
-          <Navbar
-            title="重置昵称"
-            backActive={true}
-            backPath="/user/settings"
-          />
-          <div className="reset-warning">
-            警告：互联网不是法外之地，请注意遵守法律法规与公序良俗！对于违法违规的个性化设置我们将进行警告、封号等处罚，严重者上报至公安机关！
-          </div>
+          <Navbar title="重置昵称" backActive={true} backPath="/user/settings" />
           <div className="reset-box">
             <input
               className="reset-text"
@@ -127,11 +156,7 @@ const Reset = () => {
     case "campus_id":
       return (
         <div className="reset-container">
-          <Navbar
-            title="重置默认校区"
-            backActive={true}
-            backPath="/user/settings"
-          />
+          <Navbar title="重置默认校区" backActive={true} backPath="/user/settings" />
           <div className="reset-box">
             <input
               className="reset-text"
@@ -148,11 +173,7 @@ const Reset = () => {
     case "qq_id":
       return (
         <div className="reset-container">
-          <Navbar
-            title="重置绑定QQ"
-            backActive={true}
-            backPath="/user/settings"
-          />
+          <Navbar title="重置绑定QQ" backActive={true} backPath="/user/settings" />
           <div className="reset-box">
             <input
               className="reset-text"
@@ -169,14 +190,7 @@ const Reset = () => {
     case "avatar":
       return (
         <div className="reset-container">
-          <Navbar
-            title="重置头像"
-            backActive={true}
-            backPath="/user/settings"
-          />
-          <div className="reset-warning">
-            警告：互联网不是法外之地，请注意遵守法律法规与公序良俗！对于违法违规的个性化设置我们将进行警告、封号等处罚，严重者上报至公安机关！
-          </div>
+          <Navbar title="重置头像" backActive={true} backPath="/user/settings" />
           <div className="reset-box">
             <input
               type="file"
@@ -193,11 +207,7 @@ const Reset = () => {
     case "theme_id":
       return (
         <div className="reset-container">
-          <Navbar
-            title="重置主题风格"
-            backActive={true}
-            backPath="/user/settings"
-          />
+          <Navbar title="重置主题风格" backActive={true} backPath="/user/settings" />
           <div className="reset-box">
             <input
               type="text"
@@ -214,14 +224,7 @@ const Reset = () => {
     case "background":
       return (
         <div className="reset-container">
-          <Navbar
-            title="重置发布页背景"
-            backActive={true}
-            backPath="/user/settings"
-          />
-          <div className="reset-warning">
-            警告：互联网不是法外之地，请注意遵守法律法规与公序良俗！对于违法违规的个性化设置我们将进行警告、封号等处罚，严重者上报至公安机关！
-          </div>
+          <Navbar title="重置发布页背景" backActive={true} backPath="/user/settings" />
           <div className="reset-box">
             <input
               type="file"
@@ -238,14 +241,7 @@ const Reset = () => {
     case "banner":
       return (
         <div className="reset-container">
-          <Navbar
-            title="重置资料卡背景"
-            backActive={true}
-            backPath="/user/settings"
-          />
-          <div className="reset-warning">
-            警告：互联网不是法外之地，请注意遵守法律法规与公序良俗！对于违法违规的个性化设置我们将进行警告、封号等处罚，严重者上报至公安机关！
-          </div>
+          <Navbar title="重置资料卡背景" backActive={true} backPath="/user/settings" />
           <div className="reset-box">
             <input
               type="file"

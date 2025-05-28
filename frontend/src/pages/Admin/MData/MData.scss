@@ -1,0 +1,106 @@
+// Dashboard.scss
+.dashboard-container {
+  padding: 2rem;
+  background-color: #f3f4f6;
+  width: 100%;
+  min-height: 100vh;
+
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &.share-btn { background-color: #3b82f6; }
+      &.favorite-btn { background-color: #22c55e; }
+      &.delete-btn { background-color: #ef4444; }
+
+      &:hover {
+        &.share-btn { background-color: #2563eb; }
+        &.favorite-btn { background-color: #16a34a; }
+        &.delete-btn { background-color: #dc2626; }
+      }
+    }
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+
+    .metric-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+
+      h3 {
+        color: #6b7280;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .metric-value {
+        font-size: 1.875rem;
+        font-weight: 700;
+
+        // 不同指标颜色
+        &:nth-child(1) { color: #2563eb; }  // 访问次数
+        &:nth-child(2) { color: #16a34a; } // 活跃用户
+        &:nth-child(3) { color: #9333ea; } // 商品浏览
+        &:nth-child(4) { color: #ea580c; } // 交易次数
+      }
+    }
+  }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+
+    .chart-container {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+
+      h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+    }
+
+    // 热搜关键词区域
+    .hot-keywords {
+      grid-column: span 2;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+
+      .keyword-tag {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background-color: #dbeafe;
+        color: #1e40af;
+        border-radius: 999px;
+        margin: 0.25rem;
+        font-size: 0.875rem;
+        transition: background-color 0.2s;
+
+        &:hover {
+          background-color: #bfdbfe;
+        }
+      }
+    }
+  }
+}

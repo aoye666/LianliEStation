@@ -23,6 +23,8 @@ const About = React.lazy(() => import("./pages/User/Settings/About/About"));
 const Favorites = React.lazy(() => import("./pages/User/Favorites/Favorites"));
 const Messages = React.lazy(() => import("./pages/User/Messages/Messages"));
 const History = React.lazy(() => import("./pages/User/History/History"));
+const MData = React.lazy(() => import("./pages/Admin/MData/MData"));
+const MUsers = React.lazy(() => import("./pages/Admin/MUsers/MUsers"));
 
 const App: React.FC = () => {
   // 检查是否登录并获取用户信息
@@ -174,6 +176,22 @@ const App: React.FC = () => {
         </ProtectedRoute>
       ),
     },
+    {
+      path: "/admin/data",
+      element: (
+        <ProtectedRoute>
+          <MData />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/admin/users",
+      element: (
+        <ProtectedRoute>
+          <MUsers />
+        </ProtectedRoute>
+      ),
+    }
   ]);
 
   return (

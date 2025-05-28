@@ -2,6 +2,7 @@ import { useMainStore } from "../../../store";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom"; // 使用 useParams 从路由获取参数
 import axios from "axios";
+import { message } from "antd";
 import "./Detail.scss";
 import copy from "../../../assets/copy-black.svg";
 import stars from "../../../assets/favorites-black.svg";
@@ -90,12 +91,15 @@ const Detail = () => {
         .writeText(currentGoods?.author_qq_id)
         .then(() => {
           console.log("QQ号已复制到剪贴板");
+          message.success('QQ号已复制到剪贴板')
         })
         .catch((err) => {
           console.error("复制过程出错: ", err);
+          message.error('复制过程出错')
         });
     } else {
       console.error("未获取到当前用户QQ号");
+      message.error('未获取到当前用户QQ号')
     }
   };
 

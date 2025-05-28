@@ -1,41 +1,20 @@
 import React, { useState } from "react"; // 确保导入 React 和 useState
+import { Image } from "antd";
 import Navbar from "../../../components/Navbar/Navbar";
 import "./Messages.scss";
 import { useMainStore } from "../../../store";
 import { useNavigate } from "react-router-dom";
-import Select, { components } from "react-select";
-import messages from "../../../assets/messages.png";
-import complain from "../../../assets/complain.png";
-import violate from "../../../assets/violate.png";
-import messageRead from "../../../assets/message-read.png";
-import manage from "../../../assets/settings.png";
-
-interface OptionType {
-  value: string;
-  label: string;
-  icon: string;
-}
-
-// 创建选项数组
-const options: OptionType[] = [
-  { value: "1", label: "全部", icon: messages },
-  { value: "2", label: "申诉", icon: complain },
-  { value: "3", label: "违规", icon: violate },
-];
-
-// 自定义选项组件
-const CustomOption = (props: any) => {
-  return (
-    <components.Option {...props} className="messages-option">
-      <img
-        src={props.data.icon}
-        alt={props.data.label}
-        className="messages-icon"
-      />
-      <div className="messages-label">{props.data.label}</div>
-    </components.Option>
-  );
-};
+import {
+  ProductOutlined,
+  DislikeOutlined,
+  SafetyOutlined,
+} from "@ant-design/icons";
+import type { MenuProps } from "antd";
+import { Dropdown } from "antd";
+import messages_active from "../../../assets/messages-blue.svg";
+import messages_inactive from "../../../assets/messages-black.svg";
+import manage from "../../../assets/settings.svg";
+import takePlace from "../../../assets/takePlace.png";
 
 // 消息类型定义
 interface Message {
@@ -49,10 +28,41 @@ interface Message {
   related_id: number; // 关联的订单或商品 ID
 }
 
+interface Conditions {
+  type: string;
+  read: string;
+  manage: boolean;
+}
+
+// 信息类型菜单选择
+const items: MenuProps["items"] = [
+  {
+    key: "1",
+    label: <>全部</>,
+    icon: <ProductOutlined />,
+  },
+  {
+    key: "2",
+    label: <>申诉</>,
+    icon: <SafetyOutlined />,
+  },
+  {
+    key: "3",
+    label: <>违规</>,
+    icon: <DislikeOutlined />,
+  },
+];
+
 const Messages = () => {
   const navigate = useNavigate();
   const { fetchGoods, goods } = useMainStore();
-
+  // 三个筛选条件
+  const [conditions, setConditions] = useState<Conditions>({
+    type: "all", // 'appeal' 或 'violation' 或 'all'
+    read: "all", // 'unread' 或 'read' 或 'all'
+    manage: false, // true/false
+  });
+  // 消息列表
   const [messagesList, setMessagesList] = useState<Message[]>([
     {
       id: 1,
@@ -96,27 +106,34 @@ const Messages = () => {
     <div>
       <Navbar title="信箱" backActive={true} backPath="/user" />
       <div className="messages-container">
-        {/* 使用 react-select */}
         <div className="messages-control">
           <div className="messages-control-item">
-            <Select
-              options={options}
-              components={{ Option: CustomOption }}
-              className="messages-select"
-              isSearchable={false} // 如果不需要搜索功能
-              defaultValue={options[0]}
-            />
+            <Dropdown menu={{ items }}>
+              <a onClick={(e) => e.preventDefault()}>
+                <ProductOutlined
+                  style={{ width: "20px", height: "20px", marginRight: "5px" }}
+                />
+                全部
+              </a>
+            </Dropdown>
           </div>
           <div className="messages-control-item" onClick={handleRead}>
             <div className="messages-control-item-btn">
-              <img src={messageRead} alt="已读" />
+              <img
+                src={`${
+                  conditions.read === "all"
+                    ? messages_inactive
+                    : messages_active
+                }`}
+                alt="已读"
+              />
               <button>已读</button>
             </div>
           </div>
           <div className="messages-control-item" onClick={handleManage}>
             <div className="messages-control-item-btn">
-              <img src={manage} alt="处理" />
-              <button>处理</button>
+              <img src={manage} alt="管理" />
+              <button>管理</button>
             </div>
           </div>
         </div>
@@ -133,7 +150,11 @@ const Messages = () => {
                   </div>
                   <div className="appeal-row">
                     <div className="appeal-content">{message.content}</div>
-                    <img className="appeal-image" src="" alt="图片"></img>
+                    <Image
+                      className="appeal-image"
+                      src={takePlace}
+                      alt="图片"
+                    ></Image>
                   </div>
                 </div>
               ) : (
@@ -151,7 +172,11 @@ const Messages = () => {
                   </div>
                   <div className="response-row">
                     <div className="response-content">{message.content}</div>
-                    <img className="response-image" src="" alt="图片"></img>
+                    <Image
+                      className="response-image"
+                      src={takePlace}
+                      alt="图片"
+                    ></Image>
                     {/* <div className="response-read">{message.read_status}</div> */}
                   </div>
                 </div>

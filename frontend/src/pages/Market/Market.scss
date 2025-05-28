@@ -97,6 +97,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
   .market-body {
     display: flex;
     flex-direction: column;
+    position: relative;
 
     .un-content {
       display: flex;
@@ -201,14 +202,13 @@ $shadow-color: rgba(0, 0, 0, 0.1);
       position: absolute;
       z-index: 100;
       left: 0;
-      bottom: 55px;
+      bottom: 0;
       width: 100vw;
-      border-radius: 10px; /* 更圆滑的边角 */
-      border: 1px solid #e0e0e0; /* 使用更柔和的灰色边框 */
       flex-direction: column;
       //box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       background-color: #f9f9f9;
       position: absolute;
+      height: calc(100vh - 105px - 31.25vw );
 
       input {
         outline: none;
@@ -225,6 +225,8 @@ $shadow-color: rgba(0, 0, 0, 0.1);
         margin-bottom: 10px;
         margin-top: 10px;
         width: 100vw;
+        height: 23%;
+
         .price-title {
           font-size: 18px;
           font-weight: bold;
@@ -251,6 +253,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
         flex-direction: column;
         margin-bottom: 10px;
         width: 100vw;
+        height: 23%;
 
         .location-title {
           font-size: 18px;
@@ -300,6 +303,8 @@ $shadow-color: rgba(0, 0, 0, 0.1);
         display: flex;
         justify-content: center;
         align-items: center;
+        height: 27%;
+
         button {
           color: white;
           margin-top: 20px;
@@ -325,6 +330,8 @@ $shadow-color: rgba(0, 0, 0, 0.1);
         display: flex;
         flex-direction: column;
         width: 100vw;
+        height: 27%;
+
         .sort-title {
           font-size: 18px;
           font-weight: bold;

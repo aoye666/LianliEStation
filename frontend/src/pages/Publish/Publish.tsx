@@ -1,4 +1,5 @@
 import axios from "axios";
+import { openDB } from "idb";
 import { useRef, useState, useEffect } from "react"; // 导入useEffect
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../../store";
@@ -18,6 +19,31 @@ export interface PublishProps {
   details: string;
 }
 
+const dbPromise = openDB("userImagesDB", 1, {
+  upgrade(db) {
+    if (!db.objectStoreNames.contains("images")) {
+      db.createObjectStore("images");
+    }
+  },
+});
+
+const storeImageInDB = async (key: string, file: File) => {
+  const db = await dbPromise;
+  const tx = db.transaction("images", "readwrite");
+  const store = tx.objectStore("images");
+  await store.put(file, key);
+  await tx.done;
+};
+
+const getImageFromDB = async (key: string): Promise<File | undefined> => {
+  const db = await dbPromise;
+  const tx = db.transaction("images", "readonly");
+  const store = tx.objectStore("images");
+  const file = await store.get(key);
+  await tx.done;
+  return file;
+};
+
 const Publish: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -31,48 +57,74 @@ const Publish: React.FC = () => {
   const [backgroundFile, setBackgroundFile] = useState<string | undefined>();
 
   const token = Cookies.get("auth-token");
-  const { currentUser } =  useUserStore();
+  const { currentUser } = useUserStore();
 
-  // 将图片转换为Base64并存储到localStorage  
-    const storeImagesInLocalStorage = async () => {  
-      if (currentUser&&currentUser.background_url&&currentUser.background_url!== "/uploads/default_background.png") {  
-        const backgroundBase64: any = await fetchImageAsBase64(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}${currentUser.background_url}`);  
-        localStorage.setItem("userBackground", backgroundBase64);  
-      } 
+  // 从URL获取Base64
+  const fetchImageAsBase64 = async (url: string) => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result); // 读取完成后返回Base64字符串
+      reader.readAsDataURL(blob); // 转换为Base64
+    });
+  };
 
-      // 获取localStorage中的图片  
-      let backgroundTemp = getImageFromLocalStorage("userBackground") || undefined;
-      setBackgroundFile(backgroundTemp);
+  const fetchImageFromBackend = async (
+    endpoint: string
+  ): Promise<File | null> => {
+    const response = await fetch(endpoint);
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    const filename = endpoint.includes("avatar")
+      ? "avatar.jpg"
+      : "background.jpg";
+    return new File([blob], filename, { type: blob.type });
+  };
 
-      if (currentUser&&currentUser.avatar&&currentUser.avatar!== "/uploads/default_avatar.png") {  
-        const avatarBase64: any = await fetchImageAsBase64(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}${currentUser.avatar}`);  
-        localStorage.setItem("userAvatar", avatarBase64);  
-      } 
+  const loadImage = async (
+    key: string,
+    defaultUrl: string,
+    isAvatar: boolean
+  ): Promise<any> => {
+    // 先从 IndexedDB 获取
+    const file = await getImageFromDB(key);
+    if (file) {
+      // 转为Base64
+      console.log("从 IndexedDB 获取图片");
+      return await fetchImageAsBase64(URL.createObjectURL(file));
+    } else {
+      // 从后端请求
+      console.log("从后端请求图片");
+      const endpoint = `${
+        process.env.REACT_APP_API_URL || "http://localhost:5000"
+      }${defaultUrl}`;
+      const fetchedFile = await fetchImageFromBackend(endpoint);
+      if (fetchedFile) {
+        // 存入IndexedDB
+        await storeImageInDB(key, fetchedFile);
+        // 转为Base64
+        return await fetchImageAsBase64(URL.createObjectURL(fetchedFile));
+      } else {
+        // 失败使用默认路径（可以是静态图片路径）
+        console.log("使用默认路径");
+        return isAvatar ? "/assets/logo.png" : "/assets/background-wide.jpg";
+      }
+    }
+  };
 
-      // 获取localStorage中的图片  
-      let avatarTemp = getImageFromLocalStorage("userAvatar") || undefined;
-      setAvatarFile(avatarTemp);
-    };  
-    
-    // 从URL获取Base64  
-    const fetchImageAsBase64 = async (url: string) => {  
-      const response = await fetch(url);  
-      const blob = await response.blob();  
-      return new Promise((resolve) => {  
-        const reader = new FileReader();  
-        reader.onloadend = () => resolve(reader.result); // 读取完成后返回Base64字符串  
-        reader.readAsDataURL(blob); // 转换为Base64  
-      });  
-    };  
-  
-    useEffect(() => {  
-      storeImagesInLocalStorage();  
-    }, [token, currentUser?.background_url,backgroundFile,currentUser?.avatar,avatarFile]);  
-  
-    // 从localStorage获取图片的函数  
-    const getImageFromLocalStorage = (key: string) => {  
-      return localStorage.getItem(key) || null; // 如果不存在返回 null  
-    };  
+  useEffect(() => {
+    loadImage(
+      "background",
+      currentUser?.banner_url || "/uploads/default_background.png",
+      false
+    ).then((base64) => setBackgroundFile(base64));
+    loadImage(
+      "avatar",
+      currentUser?.avatar || "/uploads/default_avatar.png",
+      true
+    ).then((base64) => setAvatarFile(base64));
+  }, [currentUser, token]);
 
   // 设置对话框自适应高度
   const handleHeight = () => {
@@ -96,7 +148,9 @@ const Publish: React.FC = () => {
     // 调用API生成模板
     try {
       const res = await axios.post(
-        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/publish/template`,
+        `${
+          process.env.REACT_APP_API_URL || "http://localhost:5000"
+        }/api/publish/template`,
         { text: text },
         {
           headers: {
@@ -189,23 +243,17 @@ const Publish: React.FC = () => {
       <Navbar title="发布助手小e" />
       <div className="dialog-container" ref={containerRef}>
         {backgroundFile ? (
-          <img
-            src={backgroundFile}
-            alt="背景"
-            className="dialog-bg"
-          ></img>
+          <img src={backgroundFile} alt="背景" className="dialog-bg"></img>
         ) : null}
         {
-          <div
-          className="dialog-ai"
-        >
-          <div className="dialog-face">
-            <img src={ logo } alt="头像"></img>
+          <div className="dialog-ai">
+            <div className="dialog-face">
+              <img src={logo} alt="头像"></img>
+            </div>
+            <div className="dialog-content">
+              嗨，Duter！我是发布助手小e，很高兴为您服务！请在下面的对话框中发布您的商品信息。
+            </div>
           </div>
-          <div className="dialog-content">
-            嗨，Duter！我是发布助手小e，很高兴为您服务！请在下面的对话框中发布您的商品信息。
-          </div>
-        </div>
         }
         {dialogHistory.map((dialog, index) => (
           <div
@@ -213,7 +261,10 @@ const Publish: React.FC = () => {
             className={dialog.role === "user" ? "dialog-user" : "dialog-ai"}
           >
             <div className="dialog-face">
-              <img src={dialog.role === "user" ? avatarFile : logo} alt="头像"></img>
+              <img
+                src={dialog.role === "user" ? avatarFile : logo}
+                alt="头像"
+              ></img>
             </div>
             <div className="dialog-content">
               {dialog.role === "user" ? (
