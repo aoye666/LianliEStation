@@ -150,14 +150,31 @@ CREATE TABLE `post_image` (
 
 CREATE TABLE `post_comments` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `post_id` INT NOT NULL,          
-  `user_id` INT NOT NULL,           
-  `content` TEXT NOT NULL,          
-  `parent_id` INT DEFAULT NULL,     
-  `status` ENUM('active', 'deleted') DEFAULT 'active',  
-  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP     
+  `post_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  `content` TEXT NOT NULL,
+  `parent_id` INT DEFAULT NULL,
+  `status` ENUM('active', 'deleted') DEFAULT 'active',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `likes` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `target_id` INT NOT NULL,
+    `target_type` ENUM('post', 'goods') NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_user_like` (`user_id`, `target_id`, `target_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `complaints` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `target_id` INT NOT NULL,
+    `target_type` ENUM('post', 'goods') NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_user_complaint` (`user_id`, `target_id`, `target_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
 ##
