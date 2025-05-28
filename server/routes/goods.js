@@ -321,43 +321,115 @@ router.put("/:post_id", upload.array("images", 3), async (req, res) => {
 router.put("/:action/:post_id", async (req, res) => {
   const { post_id, action } = req.params;
   const { value } = req.body;
+  const target_type = "goods";
 
-  if (action !== "like" && action !== "complaint") {
-    return res.status(400).json({ message: "无效的操作类型，必须是 like 或 complaint" });
-  }
-
-  if (value === undefined) {
-    return res.status(400).json({ message: `缺少 ${action === "like" ? "like" : "complaint"} 参数` });
+  // 获取 token
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
   }
 
   try {
-    // 判断是增加还是减少点赞数
-    const valueChange = value === true ? 1 : value === false ? -1 : 0;
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const user_id = decoded.user_id;
 
-    if (valueChange === 0) {
-      return res.status(400).json({ message: `无效的 ${action === "like" ? "like" : "complaint"} 参数，必须是 true 或 false` });
+    if (action !== "like" && action !== "complaint") {
+      return res.status(400).json({ message: "无效的操作类型，必须是 like 或 complaint" });
     }
 
-    const field = action === "like" ? "likes" : "complaints";
-
-    // 更新商品数据
-    const [result] = await db.query(`UPDATE goods SET ${field} = ${field} + ? WHERE id = ? AND status != 'deleted'`, [valueChange, post_id]);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "商品未找到" });
+    if (value === undefined) {
+      return res.status(400).json({ message: `缺少 ${action === "like" ? "like" : "complaint"} 参数` });
     }
 
-    // 根据操作类型和值变化返回相应消息
-    let message;
-    if (action === "like") {
-      message = valueChange === 1 ? "点赞成功" : "取消点赞成功";
-    } else {
-      message = valueChange === 1 ? "投诉成功" : "取消投诉成功";
+    const valueChange = value;
+
+    if (valueChange !== 1 && valueChange !== -1) {
+      return res.status(400).json({
+        message: `无效的 ${action === "like" ? "like" : "complaint"} 参数，必须是 1 或 -1`,
+      });
     }
 
-    res.status(200).json({ message });
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    try {
+      // 检查商品是否存在
+      const [targetCheck] = await connection.query(`SELECT id FROM goods WHERE id = ? AND status != 'deleted'`, [post_id]);
+
+      if (targetCheck.length === 0) {
+        await connection.rollback();
+        connection.release();
+        return res.status(404).json({
+          message: "商品未找到",
+        });
+      }
+
+      let message;
+      const targetTable = action === "like" ? "likes" : "complaints";
+
+      if (valueChange === 1) {
+        // 添加点赞/投诉
+        try {
+          const [insertResult] = await connection.query(`INSERT INTO ${targetTable} (user_id, target_id, target_type) VALUES (?, ?, ?)`, [user_id, post_id, target_type]);
+
+          if (insertResult.affectedRows > 0) {
+            const columnName = action === "like" ? "likes" : "complaints";
+            await connection.query(`UPDATE goods SET ${columnName} = ${columnName} + 1 WHERE id = ?`, [post_id]);
+
+            message = action === "like" ? "点赞成功" : "投诉成功";
+          } else {
+            await connection.rollback();
+            connection.release();
+            return res.status(500).json({ message: "操作失败" });
+          }
+        } catch (error) {
+          // 如果是重复键错误（用户已经点赞/投诉过）
+          if (error.code === "ER_DUP_ENTRY") {
+            await connection.rollback();
+            connection.release();
+            return res.status(400).json({
+              message: action === "like" ? "您已经点赞过了" : "您已经投诉过了",
+            });
+          }
+          throw error;
+        }
+      } else if (valueChange === -1) {
+        // 取消点赞/投诉
+        const [deleteResult] = await connection.query(`DELETE FROM ${targetTable} WHERE user_id = ? AND target_id = ? AND target_type = ?`, [user_id, post_id, target_type]);
+
+        if (deleteResult.affectedRows > 0) {
+          const columnName = action === "like" ? "likes" : "complaints";
+          await connection.query(`UPDATE goods SET ${columnName} = GREATEST(${columnName} - 1, 0) WHERE id = ?`, [post_id]);
+
+          message = action === "like" ? "取消点赞成功" : "取消投诉成功";
+        } else {
+          await connection.rollback();
+          connection.release();
+          return res.status(400).json({
+            message: action === "like" ? "您还没有点赞过" : "您还没有投诉过",
+          });
+        }
+      }
+
+      await connection.commit();
+      connection.release();
+
+      res.status(200).json({
+        message,
+      });
+    } catch (error) {
+      await connection.rollback();
+      connection.release();
+      throw error;
+    }
   } catch (err) {
     console.error(err);
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "无效的 Token" });
+    }
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token 已过期" });
+    }
     res.status(500).json({ message: "服务器错误" });
   }
 });

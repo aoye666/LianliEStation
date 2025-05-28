@@ -958,28 +958,33 @@ images: [文件1.jpg, 文件2.jpg]
 - 图片将保存在服务器的`/uploads/`目录，并通过 post_images 表与商品关联
 - 如果只想更新商品文本信息而不更改图片，请不要包含 images 字段
 
----
-
 ### 修改商品点赞数和投诉数
 
 基本信息
 
 - **路径**: `/api/goods/:action/:post_id`
 - **方法**: `PUT`
-- **描述**: 增加或减少商品的点赞数或投诉数
+- **描述**: 增加或减少商品的点赞数或投诉数，支持用户对商品进行点赞/取消点赞和投诉/取消投诉操作
 
 请求参数
-| 参数名 | 类型 | 必选 | 描述 |
-|-------|------|------|------|
-| action | String | 是 | 操作类型，必须是 "like" 或 "complaint"，作为 URL 路径参数提供 |
-| post_id | String | 是 | 商品 ID，作为 URL 路径参数提供 |
-| value | Boolean | 是 | true 表示增加计数，false 表示减少计数 |
+
+| 参数名  | 类型   | 必选 | 描述                                                                      |
+| ------- | ------ | ---- | ------------------------------------------------------------------------- |
+| action  | String | 是   | 操作类型，必须是 "like" 或 "complaint"，作为 URL 路径参数提供             |
+| post_id | String | 是   | 商品 ID，作为 URL 路径参数提供                                            |
+| value   | Number | 是   | 操作值，1 表示增加计数（点赞/投诉），-1 表示减少计数（取消点赞/取消投诉） |
+
+请求头
+
+```
+Authorization: Bearer {token}
+```
 
 请求体示例
 
 ```json
 {
-  "value": true
+  "value": 1
 }
 ```
 
@@ -987,17 +992,19 @@ images: [文件1.jpg, 文件2.jpg]
 
 ```json
 {
-  "value": false
+  "value": -1
 }
 ```
 
 响应参数
-| 状态码 | 内容类型 | 描述 |
-|------|----------|------|
-| 200 | application/json | 操作成功 |
-| 400 | application/json | 无效的操作类型或参数 |
-| 404 | application/json | 商品未找到 |
-| 500 | application/json | 服务器错误 |
+
+| 状态码 | 内容类型         | 描述                       |
+| ------ | ---------------- | -------------------------- |
+| 200    | application/json | 操作成功                   |
+| 400    | application/json | 无效的操作类型或参数       |
+| 401    | application/json | 未提供 Token 或 Token 无效 |
+| 404    | application/json | 商品未找到                 |
+| 500    | application/json | 服务器错误                 |
 
 响应示例
 
@@ -1033,6 +1040,30 @@ images: [文件1.jpg, 文件2.jpg]
   }
   ```
 
+- Token 未提供 (状态码：401)
+
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token 无效 (状态码：401)
+
+  ```json
+  {
+    "message": "无效的 Token"
+  }
+  ```
+
+- Token 已过期 (状态码：401)
+
+  ```json
+  {
+    "message": "Token 已过期"
+  }
+  ```
+
 - 无效操作类型 (状态码：400)
 
   ```json
@@ -1061,7 +1092,7 @@ images: [文件1.jpg, 文件2.jpg]
 
   ```json
   {
-    "message": "无效的 like 参数，必须是 true 或 false"
+    "message": "无效的 like 参数，必须是 1 或 -1"
   }
   ```
 
@@ -1069,7 +1100,39 @@ images: [文件1.jpg, 文件2.jpg]
 
   ```json
   {
-    "message": "无效的 complaint 参数，必须是 true 或 false"
+    "message": "无效的 complaint 参数，必须是 1 或 -1"
+  }
+  ```
+
+- 重复操作 (状态码：400)
+
+  ```json
+  {
+    "message": "您已经点赞过了"
+  }
+  ```
+
+  或
+
+  ```json
+  {
+    "message": "您已经投诉过了"
+  }
+  ```
+
+- 取消操作失败 (状态码：400)
+
+  ```json
+  {
+    "message": "您还没有点赞过"
+  }
+  ```
+
+  或
+
+  ```json
+  {
+    "message": "您还没有投诉过"
   }
   ```
 
@@ -1081,7 +1144,16 @@ images: [文件1.jpg, 文件2.jpg]
   }
   ```
 
+- 操作失败 (状态码：500)
+
+  ```json
+  {
+    "message": "操作失败"
+  }
+  ```
+
 - 服务器错误 (状态码：500)
+
   ```json
   {
     "message": "服务器错误"
@@ -1090,11 +1162,12 @@ images: [文件1.jpg, 文件2.jpg]
 
 **备注**
 
-- 该 API 用于增加或减少商品的点赞数和投诉数
-- action 参数必须是"like"或"complaint"
-- value 参数必须是布尔值，true 表示增加计数，false 表示减少计数
-- 例如：PUT /api/goods/like/123 加上 body {"value": true} 表示给 ID 为 123 的商品点赞
-- 软删除的商品不会被操作影响
+- 该 API 用于管理商品的点赞和投诉功能
+- action 参数必须是 "like" 或 "complaint"
+- value 参数必须是数字 1 或 -1，1 表示增加计数，-1 表示减少计数
+- 用户对同一商品只能点赞/投诉一次，重复操作会返回错误
+- 取消点赞/投诉时，如果用户之前没有对应操作会返回错误
+- 已删除的商品不能被点赞或投诉
 
 ## forumRoutes
 
