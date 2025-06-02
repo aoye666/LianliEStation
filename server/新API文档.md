@@ -2026,90 +2026,103 @@ images: [图片1.jpg, 图片2.jpg]
 
 ## messageRoutes
 
-### 获取通知
+- 获取通知
 
-基本信息
+  基本信息
+  - 路径: `/api/message/`
+  - 方法: `GET`
+  - 描述: 获取用户的所有通知消息
 
-- 路径: `/api/message/`
-- 方法: `GET`
-- 描述: 获取用户的所有通知消息
+  请求头
+  | 参数名        | 类型   | 必选 | 描述                                 |
+  | ------------- | ------ | ---- | ------------------------------------ |
+  | Authorization | String | 是   | 身份验证令牌，格式为`Bearer {token}` |
 
-请求头
-| 参数名 | 类型 | 必选 | 描述 |
-| ------------ | ------ | ---- | ------------------------- |
-| Authorization | String | 是 | 身份验证令牌，格式为`Bearer {token}` |
+  响应参数
+  | 状态码 | 内容类型         | 描述                       |
+  | ------ | ---------------- | -------------------------- |
+  | 200    | application/json | 成功，返回通知列表         |
+  | 401    | application/json | 未提供 Token 或 Token 无效 |
+  | 500    | application/json | 服务器错误                 |
 
-响应参数
-
-| 状态码 | 内容类型         | 描述                       |
-| ------ | ---------------- | -------------------------- |
-| 200    | application/json | 成功，返回通知列表         |
-| 401    | application/json | 未提供 Token 或 Token 无效 |
-| 500    | application/json | 服务器错误                 |
-
-响应示例
-
-- 成功响应 (状态码：200)
-
-  ```json
-  [
+  响应示例
+  - 成功响应 (状态码：200)
+    ```json
     {
-      "id": 14,
-      "user_id": 3,
-      "response_type": "violation",
-      "related_id": 1,
-      "content": "您的帖子因包含广告内容被移除，这违反了我们的社区规则第3.2条。",
-      "read_status": "read",
-      "created_at": "2025-04-14T20:42:47.000Z"
-    },
-    {
-      "id": 15,
-      "user_id": 3,
-      "response_type": "appeal",
-      "related_id": 1,
-      "content": "我们已收到您的申诉，经审核后认为您的帖子不违反社区规定，已恢复显示。",
-      "read_status": "unread",
-      "created_at": "2025-04-14T20:42:47.000Z"
-    },
-    {
-      "id": 16,
-      "user_id": 3,
-      "response_type": "violation",
-      "related_id": 1,
-      "content": "您的账户因多次违规已被临时限制发布内容，限制期为7天。",
-      "read_status": "unread",
-      "created_at": "2025-04-14T20:42:47.000Z"
+      "message": "查询成功",
+      "data": [
+        {
+          "id": 14,
+          "user_id": 3,
+          "response_type": "violation",
+          "related_id": 1,
+          "content": "您的帖子因包含广告内容被移除，这违反了我们的社区规则第3.2条。",
+          "read_status": "read",
+          "created_at": "2025-04-14T20:42:47.000Z",
+          "images": [
+            "https://example.com/images/response/violation_content_1.jpg",
+            "https://example.com/images/response/community_rules_2.jpg",
+            "https://example.com/images/response/violation_evidence_1.jpg"
+          ],
+          "image_count": 3
+        },
+        {
+          "id": 15,
+          "user_id": 3,
+          "response_type": "appeal",
+          "related_id": 1,
+          "content": "我们已收到您的申诉，经审核后认为您的帖子不违反社区规定，已恢复显示。",
+          "read_status": "unread",
+          "created_at": "2025-04-14T20:42:47.000Z",
+          "images": [
+            "https://example.com/images/response/appeal_success_2.jpg",
+            "https://example.com/images/response/post_restored_2.jpg"
+          ],
+          "image_count": 2
+        },
+        {
+          "id": 16,
+          "user_id": 3,
+          "response_type": "violation",
+          "related_id": 1,
+          "content": "您的账户因多次违规已被临时限制发布内容，限制期为7天。",
+          "read_status": "unread",
+          "created_at": "2025-04-14T20:42:47.000Z",
+          "images": [],
+          "image_count": 0
+        }
+      ]
     }
-  ]
-  ```
+    ```
+  - 查询成功但无数据 (状态码：200)
+    ```json
+    {
+      "message": "查询成功",
+      "data": []
+    }
+    ```
+  - 未提供 Token (状态码：401)
+    ```json
+    {
+      "message": "未提供 Token"
+    }
+    ```
+  - Token 无效 (状态码：401)
+    ```json
+    {
+      "message": "Token 无效"
+    }
+    ```
+  - 服务器错误 (状态码：500)
+    ```json
+    {
+      "message": "服务器错误"
+    }
+    ```
 
-- 未提供 Token (状态码：401)
-
-  ```json
-  {
-    "message": "未提供 Token"
-  }
-  ```
-
-- Token 无效 (状态码：401)
-
-  ```json
-  {
-    "message": "Token 无效"
-  }
-  ```
-
-- 服务器错误 (状态码：500)
-  ```json
-  {
-    "message": "服务器错误"
-  }
-  ```
-
-**备注**
-
-- 该接口需要用户登录，并通过 Authorization 头部提供有效的 JWT 令牌
-- 返回的通知列表按创建时间降序排序
+  **备注**
+  - 该接口需要用户登录，并通过 Authorization 头部提供有效的 JWT 令牌
+  - 返回的通知列表按创建时间降序排序
 
 ---
 

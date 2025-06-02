@@ -110,6 +110,13 @@ CREATE TABLE `appeal_images` (
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `response_images` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `responsel_id` INT NOT NULL,
+    `image_url` VARCHAR(255) NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `responses` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,           -- 自增主键
     `user_id` INT NOT NULL,                        -- 接收回复的用户ID

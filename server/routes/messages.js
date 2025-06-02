@@ -8,7 +8,7 @@ dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY;
 
 // 获取通知
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
@@ -19,21 +19,44 @@ router.get("/", (req, res) => {
     const decoded = jwt.verify(token, SECRET_KEY);
     const userId = decoded.user_id;
 
-    let promise;
+    // 查询用户的所有通知
+    const [responses] = await db.query("SELECT * FROM responses WHERE user_id = ? ORDER BY created_at DESC", [userId]);
 
-    promise = db.query("SELECT * FROM responses WHERE user_id = ? ORDER BY created_at DESC", [userId]);
-
-    promise
-      .then(([rows]) => {
-        res.json(rows);
-      })
-      .catch((err) => {
-        console.error(err);
-        res.status(500).json({ message: "服务器错误" });
+    // 如果没有通知数据，直接返回空数组
+    if (responses.length === 0) {
+      return res.status(200).json({
+        message: "查询成功",
+        data: [],
       });
+    }
+
+    const responseIds = responses.map((response) => response.id);
+
+    const [imageRows] = await db.query("SELECT responsel_id, image_url FROM response_images WHERE responsel_id IN (?)", [responseIds]);
+
+    const imagesMap = imageRows.reduce((map, row) => {
+      if (!map[row.responsel_id]) {
+        map[row.responsel_id] = [];
+      }
+      map[row.responsel_id].push(row.image_url);
+      return map;
+    }, {});
+
+    const result = responses.map((response) => ({
+      ...response,
+      images: imagesMap[response.id] || [],
+    }));
+
+    res.status(200).json({
+      message: "查询成功",
+      data: result,
+    });
   } catch (err) {
     console.error(err);
-    return res.status(401).json({ message: "Token 无效" });
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "Token 无效" });
+    }
+    res.status(500).json({ message: "服务器错误" });
   }
 });
 
