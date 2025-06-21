@@ -6,7 +6,7 @@ import axios from "axios";
 import Cookies from "js-cookie"; // 从 cookie 中获取 token
 
 // 获取 token
-const token = Cookies.get("token");
+const token = Cookies.get("auth-token");
 
 interface Response {
   user_id: number;
@@ -15,6 +15,8 @@ interface Response {
   content: string;
   read_status: string;
   created_at: string;
+  images: string[];
+  image_count: number;
 }
 
 interface Appeal {
@@ -68,15 +70,15 @@ interface HistoryGoods {
   images: string[];
 }
 
-interface ForumPost{
-  id:number;
-  title:string;
-  content:string;
-  author_id:number;
-  campust_id:number;
-  status:string;
-  created_at:string;
-  images:string[];
+interface ForumPost {
+  id: number;
+  title: string;
+  content: string;
+  author_id: number;
+  campust_id: number;
+  status: string;
+  created_at: string;
+  images: string[];
 }
 
 interface RecordState {
@@ -100,14 +102,14 @@ interface RecordState {
   // messages 相关的状态管理及方法
   appeals: Appeal[];
   responses: Response[];
-  typedResponses: Response[];
   fetchAppeals: () => Promise<void>; // 获取所有申诉（管理员）
   submitAppeal: (
-    goods_id: number,
+    id: number,
+    type: string,
     content: string,
-    images: string[]
+    images?: File[]
   ) => Promise<void>; // 提交申诉
-  searchAppeals: (status: string) => Promise<void>; // 查询申诉
+  searchAppeals: (status?: string) => Promise<void>; // 查询申诉
   updateAppealStatus: (appeal_id: number, status: string) => Promise<void>; // 修改申诉状态（管理员）
   deleteAppeal: (appeal_id: number) => Promise<void>; // 删除申诉（管理员）
   fetchResponses: () => Promise<void>; // 获取当前用户所有回复
@@ -116,9 +118,12 @@ interface RecordState {
     response_type: string,
     related_id: number,
     content: string
-  ) => Promise<void>; // 提交回复
-  markResponse: (response_id: number) => Promise<void>; // 标记回复为已读
-  searchResponses: (read_status: string) => Promise<void>; // 查询回复
+  ) => Promise<void>; // 提交回复(管理员)
+  markResponse: (
+    message_id: number,
+    type: string,
+    status: string
+  ) => Promise<void>; // 标记回复为已读
 
   //forum相关的状态管理及方法
   forumPosts: ForumPost[];
@@ -151,14 +156,16 @@ const useRecordStore = create<RecordState>()(
       initialHistoryGoods: async () => {
         try {
           const response = await axios.get(
-            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods/user-history`,
+            `${
+              process.env.REACT_APP_API_URL || "http://localhost:5000"
+            }/api/goods/user-history`,
             {
               params: {
                 page: get().page,
                 limit: 12,
               },
               headers: {
-            Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
               },
             }
           );
@@ -186,14 +193,16 @@ const useRecordStore = create<RecordState>()(
       getHistoryGoods: async () => {
         try {
           const response = await axios.get(
-            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods/user-history`,
+            `${
+              process.env.REACT_APP_API_URL || "http://localhost:5000"
+            }/api/goods/user-history`,
             {
               params: {
                 page: get().page,
                 limit: 12,
               },
               headers: {
-            Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
               },
             }
           );
@@ -219,11 +228,16 @@ const useRecordStore = create<RecordState>()(
       },
 
       removeHistoryGoods: (id) => {
-        axios.delete(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods/${id}`, {
-          headers: {
-        Authorization: `Bearer ${token}`,
-          },
-        });
+        axios.delete(
+          `${
+            process.env.REACT_APP_API_URL || "http://localhost:5000"
+          }/api/goods/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
       },
 
       getFavoritesGoods: async () => {
@@ -232,11 +246,10 @@ const useRecordStore = create<RecordState>()(
         //     `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/favorites/user/favorites`,
         //     {
         //       headers: {
-        //         Authorization: `Bearer ${token}`, 
+        //         Authorization: `Bearer ${token}`,
         //       },
         //     }
         //   );
-
         //   if (res.status === 200 && res.data) {
         //     set({ favoritesGoods: res.data });
         //   } else {
@@ -257,7 +270,9 @@ const useRecordStore = create<RecordState>()(
 
       addFavoriteGoods: (favoriteGoods) => {
         axios.post(
-          `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/favorites/add`,
+          `${
+            process.env.REACT_APP_API_URL || "http://localhost:5000"
+          }/api/favorites/add`,
           { id: favoriteGoods.id },
           {
             headers: {
@@ -268,16 +283,27 @@ const useRecordStore = create<RecordState>()(
       },
 
       removeFavoriteGoods: (favoriteId: number) => {
-    axios.post(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/favorites/add`, favoriteId, {
+        axios.post(
+          `${
+            process.env.REACT_APP_API_URL || "http://localhost:5000"
+          }/api/favorites/add`,
+          favoriteId,
+          {
             headers: {
-        Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${token}`,
             },
-    });
+          }
+        );
       },
 
+      // 获取全部申诉(管理员)
       fetchAppeals: async () => {
         try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals`);
+          const response = await axios.get(
+            `${
+              process.env.REACT_APP_API_URL || "http://localhost:5000"
+            }/api/appeals`
+          );
           set({ appeals: response.data }); // 更新申诉列表
         } catch (error) {
           if (axios.isAxiosError(error)) {
@@ -291,11 +317,35 @@ const useRecordStore = create<RecordState>()(
         }
       },
 
-      submitAppeal: async (goods_id: number, content: string, images: string[]) => {
+      // 提交申诉
+      submitAppeal: async (
+        id: number,
+        content: string,
+        type: string,
+        images?: File[]
+      ) => {
         try {
+          const formData = new FormData();
+          formData.append("id", id.toString());
+          formData.append("content", content);
+          formData.append("type", type);
+          if (images) {
+            images.forEach((image, index) => {
+              formData.append(`images[${index}]`, image);
+            });
+          }
+
           const response = await axios.post(
-            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals/publish`,
-        { goods_id, content, images: [] }
+            `${
+              process.env.REACT_APP_API_URL || "http://localhost:5000"
+            }/api/appeals/publish`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer {token}`,
+                "Content-Type": "multipart/form-data",
+              },
+            }
           );
           console.log(response.data.message); // 申诉提交成功
           await get().fetchAppeals(); // 重新获取申诉列表
@@ -311,16 +361,27 @@ const useRecordStore = create<RecordState>()(
         }
       },
 
-      searchAppeals: async (status: string) => {
+      // 查询当前用户提交的申诉记录
+      searchAppeals: async (status?: string) => {
         try {
+          const params = status ? { status } : {}; // 如果status存在，则将status作为查询参数
           const response = await axios.get(
-        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals/search/${status}`
+            `${
+              process.env.REACT_APP_API_URL || "http://localhost:5000"
+            }/api/appeals/search`,
+            {
+              params: params,
+
+              headers: {
+                Authorization: `Bearer ${token}`, // 使用Cookies.get获取最新的token
+              },
+            }
           );
-          set({ appeals: response.data }); // 更新申诉列表
+          set({ appeals: response.data.data }); // 更新申诉列表
         } catch (error) {
           if (axios.isAxiosError(error)) {
             console.error(
-              "查询申诉失败:",
+              "获取申诉失败:",
               error.response?.data.message || "服务器错误"
             );
           } else {
@@ -329,11 +390,14 @@ const useRecordStore = create<RecordState>()(
         }
       },
 
+      // 修改申诉状态(管理员)
       updateAppealStatus: async (appeal_id: number, status: string) => {
         try {
           const response = await axios.put(
-            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals/${appeal_id}`,
-        { status }
+            `${
+              process.env.REACT_APP_API_URL || "http://localhost:5000"
+            }/api/appeals/${appeal_id}`,
+            { status }
           );
           console.log(response.data.message); // 状态修改成功
           await get().fetchAppeals(); // 重新获取申诉列表
@@ -349,10 +413,13 @@ const useRecordStore = create<RecordState>()(
         }
       },
 
+      // 删除申诉(管理员)
       deleteAppeal: async (appeal_id: number) => {
         try {
           const response = await axios.delete(
-        `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/appeals/${appeal_id}`
+            `${
+              process.env.REACT_APP_API_URL || "http://localhost:5000"
+            }/api/appeals/${appeal_id}`
           );
           console.log(response.data.message); // 申诉删除成功
           await get().fetchAppeals(); // 重新获取申诉列表
@@ -368,10 +435,20 @@ const useRecordStore = create<RecordState>()(
         }
       },
 
+      // 获取用户的所有通知消息
       fetchResponses: async () => {
         try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/responses/`);
-          set({ responses: response.data }); // 更新回复列表
+          const response = await axios.get(
+            `${
+              process.env.REACT_APP_API_URL || "http://localhost:5000"
+            }/api/messages/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`, // 使用Cookies.get获取最新的token
+              },
+            }
+          );
+          set({ responses: response.data.data }); // 更新回复列表
         } catch (error) {
           if (axios.isAxiosError(error)) {
             console.error(
@@ -384,6 +461,7 @@ const useRecordStore = create<RecordState>()(
         }
       },
 
+      // (管理员)提交回复
       submitResponse: async (
         user_id: number,
         response_type: string,
@@ -392,7 +470,9 @@ const useRecordStore = create<RecordState>()(
       ) => {
         try {
           const response = await axios.post(
-            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/responses/`,
+            `${
+              process.env.REACT_APP_API_URL || "http://localhost:5000"
+            }/api/responses/`,
             {
               user_id,
               response_type,
@@ -419,11 +499,21 @@ const useRecordStore = create<RecordState>()(
         }
       },
 
-      markResponse: async (response_id: number) => {
+      // 修改通知状态（已读/未读）
+      markResponse: async (
+        message_id: number,
+        type: string,
+        status: string
+      ) => {
         try {
           const response = await axios.put(
-            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/responses/${response_id}/read`,
-            {},
+            `${
+              process.env.REACT_APP_API_URL || "http://localhost:5000"
+            }/api/messages/status/${message_id}`,
+            {
+              type: type,
+              status: status,
+            },
             {
               headers: {
                 Authorization: `Bearer ${token}`, // 使用Cookies.get获取最新的token
@@ -444,32 +534,12 @@ const useRecordStore = create<RecordState>()(
         }
       },
 
-      searchResponses: async (read_status: string) => {
+      fetchForumPosts: async () => {
         try {
           const response = await axios.get(
-            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/responses/${read_status}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`, // 使用Cookies.get获取最新的token
-              },
-            }
-          );
-          set({ typedResponses: response.data }); // 更新回复列表
-        } catch (error) {
-          if (axios.isAxiosError(error)) {
-            console.error(
-              "获取回复失败:",
-              error.response?.data.message || "服务器错误"
-            );
-          } else {
-            console.error("未知错误:", error);
-          }
-        }
-      },
-      fetchForumPosts: async () => {
-        try{
-          const response =await axios.get(
-            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/campusWall`,
+            `${
+              process.env.REACT_APP_API_URL || "http://localhost:5000"
+            }/api/campusWall`
           );
           if (response.status === 200 && response.data) {
             const data = response.data.posts;
@@ -487,7 +557,7 @@ const useRecordStore = create<RecordState>()(
           } else {
             console.error("Error fetching posts:", error);
           }
-        }       
+        }
       },
     }),
     {

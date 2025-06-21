@@ -4,7 +4,7 @@ import { useUserStore } from "../../store";
 import { useNavigate } from "react-router-dom";  
 import stars from "../../assets/favorites-black.svg";  
 import history from "../../assets/history-black.svg";  
-import messages from "../../assets/messages-black.svg";  
+import messages from "../../assets/messages-unread.svg";  
 import settings from "../../assets/settings-black.svg";  
 import right from "../../assets/right-black.svg";  
 import avatarDefault from "../../assets/logo.png";  
