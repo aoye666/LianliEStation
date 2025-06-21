@@ -12,7 +12,7 @@ const SECRET_KEY = process.env.SECRET_KEY;
 
 // 提交申诉
 router.post("/publish", upload.array("images", 3), async (req, res) => {
-  const { id, content, type } = req.body;
+  const { id, title, content, type } = req.body;
   const files = req.files;
   const token = req.headers.authorization?.split(" ")[1]; // 获取 token
 
@@ -29,7 +29,7 @@ router.post("/publish", upload.array("images", 3), async (req, res) => {
     const decoded = jwt.verify(token, SECRET_KEY);
     const author_id = decoded.user_id;
 
-    if (!id || !content) {
+    if (!id || !content || !title || !type) {
       if (files && files.length) {
         for (const file of files) {
           await fs.promises.unlink(file.path).catch(() => {});
@@ -65,7 +65,7 @@ router.post("/publish", upload.array("images", 3), async (req, res) => {
     }
 
     // 插入申诉记录
-    const [appealResult] = await db.query("INSERT INTO appeals (author_id, post_id, content, type) VALUES (?, ?, ?, ?)", [author_id, id, content, type]);
+    const [appealResult] = await db.query("INSERT INTO appeals (title, author_id, post_id, content, type) VALUES (?, ?, ?, ?, ?)", [title, author_id, id, content, type]);
     const appealId = appealResult.insertId;
     if (!appealId) {
       if (files && files.length) {
