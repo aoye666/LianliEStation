@@ -79,6 +79,7 @@ CREATE TABLE `goods` (
 
 CREATE TABLE `appeals` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `title` VARCHAR(30) NOT NULL,
     `author_id` INT NOT NULL,
     `post_id` INT NOT NULL,
     `content` TEXT NOT NULL,
@@ -119,6 +120,7 @@ CREATE TABLE `response_images` (
 
 CREATE TABLE `responses` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,           -- 自增主键
+    `title` VARCHAR(30) NOT NULL,
     `user_id` INT NOT NULL,                        -- 接收回复的用户ID
     `response_type` ENUM('appeal', 'violation') NOT NULL, -- 回复类型：申诉回复或违规通告回复
     `related_id` INT NOT NULL,                     -- 关联的申诉或违规通告记录ID
