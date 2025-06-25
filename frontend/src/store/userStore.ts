@@ -2,8 +2,8 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import axios from "axios";
 import Cookies from "js-cookie"; // 使用cookie存储token
+import api from "../api/index";
 
 // 获取token
 const token = Cookies.get("auth-token");
@@ -85,12 +85,14 @@ const useUserStore = create<UserState>()(
       // searchedUser: null,
       login: async (identifier: string, password: string) => {
         try {
-          const res = await axios.post(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/auth/login`, {
-            identifier,
-            password,
+          const res = await api.post("/api/auth/login", {
+            data: {
+              identifier,
+              password,
+            },
           });
-          const token = res.data.token;
-          const isAdmin = res.data.isAdmin;
+          const token = res?.data.token;
+          const isAdmin = res?.data.isAdmin;
           Cookies.set("auth-token", token, { expires: 7 });
           set({ isAuthenticated: true, token, isAdmin });
 
@@ -99,6 +101,7 @@ const useUserStore = create<UserState>()(
           if (error.response) console.error(error.response.data.message);
         }
       },
+
       register: async (userData: {
         nickname: string;
         email: string;
@@ -108,80 +111,86 @@ const useUserStore = create<UserState>()(
         campus_id: number;
       }) => {
         try {
-          const res = await axios.post(
-            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/auth/register`,
-            userData
-          );
-          console.log(res.data.message); // 注册成功
+          const res = await api.post("/api/auth/register", { data: userData });
+          console.log(res?.data.message); // 注册成功
         } catch (error: any) {
           console.error(error.response.data.message); // 注册失败
         }
       },
+
       logout: () => {
         Cookies.remove("auth-token"); // 登出时移除 cookie
-        set({ isAuthenticated: false, token: null, currentUser: null, isAdmin: false, users: [] });
+        set({
+          isAuthenticated: false,
+          token: null,
+          currentUser: null,
+          isAdmin: false,
+          users: [],
+        });
         localStorage.clear(); // 登出时清除 localStorage
       },
+
       deleteUser: async (username: string) => {
         try {
-          const res = await axios.delete(
-            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/users/profile`,
-            { data: { username } }
-          );
-          console.log(res.data.message); // 账户已删除
+          const res = await api.delete("/api/users/profile", {
+            data: { username },
+          });
+          console.log(res?.data.message); // 账户已删除
           Cookies.remove("auth-token"); // 删除用户时移除 cookie
           set({ isAuthenticated: false, token: null });
         } catch (error: any) {
           if (error.response) console.error(error.response.data.message);
         }
       },
+
       requestVerification: async (email: string) => {
         try {
-          const res = await axios.post(
-            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/auth/verification`,
-            { email }
-          );
-          if (res.status === 200) {
+          const res = await api.post("/api/auth/verification", {
+            data: { email },
+          });
+          if (res?.status === 200) {
             console.log(res.data.message); // 验证码已发送，请检查您的邮箱
           }
         } catch (error: any) {
           if (error.response) console.error(error.response.data.message);
         }
       },
+
       changePassword: async (
         email: string,
         verificationCode: string,
         newPassword: string
       ) => {
         try {
-          const res = await axios.put(
-            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/auth/change-password`,
-            { email, verificationCode, newPassword }
-          );
-          if (res.status === 200) {
+          const res = await api.put("/api/auth/change-password", {
+            data: {
+              email,
+              verificationCode,
+              newPassword,
+            },
+          });
+          if (res?.status === 200) {
             console.log(res.data.message); // 密码修改成功
           }
         } catch (error: any) {
           if (error.response) console.error(error.response.data.message);
         }
       },
+
       // 一般用户获取自己的信息、管理员获取所有用户信息
       fetchUserProfile: async () => {
         try {
-          const res = await axios.get(
-            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/users/profile`,
-            {
-              headers: {
-                Authorization: `Bearer ${get().token}`,
-              },
-            }
-          );
+          const res = await api.get("/api/users/profile", {
+            headers: {
+              Authorization: `Bearer ${get().token}`,
+            },
+          });
           const { isAdmin } = get();
 
           // 一般用户获取自己的信息
-          if (!isAdmin) set({ currentUser: res.data });
+          if (!isAdmin) set({ currentUser: res?.data });
           // 管理员获取所有用户信息
-          else set({ users: res.data });
+          else set({ users: res?.data });
         } catch (error: any) {
           if (error.response) console.error(error.response.data.message);
         }
@@ -189,20 +198,18 @@ const useUserStore = create<UserState>()(
       // 管理员通过QQ号搜索用户
       // fetchByQQ: async (qq: string) => {
       //   try {
-      //     const res = await axios.post(
-      //       "${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/users/searchByQQ",
-      //       {
-      //         params: {
+      //     const res = await api.post(
+      //       '/api/users/searchByQQ',
+      //        {
       //           qq_id: qq,
       //         },
-      //       },
       //       {
       //         headers: {
       //           Authorization: `Bearer ${get().token}`,
       //         },
       //       }
       //     );
-      //     set({ searchedUser: res.data });
+      //     set({ searchedUser: res?.data });
       //   } catch (error: any) {
       //     if (error.response) console.error(error.response.data.message);
       //   }
@@ -213,24 +220,20 @@ const useUserStore = create<UserState>()(
           const formData = new FormData();
           formData.append("image", image);
 
-          const res = await axios.put(
-            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/users/profile/image`,
-            formData,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "multipart/form-data", // 这行在使用FormData时通常不需要，axios会自动设置
-              },
-              params: {
-                type: type,
-              },
-            }
-          );
-
+          const res = await api.put("/api/users/profile/image", {
+            data: formData,
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data", // 这行在使用FormData时通常不需要，axios会自动设置
+            },
+            params: {
+              type: type,
+            },
+          });
           set((state: any) => ({
             currentUser: {
               ...state.currentUser,
-              [type === "avatar" ? "avatar" : `${type}_url`]: res.data.url,
+              [type === "avatar" ? "avatar" : `${type}_url`]: res?.data.url,
             },
           }));
 
@@ -243,13 +246,14 @@ const useUserStore = create<UserState>()(
           } else if (type === "avatar") {
             localStorageKey = "userAvatar";
           }
-          localStorage.removeItem(localStorageKey)
+          localStorage.removeItem(localStorageKey);
 
-          console.log(res.data);
+          console.log(res?.data);
         } catch (error: any) {
           if (error.response) console.error(error.response.data.message);
         }
       },
+
       // 更新用户的个人信息（图片除外）
       changeProfile: async (
         nickname: string,
@@ -265,19 +269,14 @@ const useUserStore = create<UserState>()(
             qq_id,
           };
 
-          if (theme_id !== undefined) {
-            requestBody.theme_id = theme_id;
-          }
+          if (theme_id !== undefined) requestBody.theme_id = theme_id;
 
-          const res = await axios.put(
-            `${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/users/profile`,
-            requestBody,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
+          const res = await api.put("/api/users/profile", {
+            data: requestBody,
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
           // 动态更新 currentUser 状态
           set(
             (state: UserState) =>
@@ -292,7 +291,7 @@ const useUserStore = create<UserState>()(
               } as Partial<UserState>)
           );
 
-          console.log(res.data);
+          console.log(res?.data);
         } catch (error: any) {
           if (error.response) console.error(error.response.data.message);
         }
@@ -300,19 +299,19 @@ const useUserStore = create<UserState>()(
       // // 管理员更新用户信誉分
       // updateCredit: async (qq_id: string, credit: number) => {
       //   try {
-      //     const res = await axios.put(
-      //       "${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/users/searchByQQ",
-      //       {
-      //         params: {
-      //           qq_id: qq_id,
-      //           credit: credit,
-      //         },
-      //       },
-      //       {
-      //         headers: {
+      //     const res = await api.put(
+      //       '/api/users/searchByQQ',{
+      //
+      //
+      //         headers:{
       //           Authorization: `Bearer ${token}`,
       //         },
-      //       }
+      //
+      //        data: {
+      //           qq_id: qq_id,
+      //           credit: credit,
+      //         },}
+      //
       //     );
       //     set(
       //       (state: UserState) =>
@@ -323,7 +322,7 @@ const useUserStore = create<UserState>()(
       //           },
       //         } as Partial<UserState>)
       //     );
-      //     console.log(res.data);
+      //     console.log(res?.data);
       //   } catch (error: any) {
       //     if (error.response) console.error(error.response.data.message);
       //   }

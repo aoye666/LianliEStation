@@ -41,15 +41,15 @@ const Market = () => {
   useEffect(() => {
     if (goods.length === 0) {
       fetchGoods();
-      console.log(filters);
+      // console.log(filters);
     }
 
     // 监听分布排列
     const handleResize = () => {
       const maxCount = Math.floor(window.innerWidth / 155);
-      console.log(window.innerWidth)
-      console.log(maxCount);
-      console.log(window.innerWidth / maxCount)
+      // console.log(window.innerWidth)
+      // console.log(maxCount);
+      // console.log(window.innerWidth / maxCount)
       setElementsPerRow(maxCount || 1);
     };
 

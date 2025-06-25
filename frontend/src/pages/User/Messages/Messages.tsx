@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Image } from "antd";
 import Navbar from "../../../components/Navbar/Navbar";
 import "./Messages.scss";
-import { useMainStore, useRecordStore } from "../../../store";
+import { useRecordStore } from "../../../store";
 import {
   ProductOutlined,
   MessageOutlined,
