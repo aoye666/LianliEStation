@@ -2132,16 +2132,21 @@ images: [图片1.jpg, 图片2.jpg]
 
 基本信息
 
-- 路径: `/api/messages/status/:message_id`
+- 路径: `/api/messages/status/batch`
 - 方法: `PUT`
 - 描述: 修改指定通知的状态（已读/未读）
 
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
 | ------ | ------ | ---- | ------------------------ |
-| message_id | Number | 是 | 通知 ID (URL 参数) |
+| messages | Array | 是 | 通知对象数组，每个对象包含 message_id、type、status |
+
+消息对象结构
+| 参数名 | 类型 | 必选 | 描述 |
+| ------ | ------ | ---- | ------------------------ |
+| message_id | Number | 是 | 通知 ID |
 | type | String | 是 | 通知类型，"appeal"或"response" |
-| status | Number | 是 | 状态值，unread 表示未读，read 表示已读 |
+| status | String | 是 | 状态值，"unread" 表示未读，"read" 表示已读 |
 
 请求头
 | 参数名 | 类型 | 必选 | 描述 |
@@ -2152,45 +2157,65 @@ images: [图片1.jpg, 图片2.jpg]
 
 ```json
 {
-  "type": "response",
-  "status": 1
+  "messages": [
+    { "message_id": 1, "type": "appeal", "status": "read" },
+    { "message_id": 2, "type": "response", "status": "read" },
+    { "message_id": 3, "type": "appeal", "status": "unread" },
+    { "message_id": 4, "type": "response", "status": "read" }
+  ]
 }
 ```
 
 响应参数
 
-| 状态码 | 内容类型         | 描述                         |
-| ------ | ---------------- | ---------------------------- |
-| 200    | application/json | 通知状态更新成功             |
-| 400    | application/json | 缺少必要参数或无效的通知类型 |
-| 401    | application/json | 未提供 Token 或 Token 无效   |
-| 403    | application/json | 无权限修改此通知             |
-| 404    | application/json | 通知不存在或无更新           |
-| 500    | application/json | 服务器错误                   |
+| 状态码 | 内容类型         | 描述                       |
+| ------ | ---------------- | -------------------------- |
+| 200    | application/json | 批量处理完成               |
+| 400    | application/json | 缺少消息数组或数组为空     |
+| 401    | application/json | 未提供 Token 或 Token 无效 |
+| 500    | application/json | 服务器错误                 |
 
 响应示例
 
-- 成功响应 (状态码：200)
+- 全部成功响应 (状态码：200)
 
   ```json
   {
-    "message": "通知状态更新成功"
+    "message": "批量处理完成",
+    "success_count": 4,
+    "error_count": 0,
+    "results": [
+      { "message_id": 1, "type": "appeal", "status": "read", "success": true },
+      { "message_id": 2, "type": "response", "status": "read", "success": true },
+      { "message_id": 3, "type": "appeal", "status": "unread", "success": true },
+      { "message_id": 4, "type": "response", "status": "read", "success": true }
+    ]
   }
   ```
 
-- 缺少必要参数 (状态码：400)
+- 部分成功响应 (状态码：200)
 
   ```json
   {
-    "message": "缺少必要参数"
+    "message": "批量处理完成",
+    "success_count": 2,
+    "error_count": 2,
+    "results": [
+      { "message_id": 1, "type": "appeal", "status": "read", "success": true },
+      { "message_id": 4, "type": "response", "status": "read", "success": true }
+    ],
+    "errors": [
+      { "message_id": 2, "type": "response", "error": "无权限修改此通知" },
+      { "message_id": 3, "error": "缺少必要参数" }
+    ]
   }
   ```
 
-- 无效的通知类型 (状态码：400)
+- 缺少消息数组 (状态码：400)
 
   ```json
   {
-    "message": "无效的通知类型"
+    "message": "缺少消息数组或数组为空"
   }
   ```
 
@@ -2210,22 +2235,6 @@ images: [图片1.jpg, 图片2.jpg]
   }
   ```
 
-- 无权限 (状态码：403)
-
-  ```json
-  {
-    "message": "无权限修改此通知"
-  }
-  ```
-
-- 通知不存在 (状态码：404)
-
-  ```json
-  {
-    "message": "通知不存在或无更新"
-  }
-  ```
-
 - 服务器错误 (状态码：500)
   ```json
   {
@@ -2235,9 +2244,13 @@ images: [图片1.jpg, 图片2.jpg]
 
 **备注**
 
-- 该接口需要用户登录，并通过 Authorization 头部提供有效的 JWT 令牌
+- 该接口支持批量处理多个通知的状态更新
+- 每个消息对象必须包含 message_id、type 和 status 三个字段
 - 用户只能修改属于自己的通知状态
 - type 参数指定通知类型，必须为"appeal"或"response"
+- status 参数必须为"read"或"unread"
+- 接口会返回成功和失败的详细信息，允许部分成功的情况
+- 如果某个通知处理失败，不会影响其他通知的处理
 
 ## historyRoutes
 
