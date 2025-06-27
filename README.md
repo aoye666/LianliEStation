@@ -1,6 +1,6 @@
-# LianliEStation 连理 e 站
+# LianliEStation 连理e站
 
-连理 e 站——校园智联生活平台
+连理e站 —— 校园智联生活平台
 
 <!-- PROJECT SHIELDS -->
 
@@ -20,7 +20,7 @@
   </a>
   <h3 align="center">连理e站</h3>
   <p align="center">
-    连理e站——校园智联生活平台
+    连理e站 —— 校园智联生活平台
     <br /><br />
     <a href="https://github.com/ProselyteCoding/LianliEStation/">  
       <img src="assets/宣传视频.gif" alt="宣传视频" width="800" height="450">  
@@ -40,6 +40,7 @@
 ## 目录
 
 - [上手指南](#上手指南)
+  - [使用指南](#使用指南(访问网站，无需安装))
   - [开发前的配置要求](#开发前的配置要求)
   - [安装步骤](#安装步骤)
 - [文件目录说明](#文件目录说明)
@@ -54,65 +55,64 @@
 
 ### 上手指南
 
+#### 日常使用指南(访问网站，无需安装)
+
+1. 使用微信搜索"连理e站"服务号并关注
+2. 点击页面左下角"连理e站"链接跳转
+3. 完成注册后登录即可访问使用
+
 #### 开发前的配置要求
 
-1. xxxxx x.x.x
-2. xxxxx x.x.x
+1. 已安装并配置了 `Node.js` 环境
+2. 全局安装了 `npm` 作为包管理器
 
-#### **安装步骤**
+#### 安装步骤
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+1. 克隆仓库
 
 ```sh
 git clone https://github.com/ProselyteCoding/LianliEStation.git
 ```
 
+2. 安装依赖包
+
+```sh
+# 前端依赖包安装
+cd frontend
+npm install
+```
+```sh
+# 后端依赖包安装
+cd ../server
+npm install
+```
+
 ### 文件目录说明
 
-eg:
-
 ```
-filetree
-├── ARCHITECTURE.md
-├── LICENSE.txt
-├── README.md
-├── /account/
-├── /bbs/
-├── /docs/
-│  ├── /rules/
-│  │  ├── backend.txt
-│  │  └── frontend.txt
-├── manage.py
-├── /oa/
-├── /static/
-├── /templates/
-├── useless.md
-└── /util/
-
+# 正在开发阶段，目录变化频繁，暂时不便给出
 ```
 
 ### 开发的架构
 
-请阅读[ARCHITECTURE.md](https://github.com/ProselyteCoding/LianliEStation/blob/main/ARCHITECTURE.md) 查阅为该项目的架构。
+请阅读项目中的说明文档，暂未统一整理。
 
 ### 部署
 
-暂无
+IP地址: [47.94.198.49](http://47.94.198.49/)
 
 ### 使用到的框架
 
-- [xxxxxxx](https://getbootstrap.com)
-- [xxxxxxx](https://jquery.com)
-- [xxxxxxx](https://laravel.com)
+- [React](https://react.dev/)
+- [Express](https://expressjs.com/)
 
 ### 贡献者
 
-请阅读**CONTRIBUTING.md** 查阅为该项目做出贡献的开发者。
+请阅读**CONTRIBUTING.md** 查阅为该项目做出贡献的开发者。目前暂未创建该文件。
 
 #### 如何参与开源项目
 
-贡献使开源社区成为一个学习、激励和创造的绝佳场所。你所作的任何贡献都是**非常感谢**的。
+贡献使开源社区成为一个学习、激励和创造的绝佳场所。你所作的任何贡献都是我们**非常感谢**的。
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
@@ -126,9 +126,11 @@ filetree
 
 ### 作者
 
-xxx@xxxx
+Proselyte
 
-知乎:xxxx &ensp; qq:3197908785
+- GitHub: https://github.com/ProselyteCoding
+- 邮箱: fan042182@gmail.com 或 3197908785@qq.com
+- qq: 3197908785
 
 _您也可以在贡献者名单中参看所有参与该项目的开发者。_
 
@@ -138,12 +140,9 @@ _您也可以在贡献者名单中参看所有参与该项目的开发者。_
 
 ### 鸣谢
 
-- [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-- [Img Shields](https://shields.io)
-- [Choose an Open Source License](https://choosealicense.com)
-- [GitHub Pages](https://pages.github.com)
-- [Animate.css](https://daneden.github.io/animate.css)
-- [xxxxxxxxxxxxxx](https://connoratherton.com/loaders)
+感谢所有为“连理e站”的设计、开发、测试、上线做出贡献的同学！特别感谢 **Wzy 学长** 和 **OurEDA 红色狐狸老师** 的支持与指导。
+
+
 
 <!-- links -->
 
