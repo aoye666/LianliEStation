@@ -9,6 +9,8 @@ import { data } from "react-router-dom";
 const token = Cookies.get("auth-token");
 
 interface Response {
+  id: number;
+  title: string;
   user_id: number;
   response_type: string;
   related_id: number;
@@ -20,12 +22,16 @@ interface Response {
 }
 
 interface Appeal {
+  id: number;
+  title: string;
   author_id: number;
-  goods_id: number;
+  post_id: number;
   content: string;
+  type: string;
   status: string;
+  read_status: string;
   created_at: string;
-  image_url: string[];
+  images: string[];
 }
 
 interface FavoriteGoods {
@@ -75,7 +81,7 @@ interface ForumPost {
   title: string;
   content: string;
   author_id: number;
-  campust_id: number;
+  campus_id: number;
   status: string;
   created_at: string;
   images: string[];
@@ -120,9 +126,7 @@ interface RecordState {
     content: string
   ) => Promise<void>; // 提交回复(管理员)
   markResponse: (
-    message_id: number,
-    type: string,
-    status: string
+    messages: object
   ) => Promise<void>; // 标记回复为已读
 
   //forum相关的状态管理及方法
@@ -306,7 +310,7 @@ const useRecordStore = create<RecordState>()(
           const response = await api.post("/api/appeals/publish", {
             data: { formData },
             headers: {
-              Authorization: `Bearer {token}`,
+              Authorization: `Bearer ${token}`,
               "Content-Type": "multipart/form-data",
             },
           });
@@ -361,9 +365,7 @@ const useRecordStore = create<RecordState>()(
       fetchResponses: async () => {
         try {
           const response = await api.get(
-            `${
-              process.env.REACT_APP_API_URL || "http://localhost:5000"
-            }/api/messages/`,
+            '/api/messages/',
             {
               headers: {
                 Authorization: `Bearer ${token}`, // 使用Cookies.get获取最新的token
@@ -408,19 +410,16 @@ const useRecordStore = create<RecordState>()(
 
       // 修改通知状态（已读/未读）
       markResponse: async (
-        message_id: number,
-        type: string,
-        status: string
+        messages: object
       ) => {
         try {
           const response = await api.put(
-            `/api/messages/status/${message_id}`,
+            `/api/messages/status/batch`,
 
             {
-              data: {
-                type: type,
-                status: status,
-              },
+              data: 
+                messages
+              ,
               headers: {
                 Authorization: `Bearer ${token}`, // 使用Cookies.get获取最新的token
               },
