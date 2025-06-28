@@ -28,7 +28,7 @@
     <br /><br />
     <a href="https://github.com/ProselyteCoding/LianliEStation"><strong>探索本项目的文档 »</strong></a>
     <br /><br />
-    <a href="https://github.com/ProselyteCoding/LianliEStation">查看Demo</a>
+    <a href="http://47.94.198.49/">查看Demo</a>
     ·
     <a href="https://github.com/ProselyteCoding/LianliEStation/issues">报告Bug</a>
     ·
