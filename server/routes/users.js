@@ -1,10 +1,9 @@
+import dotenv from "dotenv";
 import { Router } from "express";
-import bcrypt from "bcrypt"; // 用于密码加密
+import fs from "fs";
 import jwt from "jsonwebtoken"; // 用于生成 JWT
 import db from "../db.js";
-import dotenv from "dotenv";
 import upload from "../middlewares/uploadImg.js"; // 引入图片上传中间件
-import fs from "fs";
 // import {passwordChangeLimiter, verificationLimiter } from "../middlewares/limiter.js"; // 引入限流中间件
 // import logIP from "../middlewares/logIP.js"; // 记录IP的中间件
 // import sendVerificationCode from "../middlewares/mailer.js"; // 引入邮件发送逻辑
@@ -134,10 +133,7 @@ router.post("/searchByQQ", async (req, res) => {
     }
 
     // 查询指定 qq_id 的用户信息
-    const [rows] = await db.query(
-      "SELECT id, nickname, email, qq_id, username, credit, campus_id FROM users WHERE qq_id = ?",
-      [qq_id]
-    );
+    const [rows] = await db.query("SELECT id, nickname, email, qq_id, username, credit, campus_id FROM users WHERE qq_id = ?", [qq_id]);
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "没有找到匹配的用户" });
@@ -261,18 +257,13 @@ router.get("/profile", async (req, res) => {
 
     // 如果是管理员，返回所有用户信息列表
     if (decoded.isAdmin) {
-      const [rows] = await db.query(
-        "SELECT id, nickname, email, qq_id, username, campus_id, credit, theme_id, background_url, banner_url, avatar FROM users"
-      );
+      const [rows] = await db.query("SELECT id, nickname, email, qq_id, username, campus_id, credit, theme_id, background_url, banner_url, avatar FROM users");
       return res.status(200).json({ users: rows });
     }
     // 如果是普通用户，返回该用户的详细信息
     else {
       // 合并现有的 /profile 和 /get-theme 功能
-      const [userRows] = await db.query(
-        "SELECT email, credit, theme_id, background_url, banner_url, avatar FROM users WHERE id = ?",
-        [decoded.user_id]
-      );
+      const [userRows] = await db.query("SELECT email, credit, theme_id, background_url, banner_url, avatar FROM users WHERE id = ?", [decoded.user_id]);
 
       if (userRows.length === 0) {
         return res.status(404).json({ message: "用户不存在" });
@@ -398,10 +389,7 @@ router.put("/profile", async (req, res) => {
     updateParams.push(decoded.user_id);
 
     // 更新用户信息
-    const [result] = await db.query(
-      `UPDATE users SET ${updateFields} WHERE id = ?`,
-      updateParams
-    );
+    const [result] = await db.query(`UPDATE users SET ${updateFields} WHERE id = ?`, updateParams);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "用户不存在" });
@@ -737,9 +725,7 @@ router.put("/profile/image", upload.single("image"), async (req, res) => {
         await fs.promises.unlink(imageFile.path);
       } catch {}
     }
-    return res
-      .status(400)
-      .json({ message: "无效的图片类型，必须是 avatar, background 或 banner" });
+    return res.status(400).json({ message: "无效的图片类型，必须是 avatar, background 或 banner" });
   }
 
   if (!token) {
@@ -753,13 +739,9 @@ router.put("/profile/image", upload.single("image"), async (req, res) => {
 
   // 检查是否上传文件
   if (!imageFile) {
-    return res
-      .status(400)
-      .json({
-        message: `请选择要上传的${
-          type === "avatar" ? "头像" : type === "background" ? "背景" : "banner"
-        }图片`,
-      });
+    return res.status(400).json({
+      message: `请选择要上传的${type === "avatar" ? "头像" : type === "background" ? "背景" : "banner"}图片`,
+    });
   }
 
   try {
@@ -783,15 +765,10 @@ router.put("/profile/image", upload.single("image"), async (req, res) => {
     }
 
     // 从数据库获取旧图片路径
-    const [oldUserRows] = await db.query(
-      `SELECT ${fieldName} FROM users WHERE id = ?`,
-      [decoded.user_id]
-    );
+    const [oldUserRows] = await db.query(`SELECT ${fieldName} FROM users WHERE id = ?`, [decoded.user_id]);
     if (!oldUserRows.length) {
       if (imageFile) {
-        import("fs").then((fsModule) =>
-          fsModule.unlink(imageFile.path, () => {})
-        );
+        import("fs").then((fsModule) => fsModule.unlink(imageFile.path, () => {}));
       }
       return res.status(404).json({ message: "用户不存在" });
     }
@@ -810,10 +787,7 @@ router.put("/profile/image", upload.single("image"), async (req, res) => {
     }
 
     // 更新用户信息
-    const [result] = await db.query(
-      `UPDATE users SET ${fieldName} = ? WHERE id = ?`,
-      [imagePath, decoded.user_id]
-    );
+    const [result] = await db.query(`UPDATE users SET ${fieldName} = ? WHERE id = ?`, [imagePath, decoded.user_id]);
 
     if (result.affectedRows === 0) {
       if (imageFile) {
@@ -889,10 +863,7 @@ router.put("/updateCredit", async (req, res) => {
     }
 
     // 更新指定 qq_id 用户的 credit 值
-    const [result] = await db.query(
-      "UPDATE users SET credit = ? WHERE qq_id = ?",
-      [credit, qq_id]
-    );
+    const [result] = await db.query("UPDATE users SET credit = ? WHERE qq_id = ?", [credit, qq_id]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "没有找到匹配的用户" });
@@ -914,10 +885,7 @@ router.get("/user-info/:user_id", async (req, res) => {
   }
 
   try {
-    const [rows] = await db.query(
-      "SELECT qq_id, credit, avatar,nickname FROM users WHERE id = ?",
-      [user_id]
-    );
+    const [rows] = await db.query("SELECT qq_id, credit, avatar,nickname FROM users WHERE id = ?", [user_id]);
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "用户不存在" });
@@ -933,6 +901,38 @@ router.get("/user-info/:user_id", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "服务器错误" });
+  }
+});
+
+// 获取用户点赞/投诉记录
+router.get("/records", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const userId = decoded.user_id;
+
+    const [likeRecords] = await db.query("SELECT target_id, target_type FROM likes WHERE user_id = ?", [userId]);
+
+    const [complaintRecords] = await db.query("SELECT target_id, target_type FROM complaints WHERE user_id = ?", [userId]);
+
+    res.status(200).json({
+      likes: likeRecords.map((record) => ({
+        targetId: record.target_id,
+        targetType: record.target_type,
+      })),
+      complaints: complaintRecords.map((record) => ({
+        targetId: record.target_id,
+        targetType: record.target_type,
+      })),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(401).json({ message: "Token 无效" });
   }
 });
 
