@@ -1,7 +1,12 @@
+import { Alert, message } from "antd";
 // 商品与帖子的状态管理
 import api from "../api/index";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import Cookies from "js-cookie"; // 从 cookie 中获取 token
+
+// 获取 token
+const token = Cookies.get("auth-token");
 
 interface Goods {
   id: number;
@@ -52,6 +57,18 @@ interface MainState {
   setForumPage: () => void;
   clearGoods: () => void;
   clearFilters: () => void;
+  changeGoodsResponse: (
+    action: string,
+    post_id: string | undefined,
+    value: number
+  ) => Promise<string | any>;
+  publishAppeal: (
+    title: string,
+    id: number,
+    content: string,
+    type: string,
+    images: File[]
+  ) => Promise<boolean>;
 }
 
 const useMainStore = create<MainState>()(
@@ -202,6 +219,82 @@ const useMainStore = create<MainState>()(
           } else {
             console.error("Error fetching posts:", error);
           }
+        }
+      },
+
+      // 修改商品点赞/投诉数
+      changeGoodsResponse: async (
+        action: string,
+        post_id: string | undefined,
+        value: number
+      ) => {
+        let msg: string | any;
+        try {
+          const response = await api.put(`/api/goods/${action}/${post_id}`, {
+            // 将 post 改为 put
+            data: { value: value },
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          console.log(response);
+          if (response?.status === 200) {
+            if (post_id) {
+              set((state) => ({
+                ...state,
+                goods: state.goods.map((good) =>
+                  good.id === parseInt(post_id)
+                    ? { ...good, ...response.data }
+                    : good
+                ),
+              }));
+              msg = "success";
+            }
+          } else if (response?.status === 400) {
+            // console.log(response.data)
+            msg = response;
+          }
+        } catch (error) {
+          console.error(error);
+          msg = error;
+        }
+        return msg;
+      },
+
+      // 发布举报
+      publishAppeal: async (
+        title: string,
+        id: number,
+        content: string,
+        type: string,
+        images: File[]
+      ) => {
+        try {
+          const formData = new FormData();
+          formData.append("title", title);
+          formData.append("content", content);
+          formData.append("type", type);
+          for (let i = 0; i < images.length; i++) {
+            formData.append("images", images[i]);
+          }
+          const response = await api.post(`/api/appeal/${id}`, {
+            data: { formData },
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          console.log(response);
+          if (response?.status === 200) {
+            message.success("举报成功");
+            return true;
+          } else {
+            message.error("举报失败");
+            return false;
+          }
+        } catch (error) {
+          console.error(error);
+          message.error("举报失败");
+          return false;
         }
       },
     }),

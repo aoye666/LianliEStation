@@ -1,0 +1,46 @@
+.appeal-container {
+    margin-top: 25px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    .appeal-cancel {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        position: absolute;
+        left: 30px;
+        margin-top: -90px;
+    }
+
+    .appeal-area {
+        word-break: break-all;
+        padding: 3px;
+        width: 220px;
+        font-size: 16px;
+        height: 51px;
+        border: 1px solid #ccc;
+    }
+
+    .appeal-control {
+        margin-left: 5px;
+        display: flex;
+        flex-direction: column;
+        width: 70px;
+        gap: 3px;
+
+        .appeal-img {
+            width: 70px;
+        }
+
+        .appeal-submit {
+            width: 70px;
+            height: 25px;
+            border: none;
+            border-radius: 3px;
+            background: #d87272;
+            color: white;
+        }
+    }
+}

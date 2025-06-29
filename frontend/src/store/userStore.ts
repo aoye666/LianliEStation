@@ -8,6 +8,11 @@ import api from "../api/index";
 // 获取token
 const token = Cookies.get("auth-token");
 
+interface RecordItem {
+  targetId: number;
+  targetType: string; // "goods" 或 "post"
+}
+
 // 一般用户
 interface User {
   nickname: string;
@@ -20,6 +25,8 @@ interface User {
   background_url: string | undefined;
   banner_url: string | undefined;
   avatar: string | undefined;
+  likes: RecordItem[];
+  complaints: RecordItem[];
 }
 
 // 管理员获取所有用户
@@ -47,6 +54,7 @@ interface UserState {
 
   // fetchByQQ: (qq: string) => Promise<void>;
   fetchUserProfile: () => Promise<void>;
+  fetchLikesComplaints: () => Promise<void>;
   changeImage: (type: string, image: File) => Promise<void>;
   changeProfile: (
     nickname: string,
@@ -97,6 +105,7 @@ const useUserStore = create<UserState>()(
           set({ isAuthenticated: true, token, isAdmin });
 
           await get().fetchUserProfile(); // 获取当前用户信息
+          await get().fetchLikesComplaints(); // 获取当前用户的点赞、投诉记录
         } catch (error: any) {
           if (error.response) console.error(error.response.data.message);
         }
@@ -195,6 +204,29 @@ const useUserStore = create<UserState>()(
           if (error.response) console.error(error.response.data.message);
         }
       },
+
+      // 获取当前用户的点赞、投诉记录
+      fetchLikesComplaints: async () => {
+        try {
+          const res = await api.get("/api/users/records", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const currentUser = get().currentUser;
+          if (currentUser)
+            set({
+              currentUser: {
+                ...currentUser,
+                likes: res?.data.likes,
+                complaints: res?.data.complaints,
+              },
+            });
+        } catch (error: any) {
+          if (error.response) console.error(error.response.data.message);
+        }
+      },
+
       // 管理员通过QQ号搜索用户
       // fetchByQQ: async (qq: string) => {
       //   try {
@@ -214,6 +246,7 @@ const useUserStore = create<UserState>()(
       //     if (error.response) console.error(error.response.data.message);
       //   }
       // },
+
       // 上传用户的图片
       changeImage: async (type: string, image: File) => {
         try {
@@ -296,6 +329,7 @@ const useUserStore = create<UserState>()(
           if (error.response) console.error(error.response.data.message);
         }
       },
+      
       // // 管理员更新用户信誉分
       // updateCredit: async (qq_id: string, credit: number) => {
       //   try {

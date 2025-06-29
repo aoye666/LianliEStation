@@ -10,7 +10,7 @@ import {
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Dropdown } from "antd";
-import { timeConvert } from "../../../utils/timeConvert";
+import { timeFormat } from "../../../utils/timeFormat";
 import messages_read from "../../../assets/messages-read.svg";
 import messages_unread from "../../../assets/messages-unread.svg";
 import takePlace from "../../../assets/takePlace.png";
@@ -300,7 +300,7 @@ const Messages = () => {
                       </button>
                     )}
                     <div className="appeal-time">
-                      {timeConvert(message.created_at)}
+                      {timeFormat(message.created_at, "YYYY-MM-DD HH")}
                     </div>
                   </div>
                   <div className="appeal-row">
@@ -366,7 +366,7 @@ const Messages = () => {
                     )}
 
                     <div className="response-time">
-                      {timeConvert(message.created_at)}
+                      {timeFormat(message.created_at, "YYYY-MM-DD HH")}
                     </div>
                   </div>
                   <div className="response-row">

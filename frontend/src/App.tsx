@@ -10,6 +10,7 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"; //保�
 //懒加载不同页面
 const Market = React.lazy(() => import("./pages/Market/Market"));
 const Detail = React.lazy(() => import("./pages/Market/Detail/Detail"));
+const DetailAppeal = React.lazy(() => import("./pages/Market/Detail/DetailAppeal"));
 const Publish = React.lazy(() => import("./pages/Publish/Publish"));
 const Template = React.lazy(() => import("./pages/Publish/Template/Template"));
 const Login = React.lazy(() => import("./pages/Auth/Login/Login"));
@@ -101,6 +102,14 @@ const App: React.FC = () => {
       element: (
         <ProtectedRoute>
           <Detail />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/market/:goodsId/appeal/:goodsTitle",
+      element: (
+        <ProtectedRoute>
+          <DetailAppeal />
         </ProtectedRoute>
       ),
     },

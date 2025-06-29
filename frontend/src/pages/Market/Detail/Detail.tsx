@@ -1,14 +1,15 @@
-import { useMainStore } from "../../../store";
-import { useState, useEffect, useRef } from "react";
+import { useMainStore, useUserStore } from "../../../store";
+import { useState, useEffect, useRef, use } from "react";
 import { useNavigate, useParams } from "react-router-dom"; // 使用 useParams 从路由获取参数
-import axios from "axios";
+import { timeFormat } from "../../../utils/timeFormat";
 import { message } from "antd";
 import "./Detail.scss";
 import copy from "../../../assets/copy-black.svg";
 import stars from "../../../assets/favorites-black.svg";
-import like from "../../../assets/like-black.svg";
-import dislike from "../../../assets/dislike-black.svg";
-import close from "../../../assets/close-black.svg";
+import like_true from "../../../assets/like-true.svg";
+import like_false from "../../../assets/like-false.svg";
+import dislike_true from "../../../assets/dislike-true.svg";
+import dislike_false from "../../../assets/dislike-false.svg";
 import drop from "../../../assets/drop-black.svg";
 import share from "../../../assets/share-black.svg";
 import left from "../../../assets/left-black.svg";
@@ -35,27 +36,60 @@ interface Goods {
 }
 
 const Detail = () => {
-  const { goods } = useMainStore();
+  const { goods, changeGoodsResponse } = useMainStore();
+  const { currentUser } = useUserStore();
+
   const param = useParams();
+  const navigate = useNavigate();
   const ID = param.goodsId; // 通过路由参数获取商品id
+
   const [currentGoods, setCurrentGoods] = useState<Goods>(); // 当前详情商品
   const [currentIndex, setCurrentIndex] = useState(0); // 当前图片索引
-  const [currentAlter, setCurrentAlter] = useState("user"); // 当前互动类型 user/appeal/manage
+  const [isMine, setIsMine] = useState("user"); // 当前互动类型 user/manage
+  const [isLiked, setIsLiked] = useState(false); // 当前商品是否已点赞
+  const [isDisliked, setIsDisliked] = useState(false); // 当前商品是否已踩
   const touchStartX = useRef(0); // 记录触摸起始位置
   const touchEndX = useRef(0); // 记录触摸结束位置
-  const navigate = useNavigate();
+
+  const handleIsRecorded = () => {
+    if (currentUser) {
+      if (
+        currentUser.likes.find((item) => {
+          return (
+            item.targetId === currentGoods?.id && item.targetType === "goods"
+          );
+        })
+      ) {
+        setIsLiked(true);
+      } else {
+        setIsLiked(false);
+      }
+
+      if (
+        currentUser.complaints.find((item) => {
+          return (
+            item.targetId === currentGoods?.id && item.targetType === "goods"
+          );
+        })
+      ) {
+        setIsDisliked(true);
+      } else {
+        setIsDisliked(false);
+      }
+    }
+  };
+
+  const fetchData = () => {
+    const numericID = Number(ID);
+    if (goods) setCurrentGoods(goods.find((item) => item.id === numericID));
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const numericID = Number(ID);
-      if (goods)
-      setCurrentGoods(goods.find((item) => item.id === numericID));
-    };
-
     if (ID) {
       fetchData();
+      handleIsRecorded();
     }
-  }, [ID]);
+  }, [ID, currentGoods]);
 
   // 处理滑动事件
   const handleTouchStart = (e: any) => {
@@ -75,13 +109,17 @@ const Detail = () => {
 
   const nextImage = () => {
     if (currentGoods?.images.length)
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % currentGoods?.images.length);
+      setCurrentIndex(
+        (prevIndex) => (prevIndex + 1) % currentGoods?.images.length
+      );
   };
   const prevImage = () => {
     if (currentGoods?.images.length)
-    setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + currentGoods?.images.length) % currentGoods?.images.length
-    );
+      setCurrentIndex(
+        (prevIndex) =>
+          (prevIndex - 1 + currentGoods?.images.length) %
+          currentGoods?.images.length
+      );
   };
 
   // 点击复制按钮，复制发布者QQ号到剪贴板
@@ -91,53 +129,70 @@ const Detail = () => {
         .writeText(currentGoods?.author_qq_id)
         .then(() => {
           console.log("QQ号已复制到剪贴板");
-          message.success('QQ号已复制到剪贴板')
+          message.success("QQ号已复制到剪贴板");
         })
         .catch((err) => {
           console.error("复制过程出错: ", err);
-          message.error('复制过程出错')
+          message.error("复制过程出错");
         });
     } else {
       console.error("未获取到当前用户QQ号");
-      message.error('未获取到当前用户QQ号')
+      message.error("未获取到当前用户QQ号");
     }
   };
 
-  // 处理点赞、举报，待设计完善
+  // 处理点赞
   const handleLike = async () => {
-    try {
-      axios.put(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods/like/${ID}`, {
-        value: true,
-      });
+    // 已点赞
+    if (isLiked) {
+      const response = await changeGoodsResponse(
+        "like",
+        currentGoods?.id.toString(),
+        -1
+      );
+      if (response === "success") {
+        setIsLiked(false); // 设置为未点赞
+      } else {
+        message.error("取消点赞失败");
+      }
     }
-    catch (error) {
-      console.error("Error handling like:", error);
+    // 未点赞
+    else {
+      const response = await changeGoodsResponse(
+        "like",
+        currentGoods?.id.toString(),
+        1
+      );
+      if (response === "success") {
+        setIsLiked(true); // 设置为已点赞
+      } else {
+        message.error("点赞失败");
+      }
     }
   };
-  const handleDislike = () => {
-    try {
-      axios.put(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/goods/complaint/${ID}`, {
-        value: true,
-      });
+
+  // 处理踩 (点击提交后触发而不是点击图标触发)
+  const handleDislike = async () => {
+    // 已踩
+    if (isDisliked) {
+      const response = await changeGoodsResponse(
+        "dislike",
+        currentGoods?.id.toString(),
+        -1
+      );
+      if (response === "success") {
+        setIsDisliked(false); // 设置为未踩
+      } else {
+        message.error("取消举报失败");
+      }
     }
-    catch (error) {
-      console.error("Error handling complaint:", error);
+    // 未踩
+    else {
+      navigate(`/market/${ID}/appeal/${currentGoods?.title}`);
     }
   };
 
-  // 处理时间格式化
-  const formatDateTime = (dateTime: string | undefined) => {
-    if (!dateTime) return ""; // 如果没有时间字符串，返回空
-    const datePart = dateTime.split("T")[0]; // 获取日期部分
-    const timePart = dateTime.split("T")[1].split(":"); // 获取时间部分并分割为数组
-    const month = datePart.split("-")[1]; // 获取月份
-    const day = datePart.split("-")[2]; // 获取日期
-    const hour = timePart[0]; // 获取小时
-    const minute = timePart[1]; // 获取分钟
-    return `${month}-${day} ${hour}:${minute}`; // 返回格式化后的字符串
-  };
-
-  //
+  // 校区id转名称
   const handleCampusID = (campus_id: number) => {
     if (campus_id === 1) {
       return "凌水主校区";
@@ -181,9 +236,13 @@ const Detail = () => {
         <div className="slider-container">
           <img
             className="slider-item"
-            src={currentGoods?.images?.[currentIndex]
-              ? `${process.env.REACT_APP_API_URL||"http://localhost:5000"}${currentGoods.images[currentIndex]}`
-              : takePlace}
+            src={
+              currentGoods?.images?.[currentIndex]
+                ? `${process.env.REACT_APP_API_URL || "http://localhost:5000"}${
+                    currentGoods.images[currentIndex]
+                  }`
+                : takePlace
+            }
             alt={`${currentIndex + 1}`}
           />
           <div className="slider-index">
@@ -202,7 +261,7 @@ const Detail = () => {
       <div className="detail-title">{currentGoods?.title}</div>
       <div className="detail-profile">
         <div className="detail-price">￥{currentGoods?.price}</div>
-        <div className="detail-postType">
+        <div className="detail-goodsType">
           {currentGoods?.goods_type === "sell" ? "出" : "收"}
         </div>
         <div className="detail-tag">{currentGoods?.tag}</div>
@@ -214,57 +273,55 @@ const Detail = () => {
       <div className="detail-author">
         <img
           className="author-icon"
-          src={`${process.env.REACT_APP_API_URL||"http://localhost:5000"}${currentGoods?.author_avatar}`}
+          src={`${process.env.REACT_APP_API_URL || "http://localhost:5000"}${
+            currentGoods?.author_avatar
+          }`}
           alt="发布者头像"
         />
         <div className="author-name">{currentGoods?.author_nickname}</div>
         <div className="author-credit">{currentGoods?.author_credit}分</div>
         <div className="author-time">
-          {formatDateTime(currentGoods?.created_at)}
+          {timeFormat(currentGoods?.created_at, "MM-DD HH:mm")}
         </div>
       </div>
       <div className="detail-alternative">
-        {currentAlter === "user" && (
+        {isMine === "user" && (
           <div className="alter-user">
             <div className="user-like">
-              <img className="like-icon" src={like} alt="喜欢" onClick={handleLike}/>
+              <img
+                className="like-icon"
+                src={isLiked ? like_true : like_false}
+                alt="喜欢"
+                onClick={handleLike}
+              />
               <div className="like-text">{currentGoods?.likes}</div>
             </div>
-            <div
-              className="user-dislike"
-              onClick={() => setCurrentAlter("appeal")}
-            >
-              <img className="dislike-icon" src={dislike} alt="不喜欢" onClick={handleDislike}/>
+            <div className="user-dislike" onClick={() => handleDislike()}>
+              <img
+                className="dislike-icon"
+                src={isDisliked ? dislike_true : dislike_false}
+                alt="不喜欢"
+              />
               <div className="dislike-text">{currentGoods?.complaints}</div>
             </div>
           </div>
         )}
-        {currentAlter === "appeal" && (
-          <div className="alter-appeal">
-            <img
-              className="appeal-cancel"
-              src={close}
-              alt="取消"
-              onClick={() => setCurrentAlter("user")}
-            ></img>
-            <textarea
-              className="appeal-area"
-              placeholder="请写下您的反馈..."
-            ></textarea>
-            <div className="appeal-control">
-              <input className="appeal-img" type="file" id="file" />
-              <button className="appeal-submit">提交举报</button>
-            </div>
-          </div>
-        )}
-        {currentAlter === "manage" && (
+        {isMine === "manage" && (
           <div className="alter-manage">
             <div className="manage-like" onClick={handleLike}>
-              <img className="like-icon" src={like} alt="喜欢" />
+              <img
+                className="like-icon"
+                src={isLiked ? like_true : like_false}
+                alt="喜欢"
+              />
               <div className="like-text">{currentGoods?.likes}</div>
             </div>
             <div className="manage-dislike" onClick={handleDislike}>
-              <img className="dislike-icon" src={dislike} alt="不喜欢" />
+              <img
+                className="dislike-icon"
+                src={isDisliked ? dislike_true : dislike_false}
+                alt="不喜欢"
+              />
               <div className="dislike-text">{currentGoods?.complaints}</div>
             </div>
             <img className="manage-drop" src={drop} alt="删除" />
@@ -277,11 +334,7 @@ const Detail = () => {
           <div className="starBtn-text">加入收藏</div>
         </div>
         <div className="contact-btn" onClick={handleCopy}>
-          <img
-            className="qqBtn-icon"
-            src={copy}
-            alt="发布者QQ号"
-          />
+          <img className="qqBtn-icon" src={copy} alt="发布者QQ号" />
           <div className="qqBtn-text">立即联系！</div>
         </div>
       </div>
