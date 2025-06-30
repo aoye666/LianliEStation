@@ -1,46 +1,56 @@
 .appeal-container {
-    margin-top: 25px;
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
 
     .appeal-cancel {
         width: 32px;
         height: 32px;
-        border-radius: 50%;
-        position: absolute;
-        left: 30px;
-        margin-top: -90px;
+        align-self: start;
+        margin-top: 10px;
+        margin-left: 20px;
+    }
+
+    .appeal-inform {
+        width: 85%;
+        align-self: center;
+        border-radius: 5px;
+        border: 1px dashed #4693e0;
+        color: #4693e0;
+        padding: 5px;
+        margin-top: 10px;
     }
 
     .appeal-area {
-        word-break: break-all;
-        padding: 3px;
-        width: 220px;
-        font-size: 16px;
-        height: 51px;
-        border: 1px solid #ccc;
+        width: 85%;
+        min-height: 150px;
+        align-self: center;
+        margin-top: 15px;
+        font-size: 18px;
+        padding: 5px;
     }
 
-    .appeal-control {
-        margin-left: 5px;
-        display: flex;
-        flex-direction: column;
-        width: 70px;
-        gap: 3px;
+    .appeal-images {
+        margin-top: 20px;
+        width: 90vw;
+        align-self: center;
 
-        .appeal-img {
-            width: 70px;
+        .appeal-images-title {
+            margin-bottom: 10px;
+            // color: #4693e0;
         }
+    }
 
-        .appeal-submit {
-            width: 70px;
-            height: 25px;
-            border: none;
-            border-radius: 3px;
-            background: #d87272;
-            color: white;
-        }
+    .appeal-submit {
+        width: 60%;
+        height: 40px;
+        align-self: center;
+        position: fixed;
+        bottom: 15px;
+        border: none;
+        border-radius: 3px;
+        background-color: #e04646;
+        color: white
     }
 }

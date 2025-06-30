@@ -50,6 +50,8 @@ const Detail = () => {
   const [isDisliked, setIsDisliked] = useState(false); // 当前商品是否已踩
   const touchStartX = useRef(0); // 记录触摸起始位置
   const touchEndX = useRef(0); // 记录触摸结束位置
+  const initialIsLiked = useRef(false); // 记录初始点赞状态
+  const initialIsDisliked = useRef(false); // 记录初始踩状态
 
   const handleIsRecorded = () => {
     if (currentUser) {

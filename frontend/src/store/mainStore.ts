@@ -269,23 +269,25 @@ const useMainStore = create<MainState>()(
         type: string,
         images: File[]
       ) => {
+        console.log(title, id, content, type, images);
         try {
           const formData = new FormData();
-          formData.append("title", title);
+          formData.append("id", id.toString());
           formData.append("content", content);
           formData.append("type", type);
+          formData.append("title", title);
           for (let i = 0; i < images.length; i++) {
             formData.append("images", images[i]);
           }
-          const response = await api.post(`/api/appeal/${id}`, {
-            data: { formData },
+          
+          const response = await api.post('/api/appeals/publish', {
+            data:  formData ,
             headers: {
               Authorization: `Bearer ${token}`,
             },
           });
           console.log(response);
-          if (response?.status === 200) {
-            message.success("举报成功");
+          if (response?.status === 201) {
             return true;
           } else {
             message.error("举报失败");
@@ -293,7 +295,7 @@ const useMainStore = create<MainState>()(
           }
         } catch (error) {
           console.error(error);
-          message.error("举报失败");
+          message.error("提交举报失败");
           return false;
         }
       },
