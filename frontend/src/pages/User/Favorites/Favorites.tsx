@@ -50,7 +50,14 @@ const Favorites: React.FC = () => {
                 }
 
                 <div className='commodity-img'>
-                <img src={takePlace} alt="" />
+                <img src={
+                  post.images[0]
+                  ? `${
+                      process.env.REACT_APP_API_URL ||
+                      "http://localhost:5000"
+                    }${post.images[0]}`
+                  : takePlace
+                } alt="" />
                 </div>
                 <div className="commodity-description">
                   <div className='commodity-title'>
@@ -99,6 +106,10 @@ const Favorites: React.FC = () => {
               </div>
 
               <div className='commodity'>
+
+                {
+                  isVisible?<div className="commodity-delete" key={1} onClick={() => handleCheck(1)} style={checked[1] ? {backgroundColor: "#3498db",border: "none"} : {backgroundColor: "white"}} />:null
+                }
                 <div className='commodity-img'>
                 <img src={background2} alt="" />
                 </div>

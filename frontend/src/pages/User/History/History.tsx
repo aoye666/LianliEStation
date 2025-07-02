@@ -21,7 +21,7 @@ const History = () => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    initialHistoryGoods();
+    getHistoryGoods();
   }, []);
 
   window.addEventListener("beforeunload", () => {

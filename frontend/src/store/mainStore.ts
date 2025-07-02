@@ -42,12 +42,24 @@ interface Filters {
   campus_id: number | null;
 }
 
+interface Forum{
+  id: number;
+  title: string;
+  content: string;
+  auther_id: number;
+  campus_id: number;
+  status: "active" | "inactive" | "deleted";
+  created_at: string;
+  images: string[];
+}
+
 interface MainState {
   maxMarketPage: boolean;
   marketPage: number;
   forumPage: number;
   goods: Goods[];
   posts: Post[];
+  forums: Forum[];
   filters: Filters;
   clear: () => void;
   fetchGoods: () => Promise<void>;
@@ -55,6 +67,7 @@ interface MainState {
   updateGoods: () => Promise<void>;
   setMarketPage: () => void;
   setForumPage: () => void;
+  getForumPosts:() => Promise<void>;
   clearGoods: () => void;
   clearFilters: () => void;
   changeGoodsResponse: (
@@ -77,6 +90,7 @@ const useMainStore = create<MainState>()(
       marketPage: 1,
       forumPage: 1,
       goods: [],
+      forums:[],
       maxMarketPage: false,
       posts: [],
       filters: {
@@ -99,6 +113,28 @@ const useMainStore = create<MainState>()(
         set((preState) => ({
           forumPage: preState.forumPage + 1,
         }));
+      },
+      getForumPosts: async () => {
+        try {
+          const response = await api.get('/api/campusWall/')
+          if (response?.status === 200 && response.data) {
+            const data = response.data.posts;
+            set((state) => ({
+              forums: [...data], // 更新 goods 状态
+            }));
+            console.log(get().maxMarketPage);
+          } else {
+            // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
+            console.log("No goods available or unexpected response status");
+          }
+        } catch (error) {
+          // 捕获请求失败的错误（如 404 或网络问题）
+          if (error instanceof Error) {
+            console.error("Error fetching posts:", error.message);
+          } else {
+            console.error("Error fetching posts:", error);
+          }
+        }
       },
 
       fetchGoods: async () => {

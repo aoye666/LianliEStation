@@ -26,6 +26,8 @@ const Messages = React.lazy(() => import("./pages/User/Messages/Messages"));
 const History = React.lazy(() => import("./pages/User/History/History"));
 const MData = React.lazy(() => import("./pages/Admin/MData/MData"));
 const MUsers = React.lazy(() => import("./pages/Admin/MUsers/MUsers"));
+const ForumPublish = React.lazy(() => import("./pages/Publish/ForumPublish/ForumPublish"));
+const ForumDetail = React.lazy(() => import("./pages/ForumDisable/ForumDetail/ForumDetail"));
 
 const App: React.FC = () => {
   // 检查是否登录并获取用户信息
@@ -130,10 +132,26 @@ const App: React.FC = () => {
       ),
     },
     {
+      path: "/forum-detail",
+      element: (
+        <ProtectedRoute>
+          <ForumDetail />
+        </ProtectedRoute>
+      ),
+    },
+    {
       path: "/publish",
       element: (
         <ProtectedRoute>
           <Publish />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/publish/forum-publish",
+      element: (
+        <ProtectedRoute>
+          <ForumPublish />
         </ProtectedRoute>
       ),
     },

@@ -230,31 +230,24 @@ const useRecordStore = create<RecordState>()(
       },
 
       getFavoritesGoods: async () => {
-        // try {
-        //   const res = await axios.get<FavoriteGoods[]>(
-        //     '/api/favorites/user/favorites',
-        //     {
-        //       headers: {
-        //         Authorization: `Bearer ${token}`,
-        //       },
-        //     }
-        //   );
-        //   if (res.status === 200 && res.data) {
-        //     set({ favoritesGoods: res.data });
-        //   } else {
-        //     // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
-        //     console.log("No goods available or unexpected response status");
-        //   }
-        // } catch (error) {
-        //   if (axios.isAxiosError(error)) {
-        //     console.error(
-        //       "查询收藏失败:",
-        //       error.response?.data.message || "服务器错误"
-        //     );
-        //   } else {
-        //     console.error("未知错误:", error);
-        //   }
-        // }
+        try {
+          const res = await api.get(
+            '/api/favorites/user/favorites',
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          if (res?.status === 200 && res.data) {
+            set({ favoritesGoods: res.data });
+          } else {
+            // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
+            console.log("No goods available or unexpected response status");
+          }
+        } catch (error) {
+            console.error("未知错误:", error);
+        }
       },
 
       addFavoriteGoods: (favoriteGoods) => {
@@ -271,8 +264,10 @@ const useRecordStore = create<RecordState>()(
       },
 
       removeFavoriteGoods: (favoriteId: number) => {
-        api.post("/api/favorites/add", {
-          data: { favoriteId: favoriteId },
+        api.post("/api/favorites/remove", {
+          params:{
+            post_id: favoriteId,
+          },
           headers: {
             Authorization: `Bearer ${token}`,
           },

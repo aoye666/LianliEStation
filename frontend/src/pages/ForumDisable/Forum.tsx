@@ -1,17 +1,39 @@
 import React from "react";
-import {Button,Col,Row,Card,Image} from "antd";
+import {Button,Col,Row,Card,Image,Tabs,TabsProps,FloatButton} from "antd";
 import "./Forum.scss";
 import { useRecordStore } from "../../store";
+import { useMainStore } from "../../store";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
 import Tabbar from "../../components/Tabbar/Tabbar";
 import takePlace from "../../assets/takePlace.png";
+import publish from "../../assets/publish-white.svg";
+import { PlusOutlined } from "@ant-design/icons";
+
 
 const {Meta} = Card;
 
 
 const Forum=()=>{
+    const navigate = useNavigate();
     const recordStore = useRecordStore();
-    const {forumPosts} = recordStore;
+    const mainStore = useMainStore();
+    const {forums} = mainStore;
+    const nav: TabsProps['items'] =[
+        {
+            key: '1',
+            label: '时间',
+        },
+        {
+            key: '2',
+            label: '热度',
+        },
+        {
+            key: '3',
+            label: '精选',
+        }
+
+    ]
                    
     return (
         <div className="forum-container">
@@ -20,8 +42,8 @@ const Forum=()=>{
             </div>
 
             <div className="content">
-                <div className="advertise">
-
+                <div className="banner">
+                    <Tabs className="Tabs" centered items={nav} defaultActiveKey="1" />
                 </div>
 
                 <div className="top-posts">
@@ -43,7 +65,7 @@ const Forum=()=>{
                 </div>
 
                 <div className="posts">
-                    <Row className="Row">
+                    <Row className="Row" onClick={()=>navigate(`/forum-detail`)}>
                         <Col className="Col" span={24}>
                             <Card className="Card" title="校园墙">
                                 11111
@@ -61,7 +83,7 @@ const Forum=()=>{
                             </Card>
                         </Col>
                     </Row>
-                    <Row className="Row">
+                    <Row className="Row" onClick={()=>navigate(`/forum-detail`)}>
                         <Col className="Col" span={24}>
                             <Card className="Card" title="校园墙" >
                                 示例内容
@@ -75,8 +97,8 @@ const Forum=()=>{
                     </Row>
                 </div>
                 {
-                    forumPosts.map((post,index)=>(
-                        <Row key={index} className="Row">
+                    forums.map((post,index)=>(
+                        <Row key={index} className="Row" onClick={()=>navigate(`/forum-detail`)}>
                             <Col className="Col" span={24}>
                                 <Card className="Card" title={post.title}>
                                     {post.content}
@@ -90,6 +112,11 @@ const Forum=()=>{
             </div>
 
             <div className="tabbar">
+                <div className="float-button">
+                    <FloatButton icon={<PlusOutlined />} onClick={()=>{
+                        navigate("/publish/forum-publish")
+                        }}/>
+                </div>
                 <Tabbar initialIndex={1} />
             </div>
         </div>
