@@ -7,7 +7,7 @@ const ForumDetail = () => {
         <div className='forum-detail'>
 
             <div className='navbar'>
-                <Navbar title='详情' backActive={true} backPath='/forum-test'/>
+                <Navbar title='详情' backActive={true} backPath='/forum'/>
             </div>
             <h1>ForumDetail</h1>
         </div>
