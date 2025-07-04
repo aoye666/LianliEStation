@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Image, message } from "antd";
+import { Image, Button } from "antd";
 import Navbar from "../../../components/Navbar/Navbar";
 import "./Messages.scss";
 import { useRecordStore } from "../../../store";
@@ -215,12 +215,12 @@ const Messages = () => {
         <div className="messages-control">
           <div className="messages-control-item">
             <Dropdown menu={{ items }}>
-              <a onClick={(e) => e.preventDefault()}>
+              <div onClick={(e) => e.preventDefault()}>
                 <ProductOutlined
                   style={{ width: "20px", height: "20px", marginRight: "5px" }}
                 />
                 全部
-              </a>
+              </div>
             </Dropdown>
           </div>
           <div
@@ -247,18 +247,16 @@ const Messages = () => {
               {!message.response_type ? (
                 <div className="message-appeal">
                   <div className="appeal-row">
-                    <div className="appeal-type">申诉</div>
-                    <div className="appeal-status">
-                      {message.status === "pending"
-                        ? "处理中"
+                    <div className="appeal-type" style={{ backgroundColor: `${message.status === "pending"
+                        ? "rgb(233, 218, 8)"
                         : message.status === "resolved"
-                        ? "已解决"
-                        : "已拒绝"}
-                    </div>
-                    <div className="appeal-title">《{message.title}》</div>
+                        ? "#3bc570"
+                        : "#ff5a5f"}` }}>申诉</div>
+                    <div className="appeal-title">《{message.title.length > 8 ? message.title.slice(0, 8) + '...' : message.title}》</div>
                     {conditions.read === false ? (
-                      <button
+                      <Button
                         className="response-read-control"
+                        size="small"
                         onClick={(e) => {
                           e.preventDefault(); // 如果需要阻止默认行为
                           // 找到 allMessagesList 中对应 message 的 id 的元素
@@ -276,10 +274,11 @@ const Messages = () => {
                         }}
                       >
                         设为已读
-                      </button>
+                      </Button>
                     ) : (
-                      <button
-                        className="response-unread-control"
+                      <Button
+                        className="response-read-control"
+                        size="small"
                         onClick={(e) => {
                           e.preventDefault(); // 如果需要阻止默认行为
                           // 找到 allMessagesList 中对应 message 的 id 的元素
@@ -297,10 +296,10 @@ const Messages = () => {
                         }}
                       >
                         设为未读
-                      </button>
+                      </Button>
                     )}
                     <div className="appeal-time">
-                      {timeFormat(message.created_at, "YYYY-MM-DD HH")}
+                      {timeFormat(message.created_at, "MM-DD")}
                     </div>
                   </div>
                   <div className="appeal-row">
@@ -320,10 +319,11 @@ const Messages = () => {
                     ) : (
                       <div className="response-type-response">处理</div>
                     )}
-                    <div className="response-title">《{message.title}》</div>
+                    <div className="response-title">《{message.title.length > 7 ? message.title.slice(0, 7) + '...' : message.title}》</div>
                     {conditions.read === false ? (
-                      <button
+                      <Button
                         className="response-read-control"
+                        size="small"
                         onClick={(e) => {
                           e.preventDefault(); // 如果需要阻止默认行为
                           // 找到 allMessagesList 中对应 message 的 id 的元素
@@ -341,10 +341,11 @@ const Messages = () => {
                         }}
                       >
                         设为已读
-                      </button>
+                      </Button>
                     ) : (
-                      <button
-                        className="response-unread-control"
+                      <Button
+                        className="response-read-control"
+                        size="small"
                         onClick={(e) => {
                           e.preventDefault(); // 如果需要阻止默认行为
                           // 找到 allMessagesList 中对应 message 的 id 的元素
@@ -362,11 +363,11 @@ const Messages = () => {
                         }}
                       >
                         设为未读
-                      </button>
+                      </Button>
                     )}
 
                     <div className="response-time">
-                      {timeFormat(message.created_at, "YYYY-MM-DD HH")}
+                      {timeFormat(message.created_at, "MM-DD")}
                     </div>
                   </div>
                   <div className="response-row">

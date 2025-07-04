@@ -36,7 +36,7 @@ interface Goods {
 }
 
 const Detail = () => {
-  const { goods, changeGoodsResponse } = useMainStore();
+  const { goods, changeGoodsResponse, fetchGoods } = useMainStore();
   const { currentUser } = useUserStore();
 
   const param = useParams();
@@ -63,8 +63,10 @@ const Detail = () => {
         })
       ) {
         setIsLiked(true);
+        initialIsLiked.current = true;
       } else {
         setIsLiked(false);
+        initialIsLiked.current = false;
       }
 
       if (
@@ -75,23 +77,23 @@ const Detail = () => {
         })
       ) {
         setIsDisliked(true);
+        initialIsDisliked.current = true;
       } else {
         setIsDisliked(false);
+        initialIsDisliked.current = false;
       }
     }
   };
 
   const fetchData = () => {
     const numericID = Number(ID);
-    if (goods) setCurrentGoods(goods.find((item) => item.id === numericID));
+    setCurrentGoods(goods.find((item) => item.id === numericID));
   };
 
   useEffect(() => {
-    if (ID) {
       fetchData();
       handleIsRecorded();
-    }
-  }, [ID, currentGoods]);
+  }, [ currentGoods ]);
 
   // 处理滑动事件
   const handleTouchStart = (e: any) => {
@@ -154,6 +156,7 @@ const Detail = () => {
       );
       if (response === "success") {
         setIsLiked(false); // 设置为未点赞
+        fetchGoods(); // 更新商品列表
       } else {
         message.error("取消点赞失败");
       }

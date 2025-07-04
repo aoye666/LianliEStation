@@ -72,11 +72,12 @@ $grey: #ededed;
     width: 100vw;
     height: calc(100vh - 135px);
     .messages-list-item {
-      width: 90vw;
+      width: 95vw;
       height: 110px;
       display: flex;
       margin-top: 7px;
       border: 1px solid $grey;
+      border-radius: 5px;
       .message-appeal {
         display: flex;
         flex-direction: column;
@@ -92,17 +93,18 @@ $grey: #ededed;
             justify-content: center;
             width: 40px;
             color: white;
-            background: #3bc570;
+            // background: rgb(233, 218, 8);
             border: none;
             border-radius: 5px;
           }
-          .appeal-status {
-          }
-          .appeal-title {
-          }
+          // .appeal-title {
+          // }
           .appeal-time {
             position: absolute;
             right: 23px;
+          }
+          .response-read-control {
+            margin-left: 10px;
           }
           .appeal-content {
             display: flex;
@@ -150,8 +152,11 @@ $grey: #ededed;
             border: none;
             border-radius: 5px;
           }
-          .response-title {
+          .response-read-control {
+            margin-left: 10px;
           }
+          // .response-title {
+          // }
           .response-time {
             position: absolute;
             right: 5px;
@@ -169,8 +174,6 @@ $grey: #ededed;
             height: 70px;
             margin-top: 5px;
             margin-left: 20px;
-          }
-          .response-read {
           }
         }
       }

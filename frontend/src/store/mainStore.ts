@@ -82,6 +82,7 @@ interface MainState {
     type: string,
     images: File[]
   ) => Promise<boolean>;
+  // updateGoodsItem: (id: number, data: Partial<Goods>) => void;
 }
 
 const useMainStore = create<MainState>()(

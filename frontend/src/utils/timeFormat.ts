@@ -32,6 +32,8 @@ export function timeFormat(
         return `${month}.${day} ${padZero(hours)}:${padZero(
           minutes
         )}`;
+      case "MM-DD":
+        return `${month}.${day}`;
       default:
         return `${year}.${month}.${day} ${padZero(hours)}:${padZero(minutes)}`;
     }
