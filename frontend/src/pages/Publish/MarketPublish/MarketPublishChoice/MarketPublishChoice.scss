@@ -1,0 +1,22 @@
+.market-publish-choice-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+
+    .card {
+        background: rgb(189, 95, 95);
+        width: 40vw;
+        height: 20vh;
+        border-radius: 10px;
+        align-items: center;
+        justify-content: center;
+        display: flex;
+    }
+
+    .card:nth-child(3) {
+        background: rgb(118, 118, 197);
+    }
+}

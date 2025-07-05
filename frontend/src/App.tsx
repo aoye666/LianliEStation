@@ -11,8 +11,9 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"; //ä¿æŠ
 const Market = React.lazy(() => import("./pages/Market/Market"));
 const Detail = React.lazy(() => import("./pages/Market/Detail/Detail"));
 const DetailAppeal = React.lazy(() => import("./pages/Market/Detail/DetailAppeal"));
-const Publish = React.lazy(() => import("./pages/Publish/Publish"));
-const Template = React.lazy(() => import("./pages/Publish/Template/Template"));
+const MarketPublishChoice = React.lazy(() => import("./pages/Publish/MarketPublish/MarketPublishChoice/MarketPublishChoice"));
+const MarketPublish = React.lazy(() => import("./pages/Publish/MarketPublish/MarketPublish"));
+const Template = React.lazy(() => import("./pages/Publish/MarketPublish/Template/Template"));
 const Login = React.lazy(() => import("./pages/Auth/Login/Login"));
 const Register = React.lazy(() => import("./pages/Auth/Register/Register"));
 const Reset = React.lazy(() => import("./pages/User/Settings/Reset/Reset"));
@@ -140,10 +141,18 @@ const App: React.FC = () => {
       ),
     },
     {
-      path: "/publish",
+      path: "/publish/market-publish-choice",
       element: (
         <ProtectedRoute>
-          <Publish />
+          <MarketPublishChoice />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/publish/market-publish-ai",
+      element: (
+        <ProtectedRoute>
+          <MarketPublish />
         </ProtectedRoute>
       ),
     },
@@ -156,7 +165,7 @@ const App: React.FC = () => {
       ),
     },
     {
-      path: "/publish/template",
+      path: "/publish/market-publish-basic",
       element: (
         <ProtectedRoute>
           <Template />

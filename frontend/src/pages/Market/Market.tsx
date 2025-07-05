@@ -1,4 +1,6 @@
 import { useRef, useEffect, useState } from "react";
+import { FloatButton, Carousel } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 import "./Market.scss";
 import Tabbar from "../../components/Tabbar/Tabbar";
 import more from "../../assets/more.png";
@@ -129,10 +131,11 @@ const Market = () => {
 
       <div className="market-body">
         <div className="un-content">
-          <div className="img">
-            <img src={topLogo} alt="schoolLogo" />
-          </div>
-
+          <Carousel autoplay className="carousel">
+            <img className="carousel-item" src={topLogo} alt="schoolLogo" />
+            <img className="carousel-item" src={""} alt="广告位1" />
+            <img className="carousel-item" src={""} alt="广告位2" />
+          </Carousel>
           <div className="region"></div>
 
           <div className="tag">
@@ -471,6 +474,19 @@ const Market = () => {
       </div>
 
       <div className="market-tabbar">
+        <div className="float-button">
+          <FloatButton
+            style={{
+              marginBottom: "20px",
+              right: "20px",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+            }}
+            icon={<PlusOutlined />}
+            onClick={() => {
+              navigate("/publish/market-publish-choice");
+            }}
+          />
+        </div>
         <Tabbar initialIndex={0} />
       </div>
     </div>

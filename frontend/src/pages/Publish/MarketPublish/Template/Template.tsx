@@ -1,15 +1,15 @@
 import React, { use } from 'react'
 import './Template.scss'
-import add from '../../../assets/more.png'
-import takePlace from '../../../assets/takePlace.png'
-import logo from '../../assets/logo.png'
+import add from '../../../../assets/more.png'
+import takePlace from '../../../../assets/takePlace.png'
+import logo from '../../../assets/logo.png'
 import { useState,useEffect,useReducer } from 'react'
-import { useUserStore } from '../../../store'
+import { useUserStore } from '../../../../store'
 import axios from 'axios'
 import { useLocation } from 'react-router-dom'
 import { useNavigate } from "react-router-dom";
 import Cookies from 'js-cookie'
-import Navbar from '../../../components/Navbar/Navbar'
+import Navbar from '../../../../components/Navbar/Navbar'
 
 const initialState = {
   id:1,
@@ -26,7 +26,7 @@ const initialState = {
   error: null as string | null,
   campus_name: '校区选择',
   likes: 0,
-  complints: 0,
+  complaints: 0,
 }
 
 type Action=
@@ -98,7 +98,7 @@ const reducer = (state: typeof initialState, action: Action) => {
     case 'SET_AUTHOR_ID':
       return {
         ...state,
-        auther_id: action.payload,
+        author_id: action.payload,
       }
     case 'SET_CREATE_AT':
       return {
@@ -192,7 +192,7 @@ const Template = () => {
     create_at,
     price,
     likes,
-    complints,
+    complaints,
   } = state
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -216,7 +216,6 @@ const Template = () => {
   const handleCampusChange = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     setCampusId(parseInt(e.currentTarget.id))
     setCampusName(e.currentTarget.innerText)
-    
   }
 
   const handlePublish = async () => {
@@ -234,7 +233,7 @@ const Template = () => {
       formData.append('images', image);
     });
     formData.append('likes', likes.toString());
-    formData.append('complints', complints.toString());
+    formData.append('complaints', complaints.toString());
     axios.post(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/publish/goods`, formData,{
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -260,7 +259,7 @@ const Template = () => {
         <div className='text'>
           连理e站
         </div> */}
-        <Navbar backActive={true} backPath='/publish' title='发布' />
+        <Navbar backActive={true} backPath='/market' title='商品发布模板' />
       </div>
        
       <div className='content'>

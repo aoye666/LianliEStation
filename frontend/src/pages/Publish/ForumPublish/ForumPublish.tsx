@@ -222,7 +222,7 @@ const ForumPublish = () => {
         <div className='text'>
           连理e站
         </div> */}
-        <Navbar backActive={true} backPath='/forum' title='发布' />
+        <Navbar backActive={true} backPath='/forum' title='帖子发布' />
       </div>
        
       <div className='content'>

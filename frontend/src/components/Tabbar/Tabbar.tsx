@@ -4,11 +4,11 @@ import { useState } from "react";
 import "./Tabbar.scss";
 import market from "../../assets/market-white.svg";
 import forum from "../../assets/forum-white.svg";
-import publish from "../../assets/publish-white.svg";
+// import publish from "../../assets/publish-white.svg";
 import user from "../../assets/user-white.svg";
 import market_active from "../../assets/market-white-active.svg";
 import forum_active from "../../assets/forum-white-active.svg";
-import publish_active from "../../assets/publish-white-active.svg";
+// import publish_active from "../../assets/publish-white-active.svg";
 import user_active from "../../assets/user-white-active.svg";
 
 interface TabbarProps {
@@ -41,7 +41,7 @@ const Tabbar: React.FC<TabbarProps> = ({ initialIndex }) => {
         </div>
         <span style={(activeIndex === 1 ? { color: "#white" } : { color: "white" })} >校园墙</span>
       </div>
-      <div className="tabbar-item" onClick={() => handleClick("/publish", 2)}>
+      {/* <div className="tabbar-item" onClick={() => handleClick("/publish", 2)}>
         <div className="tabbar-icon">
           <img
             src={activeIndex === 2 ? publish_active : publish}
@@ -49,12 +49,12 @@ const Tabbar: React.FC<TabbarProps> = ({ initialIndex }) => {
           ></img>
         </div>
         <span style={(activeIndex === 2 ? { color: "white" } : { color: "white" })} >发布</span>
-      </div>
+      </div> */}
       <div className="tabbar-item" onClick={() => handleClick("/user", 3)}>
         <div className="tabbar-icon">
-          <img src={activeIndex === 3 ? user_active : user} alt="user"></img>
+          <img src={activeIndex === 2 ? user_active : user} alt="user"></img>
         </div>
-        <span style={(activeIndex === 3 ? { color: "white" } : { color: "white" })} >用户</span>
+        <span style={(activeIndex === 2 ? { color: "white" } : { color: "white" })} >用户</span>
       </div>
     </div>
   );

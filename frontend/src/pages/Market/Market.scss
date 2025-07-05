@@ -107,15 +107,15 @@ $shadow-color: rgba(0, 0, 0, 0.1);
       //box-shadow: #bfbfbf 0px 3px 5px;
       border-bottom: 1px solid #bfbfbf;
 
-      .img {
+      .carousel {
         display: flex;
         justify-content: center;
         align-items: center;
-        img {
+        .carousel-item {
           width: 100vw;
           aspect-ratio: 3.2;
         }
-        margin-bottom: 10px;
+        margin-bottom: 3px;
       }
 
       .tag {

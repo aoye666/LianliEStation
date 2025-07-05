@@ -2,14 +2,15 @@ import axios from "axios";
 import { openDB } from "idb";
 import { useRef, useState, useEffect } from "react"; // 导入useEffect
 import { useNavigate } from "react-router-dom";
-import { useUserStore } from "../../store";
+import { useUserStore } from "../../../store";
+import { message } from "antd";
 import Cookies from "js-cookie";
-import "./Publish.scss";
-import Navbar from "../../components/Navbar/Navbar";
-import Tabbar from "../../components/Tabbar/Tabbar";
-import logo from "../../assets/logo.png";
-import accept from "../../assets/accept.png";
-import refresh from "../../assets/refresh.png";
+import "./MarketPublish.scss";
+import Navbar from "../../../components/Navbar/Navbar";
+import Tabbar from "../../../components/Tabbar/Tabbar";
+import logo from "../../../assets/logo.png";
+import accept from "../../../assets/accept.png";
+import refresh from "../../../assets/refresh.png";
 
 export interface PublishProps {
   title: string;
@@ -137,7 +138,12 @@ const Publish: React.FC = () => {
   // API调用
   const handleRequest = async (text: string = textareaValue) => {
     if (!text) {
-      alert("请输入商品信息");
+      message.error({
+        content: "请输入商品信息",
+        style: {
+          marginTop: "50px",
+        },
+      });
       return;
     }
     // 添加用户对话框
@@ -165,20 +171,35 @@ const Publish: React.FC = () => {
           { role: "ai", content: JSON.stringify(res.data) },
         ]);
       } else {
-        alert("生成失败，请重试");
+        message.error({
+          content: "生成失败，请重试",
+          style: {
+            marginTop: "50px",
+          },
+        });
       }
     } catch (error: any) {
       if (error.response && error.response.status === 400) {
         console.error("缺少必要参数");
       } else if (error.response && error.response.status === 401) {
         console.error("未授权，请检查你的登录状态");
-        alert("未授权，请检查你的登录状态");
+        message.error({
+          content: "未授权，请检查你的登录状态",
+          style: {
+            marginTop: "50px",
+          },
+        });
       } else if (error.response && error.response.status === 500) {
         console.error("服务器错误");
       } else {
         console.error("Error generating AI product info:", error);
       }
-      alert("生成失败，请重试");
+      message.error({
+        content: "生成失败，请重试",
+        style: {
+          marginTop: "50px",
+        },
+      });
     }
     // 清空文本框,重置高度
     if (textareaValue) {
@@ -200,7 +221,7 @@ const Publish: React.FC = () => {
     try {
       const templateData: PublishProps = JSON.parse(content);
       // 跳转至模板页，并传递模板参数
-      navigate("/publish/template", { state: templateData });
+      navigate("/publish/market-publish-basic", { state: templateData });
     } catch (error) {
       console.error("解析模板数据失败", error);
       alert("解析模板数据失败，请重试");
@@ -240,7 +261,7 @@ const Publish: React.FC = () => {
 
   return (
     <div className="publish-container">
-      <Navbar title="发布助手小e" />
+      <Navbar title="商品AI发布" />
       <div className="dialog-container" ref={containerRef}>
         {backgroundFile ? (
           <img src={backgroundFile} alt="背景" className="dialog-bg"></img>
@@ -251,7 +272,9 @@ const Publish: React.FC = () => {
               <img src={logo} alt="头像"></img>
             </div>
             <div className="dialog-content">
-              嗨，Duter！我是发布助手小e，很高兴为您服务！请在下面的对话框中发布您的商品信息。
+              嗨！我是发布助手小e，很高兴为您服务！请在下面的对话框中发布您的商品信息：
+              <br></br>
+              按照“收/出+商品名称+价格+细节”的格式填写，如“收计网二手教材，10r，不要圈画”。
             </div>
           </div>
         }
