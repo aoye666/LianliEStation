@@ -42,7 +42,7 @@ interface Filters {
   campus_id: number | null;
 }
 
-interface Forum{
+interface Forum {
   id: number;
   title: string;
   content: string;
@@ -67,7 +67,7 @@ interface MainState {
   updateGoods: () => Promise<void>;
   setMarketPage: () => void;
   setForumPage: () => void;
-  getForumPosts:() => Promise<void>;
+  getForumPosts: () => Promise<void>;
   clearGoods: () => void;
   clearFilters: () => void;
   changeGoodsResponse: (
@@ -82,7 +82,7 @@ interface MainState {
     type: string,
     images: File[]
   ) => Promise<boolean>;
-  // updateGoodsItem: (id: number, data: Partial<Goods>) => void;
+  updateGoodsItem: (action: string, post_id: number, value: number) => void;
 }
 
 const useMainStore = create<MainState>()(
@@ -91,7 +91,7 @@ const useMainStore = create<MainState>()(
       marketPage: 1,
       forumPage: 1,
       goods: [],
-      forums:[],
+      forums: [],
       maxMarketPage: false,
       posts: [],
       filters: {
@@ -117,7 +117,7 @@ const useMainStore = create<MainState>()(
       },
       getForumPosts: async () => {
         try {
-          const response = await api.get('/api/campusWall/')
+          const response = await api.get("/api/campusWall/");
           if (response?.status === 200 && response.data) {
             const data = response.data.posts;
             set((state) => ({
@@ -316,9 +316,9 @@ const useMainStore = create<MainState>()(
           for (let i = 0; i < images.length; i++) {
             formData.append("images", images[i]);
           }
-          
-          const response = await api.post('/api/appeals/publish', {
-            data:  formData ,
+
+          const response = await api.post("/api/appeals/publish", {
+            data: formData,
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -335,6 +335,32 @@ const useMainStore = create<MainState>()(
           message.error("提交举报失败");
           return false;
         }
+      },
+
+      updateGoodsItem: (action: string, post_id: number, value: number) => {
+        const goods = get().goods;
+        const newGoodsItem = goods.filter((item) => item.id === post_id);
+        const newGoods: Goods[] = goods.filter((item) => item.id !== post_id);
+        if (value === 1) {
+          if (action === "like") {
+            newGoodsItem[0].likes += 1;
+            newGoods.push(newGoodsItem[0]);
+          } else {
+            newGoodsItem[0].complaints += 1;
+            newGoods.push(newGoodsItem[0]);
+          }
+        } else {
+          if (action === "like") {
+            newGoodsItem[0].likes -= 1;
+            newGoods.push(newGoodsItem[0]);
+          } else {
+            newGoodsItem[0].complaints -= 1;
+            newGoods.push(newGoodsItem[0]);
+          }
+        }
+        set(() => ({
+          goods: newGoods,
+        }));
       },
     }),
     {

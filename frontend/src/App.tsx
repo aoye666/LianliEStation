@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import Cookies from "js-cookie";
 import "./App.scss";
 import {
   createBrowserRouter,
@@ -25,6 +26,7 @@ const About = React.lazy(() => import("./pages/User/Settings/About/About"));
 const Favorites = React.lazy(() => import("./pages/User/Favorites/Favorites"));
 const Messages = React.lazy(() => import("./pages/User/Messages/Messages"));
 const History = React.lazy(() => import("./pages/User/History/History"));
+const Admin = React.lazy(() => import("./pages/Admin/Admin"));
 const MData = React.lazy(() => import("./pages/Admin/MData/MData"));
 const MUsers = React.lazy(() => import("./pages/Admin/MUsers/MUsers"));
 const ForumPublish = React.lazy(() => import("./pages/Publish/ForumPublish/ForumPublish"));
@@ -33,6 +35,7 @@ const ForumDetail = React.lazy(() => import("./pages/Forum/ForumDetail/ForumDeta
 const App: React.FC = () => {
   // 检查是否登录并获取用户信息
   const { isAuthenticated } = useUserStore();
+  const token = Cookies.get("auth-token");
 
   // // 锁定竖屏
   // const lockOrientation = () => {
@@ -62,6 +65,14 @@ const App: React.FC = () => {
   //     window.removeEventListener("orientationchange", handleOrientationChange);
   //   };
   // }, []);
+
+  useEffect(() => {
+    // 监听登录状态
+    if (token) {
+      useUserStore.getState().fetchUserProfile();
+      useUserStore.getState().fetchLikesComplaints();
+    }
+  }, [isAuthenticated, token]);
 
   const router = createBrowserRouter([
     {
@@ -209,6 +220,14 @@ const App: React.FC = () => {
       element: (
         <ProtectedRoute>
           <Settings />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/admin",
+      element: (
+        <ProtectedRoute>
+          <Admin />
         </ProtectedRoute>
       ),
     },

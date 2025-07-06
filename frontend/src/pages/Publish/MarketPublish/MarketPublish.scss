@@ -10,7 +10,7 @@
         height: 500px;
         .dialog-bg {
             width: 100%;
-            height: calc(100vh - 150px);
+            height: calc(100vh - 95px);
             position: absolute;
             z-index: -1;
             opacity: 0.8;
@@ -114,7 +114,7 @@
         height: auto;
         min-height: 40px;
         position: fixed;
-        bottom: 55px;
+        bottom: 0;
         background-color: #f2f2f2;
         display: flex;
         flex-direction: row;

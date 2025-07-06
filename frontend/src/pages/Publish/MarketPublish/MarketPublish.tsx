@@ -7,7 +7,6 @@ import { message } from "antd";
 import Cookies from "js-cookie";
 import "./MarketPublish.scss";
 import Navbar from "../../../components/Navbar/Navbar";
-import Tabbar from "../../../components/Tabbar/Tabbar";
 import logo from "../../../assets/logo.png";
 import accept from "../../../assets/accept.png";
 import refresh from "../../../assets/refresh.png";
@@ -261,7 +260,7 @@ const Publish: React.FC = () => {
 
   return (
     <div className="publish-container">
-      <Navbar title="商品AI发布" />
+      <Navbar title="商品AI发布" backActive={true} backPath="/publish/market-publish-choice"/>
       <div className="dialog-container" ref={containerRef}>
         {backgroundFile ? (
           <img src={backgroundFile} alt="背景" className="dialog-bg"></img>
@@ -349,7 +348,6 @@ const Publish: React.FC = () => {
           发送
         </button>
       </div>
-      <Tabbar initialIndex={2} />
     </div>
   );
 };

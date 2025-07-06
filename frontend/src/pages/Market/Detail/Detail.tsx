@@ -36,8 +36,9 @@ interface Goods {
 }
 
 const Detail = () => {
-  const { goods, changeGoodsResponse, fetchGoods } = useMainStore();
-  const { currentUser } = useUserStore();
+  const { goods, changeGoodsResponse, updateGoodsItem } =
+    useMainStore();
+  const { currentUser, updateLikesComplaints } = useUserStore();
 
   const param = useParams();
   const navigate = useNavigate();
@@ -50,37 +51,35 @@ const Detail = () => {
   const [isDisliked, setIsDisliked] = useState(false); // 当前商品是否已踩
   const touchStartX = useRef(0); // 记录触摸起始位置
   const touchEndX = useRef(0); // 记录触摸结束位置
-  const initialIsLiked = useRef(false); // 记录初始点赞状态
-  const initialIsDisliked = useRef(false); // 记录初始踩状态
 
   const handleIsRecorded = () => {
-    if (currentUser) {
+    if (currentUser && currentGoods) {
       if (
         currentUser.likes.find((item) => {
           return (
-            item.targetId === currentGoods?.id && item.targetType === "goods"
+            item.targetId === currentGoods.id && item.targetType === "goods"
           );
         })
       ) {
         setIsLiked(true);
-        initialIsLiked.current = true;
+        console.log("已点赞");
       } else {
         setIsLiked(false);
-        initialIsLiked.current = false;
+        console.log("未点赞");
       }
 
       if (
         currentUser.complaints.find((item) => {
           return (
-            item.targetId === currentGoods?.id && item.targetType === "goods"
+            item.targetId === currentGoods.id && item.targetType === "goods"
           );
         })
       ) {
         setIsDisliked(true);
-        initialIsDisliked.current = true;
+        console.log("已举报");
       } else {
         setIsDisliked(false);
-        initialIsDisliked.current = false;
+        console.log("未举报");
       }
     }
   };
@@ -91,9 +90,12 @@ const Detail = () => {
   };
 
   useEffect(() => {
+ 
       fetchData();
       handleIsRecorded();
-  }, [ currentGoods ]);
+    console.log(currentGoods);
+    console.log(currentUser);
+  }, [currentUser, currentGoods, isLiked, isDisliked,  goods]);
 
   // 处理滑动事件
   const handleTouchStart = (e: any) => {
@@ -147,6 +149,7 @@ const Detail = () => {
 
   // 处理点赞
   const handleLike = async () => {
+    if (!currentGoods) return;
     // 已点赞
     if (isLiked) {
       const response = await changeGoodsResponse(
@@ -156,7 +159,8 @@ const Detail = () => {
       );
       if (response === "success") {
         setIsLiked(false); // 设置为未点赞
-        fetchGoods(); // 更新商品列表
+        updateGoodsItem("like", currentGoods.id, -1);
+        updateLikesComplaints("goods", "like", currentGoods.id, -1);
       } else {
         message.error("取消点赞失败");
       }
@@ -170,6 +174,8 @@ const Detail = () => {
       );
       if (response === "success") {
         setIsLiked(true); // 设置为已点赞
+        updateGoodsItem("like", currentGoods.id, 1);
+        updateLikesComplaints("goods", "like", currentGoods.id, 1);
       } else {
         message.error("点赞失败");
       }
@@ -178,15 +184,18 @@ const Detail = () => {
 
   // 处理踩 (点击提交后触发而不是点击图标触发)
   const handleDislike = async () => {
+    if (!currentGoods) return;
     // 已踩
     if (isDisliked) {
       const response = await changeGoodsResponse(
-        "dislike",
+        "complaint",
         currentGoods?.id.toString(),
         -1
       );
       if (response === "success") {
         setIsDisliked(false); // 设置为未踩
+        updateGoodsItem("complaint", currentGoods.id, -1);
+        updateLikesComplaints("goods", "complaint", currentGoods.id, -1);
       } else {
         message.error("取消举报失败");
       }

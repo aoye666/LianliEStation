@@ -4,7 +4,7 @@ import { Image, Upload } from "antd";
 import type { GetProp, UploadFile, UploadProps } from "antd";
 import { message } from "antd";
 import "./DetailAppeal.scss";
-import { useMainStore } from "../../../store";
+import { useMainStore, useUserStore } from "../../../store";
 import { useParams, useNavigate } from "react-router-dom";
 import left from "../../../assets/left-black.svg";
 
@@ -24,7 +24,8 @@ const DetailAppeal = () => {
   const id = params.goodsId;
   const title = params.goodsTitle;
 
-  const { changeGoodsResponse, publishAppeal } = useMainStore();
+  const { changeGoodsResponse, publishAppeal, updateGoodsItem } = useMainStore();
+  const { updateLikesComplaints } = useUserStore();
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
@@ -69,6 +70,8 @@ const DetailAppeal = () => {
         console.log(res2);
         if (res2 === "success") {
           message.success("已提交举报");
+          updateGoodsItem('complaint', Number(id), 1);
+          updateLikesComplaints('goods', 'complaint', Number(id), 1);
           navigate(`/market/${Number(id)}`);
         } else {
           message.error("举报失败");
