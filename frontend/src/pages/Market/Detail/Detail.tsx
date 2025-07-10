@@ -90,11 +90,10 @@ const Detail = () => {
   };
 
   useEffect(() => {
- 
-      fetchData();
-      handleIsRecorded();
-    console.log(currentGoods);
-    console.log(currentUser);
+    fetchData();
+    handleIsRecorded();
+    // console.log(currentGoods);
+    // console.log(currentUser);
   }, [currentUser, currentGoods, isLiked, isDisliked,  goods]);
 
   // 处理滑动事件
@@ -232,13 +231,7 @@ const Detail = () => {
           className="navbar-icon"
           src={share}
           alt="分享"
-          onClick={() => console.log("分享功能正在开发，暂不支持")}
-        />
-        <img
-          className="navbar-icon"
-          src={stars}
-          alt="收藏"
-          onClick={() => navigate("/user/favorites")}
+          onClick={() => message.info("分享功能正在开发，暂不支持")}
         />
       </div>
       <div
@@ -343,7 +336,7 @@ const Detail = () => {
         )}
       </div>
       <div className="detail-btn">
-        <div className="star-btn">
+        <div className="star-btn" onClick={() => message.info("收藏功能正在开发，暂不支持")}>
           <img className="starBtn-icon" src={stars} alt="收藏" />
           <div className="starBtn-text">加入收藏</div>
         </div>

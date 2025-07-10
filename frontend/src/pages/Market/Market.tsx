@@ -5,7 +5,8 @@ import "./Market.scss";
 import Tabbar from "../../components/Tabbar/Tabbar";
 import more from "../../assets/more.png";
 import close from "../../assets/close.png";
-import topLogo from "../../assets/banner3.png";
+import MarketBanner from "../../assets/banner3.png";
+import ADInviting from "../../assets/广告位3.3.png";
 import logo from "../../assets/logo.png";
 import search from "../../assets/search-white.svg";
 import takePlace from "../../assets/takePlace.png";
@@ -132,9 +133,8 @@ const Market = () => {
       <div className="market-body">
         <div className="un-content">
           <Carousel autoplay className="carousel">
-            <img className="carousel-item" src={topLogo} alt="schoolLogo" />
-            <img className="carousel-item" src={""} alt="广告位1" />
-            <img className="carousel-item" src={""} alt="广告位2" />
+            <img className="carousel-item" src={MarketBanner} alt="schoolLogo" />
+            <img className="carousel-item" src={ADInviting} alt="广告位招商" />
           </Carousel>
           <div className="region"></div>
 

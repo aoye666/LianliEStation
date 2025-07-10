@@ -63,6 +63,7 @@ const Reset = () => {
     console.log(profile);
   }, [currentUser]);
 
+  // 处理文件上传变化
   const handleChange =
     (key: keyof Profile) => async (e: React.ChangeEvent<HTMLInputElement>) => {
       if (
@@ -89,6 +90,7 @@ const Reset = () => {
       }
     };
 
+  // 处理个人信息提交
   const handleProfileSubmit = async () => {
     // 提交个人信息
     changeProfile(
@@ -99,6 +101,7 @@ const Reset = () => {
     navigate("/user/settings");
   };
 
+  // 处理图片提交
   const handleImageSubmission = async (key: string, file?: File) => {
     if (file) {
       await storeImageInDB(key, file); // 存储到IndexedDB
@@ -107,24 +110,28 @@ const Reset = () => {
     navigate("/user/settings");
   };
 
+  // 处理资料卡背景提交
   const handleBannerSubmit = () => {
     if (profile?.banner_url) {
       handleImageSubmission("banner", profile.banner_url);
     }
   };
 
+  // 处理发布背景提交
   const handleBackgroundSubmit = () => {
     if (profile?.background_url) {
       handleImageSubmission("background", profile.background_url);
     }
   };
 
+  // 处理头像提交
   const handleAvatarSubmit = () => {
     if (profile?.avatar) {
       handleImageSubmission("avatar", profile.avatar);
     }
   };
 
+  // 处理主题提交
   const handleThemeSubmit = () => {
     changeProfile(
       currentUser?.nickname || "",
@@ -134,6 +141,10 @@ const Reset = () => {
     );
     navigate("/user/settings");
   };
+
+  // 处理图片重置默认设置
+  const handleResetDefaults = (key: string) => {
+  }
 
   switch (type) {
     case "nickname":

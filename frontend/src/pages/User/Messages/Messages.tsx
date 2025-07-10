@@ -131,6 +131,7 @@ const Messages = () => {
     };
 
     // 初始化获取全部messages，不筛选，存入initialMessagesList
+    if(!initialMessagesList.length)
     initList();
 
     // 组件卸载时更新同步已读/未读信息
