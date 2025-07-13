@@ -68,6 +68,7 @@ interface MainState {
   setMarketPage: () => void;
   setForumPage: () => void;
   getForumPosts:() => Promise<void>;
+  publishForumPost:()=>Promise<void>;
   clearGoods: () => void;
   clearFilters: () => void;
   changeGoodsResponse: (
@@ -136,6 +137,22 @@ const useMainStore = create<MainState>()(
             console.error("Error fetching posts:", error);
           }
         }
+      },
+      publishForumPost:async()=>{
+        try{
+          const response = await api.post('/api/campusWall/publish', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            data: {
+
+            }
+          })
+        }
+        catch(error){
+          
+        }
+
       },
 
       fetchGoods: async () => {
@@ -216,8 +233,8 @@ const useMainStore = create<MainState>()(
 
       updateGoods: async () => {
         try {
-          const response = await api.get("/api/goods", {
-            data: {
+          const response = await api.get("/api/posts/search", {
+            params: {
               page: get().marketPage,
               limit: 12,
               keyword: get().filters.searchTerm,

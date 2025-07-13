@@ -159,7 +159,7 @@ const useRecordStore = create<RecordState>()(
 
       initialHistoryGoods: async () => {
         try {
-          const response = await api.get("/api/goods/user-history", {
+          const response = await api.get("/api/posts/user-history", {
             params: {
               page: get().page,
               limit: 12,
@@ -191,7 +191,7 @@ const useRecordStore = create<RecordState>()(
 
       getHistoryGoods: async () => {
         try {
-          const response = await api.get("/api/goods/user-history", {
+          const response = await api.get("/api/posts/user-history", {
             params: {
               page: get().page,
               limit: 12,

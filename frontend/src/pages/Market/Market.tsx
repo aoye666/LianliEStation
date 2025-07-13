@@ -45,7 +45,6 @@ const Market = () => {
       fetchGoods();
       // console.log(filters);
     }
-
     // 监听分布排列
     const handleResize = () => {
       const maxCount = Math.floor(window.innerWidth / 155);
