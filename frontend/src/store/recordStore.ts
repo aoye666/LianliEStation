@@ -3,7 +3,6 @@ import api from "../api/index";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import Cookies from "js-cookie"; // 从 cookie 中获取 token
-import { data } from "react-router-dom";
 
 // 获取 token
 const token = Cookies.get("auth-token");
@@ -171,10 +170,10 @@ const useRecordStore = create<RecordState>()(
 
           // 检查返回数据是否有效
           if (response?.status === 200 && response.data) {
-            const data = response.data.goods;
-            set((state) => ({
-              historyGoods: [...data], // 更新 goods 状态
-            }));
+          const data = response.data.goods;
+          set((state) => ({
+            historyGoods: [...data], // 更新 goods 状态
+          }));
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
             console.log("No goods available or unexpected response status");
@@ -203,10 +202,10 @@ const useRecordStore = create<RecordState>()(
 
           // 检查返回数据是否有效
           if (response?.status === 200 && response.data) {
-            const data = response.data.goods;
-            set((state) => ({
-              historyGoods: [...state.historyGoods, ...data], // 更新 goods 状态
-            }));
+          const data = response.data.goods;
+          set((state) => ({
+            historyGoods: [...state.historyGoods, ...data], // 更新 goods 状态
+          }));
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
             console.log("No goods available or unexpected response status");
@@ -222,11 +221,11 @@ const useRecordStore = create<RecordState>()(
       },
 
       removeHistoryGoods: (id) => {
-        api.delete(`/api/goods/${id}`, {
-          headers: {
+          api.delete(`/api/goods/${id}`, {
+            headers: {
             Authorization: `Bearer ${token}`,
-          },
-        });
+            },
+          });
       },
 
       getFavoritesGoods: async () => {
@@ -234,13 +233,13 @@ const useRecordStore = create<RecordState>()(
           const res = await api.get(
             '/api/favorites/user/favorites',
             {
-              headers: {
+            headers: {
                 Authorization: `Bearer ${token}`,
-              },
+            },
             }
           );
           if (res?.status === 200 && res.data) {
-            set({ favoritesGoods: res.data });
+          set({ favoritesGoods: res.data });
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
             console.log("No goods available or unexpected response status");
@@ -251,27 +250,27 @@ const useRecordStore = create<RecordState>()(
       },
 
       addFavoriteGoods: (favoriteGoods) => {
-        api.post(
-          "/api/favorites/add",
+          api.post(
+            "/api/favorites/add",
 
-          {
-            data: { id: favoriteGoods.id },
-            headers: {
+            {
+              data: { id: favoriteGoods.id },
+              headers: {
               Authorization: `Bearer ${Cookies.get("token")}`, // 使用Cookies.get获取最新的token
-            },
-          }
-        );
+              },
+            }
+          );
       },
 
       removeFavoriteGoods: (favoriteId: number) => {
-        api.post("/api/favorites/remove", {
+          api.post("/api/favorites/remove", {
           params:{
-            post_id: favoriteId,
-          },
-          headers: {
+              post_id: favoriteId,
+            },
+            headers: {
             Authorization: `Bearer ${token}`,
-          },
-        });
+            },
+          });
       },
 
       // 获取全部申诉(管理员)
@@ -302,17 +301,13 @@ const useRecordStore = create<RecordState>()(
             });
           }
 
-          const response = await api.post("/api/appeals/publish", {
-            data: { formData },
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
-            },
-          });
+          const response = await api.post("/api/appeals/publish", 
+            { formData }
+          );
           console.log(response?.data.message); // 申诉提交成功
           await get().fetchAppeals(); // 重新获取申诉列表
         } catch (error) {
-          console.error("未知错误:", error);
+          throw error;
         }
       },
 
@@ -321,27 +316,22 @@ const useRecordStore = create<RecordState>()(
         try {
           const params = status ? { status } : {}; // 如果status存在，则将status作为查询参数
           const response = await api.get("/api/appeals/search", {
-            params: { params },
-            headers: {
-              Authorization: `Bearer ${token}`, // 使用Cookies.get获取最新的token
-            },
+            params: { params }
           });
           set({ appeals: response?.data.data }); // 更新申诉列表
         } catch (error) {
-          console.error("未知错误:", error);
+          throw error;
         }
       },
 
       // 修改申诉状态(管理员)
       updateAppealStatus: async (appeal_id: number, status: string) => {
         try {
-          const response = await api.put(`/api/appeals/${appeal_id}`, {
-            data: { status },
-          });
+          const response = await api.put(`/api/appeals/${appeal_id}`,{ status });
           console.log(response?.data.message); // 状态修改成功
           await get().fetchAppeals(); // 重新获取申诉列表
         } catch (error) {
-          console.error("未知错误:", error);
+          throw error;
         }
       },
 
@@ -352,24 +342,17 @@ const useRecordStore = create<RecordState>()(
           console.log(response?.data.message); // 申诉删除成功
           await get().fetchAppeals(); // 重新获取申诉列表
         } catch (error) {
-          console.error("未知错误:", error);
+          throw error;
         }
       },
 
       // 获取用户的所有通知消息
       fetchResponses: async () => {
         try {
-          const response = await api.get(
-            '/api/messages/',
-            {
-              headers: {
-                Authorization: `Bearer ${token}`, // 使用Cookies.get获取最新的token
-              },
-            }
-          );
+          const response = await api.get("/api/messages/");
           set({ responses: response?.data.data }); // 更新回复列表
         } catch (error) {
-          console.error("未知错误:", error);
+          throw error;
         }
       },
 
@@ -383,47 +366,28 @@ const useRecordStore = create<RecordState>()(
         try {
           const response = await api.post(
             "/api/responses/",
-
             {
-              data: {
-                user_id,
-                response_type,
-                related_id,
-                content,
-              },
-              headers: {
-                Authorization: `Bearer ${token}`, // 使用Cookies.get获取最新的token
-              },
-            }
+              user_id,
+              response_type,
+              related_id,
+              content,
+            },
           );
           console.log(response?.data.message); // 回复提交成功
           await get().fetchResponses(); // 重新获取回复列表
         } catch (error) {
-          console.error("未知错误:", error);
+          throw error;
         }
       },
 
       // 修改通知状态（已读/未读）
-      markResponse: async (
-        messages: object
-      ) => {
+      markResponse: async (messages: object) => {
         try {
-          const response = await api.put(
-            `/api/messages/status/batch`,
-
-            {
-              data: 
-                messages
-              ,
-              headers: {
-                Authorization: `Bearer ${token}`, // 使用Cookies.get获取最新的token
-              },
-            }
-          );
+          const response = await api.put(`/api/messages/status/batch`,messages);
           console.log(response?.data.message); // 回复标记为已读成功
           await get().fetchResponses(); // 重新获取回复列表
         } catch (error) {
-          console.error("未知错误:", error);
+          throw error;
         }
       },
 
@@ -431,10 +395,10 @@ const useRecordStore = create<RecordState>()(
         try {
           const response = await api.get("/api/campusWall");
           if (response?.status === 200 && response.data) {
-            const data = response.data.posts;
-            set((state) => ({
-              forumPosts: [...data], // 更新 goods 状态
-            }));
+          const data = response.data.posts;
+          set((state) => ({
+            forumPosts: [...data], // 更新 goods 状态
+          }));
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
             console.log("No posts available or unexpected response status");

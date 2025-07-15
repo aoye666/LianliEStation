@@ -1,4 +1,4 @@
-import { Alert, message } from "antd";
+import { message } from "antd";
 // 商品与帖子的状态管理
 import api from "../api/index";
 import { create } from "zustand";
@@ -119,11 +119,11 @@ const useMainStore = create<MainState>()(
         try {
           const response = await api.get("/api/campusWall/");
           if (response?.status === 200 && response.data) {
-            const data = response.data.posts;
-            set((state) => ({
-              forums: [...data], // 更新 goods 状态
-            }));
-            console.log(get().maxMarketPage);
+          const data = response.data.posts;
+          set((state) => ({
+            forums: [...data], // 更新 goods 状态
+          }));
+          console.log(get().maxMarketPage);
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
             console.log("No goods available or unexpected response status");
@@ -158,11 +158,11 @@ const useMainStore = create<MainState>()(
           // console.log(response);
           // 检查返回数据是否有效
           if (response?.status === 200 && response.data) {
-            const data = response.data.goods;
-            set((state) => ({
-              goods: [...data], // 更新 goods 状态
-            }));
-            console.log(get().maxMarketPage);
+          const data = response.data.goods;
+          set((state) => ({
+            goods: [...data], // 更新 goods 状态
+          }));
+          console.log(get().maxMarketPage);
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
             console.log("No goods available or unexpected response status");
@@ -271,7 +271,7 @@ const useMainStore = create<MainState>()(
             // 将 post 改为 put
             data: { value: value },
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${Cookies.get("auth-token")}`,
             },
           });
           console.log(response);
@@ -320,7 +320,7 @@ const useMainStore = create<MainState>()(
           const response = await api.post("/api/appeals/publish", {
             data: formData,
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${Cookies.get("auth-token")}`,
             },
           });
           console.log(response);

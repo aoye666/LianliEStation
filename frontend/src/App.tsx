@@ -11,10 +11,21 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"; //保�
 //懒加载不同页面
 const Market = React.lazy(() => import("./pages/Market/Market"));
 const Detail = React.lazy(() => import("./pages/Market/Detail/Detail"));
-const DetailAppeal = React.lazy(() => import("./pages/Market/Detail/DetailAppeal"));
-const MarketPublishChoice = React.lazy(() => import("./pages/Publish/MarketPublish/MarketPublishChoice/MarketPublishChoice"));
-const MarketPublish = React.lazy(() => import("./pages/Publish/MarketPublish/MarketPublish"));
-const Template = React.lazy(() => import("./pages/Publish/MarketPublish/Template/Template"));
+const DetailAppeal = React.lazy(
+  () => import("./pages/Market/Detail/DetailAppeal")
+);
+const MarketPublishChoice = React.lazy(
+  () =>
+    import(
+      "./pages/Publish/MarketPublish/MarketPublishChoice/MarketPublishChoice"
+    )
+);
+const MarketPublish = React.lazy(
+  () => import("./pages/Publish/MarketPublish/MarketPublish")
+);
+const Template = React.lazy(
+  () => import("./pages/Publish/MarketPublish/Template/Template")
+);
 const Login = React.lazy(() => import("./pages/Auth/Login/Login"));
 const Register = React.lazy(() => import("./pages/Auth/Register/Register"));
 const Reset = React.lazy(() => import("./pages/User/Settings/Reset/Reset"));
@@ -29,8 +40,12 @@ const History = React.lazy(() => import("./pages/User/History/History"));
 const Admin = React.lazy(() => import("./pages/Admin/Admin"));
 const MData = React.lazy(() => import("./pages/Admin/MData/MData"));
 const MUsers = React.lazy(() => import("./pages/Admin/MUsers/MUsers"));
-const ForumPublish = React.lazy(() => import("./pages/Publish/ForumPublish/ForumPublish"));
-const ForumDetail = React.lazy(() => import("./pages/Forum/ForumDetail/ForumDetail"));
+const ForumPublish = React.lazy(
+  () => import("./pages/Publish/ForumPublish/ForumPublish")
+);
+const ForumDetail = React.lazy(
+  () => import("./pages/Forum/ForumDetail/ForumDetail")
+);
 
 const App: React.FC = () => {
   // 检查是否登录并获取用户信息
@@ -67,11 +82,39 @@ const App: React.FC = () => {
   // }, []);
 
   useEffect(() => {
-    // 监听登录状态
+    let cancelled = false;
+    const MAX_RETRIES = 5;
+
+    const tryFetchUserProfileAndLikes = async () => {
+      let retries = 0;
+      while (!cancelled && retries < MAX_RETRIES) {
+        try {
+          // 并行请求用户信息和点赞/投诉信息
+          await Promise.all([
+            useUserStore.getState().fetchUserProfile(),
+            useUserStore.getState().fetchLikesComplaints(),
+          ]);
+
+          // 成功获取用户信息和点赞/投诉信息，退出循环；否则被catch捕获并继续重试直至请求成功或达到最大重试次数
+          break;
+        } catch (e) {
+          console.error("获取用户信息或点赞/投诉信息失败:", e);
+        }
+        retries++;
+        await new Promise((res) => setTimeout(res, 1000));
+      }
+      if (retries === MAX_RETRIES) {
+        alert("获取用户信息或点赞/投诉信息失败，请检查网络或稍后重试。");
+      }
+    };
+
     if (token) {
-      useUserStore.getState().fetchUserProfile();
-      useUserStore.getState().fetchLikesComplaints();
+      tryFetchUserProfileAndLikes();
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, [isAuthenticated, token]);
 
   const router = createBrowserRouter([
@@ -246,7 +289,7 @@ const App: React.FC = () => {
           <MUsers />
         </ProtectedRoute>
       ),
-    }
+    },
   ]);
 
   return (
