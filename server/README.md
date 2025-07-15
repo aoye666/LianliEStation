@@ -144,7 +144,8 @@ CREATE TABLE `posts` (
     `campus_id` INT NOT NULL,
     `status` ENUM('active', 'deleted') DEFAULT 'active',
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `likes` INT DEFAULT 0
+    `likes` INT DEFAULT 0,
+    `complaints` INT DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

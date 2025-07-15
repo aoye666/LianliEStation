@@ -6,9 +6,6 @@ import Cookies from "js-cookie"; // 使用cookie存储token
 import api from "../api/index";
 import { message } from "antd";
 
-// 获取token
-const token = Cookies.get("auth-token");
-
 interface RecordItem {
   targetId: number;
   targetType: string; // "goods" 或 "post"
@@ -101,15 +98,13 @@ const useUserStore = create<UserState>()(
       login: async (identifier: string, password: string) => {
         try {
           const res = await api.post("/api/auth/login", {
-            data: {
-              identifier,
-              password,
-            },
+            identifier,
+            password,
           });
-          
+
           const token = res?.data.token;
-          console.log("当前获取的token: ",token);
-          if(!token) {
+          console.log("当前获取的token: ", token);
+          if (!token) {
             message.error("未获取到token，请重试");
             return;
           }
@@ -120,7 +115,7 @@ const useUserStore = create<UserState>()(
           await get().fetchUserProfile(); // 获取当前用户信息
           await get().fetchLikesComplaints(); // 获取当前用户的点赞、投诉记录
         } catch (error: any) {
-          if (error.response) console.error(error.response.data.message);
+          throw error;
         }
       },
 
@@ -136,7 +131,7 @@ const useUserStore = create<UserState>()(
           const res = await api.post("/api/auth/register", { data: userData });
           console.log(res?.data.message); // 注册成功
         } catch (error: any) {
-          console.error(error.response.data.message); // 注册失败
+          throw error;
         }
       },
 
@@ -155,26 +150,26 @@ const useUserStore = create<UserState>()(
       deleteUser: async (username: string) => {
         try {
           const res = await api.delete("/api/users/profile", {
-            data: { username },
+            username,
           });
           console.log(res?.data.message); // 账户已删除
           Cookies.remove("auth-token"); // 删除用户时移除 cookie
           set({ isAuthenticated: false, token: null });
         } catch (error: any) {
-          if (error.response) console.error(error.response.data.message);
+          throw error;
         }
       },
 
       requestVerification: async (email: string) => {
         try {
           const res = await api.post("/api/auth/verification", {
-            data: { email },
+            email,
           });
           if (res?.status === 200) {
             console.log(res.data.message); // 验证码已发送，请检查您的邮箱
           }
         } catch (error: any) {
-          if (error.response) console.error(error.response.data.message);
+          throw error;
         }
       },
 
@@ -185,17 +180,15 @@ const useUserStore = create<UserState>()(
       ) => {
         try {
           const res = await api.put("/api/auth/change-password", {
-            data: {
-              email,
-              verificationCode,
-              newPassword,
-            },
+            email,
+            verificationCode,
+            newPassword,
           });
           if (res?.status === 200) {
             console.log(res.data.message); // 密码修改成功
           }
         } catch (error: any) {
-          if (error.response) console.error(error.response.data.message);
+          throw error;
         }
       },
 
@@ -214,18 +207,14 @@ const useUserStore = create<UserState>()(
           // 管理员获取所有用户信息
           else set({ users: res?.data });
         } catch (error: any) {
-          if (error.response) console.error(error.response.data.message);
+          throw error;
         }
       },
 
       // 获取当前用户的点赞、投诉记录
       fetchLikesComplaints: async () => {
         try {
-          const res = await api.get("/api/users/records", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          const res = await api.get("/api/users/records");
           const currentUser = get().currentUser;
           if (currentUser)
             set({
@@ -236,7 +225,7 @@ const useUserStore = create<UserState>()(
               },
             });
         } catch (error: any) {
-          if (error.response) console.error(error.response.data.message);
+          throw error;
         }
       },
 
@@ -248,15 +237,10 @@ const useUserStore = create<UserState>()(
       //        {
       //           qq_id: qq,
       //         },
-      //       {
-      //         headers: {
-      //           Authorization: `Bearer ${get().token}`,
-      //         },
-      //       }
       //     );
       //     set({ searchedUser: res?.data });
       //   } catch (error: any) {
-      //     if (error.response) console.error(error.response.data.message);
+      //     throw error;
       //   }
       // },
 
@@ -268,10 +252,6 @@ const useUserStore = create<UserState>()(
 
           const res = await api.put("/api/users/profile/image", {
             data: formData,
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data", // 这行在使用FormData时通常不需要，axios会自动设置
-            },
             params: {
               type: type,
             },
@@ -296,7 +276,7 @@ const useUserStore = create<UserState>()(
 
           console.log(res?.data);
         } catch (error: any) {
-          if (error.response) console.error(error.response.data.message);
+          throw error;
         }
       },
 
@@ -317,12 +297,7 @@ const useUserStore = create<UserState>()(
 
           if (theme_id !== undefined) requestBody.theme_id = theme_id;
 
-          const res = await api.put("/api/users/profile", {
-            data: requestBody,
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          const res = await api.put("/api/users/profile", requestBody);
           // 动态更新 currentUser 状态
           set(
             (state: UserState) =>
@@ -337,9 +312,9 @@ const useUserStore = create<UserState>()(
               } as Partial<UserState>)
           );
 
-          console.log(res?.data);
+          console.log(res.data);
         } catch (error: any) {
-          if (error.response) console.error(error.response.data.message);
+          throw error;
         }
       },
 
@@ -414,16 +389,10 @@ const useUserStore = create<UserState>()(
       //   try {
       //     const res = await api.put(
       //       '/api/users/searchByQQ',{
-      //
-      //
-      //         headers:{
-      //           Authorization: `Bearer ${token}`,
-      //         },
-      //
-      //        data: {
+
       //           qq_id: qq_id,
       //           credit: credit,
-      //         },}
+      //         }
       //
       //     );
       //     set(
@@ -437,7 +406,7 @@ const useUserStore = create<UserState>()(
       //     );
       //     console.log(res?.data);
       //   } catch (error: any) {
-      //     if (error.response) console.error(error.response.data.message);
+      //     throw error;
       //   }
       // },
     }),

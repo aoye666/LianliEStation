@@ -1,4 +1,4 @@
-import { Alert, message } from "antd";
+import { message } from "antd";
 // 商品与帖子的状态管理
 import api from "../api/index";
 import { create } from "zustand";
@@ -258,7 +258,7 @@ const useMainStore = create<MainState>()(
             // 将 post 改为 put
             data: { value: value },
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${Cookies.get("auth-token")}`,
             },
           });
           console.log(response);
@@ -307,7 +307,7 @@ const useMainStore = create<MainState>()(
           const response = await api.post("/api/appeals/publish", {
             data: formData,
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${Cookies.get("auth-token")}`,
             },
           });
           console.log(response);
