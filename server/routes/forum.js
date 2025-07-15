@@ -107,25 +107,93 @@ router.post("/posts/interact/:post_id", async (req, res) => {
     // 根据action执行不同操作
     switch (action) {
       case 'like':
-        // 点赞操作
+      case 'complaint':
+        // 点赞/投诉操作
         const { value } = req.body;
         if (value === undefined) {
-          return res.status(400).json({ message: "缺少 value 参数" });
+          return res.status(400).json({ message: `缺少 ${action === 'like' ? 'value' : 'value'} 参数` });
         }
 
-        // 判断是增加还是减少点赞数
-        const valueChange = value === true ? 1 : value === false ? -1 : 0;
-
-        if (valueChange === 0) {
-          return res.status(400).json({ message: "无效的 value 参数，必须是 true 或 false" });
+        const valueChange = value;
+        if (valueChange !== 1 && valueChange !== -1) {
+          return res.status(400).json({
+            message: `无效的 ${action === 'like' ? 'value' : 'value'} 参数，必须是 1 或 -1`,
+          });
         }
 
-        // 更新帖子点赞数
-        await db.query("UPDATE posts SET likes = likes + ? WHERE id = ?", [valueChange, post_id]);
-        
-        return res.status(200).json({ 
-          message: valueChange === 1 ? "点赞成功" : "取消点赞成功" 
-        });
+        const connection = await db.getConnection();
+        await connection.beginTransaction();
+
+        try {
+          let message;
+          const targetTable = action === "like" ? "likes" : "complaints";
+          const target_type = "post";
+
+          if (valueChange === 1) {
+            // 添加点赞/投诉
+            try {
+              const [insertResult] = await connection.query(
+                `INSERT INTO ${targetTable} (user_id, target_id, target_type) VALUES (?, ?, ?)`, 
+                [user_id, post_id, target_type]
+              );
+
+              if (insertResult.affectedRows > 0) {
+                const columnName = action === "like" ? "likes" : "complaints";
+                await connection.query(
+                  `UPDATE posts SET ${columnName} = ${columnName} + 1 WHERE id = ?`, 
+                  [post_id]
+                );
+
+                message = action === "like" ? "点赞成功" : "投诉成功";
+              } else {
+                await connection.rollback();
+                connection.release();
+                return res.status(500).json({ message: "操作失败" });
+              }
+            } catch (error) {
+              // 如果是重复键错误（用户已经点赞/投诉过）
+              if (error.code === "ER_DUP_ENTRY") {
+                await connection.rollback();
+                connection.release();
+                return res.status(400).json({
+                  message: action === "like" ? "您已经点赞过了" : "您已经投诉过了",
+                });
+              }
+              throw error;
+            }
+          } else if (valueChange === -1) {
+            // 取消点赞/投诉
+            const [deleteResult] = await connection.query(
+              `DELETE FROM ${targetTable} WHERE user_id = ? AND target_id = ? AND target_type = ?`, 
+              [user_id, post_id, target_type]
+            );
+
+            if (deleteResult.affectedRows > 0) {
+              const columnName = action === "like" ? "likes" : "complaints";
+              await connection.query(
+                `UPDATE posts SET ${columnName} = GREATEST(${columnName} - 1, 0) WHERE id = ?`, 
+                [post_id]
+              );
+
+              message = action === "like" ? "取消点赞成功" : "取消投诉成功";
+            } else {
+              await connection.rollback();
+              connection.release();
+              return res.status(400).json({
+                message: action === "like" ? "您还没有点赞过" : "您还没有投诉过",
+              });
+            }
+          }
+
+          await connection.commit();
+          connection.release();
+
+          return res.status(200).json({ message });
+        } catch (error) {
+          await connection.rollback();
+          connection.release();
+          throw error;
+        }
 
       case 'comment':
         // 评论操作
@@ -183,7 +251,7 @@ router.post("/posts/interact/:post_id", async (req, res) => {
         });
 
       default:
-        return res.status(400).json({ message: "无效的交互类型，必须是 like 或 comment" });
+        return res.status(400).json({ message: "无效的交互类型，必须是 like、complaint 或 comment" });
     }
   } catch (err) {
     console.error(err);
