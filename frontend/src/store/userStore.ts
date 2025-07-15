@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import Cookies from "js-cookie"; // 使用cookie存储token
 import api from "../api/index";
+import { message } from "antd";
 
 // 获取token
 const token = Cookies.get("auth-token");
@@ -45,8 +46,8 @@ interface AllUsers {
 }
 
 interface UserState {
-  users: AllUsers[]; // 管理员获取所有用户
-  currentUser: User | null; // 当前用户
+  users?: AllUsers[]; // 管理员获取所有用户
+  currentUser?: User | null; // 当前用户
   // searchedUser: QQSearchedUser | null; // 管理员通过QQ号搜索到的用户
   isAuthenticated: boolean;
   token: string | null;
@@ -80,6 +81,12 @@ interface UserState {
     verificationCode: string,
     newPassword: string
   ) => Promise<void>;
+  updateLikesComplaints: (
+    type: string,
+    action: string,
+    post_id: number,
+    value: number
+  ) => void;
 }
 
 const useUserStore = create<UserState>()(
@@ -99,7 +106,13 @@ const useUserStore = create<UserState>()(
               password,
             },
           });
+          
           const token = res?.data.token;
+          console.log("当前获取的token: ",token);
+          if(!token) {
+            message.error("未获取到token，请重试");
+            return;
+          }
           const isAdmin = res?.data.isAdmin;
           Cookies.set("auth-token", token, { expires: 7 });
           set({ isAuthenticated: true, token, isAdmin });
@@ -329,7 +342,73 @@ const useUserStore = create<UserState>()(
           if (error.response) console.error(error.response.data.message);
         }
       },
-      
+
+      updateLikesComplaints: (
+        type: string,
+        action: string,
+        post_id: number,
+        value: number
+      ) => {
+        const currentUser = get().currentUser;
+        if (currentUser) {
+          if (value === 1) {
+            if (action === "like") {
+              const likes = currentUser.likes;
+              likes.push({ targetId: post_id, targetType: type });
+              set(
+                (state: UserState) =>
+                  ({
+                    currentUser: {
+                      ...state.currentUser,
+                      likes,
+                    },
+                  } as Partial<UserState>)
+              );
+            } else {
+              const complaints = currentUser.complaints;
+              complaints.push({ targetId: post_id, targetType: type });
+              set(
+                (state: UserState) =>
+                  ({
+                    currentUser: {
+                      ...state.currentUser,
+                      complaints,
+                    },
+                  } as Partial<UserState>)
+              );
+            }
+          } else {
+            if (action === "like") {
+              const likes = currentUser.likes.filter(
+                (item) => item.targetId !== post_id || item.targetType !== type
+              );
+              set(
+                (state: UserState) =>
+                  ({
+                    currentUser: {
+                      ...state.currentUser,
+                      likes,
+                    },
+                  } as Partial<UserState>)
+              );
+            } else {
+              const complaints = currentUser.complaints.filter(
+                (item) => item.targetId !== post_id || item.targetType !== type
+              );
+              set(
+                (state: UserState) =>
+                  ({
+                    currentUser: {
+                      ...state.currentUser,
+                      complaints,
+                    },
+                  } as Partial<UserState>)
+              );
+            }
+          }
+        }
+      },
+
       // // 管理员更新用户信誉分
       // updateCredit: async (qq_id: string, credit: number) => {
       //   try {

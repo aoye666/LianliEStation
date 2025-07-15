@@ -20,25 +20,14 @@ const History = () => {
   const [isVisible, setIsVisible] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
+
   useEffect(() => {
     getHistoryGoods();
-  }, []);
+  }, [isVisible]);
 
   window.addEventListener("beforeunload", () => {
     clear();
   });
-
-  const handleScroll = () => {
-    if (scrollRef.current) {
-      const { scrollHeight, scrollTop, clientHeight } = scrollRef.current;
-
-      // 判断该部件是否滚动到底部
-      if (scrollTop + clientHeight >= scrollHeight) {
-        setPage();
-        getHistoryGoods();
-      }
-    }
-  };
 
   const handleOnClick = () => {
     setIsVisible(!isVisible);
@@ -70,7 +59,6 @@ const History = () => {
               className="commodity"
               key={goods.id}
               ref={scrollRef}
-              onScroll={handleScroll}
             >
               {isVisible ? (
                 <div
@@ -105,46 +93,6 @@ const History = () => {
               </div>
             </div>
           ))}
-          <div className="commodity">
-            {isVisible ? (
-              <div
-                className="commodity-delete"
-                key={1}
-                onClick={() => handleCheck(1)}
-                style={
-                  checked[1]
-                    ? { backgroundColor: "#3498db", border: "none" }
-                    : { backgroundColor: "white" }
-                }
-              />
-            ) : null}
-
-            <div className="commodity-img">
-              <img src={takePlace} alt="" />
-            </div>
-            <div className="commodity-description">
-              <div className="commodity-title">c语言教材</div>
-              <div className="commodity-detail">有勾画，开发区校区面交</div>
-              <div className="commodity-bottom">
-                <div className="commodity-price">15r</div>
-                <div className="commodity-tag">教材</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="commodity">
-            <div className="commodity-img">
-              <img src={takePlace} alt="" />
-            </div>
-            <div className="commodity-description">
-              <div className="commodity-title">c语言教材</div>
-              <div className="commodity-detail">有勾画，开发区校区面交</div>
-              <div className="commodity-bottom">
-                <div className="commodity-price">15r</div>
-                <div className="commodity-tag">教材</div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 

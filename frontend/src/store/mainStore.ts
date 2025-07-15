@@ -42,7 +42,7 @@ interface Filters {
   campus_id: number | null;
 }
 
-interface Forum{
+interface Forum {
   id: number;
   title: string;
   content: string;
@@ -54,7 +54,6 @@ interface Forum{
 }
 
 interface MainState {
-  maxMarketPage: boolean;
   marketPage: number;
   forumPage: number;
   goods: Goods[];
@@ -65,10 +64,7 @@ interface MainState {
   fetchGoods: () => Promise<void>;
   setFilters: (newFilters: Partial<Filters>) => void;
   updateGoods: () => Promise<void>;
-  setMarketPage: () => void;
-  setForumPage: () => void;
-  getForumPosts:() => Promise<void>;
-  publishForumPost:()=>Promise<void>;
+  getForumPosts: () => Promise<void>;
   clearGoods: () => void;
   clearFilters: () => void;
   changeGoodsResponse: (
@@ -83,7 +79,7 @@ interface MainState {
     type: string,
     images: File[]
   ) => Promise<boolean>;
-  // updateGoodsItem: (id: number, data: Partial<Goods>) => void;
+  updateGoodsItem: (action: string, post_id: number, value: number) => void;
 }
 
 const useMainStore = create<MainState>()(
@@ -92,8 +88,7 @@ const useMainStore = create<MainState>()(
       marketPage: 1,
       forumPage: 1,
       goods: [],
-      forums:[],
-      maxMarketPage: false,
+      forums: [],
       posts: [],
       filters: {
         searchTerm: "",
@@ -103,28 +98,14 @@ const useMainStore = create<MainState>()(
         campus_id: null,
       },
 
-      setMarketPage: () => {
-        if (!get().maxMarketPage) {
-          set((preState) => ({
-            marketPage: preState.marketPage + 1,
-          }));
-        }
-      },
-
-      setForumPage: () => {
-        set((preState) => ({
-          forumPage: preState.forumPage + 1,
-        }));
-      },
       getForumPosts: async () => {
         try {
-          const response = await api.get('/api/campusWall/')
+          const response = await api.get("/api/campusWall/");
           if (response?.status === 200 && response.data) {
             const data = response.data.posts;
             set((state) => ({
               forums: [...data], // 更新 goods 状态
             }));
-            console.log(get().maxMarketPage);
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
             console.log("No goods available or unexpected response status");
@@ -179,7 +160,6 @@ const useMainStore = create<MainState>()(
             set((state) => ({
               goods: [...data], // 更新 goods 状态
             }));
-            console.log(get().maxMarketPage);
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
             console.log("No goods available or unexpected response status");
@@ -197,8 +177,7 @@ const useMainStore = create<MainState>()(
       clear: () =>
         set(() => ({
           goods: [],
-          maxMarketPage: false,
-          page: 1,
+          marketPage: 1,
           filters: {
             searchTerm: "",
             goods_type: null,
@@ -233,7 +212,7 @@ const useMainStore = create<MainState>()(
 
       updateGoods: async () => {
         try {
-          const response = await api.get("/api/posts/search", {
+          const response = await api.get("/api/goods", {
             params: {
               page: get().marketPage,
               limit: 12,
@@ -251,16 +230,7 @@ const useMainStore = create<MainState>()(
             const data = response.data.goods;
             set((state) => ({
               goods: [...state.goods, ...data], // 更新 posts 状态
-              maxMarketPage: false,
-            }));
-          } else if (
-            response?.status === 200 &&
-            response.data.goods.length === 0
-          ) {
-            console.log("No more goods available");
-            set((state) => ({
-              maxMarketPage: true,
-              marketPage: state.marketPage - 1,
+              marketPage: state.marketPage + 1,
             }));
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
@@ -333,9 +303,9 @@ const useMainStore = create<MainState>()(
           for (let i = 0; i < images.length; i++) {
             formData.append("images", images[i]);
           }
-          
-          const response = await api.post('/api/appeals/publish', {
-            data:  formData ,
+
+          const response = await api.post("/api/appeals/publish", {
+            data: formData,
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -352,6 +322,32 @@ const useMainStore = create<MainState>()(
           message.error("提交举报失败");
           return false;
         }
+      },
+
+      updateGoodsItem: (action: string, post_id: number, value: number) => {
+        const goods = get().goods;
+        const newGoodsItem = goods.filter((item) => item.id === post_id);
+        const newGoods: Goods[] = goods.filter((item) => item.id !== post_id);
+        if (value === 1) {
+          if (action === "like") {
+            newGoodsItem[0].likes += 1;
+            newGoods.push(newGoodsItem[0]);
+          } else {
+            newGoodsItem[0].complaints += 1;
+            newGoods.push(newGoodsItem[0]);
+          }
+        } else {
+          if (action === "like") {
+            newGoodsItem[0].likes -= 1;
+            newGoods.push(newGoodsItem[0]);
+          } else {
+            newGoodsItem[0].complaints -= 1;
+            newGoods.push(newGoodsItem[0]);
+          }
+        }
+        set(() => ({
+          goods: newGoods,
+        }));
       },
     }),
     {

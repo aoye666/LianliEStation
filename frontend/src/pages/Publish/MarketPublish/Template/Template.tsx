@@ -259,7 +259,7 @@ const Template = () => {
         <div className='text'>
           连理e站
         </div> */}
-        <Navbar backActive={true} backPath='/market' title='商品发布模板' />
+        <Navbar backActive={true} backPath='/publish/market-publish-choice' title='商品发布模板' />
       </div>
        
       <div className='content'>

@@ -159,11 +159,7 @@ const useRecordStore = create<RecordState>()(
 
       initialHistoryGoods: async () => {
         try {
-          const response = await api.get("/api/posts/user-history", {
-            params: {
-              page: get().page,
-              limit: 12,
-            },
+          const response = await api.get("/api/history/goods", {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -191,11 +187,7 @@ const useRecordStore = create<RecordState>()(
 
       getHistoryGoods: async () => {
         try {
-          const response = await api.get("/api/posts/user-history", {
-            params: {
-              page: get().page,
-              limit: 12,
-            },
+          const response = await api.get("/api/history/goods", {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -205,7 +197,7 @@ const useRecordStore = create<RecordState>()(
           if (response?.status === 200 && response.data) {
             const data = response.data.goods;
             set((state) => ({
-              historyGoods: [...state.historyGoods, ...data], // 更新 goods 状态
+              historyGoods: data, // 更新 goods 状态
             }));
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理

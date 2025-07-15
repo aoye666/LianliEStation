@@ -197,7 +197,7 @@ const ForumPublish = () => {
     });
     formData.append('likes', likes.toString());
     formData.append('complints', complints.toString());
-    axios.post(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/campusWall/publish`, formData,{
+    axios.post(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/publish/posts`, formData,{
       headers: {
         'Content-Type': 'multipart/form-data',
         'Authorization': `Bearer ${token}`
@@ -205,7 +205,7 @@ const ForumPublish = () => {
     }).then(() => {
       handleSuccess()
       console.log('发布成功')
-      window.location.href = '/forum-test'
+      window.location.href = '/forum'
   })
   .catch((error) => {
       console.log(error)
