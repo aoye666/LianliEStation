@@ -1340,17 +1340,17 @@ Authorization: Bearer {token}
 
 - 路径: `/posts/interact/:post_id`
 - 方法: `POST`
-- 描述: 处理用户对帖子进行的交互，包括点赞和评论。
+- 描述: 处理用户对帖子进行的交互，包括点赞、投诉和评论。
 
 请求参数
 
 | 参数名    | 类型    | 必选 | 描述                                                                   |
 | --------- | ------- | ---- | ---------------------------------------------------------------------- |
 | post_id   | Number  | 是   | 帖子 ID (URL 参数)                                                     |
-| action    | String  | 是   | 交互类型，"like" 或 "comment"                                          |
+| action    | String  | 是   | 交互类型，"like"（点赞）、"complaint"（投诉）或 "comment"（评论）                                          |
 | content   | String  | 否   | 评论内容，仅在 action 为 "comment" 时需要                              |
 | parent_id | Number  | 否   | 如果是回复评论，则提供父评论的 ID                                      |
-| value     | Boolean | 否   | 点赞状态，仅在 action 为 "like" 时需要 (true 为点赞, false 为取消点赞) |
+| value     | Number | 否   | 操作值，仅在 action 为 "like" 或 "complaint" 时需要 (1 为添加, -1 为取消) |
 
 请求头
 
@@ -1365,7 +1365,34 @@ Authorization: Bearer {token}
 ```json
 {
   "action": "like",
-  "value": true
+  "value": 1
+}
+```
+
+- 取消点赞请求
+
+```json
+{
+  "action": "like",
+  "value": -1
+}
+```
+
+- 投诉请求
+
+```json
+{
+  "action": "complaint",
+  "value": 1
+}
+```
+
+- 取消投诉请求
+
+```json
+{
+  "action": "complaint",
+  "value": -1
 }
 ```
 
@@ -1374,7 +1401,16 @@ Authorization: Bearer {token}
 ```json
 {
   "action": "comment",
-  "content": "这是一个评论内容",
+  "content": "这是一个评论内容"
+}
+```
+
+- 回复评论请求
+
+```json
+{
+  "action": "comment",
+  "content": "这是对某条评论的回复",
   "parent_id": 123
 }
 ```
@@ -1383,9 +1419,9 @@ Authorization: Bearer {token}
 
 | 状态码 | 内容类型         | 描述                       |
 | ------ | ---------------- | -------------------------- |
-| 200    | application/json | 点赞成功或取消点赞成功     |
+| 200    | application/json | 点赞/投诉成功或取消成功     |
 | 201    | application/json | 评论发布成功               |
-| 400    | application/json | 缺少必要参数或无效的参数   |
+| 400    | application/json | 缺少必要参数、无效的参数或重复操作   |
 | 401    | application/json | 未提供 Token 或 Token 无效 |
 | 404    | application/json | 帖子或评论不存在           |
 | 500    | application/json | 服务器错误                 |
@@ -1405,6 +1441,22 @@ Authorization: Bearer {token}
 ```json
 {
   "message": "取消点赞成功"
+}
+```
+
+- 投诉成功 (状态码：200)
+
+```json
+{
+  "message": "投诉成功"
+}
+```
+
+- 取消投诉成功 (状态码：200)
+
+```json
+{
+  "message": "取消投诉成功"
 }
 ```
 
@@ -1435,11 +1487,67 @@ Authorization: Bearer {token}
 }
 ```
 
+或
+
+```json
+{
+  "message": "缺少 value 参数"
+}
+```
+
+或
+
+```json
+{
+  "message": "无效的 value 参数，必须是 1 或 -1"
+}
+```
+
+- 重复操作 (状态码：400)
+
+```json
+{
+  "message": "您已经点赞过了"
+}
+```
+
+或
+
+```json
+{
+  "message": "您已经投诉过了"
+}
+```
+
+或
+
+```json
+{
+  "message": "您还没有点赞过"
+}
+```
+
+或
+
+```json
+{
+  "message": "您还没有投诉过"
+}
+```
+
 - 帖子不存在或已删除 (状态码：404)
 
 ```json
 {
   "message": "帖子不存在或已被删除"
+}
+```
+
+- 回复的评论不存在 (状态码：404)
+
+```json
+{
+  "message": "回复的评论不存在或已被删除"
 }
 ```
 
@@ -1451,6 +1559,14 @@ Authorization: Bearer {token}
 }
 ```
 
+- 无效的交互类型 (状态码：400)
+
+```json
+{
+  "message": "无效的交互类型，必须是 like、complaint 或 comment"
+}
+```
+
 - 服务器错误 (状态码：500)
 
 ```json
@@ -1458,6 +1574,14 @@ Authorization: Bearer {token}
   "message": "服务器错误"
 }
 ```
+
+**备注**
+
+- 该接口需要用户登录验证
+- 点赞和投诉使用防重复机制，同一用户对同一帖子只能执行一次相同操作
+- 取消点赞/投诉时，如果用户之前没有执行过对应操作，会返回相应错误信息
+- 评论支持多级回复功能
+- 所有操作都使用数据库事务确保数据一致性
 
 ### 条件查询帖子
 
