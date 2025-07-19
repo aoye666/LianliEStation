@@ -1587,7 +1587,7 @@ Authorization: Bearer {token}
 
 基本信息
 
-- 路径: `/posts`
+- 路径: `/api/forum/posts`
 - 方法: `GET`
 - 描述: 获取帖子列表，并可以选择是否包含评论。
 
