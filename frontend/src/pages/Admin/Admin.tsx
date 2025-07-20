@@ -1,7 +1,8 @@
-import React from 'react';
-import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
+import React, { useState } from 'react';
+import { LaptopOutlined, NotificationOutlined, UserOutlined, BarChartOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
+import Dashboard from './Dashboard/Dashboard';
 
 const { Header, Content, Sider } = Layout;
 
@@ -29,10 +30,25 @@ const items2: MenuProps['items'] = [UserOutlined, LaptopOutlined, NotificationOu
   },
 );
 
+const menuItems: MenuProps['items'] = [
+  { key: 'dashboard', icon: <BarChartOutlined />, label: '监测数据' },
+  { key: 'user', icon: <UserOutlined />, label: '用户管理' },
+  { key: 'market', icon: <LaptopOutlined />, label: '商品管理' },
+  { key: 'forum', icon: <NotificationOutlined />, label: '论坛管理' },
+];
+
 const Admin = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  const [selectedKey, setSelectedKey] = useState('dashboard');
+  let content = null;
+  if (selectedKey === 'dashboard') content = <Dashboard />;
+  else {
+    const found = menuItems?.find((i) => i?.key === selectedKey) as { label?: React.ReactNode };
+    content = <div style={{ padding: 24 }}>开发中：{found?.label}</div>;
+  }
 
   return (
     <Layout>
@@ -70,7 +86,7 @@ const Admin = () => {
               borderRadius: borderRadiusLG,
             }}
           >
-            Content
+            {content}
           </Content>
         </Layout>
       </Layout>
@@ -78,4 +94,4 @@ const Admin = () => {
   );
 }
 
-export default Admin
+export default Admin;

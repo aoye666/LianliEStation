@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import useScreenType from "./hooks/useScreenType";
 import Cookies from "js-cookie";
 import "./App.scss";
 import {
@@ -8,78 +9,72 @@ import {
 } from "react-router-dom";
 import { useUserStore } from "./store";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"; //保护路由，未登录将只能导航至login和register页面
-//懒加载不同页面
-const Market = React.lazy(() => import("./pages/Market/Market"));
-const Detail = React.lazy(() => import("./pages/Market/Detail/Detail"));
-const DetailAppeal = React.lazy(
-  () => import("./pages/Market/Detail/DetailAppeal")
-);
-const MarketPublishChoice = React.lazy(
-  () =>
-    import(
-      "./pages/Publish/MarketPublish/MarketPublishChoice/MarketPublishChoice"
-    )
-);
-const MarketPublish = React.lazy(
-  () => import("./pages/Publish/MarketPublish/MarketPublish")
-);
-const Template = React.lazy(
-  () => import("./pages/Publish/MarketPublish/Template/Template")
-);
-const Login = React.lazy(() => import("./pages/Auth/Login/Login"));
-const Register = React.lazy(() => import("./pages/Auth/Register/Register"));
-const Reset = React.lazy(() => import("./pages/User/Settings/Reset/Reset"));
-const User = React.lazy(() => import("./pages/User/User"));
-const Forum = React.lazy(() => import("./pages/Forum/Forum"));
-const ForumDisable = React.lazy(() => import("./pages/ForumDisable/Forum"));
-const Settings = React.lazy(() => import("./pages/User/Settings/Settings"));
-const About = React.lazy(() => import("./pages/User/Settings/About/About"));
-const Favorites = React.lazy(() => import("./pages/User/Favorites/Favorites"));
-const Messages = React.lazy(() => import("./pages/User/Messages/Messages"));
-const History = React.lazy(() => import("./pages/User/History/History"));
-const Admin = React.lazy(() => import("./pages/Admin/Admin"));
-const MData = React.lazy(() => import("./pages/Admin/MData/MData"));
-const MUsers = React.lazy(() => import("./pages/Admin/MUsers/MUsers"));
-const ForumPublish = React.lazy(
-  () => import("./pages/Publish/ForumPublish/ForumPublish")
-);
-const ForumDetail = React.lazy(
-  () => import("./pages/Forum/ForumDetail/ForumDetail")
-);
+import { message } from "antd";
+
+// 懒加载页面组件统一管理
+const Lazy = {
+  Market: React.lazy(() => import("./pages/Market/Market")),
+  Detail: React.lazy(() => import("./pages/Market/Detail/Detail")),
+  DetailAppeal: React.lazy(() => import("./pages/Market/Detail/DetailAppeal")),
+  MarketPublishChoice: React.lazy(() => import("./pages/Publish/MarketPublish/MarketPublishChoice/MarketPublishChoice")),
+  MarketPublish: React.lazy(() => import("./pages/Publish/MarketPublish/MarketPublish")),
+  Template: React.lazy(() => import("./pages/Publish/MarketPublish/Template/Template")),
+  Login: React.lazy(() => import("./pages/Auth/Login/Login")),
+  Register: React.lazy(() => import("./pages/Auth/Register/Register")),
+  Reset: React.lazy(() => import("./pages/User/Settings/Reset/Reset")),
+  User: React.lazy(() => import("./pages/User/User")),
+  Forum: React.lazy(() => import("./pages/Forum/Forum")),
+  ForumDisable: React.lazy(() => import("./pages/ForumDisable/Forum")),
+  Settings: React.lazy(() => import("./pages/User/Settings/Settings")),
+  About: React.lazy(() => import("./pages/User/Settings/About/About")),
+  Favorites: React.lazy(() => import("./pages/User/Favorites/Favorites")),
+  Messages: React.lazy(() => import("./pages/User/Messages/Messages")),
+  History: React.lazy(() => import("./pages/User/History/History")),
+  Admin: React.lazy(() => import("./pages/Admin/Admin")),
+  ForumPublish: React.lazy(() => import("./pages/Publish/ForumPublish/ForumPublish")),
+  ForumDetail: React.lazy(() => import("./pages/Forum/ForumDetail/ForumDetail")),
+  Dashboard: React.lazy(() => import("./pages/Admin/Dashboard/Dashboard")),
+  AdminMessages: React.lazy(() => import("./pages/Admin/Messages/Messages")),
+  AdminMarket: React.lazy(() => import("./pages/Admin/Market/Market")),
+  AdminForum: React.lazy(() => import("./pages/Admin/Forum/Forum")),
+};
 
 const App: React.FC = () => {
   // 检查是否登录并获取用户信息
   const { isAuthenticated } = useUserStore();
   const token = Cookies.get("auth-token");
 
-  // // 锁定竖屏
-  // const lockOrientation = () => {
-  //   if (window.screen.orientation && window.screen.orientation.lock) {
-  //     window.screen.orientation.lock("portrait").catch((err) => {
-  //       console.error("锁定竖屏失败:", err);
-  //     });
-  //   }
-  // };
+  // 仅在移动端开启竖屏监控和提示
+  useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+    if (!isMobile) return;
 
-  // // 监听屏幕方向变化
-  // useEffect(() => {
-  //   const handleOrientationChange = () => {
-  //     if (window.matchMedia("(orientation: landscape)").matches) {
-  //       alert("请将设备旋转到竖屏模式以获得最佳体验。");
-  //       lockOrientation(); // 尝试锁定竖屏
-  //     }
-  //   };
+    const lockOrientation = () => {
+      if (window.screen.orientation && window.screen.orientation.lock) {
+        window.screen.orientation.lock("portrait").catch((err) => {
+          console.error("锁定竖屏失败:", err);
+        });
+      }
+    };
 
-  //   // 绑定事件监听器
-  //   window.addEventListener("resize", handleOrientationChange);
-  //   window.addEventListener("orientationchange", handleOrientationChange);
+    const handleOrientationChange = () => {
+      if (window.matchMedia("(orientation: landscape)").matches) {
+        message.info("请将设备旋转到竖屏模式以获得最佳体验。");
+        lockOrientation();
+      }
+    };
 
-  //   // 在组件卸载时移除监听器
-  //   return () => {
-  //     window.removeEventListener("resize", handleOrientationChange);
-  //     window.removeEventListener("orientationchange", handleOrientationChange);
-  //   };
-  // }, []);
+    window.addEventListener("resize", handleOrientationChange);
+    window.addEventListener("orientationchange", handleOrientationChange);
+
+    // 初始检测
+    handleOrientationChange();
+
+    return () => {
+      window.removeEventListener("resize", handleOrientationChange);
+      window.removeEventListener("orientationchange", handleOrientationChange);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -117,185 +112,188 @@ const App: React.FC = () => {
     };
   }, [isAuthenticated, token]);
 
-  const router = createBrowserRouter([
-    {
-      path: "*",
-      element: isAuthenticated ? (
-        <Navigate to="/market" replace />
-      ) : (
-        <Navigate to="/auth/login" replace />
-      ),
-    },
-    {
-      path: "/auth/login",
-      element: <Login />,
-    },
-    {
-      path: "/auth/register",
-      element: <Register />,
-    },
-    {
-      path: "/user/settings/reset/:type",
-      element: <Reset />,
-    },
-    {
-      path: "/user/settings/about",
-      element: (
-        <ProtectedRoute>
-          <About />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/market",
-      element: (
-        <ProtectedRoute>
-          <Market />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/market/:goodsId",
-      element: (
-        <ProtectedRoute>
-          <Detail />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/market/:goodsId/appeal/:goodsTitle",
-      element: (
-        <ProtectedRoute>
-          <DetailAppeal />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/forum",
-      element: (
-        <ProtectedRoute>
-          <Forum />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/forum-test",
-      element: (
-        <ProtectedRoute>
-          <ForumDisable />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/forum-detail",
-      element: (
-        <ProtectedRoute>
-          <ForumDetail />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/publish/market-publish-choice",
-      element: (
-        <ProtectedRoute>
-          <MarketPublishChoice />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/publish/market-publish-ai",
-      element: (
-        <ProtectedRoute>
-          <MarketPublish />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/publish/forum-publish",
-      element: (
-        <ProtectedRoute>
-          <ForumPublish />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/publish/market-publish-basic",
-      element: (
-        <ProtectedRoute>
-          <Template />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/user",
-      element: (
-        <ProtectedRoute>
-          <User />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/user/favorites",
-      element: (
-        <ProtectedRoute>
-          <Favorites />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/user/messages",
-      element: (
-        <ProtectedRoute>
-          <Messages />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/user/history",
-      element: (
-        <ProtectedRoute>
-          <History />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/user/settings",
-      element: (
-        <ProtectedRoute>
-          <Settings />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/admin",
-      element: (
-        <ProtectedRoute>
-          <Admin />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/admin/data",
-      element: (
-        <ProtectedRoute>
-          <MData />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/admin/users",
-      element: (
-        <ProtectedRoute>
-          <MUsers />
-        </ProtectedRoute>
-      ),
-    },
-  ]);
+
+// 路由表抽离为常量
+const mobileRoutes = [
+  {
+    path: "*",
+    element: useUserStore.getState().isAuthenticated ? (
+      <Navigate to="/market" replace />
+    ) : (
+      <Navigate to="/auth/login" replace />
+    ),
+  },
+  { path: "/auth/login", element: <Lazy.Login /> },
+  { path: "/auth/register", element: <Lazy.Register /> },
+  { path: "/user/settings/reset/:type", element: <Lazy.Reset /> },
+  {
+    path: "/user/settings/about",
+    element: (
+      <ProtectedRoute>
+        <Lazy.About />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/market",
+    element: (
+      <ProtectedRoute>
+        <Lazy.Market />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/market/:goodsId",
+    element: (
+      <ProtectedRoute>
+        <Lazy.Detail />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/market/:goodsId/appeal/:goodsTitle",
+    element: (
+      <ProtectedRoute>
+        <Lazy.DetailAppeal />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/forum",
+    element: (
+      <ProtectedRoute>
+        <Lazy.Forum />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/forum-test",
+    element: (
+      <ProtectedRoute>
+        <Lazy.ForumDisable />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/forum-detail",
+    element: (
+      <ProtectedRoute>
+        <Lazy.ForumDetail />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/publish/market-publish-choice",
+    element: (
+      <ProtectedRoute>
+        <Lazy.MarketPublishChoice />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/publish/market-publish-ai",
+    element: (
+      <ProtectedRoute>
+        <Lazy.MarketPublish />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/publish/forum-publish",
+    element: (
+      <ProtectedRoute>
+        <Lazy.ForumPublish />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/publish/market-publish-basic",
+    element: (
+      <ProtectedRoute>
+        <Lazy.Template />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/user",
+    element: (
+      <ProtectedRoute>
+        <Lazy.User />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/user/favorites",
+    element: (
+      <ProtectedRoute>
+        <Lazy.Favorites />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/user/messages",
+    element: (
+      <ProtectedRoute>
+        <Lazy.Messages />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/user/history",
+    element: (
+      <ProtectedRoute>
+        <Lazy.History />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/user/settings",
+    element: (
+      <ProtectedRoute>
+        <Lazy.Settings />
+      </ProtectedRoute>
+    ),
+  },
+];
+
+const webRoutes = [
+  {
+    path: "/admin",
+    element: (
+      <ProtectedRoute>
+        <Lazy.Admin />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <Lazy.Dashboard />,
+      },
+      {
+        path: "messages",
+        element: <Lazy.AdminMessages />,
+      },
+      {
+        path: "market",
+        element: <Lazy.AdminMarket />,
+      },
+      {
+        path: "forum",
+        element: <Lazy.AdminForum />,
+      },
+    ],
+  },
+];
+
+const mobileRouter = createBrowserRouter(mobileRoutes);
+const webRouter = createBrowserRouter(webRoutes);
+
+  const isMobile = useScreenType(768);
 
   return (
     <div className="App">
       <React.Suspense fallback={<div>加载中......请稍候......</div>}>
-        <RouterProvider router={router} />
+        <RouterProvider router={isMobile ? mobileRouter : webRouter} />
       </React.Suspense>
     </div>
   );

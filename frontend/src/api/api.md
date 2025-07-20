@@ -77,7 +77,8 @@ try {
 - token 会自动从 cookie 获取并添加到请求头，无需手动处理
 - 建议所有接口请求均通过本 api 模块发起，便于后续统一维护
 - 即使某些请求不需要 token 或者还未加载 token ，使用本封装函数也不会有任何问题
+- 对于post和put请求，由于两个参数data与config都是可选参数，若需要执行无data只有config的请求，需将data部分传入 `null` 或 `undefined` 占位以避免参数对应错误
 
 ---
 
-如有特殊需求（如文件上传、取消请求等），可参考 axios 官方文档或联系 Proselyte
+如有问题可联系 Prosel
