@@ -22,37 +22,21 @@ router.delete("/:post_id", async (req, res) => {
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
     const author_id = decoded.user_id;
-    const isAdmin = decoded.isAdmin || false;
 
     // 确保必需的参数存在
     if (!post_id || !author_id) {
       return res.status(400).json({ message: "缺少必要参数" });
     }
 
-    if (isAdmin) {
-      try {
-        await db.query("UPDATE goods SET status = 'deleted' WHERE id = ?", [post_id]);
-        return res.status(200).json({ message: "管理员已删除商品" });
-      } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: "服务器错误" });
-      }
-    }
-
     // 查找商品并验证用户是否是作者
-    try {
-      const [rows] = await db.query("SELECT * FROM goods WHERE id = ? AND author_id = ?", [post_id, author_id]);
+    const [rows] = await db.query("SELECT * FROM goods WHERE id = ? AND author_id = ?", [post_id, author_id]);
 
-      if (rows.length === 0) {
-        return res.status(404).json({ message: "商品未找到或用户无权删除" });
-      }
-
-      await db.query("UPDATE goods SET status = 'deleted' WHERE id = ?", [post_id]);
-      return res.status(200).json({ message: "商品已标记为删除" });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ message: "服务器错误" });
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "商品未找到或用户无权删除" });
     }
+
+    await db.query("UPDATE goods SET status = 'deleted' WHERE id = ?", [post_id]);
+    return res.status(200).json({ message: "商品已标记为删除" });
   } catch (err) {
     console.error(err);
     res.status(401).json({ message: "无效的 Token" });

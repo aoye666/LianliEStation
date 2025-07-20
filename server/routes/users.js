@@ -111,42 +111,7 @@ const SECRET_KEY = process.env.SECRET_KEY;
 //   }
 // });
 
-// 根据 qq_id 查询用户信息（仅限管理员）
-router.post("/searchByQQ", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1]; // 获取 token
-  const { qq_id } = req.body; // 从请求体中获取 qq_id
-
-  if (!token) {
-    return res.status(401).json({ message: "未提供 Token" });
-  }
-
-  if (!qq_id) {
-    return res.status(400).json({ message: "缺少 qq_id 参数" });
-  }
-
-  try {
-    const decoded = jwt.verify(token, SECRET_KEY); // 解码 Token 获取用户信息
-
-    // 通过 isAdmin 字段判断是否为管理员
-    if (!decoded.isAdmin) {
-      return res.status(403).json({ message: "您没有权限执行此操作" });
-    }
-
-    // 查询指定 qq_id 的用户信息
-    const [rows] = await db.query("SELECT id, nickname, email, qq_id, username, credit, campus_id FROM users WHERE qq_id = ?", [qq_id]);
-
-    if (rows.length === 0) {
-      return res.status(404).json({ message: "没有找到匹配的用户" });
-    }
-
-    res.status(200).json(rows[0]); // 返回找到的用户信息
-  } catch (err) {
-    console.error(err);
-    return res.status(401).json({ message: "Token 无效" });
-  }
-});
-
-// 用户(管理员)登录
+// 根据用户ID查询用户的qq_id, credit,avatar,nickname信息,便于前端帖子的详情页查询用户基本信息
 // router.post("/login", loginLimiter, async (req, res) => {
 //   const { identifier, password } = req.body;
 
@@ -840,41 +805,6 @@ router.put("/profile/image", upload.single("image"), async (req, res) => {
 //     res.status(401).json({ message: "Token 无效" });
 //   }
 // });
-
-// 管理员修改用户信用值 (credit)
-router.put("/updateCredit", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1]; // 获取 token
-  const { qq_id, credit } = req.body; // 获取 qq_id 和新的 credit 值
-
-  if (!token) {
-    return res.status(401).json({ message: "未提供 Token" });
-  }
-
-  if (!qq_id || credit === undefined) {
-    return res.status(400).json({ message: "缺少必要参数" });
-  }
-
-  try {
-    const decoded = jwt.verify(token, SECRET_KEY); // 解码 Token 获取用户信息
-
-    // 通过 isAdmin 字段判断是否为管理员
-    if (!decoded.isAdmin) {
-      return res.status(403).json({ message: "您没有权限执行此操作" });
-    }
-
-    // 更新指定 qq_id 用户的 credit 值
-    const [result] = await db.query("UPDATE users SET credit = ? WHERE qq_id = ?", [credit, qq_id]);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "没有找到匹配的用户" });
-    }
-
-    res.status(200).json({ message: "信用值已更新" });
-  } catch (err) {
-    console.error(err);
-    return res.status(401).json({ message: "Token 无效" });
-  }
-});
 
 // 根据用户ID查询用户的qq_id, credit,avatar,nickname信息,便于前端帖子的详情页查询用户基本信息
 router.get("/user-info/:user_id", async (req, res) => {

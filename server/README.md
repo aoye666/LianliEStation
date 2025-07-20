@@ -99,9 +99,12 @@ CREATE TABLE `goods_images` (
 CREATE TABLE `user_favorites` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `user_id` INT NOT NULL,
-    `post_id` INT NOT NULL,
+    `post_id` INT NULL,
+    `goods_id` INT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY `unique_user_post` (`user_id`, `post_id`)
+    UNIQUE KEY `unique_user_post` (`user_id`, `post_id`),
+    UNIQUE KEY `unique_user_goods` (`user_id`, `goods_id`),
+    CHECK ((`post_id` IS NOT NULL AND `goods_id` IS NULL) OR (`post_id` IS NULL AND `goods_id` IS NOT NULL))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `appeal_images` (
