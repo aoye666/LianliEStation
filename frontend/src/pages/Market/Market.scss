@@ -108,9 +108,6 @@ $shadow-color: rgba(0, 0, 0, 0.1);
       border-bottom: 1px solid #bfbfbf;
 
       .carousel {
-        display: flex;
-        justify-content: center;
-        align-items: center;
         .carousel-item {
           width: 100vw;
           aspect-ratio: 3.2;

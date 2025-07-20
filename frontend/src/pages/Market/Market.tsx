@@ -125,9 +125,19 @@ const Market = () => {
 
       <div className="market-body">
         <div className="un-content">
-          <Carousel autoplay className="carousel">
-            <img className="carousel-item" src={MarketBanner} alt="schoolLogo" />
-            <img className="carousel-item" src={ADInviting} alt="广告位招商" />
+          <Carousel autoplay className="carousel" >
+            <img
+              className="carousel-item"
+              src={MarketBanner}
+              alt="schoolLogo"
+              onLoad={() => window.dispatchEvent(new Event('resize'))}
+            />
+            <img
+              className="carousel-item"
+              src={ADInviting}
+              alt="广告位招商"
+              onLoad={() => window.dispatchEvent(new Event('resize'))}
+            />
           </Carousel>
           <div className="region"></div>
 
