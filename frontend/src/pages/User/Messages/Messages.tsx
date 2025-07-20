@@ -10,7 +10,7 @@ import {
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Dropdown } from "antd";
-import { timeFormat } from "../../../utils/timeFormat";
+import { timeFormat } from "../../../utils/formatters";
 import messages_read from "../../../assets/messages-read.svg";
 import messages_unread from "../../../assets/messages-unread.svg";
 import takePlace from "../../../assets/takePlace.png";

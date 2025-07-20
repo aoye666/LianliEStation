@@ -1,7 +1,8 @@
 import { useMainStore, useUserStore } from "../../../store";
 import { useState, useEffect, useRef, use } from "react";
 import { useNavigate, useParams } from "react-router-dom"; // 使用 useParams 从路由获取参数
-import { timeFormat } from "../../../utils/timeFormat";
+import { timeFormat } from "../../../utils/formatters";
+import { getCampusName } from "../../../utils/formatters";
 import { message } from "antd";
 import "./Detail.scss";
 import copy from "../../../assets/copy-black.svg";
@@ -205,19 +206,6 @@ const Detail = () => {
     }
   };
 
-  // 校区id转名称
-  const handleCampusID = (campus_id: number) => {
-    if (campus_id === 1) {
-      return "凌水主校区";
-    } else if (campus_id === 2) {
-      return "开发区校区";
-    } else if (campus_id === 3) {
-      return "盘锦校区";
-    } else {
-      return "校区获取错误";
-    }
-  };
-
   return (
     <div className="detail-container">
       <div className="detail-navbar">
@@ -273,7 +261,7 @@ const Detail = () => {
         </div>
         <div className="detail-tag">{currentGoods?.tag}</div>
         <div className="detail-campus">
-          {handleCampusID(currentGoods?.campus_id || 1)}
+          {getCampusName(currentGoods?.campus_id || 1)}
         </div>
       </div>
       <div className="detail-content">{currentGoods?.content}</div>
