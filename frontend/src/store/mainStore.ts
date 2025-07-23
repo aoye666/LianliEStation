@@ -54,6 +54,7 @@ interface Forum {
 }
 
 interface MainState {
+  reset: () => void; // 退出账号时重置状态
   marketPage: number;
   forumPage: number;
   goods: Goods[];
@@ -98,6 +99,23 @@ const useMainStore = create<MainState>()(
         campus_id: null,
       },
 
+      reset: () => {
+        set({
+          marketPage: 1,
+          forumPage: 1,
+          goods: [],
+          forums: [],
+          posts: [],
+          filters: {
+            searchTerm: "",
+            goods_type: null,
+            tag: "",
+            priceRange: [0, 1000000],
+            campus_id: null,
+          },
+        });
+      },
+
       getForumPosts: async () => {
         try {
           const response = await api.get("/api/campusWall/");
@@ -119,39 +137,29 @@ const useMainStore = create<MainState>()(
           }
         }
       },
-      publishForumPost:async()=>{
-        try{
-          const response = await api.post('/api/campusWall/publish', {
+      publishForumPost: async () => {
+        try {
+          const response = await api.post("/api/campusWall/publish", {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-            data: {
-
-            }
-          })
-        }
-        catch(error){
-          
-        }
-
+            data: {},
+          });
+        } catch (error) {}
       },
 
       fetchGoods: async () => {
         try {
-          const response = await api.get(
-            "/api/goods",
-
-            {
-              page: get().marketPage,
-              limit: 12,
-              keyword: get().filters.searchTerm,
-              goods_type: get().filters.goods_type,
-              tag: get().filters.tag,
-              min_price: get().filters.priceRange[0],
-              max_price: get().filters.priceRange[1],
-              campus_id: get().filters.campus_id,
-            }
-          );
+          const response = await api.get("/api/goods", {
+            page: get().marketPage,
+            limit: 12,
+            keyword: get().filters.searchTerm,
+            goods_type: get().filters.goods_type,
+            tag: get().filters.tag,
+            min_price: get().filters.priceRange[0],
+            max_price: get().filters.priceRange[1],
+            campus_id: get().filters.campus_id,
+          });
 
           // console.log(response);
           // 检查返回数据是否有效
@@ -255,11 +263,7 @@ const useMainStore = create<MainState>()(
         let msg: string | any;
         try {
           const response = await api.put(`/api/goods/${action}/${post_id}`, {
-            // 将 post 改为 put
-            data: { value: value },
-            headers: {
-              Authorization: `Bearer ${Cookies.get("auth-token")}`,
-            },
+            value: value,
           });
           console.log(response);
           if (response?.status === 200) {
@@ -305,10 +309,7 @@ const useMainStore = create<MainState>()(
           }
 
           const response = await api.post("/api/appeals/publish", {
-            data: formData,
-            headers: {
-              Authorization: `Bearer ${Cookies.get("auth-token")}`,
-            },
+            formData,
           });
           console.log(response);
           if (response?.status === 201) {

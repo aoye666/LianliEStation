@@ -1,10 +1,10 @@
-import axios from "axios";
 import { openDB } from "idb";
-import { useRef, useState, useEffect } from "react"; // 导入useEffect
+import { useRef, useState, useEffect, useCallback } from "react"; // 导入useCallback
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../../../store";
 import { message } from "antd";
 import Cookies from "js-cookie";
+import api from "../../../api";
 import "./MarketPublish.scss";
 import Navbar from "../../../components/Navbar/Navbar";
 import logo from "../../../assets/logo.png";
@@ -61,28 +61,38 @@ const Publish: React.FC = () => {
 
   // 从URL获取Base64
   const fetchImageAsBase64 = async (url: string) => {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result); // 读取完成后返回Base64字符串
-      reader.readAsDataURL(blob); // 转换为Base64
-    });
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result); // 读取完成后返回Base64字符串
+        reader.readAsDataURL(blob); // 转换为Base64
+      });
+    } catch (error) {
+      console.error('获取图片失败:', error);
+      return null;
+    }
   };
 
   const fetchImageFromBackend = async (
     endpoint: string
   ): Promise<File | null> => {
-    const response = await fetch(endpoint);
-    if (!response.ok) return null;
-    const blob = await response.blob();
-    const filename = endpoint.includes("avatar")
-      ? "avatar.jpg"
-      : "background.jpg";
-    return new File([blob], filename, { type: blob.type });
+    try {
+      const response = await fetch(endpoint);
+      if (!response.ok) return null;
+      const blob = await response.blob();
+      const filename = endpoint.includes("avatar")
+        ? "avatar.jpg"
+        : "background.jpg";
+      return new File([blob], filename, { type: blob.type });
+    } catch (error) {
+      console.error('从后端获取图片失败:', error);
+      return null;
+    }
   };
 
-  const loadImage = async (
+  const loadImage = useCallback(async (
     key: string,
     defaultUrl: string,
     isAvatar: boolean
@@ -111,7 +121,7 @@ const Publish: React.FC = () => {
         return isAvatar ? "/assets/logo.png" : "/assets/background-wide.jpg";
       }
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadImage(
@@ -124,7 +134,7 @@ const Publish: React.FC = () => {
       currentUser?.avatar || "/uploads/default_avatar.png",
       true
     ).then((base64) => setAvatarFile(base64));
-  }, [currentUser, token]);
+  }, [currentUser, token, loadImage]);
 
   // 设置对话框自适应高度
   const handleHeight = () => {
@@ -152,17 +162,7 @@ const Publish: React.FC = () => {
     ]);
     // 调用API生成模板
     try {
-      const res = await axios.post(
-        `${
-          process.env.REACT_APP_API_URL || "http://localhost:5000"
-        }/api/publish/template`,
-        { text: text },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await api.post("/api/publish/template", { text: text });
       if (res) {
         // 添加AI对话框
         setDialogHistory((prevHistory) => [

@@ -5,6 +5,7 @@ import { persist } from "zustand/middleware";
 import Cookies from "js-cookie"; // 使用cookie存储token
 import api from "../api/index";
 import { message } from "antd";
+import { useRecordStore, useMainStore } from "./index";
 
 interface RecordItem {
   targetId: number;
@@ -128,7 +129,7 @@ const useUserStore = create<UserState>()(
         campus_id: number;
       }) => {
         try {
-          const res = await api.post("/api/auth/register", { data: userData });
+          const res = await api.post("/api/auth/register", { userData });
           console.log(res?.data.message); // 注册成功
         } catch (error: any) {
           throw error;
@@ -136,15 +137,32 @@ const useUserStore = create<UserState>()(
       },
 
       logout: () => {
-        Cookies.remove("auth-token"); // 登出时移除 cookie
+        // 清理当前 Store
         set({
           isAuthenticated: false,
           token: null,
-          currentUser: null,
           isAdmin: false,
           users: [],
+          currentUser: null,
+          // searchedUser: null,
         });
-        localStorage.clear(); // 登出时清除 localStorage
+
+        // 清理其他 Store
+        useRecordStore.getState().reset();
+        useMainStore.getState().reset();
+
+        // 清理 localStorage
+        localStorage.removeItem("userStore");
+        localStorage.removeItem("recordStore");
+        localStorage.removeItem("mainStore");
+
+        // 清理 indexedDB
+        // 可选
+
+        // 清理 Cookies
+        Cookies.remove("auth-token");
+
+        console.log("全局登出完成");
       },
 
       deleteUser: async (username: string) => {
@@ -195,11 +213,7 @@ const useUserStore = create<UserState>()(
       // 一般用户获取自己的信息、管理员获取所有用户信息
       fetchUserProfile: async () => {
         try {
-          const res = await api.get("/api/users/profile", {
-            headers: {
-              Authorization: `Bearer ${get().token}`,
-            },
-          });
+          const res = await api.get("/api/users/profile");
           const { isAdmin } = get();
 
           // 一般用户获取自己的信息
@@ -250,12 +264,15 @@ const useUserStore = create<UserState>()(
           const formData = new FormData();
           formData.append("image", image);
 
-          const res = await api.put("/api/users/profile/image", {
-            data: formData,
-            params: {
-              type: type,
-            },
-          });
+          const res = await api.put(
+            "/api/users/profile/image",
+            { formData },
+            {
+              params: {
+                type: type,
+              },
+            }
+          );
           set((state: any) => ({
             currentUser: {
               ...state.currentUser,
