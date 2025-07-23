@@ -1,17 +1,16 @@
 // src/components/ProtectedRoute.tsx
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useUserStore } from "../../store";
+import Cookies from "js-cookie";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated } = useUserStore();
   const location = useLocation();
 
-  if (!isAuthenticated) {
+  if (!Cookies.get("auth-token")) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

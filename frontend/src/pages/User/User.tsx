@@ -42,21 +42,31 @@ const getImageFromDB = async (key: string): Promise<File | undefined> => {
 };  
 
 const fetchImageAsBase64 = async (url: string) => {  
-  const response = await fetch(url);  
-  const blob = await response.blob();  
-  return new Promise((resolve) => {  
-    const reader = new FileReader();  
-    reader.onloadend = () => resolve(reader.result);  
-    reader.readAsDataURL(blob);  
-  });  
+  try {
+    const response = await fetch(url);  
+    const blob = await response.blob();  
+    return new Promise((resolve) => {  
+      const reader = new FileReader();  
+      reader.onloadend = () => resolve(reader.result);  
+      reader.readAsDataURL(blob);  
+    });  
+  } catch (error) {
+    console.error('获取图片失败:', error);
+    return null;
+  }
 };  
 
 const fetchImageFromBackend = async (endpoint: string): Promise<File | null> => {  
-  const response = await fetch(endpoint);  
-  if (!response.ok) return null;  
-  const blob = await response.blob();  
-  const fileName = endpoint.includes("avatar") ? "avatar.jpg" : "background.jpg";  
-  return new File([blob], fileName, { type: blob.type });  
+  try {
+    const response = await fetch(endpoint);  
+    if (!response.ok) return null;  
+    const blob = await response.blob();  
+    const fileName = endpoint.includes("avatar") ? "avatar.jpg" : "background.jpg";  
+    return new File([blob], fileName, { type: blob.type });  
+  } catch (error) {
+    console.error('从后端获取图片失败:', error);
+    return null;
+  }
 };  
 
 const User = () => {  

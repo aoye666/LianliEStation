@@ -41,7 +41,6 @@ const Lazy = {
 
 const App: React.FC = () => {
   // 检查是否登录并获取用户信息
-  const { isAuthenticated } = useUserStore();
   const token = Cookies.get("auth-token");
 
   // 仅在移动端开启竖屏监控和提示
@@ -103,14 +102,14 @@ const App: React.FC = () => {
       }
     };
 
-    if (token) {
+    if (token&&!useUserStore.getState().currentUser?.likes) {
       tryFetchUserProfileAndLikes();
     }
 
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, token]);
+  }, [token]);
 
 
 // 路由表抽离为常量

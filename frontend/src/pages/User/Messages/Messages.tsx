@@ -108,9 +108,11 @@ const Messages = () => {
 
   useEffect(() => {
     const initList = async () => {
-      await fetchResponses();
-      await searchAppeals();
-      const combinedMessages = [...appeals, ...responses];
+      const [responsesData, appealsData] = await Promise.all([
+        fetchResponses(),
+        searchAppeals()
+      ]);
+      const combinedMessages = [...appealsData, ...responsesData];
 
       // 按照 created_at 进行排序
       combinedMessages.sort(
@@ -205,9 +207,8 @@ const Messages = () => {
 
     if (initialMessagesList.length > 0) {
       handleList(conditions.type, conditions.read);
-      console.log("筛选后的消息列表:", messagesList);
     }
-  }, [conditions, initialMessagesList, allMessagesList]);
+  }, [conditions, allMessagesList]);
 
   return (
     <div>
