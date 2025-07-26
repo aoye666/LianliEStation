@@ -219,37 +219,45 @@ router.get("/profile", async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
+    const userId = decoded.user_id;
 
-    // 如果是管理员，返回所有用户信息列表
-    if (decoded.isAdmin) {
-      const [rows] = await db.query("SELECT id, nickname, email, qq_id, username, campus_id, credit, theme_id, background_url, banner_url, avatar FROM users");
-      return res.status(200).json({ users: rows });
+    const [userRows] = await db.query("SELECT email, credit, theme_id, background_url, banner_url, avatar FROM users WHERE id = ?", [userId]);
+
+    if (userRows.length === 0) {
+      return res.status(404).json({ message: "用户不存在" });
     }
-    // 如果是普通用户，返回该用户的详细信息
-    else {
-      // 合并现有的 /profile 和 /get-theme 功能
-      const [userRows] = await db.query("SELECT email, credit, theme_id, background_url, banner_url, avatar FROM users WHERE id = ?", [decoded.user_id]);
 
-      if (userRows.length === 0) {
-        return res.status(404).json({ message: "用户不存在" });
-      }
+    // 获取点赞记录
+    const [likeRecords] = await db.query("SELECT target_id, target_type FROM likes WHERE user_id = ?", [userId]);
 
-      // 返回用户的详细信息
-      const userData = {
-        nickname: decoded.nickname,
-        username: decoded.username,
-        campus_id: decoded.campus_id,
-        qq: decoded.qq,
-        email: userRows[0].email,
-        credit: userRows[0].credit,
-        theme_id: userRows[0].theme_id,
-        background_url: userRows[0].background_url,
-        banner_url: userRows[0].banner_url,
-        avatar: userRows[0].avatar,
-      };
+    // 获取投诉记录
+    const [complaintRecords] = await db.query("SELECT target_id, target_type FROM complaints WHERE user_id = ?", [userId]);
 
-      return res.status(200).json(userData);
-    }
+    // 返回用户的详细信息
+    const userData = {
+      nickname: decoded.nickname,
+      username: decoded.username,
+      campus_id: decoded.campus_id,
+      qq: decoded.qq,
+      email: userRows[0].email,
+      credit: userRows[0].credit,
+      theme_id: userRows[0].theme_id,
+      background_url: userRows[0].background_url,
+      banner_url: userRows[0].banner_url,
+      avatar: userRows[0].avatar,
+      records: {
+        likes: likeRecords.map((record) => ({
+          targetId: record.target_id,
+          targetType: record.target_type,
+        })),
+        complaints: complaintRecords.map((record) => ({
+          targetId: record.target_id,
+          targetType: record.target_type,
+        })),
+      },
+    };
+
+    return res.status(200).json(userData);
   } catch (err) {
     console.error(err);
     res.status(401).json({ message: "Token 无效" });
@@ -835,35 +843,35 @@ router.get("/user-info/:user_id", async (req, res) => {
 });
 
 // 获取用户点赞/投诉记录
-router.get("/records", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
+// router.get("/records", async (req, res) => {
+//   const token = req.headers.authorization?.split(" ")[1];
 
-  if (!token) {
-    return res.status(401).json({ message: "未提供 Token" });
-  }
+//   if (!token) {
+//     return res.status(401).json({ message: "未提供 Token" });
+//   }
 
-  try {
-    const decoded = jwt.verify(token, SECRET_KEY);
-    const userId = decoded.user_id;
+//   try {
+//     const decoded = jwt.verify(token, SECRET_KEY);
+//     const userId = decoded.user_id;
 
-    const [likeRecords] = await db.query("SELECT target_id, target_type FROM likes WHERE user_id = ?", [userId]);
+//     const [likeRecords] = await db.query("SELECT target_id, target_type FROM likes WHERE user_id = ?", [userId]);
 
-    const [complaintRecords] = await db.query("SELECT target_id, target_type FROM complaints WHERE user_id = ?", [userId]);
+//     const [complaintRecords] = await db.query("SELECT target_id, target_type FROM complaints WHERE user_id = ?", [userId]);
 
-    res.status(200).json({
-      likes: likeRecords.map((record) => ({
-        targetId: record.target_id,
-        targetType: record.target_type,
-      })),
-      complaints: complaintRecords.map((record) => ({
-        targetId: record.target_id,
-        targetType: record.target_type,
-      })),
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(401).json({ message: "Token 无效" });
-  }
-});
+//     res.status(200).json({
+//       likes: likeRecords.map((record) => ({
+//         targetId: record.target_id,
+//         targetType: record.target_type,
+//       })),
+//       complaints: complaintRecords.map((record) => ({
+//         targetId: record.target_id,
+//         targetType: record.target_type,
+//       })),
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(401).json({ message: "Token 无效" });
+//   }
+// });
 
 export default router;

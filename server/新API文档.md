@@ -353,8 +353,7 @@
 
 - **路径**: `/api/users/profile`
 - **方法**: `GET`
-- **描述**: 根据用户角色返回不同的信息：管理员获取所有用户信息，普通用户获取个人资料
-- ==**备注**: 这个 api 的管理员部分还未测试==
+- **描述**: 获取当前用户的个人资料，包括基本信息、主题设置和用户记录
 
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
@@ -370,50 +369,14 @@ Authorization: Bearer {token}
 响应参数
 | 状态码 | 内容类型 | 描述 |
 |------|----------|------|
-| 200 | application/json | 成功获取数据 |
+| 200 | application/json | 成功获取用户资料 |
 | 401 | application/json | 未提供 Token 或 Token 无效 |
-| 404 | application/json | 用户不存在（仅针对普通用户） |
+| 404 | application/json | 用户不存在 |
 | 500 | application/json | 服务器错误 |
 
 响应示例
 
-- 管理员成功响应 (状态码：200)
-
-  ```json
-  {
-    "users": [
-      {
-        "id": 1,
-        "nickname": "用户1",
-        "email": "user1@example.com",
-        "qq_id": "123456789",
-        "username": "user1",
-        "campus_id": 1,
-        "credit": 100,
-        "theme_id": 1,
-        "background_url": "/uploads/bg1.jpg",
-        "banner_url": "/uploads/banner1.jpg",
-        "avatar": "/uploads/avatar1.jpg"
-      },
-      {
-        "id": 2,
-        "nickname": "用户2",
-        "email": "user2@example.com",
-        "qq_id": "987654321",
-        "username": "user2",
-        "campus_id": 2,
-        "credit": 80,
-        "theme_id": 2,
-        "background_url": "/uploads/bg2.jpg",
-        "banner_url": "/uploads/banner2.jpg",
-        "avatar": "/uploads/avatar2.jpg"
-      }
-      // 更多用户...
-    ]
-  }
-  ```
-
-- 普通用户成功响应 (状态码：200)
+- 成功响应 (状态码：200)
 
   ```json
   {
@@ -426,7 +389,25 @@ Authorization: Bearer {token}
     "theme_id": 1,
     "background_url": "/uploads/background.jpg",
     "banner_url": "/uploads/banner.jpg",
-    "avatar": "/uploads/avatar.jpg"
+    "avatar": "/uploads/avatar.jpg",
+    "records": {
+      "likes": [
+        {
+          "targetId": 123,
+          "targetType": "post"
+        },
+        {
+          "targetId": 456,
+          "targetType": "goods"
+        }
+      ],
+      "complaints": [
+        {
+          "targetId": 789,
+          "targetType": "post"
+        }
+      ]
+    }
   }
   ```
 
@@ -455,11 +436,12 @@ Authorization: Bearer {token}
 
 **备注**
 
-- 该 API 合并了之前的 `/` 和 `/get-theme` 功能
-- 根据用户角色（管理员/普通用户）返回不同内容
-- 普通用户只能查看自己的资料
-- 管理员可以查看所有用户的资料
-- 建议普通用户端使用 localStorage 缓存主题相关信息，避免频繁请求
+- 该 API 合并了原来的 `/records` 功能，现在一次请求可获取完整的用户信息
+- 用户只能查看自己的资料
+- records 对象包含用户的所有点赞和投诉记录
+- `targetType` 表示目标类型，可能的值包括：`post`（帖子）、`goods`（商品）
+- `targetId` 表示目标对象的 ID
+- 建议前端使用 localStorage 缓存主题相关信息，避免频繁请求
 
 ### 更新用户资料
 
@@ -656,6 +638,7 @@ PUT /api/users/profile/image?type=avatar
 ### 获取用户点赞/投诉记录
 
 **基本信息**
+
 - **路径**: `/api/users/records`
 - **方法**: `GET`
 - **描述**: 获取当前用户的点赞记录和投诉记录
@@ -664,11 +647,13 @@ PUT /api/users/profile/image?type=avatar
 无
 
 **请求头**
+
 ```
 Authorization: Bearer {token}
 ```
 
 **请求示例**
+
 ```
 GET /api/users/records
 ```
@@ -681,6 +666,7 @@ GET /api/users/records
 | 500 | application/json | 服务器错误 |
 
 **响应示例**
+
 - 成功响应 (状态码：200)
   ```json
   {
@@ -696,8 +682,8 @@ GET /api/users/records
     ]
   }
   ```
-  
 - Token 未提供 (状态码：401)
+
   ```json
   {
     "message": "未提供 Token"
@@ -712,12 +698,12 @@ GET /api/users/records
   ```
 
 **备注**
+
 - 此 API 返回用户的所有点赞记录和投诉记录
 - `targetType` 表示目标类型，可能的值包括：`post`、`goods`
 - `targetId` 表示目标对象的 ID
 - 点赞记录从 `likes` 表查询，投诉记录从 `complaints` 表查询
 - 需要提供有效的认证 Token 才能访问
-
 
 ## goodsRoutes
 
@@ -1025,217 +1011,6 @@ images: [文件1.jpg, 文件2.jpg]
 - 图片将保存在服务器的`/uploads/`目录，并通过 post_images 表与商品关联
 - 如果只想更新商品文本信息而不更改图片，请不要包含 images 字段
 
-### 修改商品点赞数和投诉数
-
-基本信息
-
-- **路径**: `/api/goods/:action/:post_id`
-- **方法**: `PUT`
-- **描述**: 增加或减少商品的点赞数或投诉数，支持用户对商品进行点赞/取消点赞和投诉/取消投诉操作
-
-请求参数
-
-| 参数名  | 类型   | 必选 | 描述                                                                      |
-| ------- | ------ | ---- | ------------------------------------------------------------------------- |
-| action  | String | 是   | 操作类型，必须是 "like" 或 "complaint"，作为 URL 路径参数提供             |
-| post_id | String | 是   | 商品 ID，作为 URL 路径参数提供                                            |
-| value   | Number | 是   | 操作值，1 表示增加计数（点赞/投诉），-1 表示减少计数（取消点赞/取消投诉） |
-
-请求头
-
-```
-Authorization: Bearer {token}
-```
-
-请求体示例
-
-```json
-{
-  "value": 1
-}
-```
-
-或
-
-```json
-{
-  "value": -1
-}
-```
-
-响应参数
-
-| 状态码 | 内容类型         | 描述                       |
-| ------ | ---------------- | -------------------------- |
-| 200    | application/json | 操作成功                   |
-| 400    | application/json | 无效的操作类型或参数       |
-| 401    | application/json | 未提供 Token 或 Token 无效 |
-| 404    | application/json | 商品未找到                 |
-| 500    | application/json | 服务器错误                 |
-
-响应示例
-
-- 点赞成功 (状态码：200)
-
-  ```json
-  {
-    "message": "点赞成功"
-  }
-  ```
-
-- 取消点赞成功 (状态码：200)
-
-  ```json
-  {
-    "message": "取消点赞成功"
-  }
-  ```
-
-- 投诉成功 (状态码：200)
-
-  ```json
-  {
-    "message": "投诉成功"
-  }
-  ```
-
-- 取消投诉成功 (状态码：200)
-
-  ```json
-  {
-    "message": "取消投诉成功"
-  }
-  ```
-
-- Token 未提供 (状态码：401)
-
-  ```json
-  {
-    "message": "未提供 Token"
-  }
-  ```
-
-- Token 无效 (状态码：401)
-
-  ```json
-  {
-    "message": "无效的 Token"
-  }
-  ```
-
-- Token 已过期 (状态码：401)
-
-  ```json
-  {
-    "message": "Token 已过期"
-  }
-  ```
-
-- 无效操作类型 (状态码：400)
-
-  ```json
-  {
-    "message": "无效的操作类型，必须是 like 或 complaint"
-  }
-  ```
-
-- 缺少参数 (状态码：400)
-
-  ```json
-  {
-    "message": "缺少 like 参数"
-  }
-  ```
-
-  或
-
-  ```json
-  {
-    "message": "缺少 complaint 参数"
-  }
-  ```
-
-- 参数值无效 (状态码：400)
-
-  ```json
-  {
-    "message": "无效的 like 参数，必须是 1 或 -1"
-  }
-  ```
-
-  或
-
-  ```json
-  {
-    "message": "无效的 complaint 参数，必须是 1 或 -1"
-  }
-  ```
-
-- 重复操作 (状态码：400)
-
-  ```json
-  {
-    "message": "您已经点赞过了"
-  }
-  ```
-
-  或
-
-  ```json
-  {
-    "message": "您已经投诉过了"
-  }
-  ```
-
-- 取消操作失败 (状态码：400)
-
-  ```json
-  {
-    "message": "您还没有点赞过"
-  }
-  ```
-
-  或
-
-  ```json
-  {
-    "message": "您还没有投诉过"
-  }
-  ```
-
-- 商品未找到 (状态码：404)
-
-  ```json
-  {
-    "message": "商品未找到"
-  }
-  ```
-
-- 操作失败 (状态码：500)
-
-  ```json
-  {
-    "message": "操作失败"
-  }
-  ```
-
-- 服务器错误 (状态码：500)
-
-  ```json
-  {
-    "message": "服务器错误"
-  }
-  ```
-
-**备注**
-
-- 该 API 用于管理商品的点赞和投诉功能
-- action 参数必须是 "like" 或 "complaint"
-- value 参数必须是数字 1 或 -1，1 表示增加计数，-1 表示减少计数
-- 用户对同一商品只能点赞/投诉一次，重复操作会返回错误
-- 取消点赞/投诉时，如果用户之前没有对应操作会返回错误
-- 已删除的商品不能被点赞或投诉
-
 ## forumRoutes
 
 ### 删除帖子
@@ -1244,7 +1019,7 @@ Authorization: Bearer {token}
 
 - **路径**: `/api/forum/posts/:post_id`
 - **方法**: `DELETE`
-- **描述**: 用户软删除校园墙帖子（修改状态为deleted）
+- **描述**: 用户软删除校园墙帖子（修改状态为 deleted）
 
 请求参数
 
@@ -1343,12 +1118,12 @@ Authorization: Bearer {token}
 
 请求参数
 
-| 参数名    | 类型    | 必选 | 描述                                                                   |
-| --------- | ------- | ---- | ---------------------------------------------------------------------- |
-| post_id   | Number  | 是   | 帖子 ID (URL 参数)                                                     |
-| action    | String  | 是   | 交互类型，"like"（点赞）、"complaint"（投诉）或 "comment"（评论）                                          |
-| content   | String  | 否   | 评论内容，仅在 action 为 "comment" 时需要                              |
-| parent_id | Number  | 否   | 如果是回复评论，则提供父评论的 ID                                      |
+| 参数名    | 类型   | 必选 | 描述                                                                      |
+| --------- | ------ | ---- | ------------------------------------------------------------------------- |
+| post_id   | Number | 是   | 帖子 ID (URL 参数)                                                        |
+| action    | String | 是   | 交互类型，"like"（点赞）、"complaint"（投诉）或 "comment"（评论）         |
+| content   | String | 否   | 评论内容，仅在 action 为 "comment" 时需要                                 |
+| parent_id | Number | 否   | 如果是回复评论，则提供父评论的 ID                                         |
 | value     | Number | 否   | 操作值，仅在 action 为 "like" 或 "complaint" 时需要 (1 为添加, -1 为取消) |
 
 请求头
@@ -1416,14 +1191,14 @@ Authorization: Bearer {token}
 
 响应参数
 
-| 状态码 | 内容类型         | 描述                       |
-| ------ | ---------------- | -------------------------- |
-| 200    | application/json | 点赞/投诉成功或取消成功     |
-| 201    | application/json | 评论发布成功               |
-| 400    | application/json | 缺少必要参数、无效的参数或重复操作   |
-| 401    | application/json | 未提供 Token 或 Token 无效 |
-| 404    | application/json | 帖子或评论不存在           |
-| 500    | application/json | 服务器错误                 |
+| 状态码 | 内容类型         | 描述                               |
+| ------ | ---------------- | ---------------------------------- |
+| 200    | application/json | 点赞/投诉成功或取消成功            |
+| 201    | application/json | 评论发布成功                       |
+| 400    | application/json | 缺少必要参数、无效的参数或重复操作 |
+| 401    | application/json | 未提供 Token 或 Token 无效         |
+| 404    | application/json | 帖子或评论不存在                   |
+| 500    | application/json | 服务器错误                         |
 
 响应示例
 
@@ -2715,15 +2490,15 @@ Authorization: Bearer {token}
 
 请求参数
 
-| 参数名 | 类型 | 必选 | 描述 |
-| ------ | ---- | ---- | ---- |
-| post_id | Number | 是 | 帖子ID |
+| 参数名  | 类型   | 必选 | 描述    |
+| ------- | ------ | ---- | ------- |
+| post_id | Number | 是   | 帖子 ID |
 
 请求头
 
-| 参数名 | 类型 | 必选 | 描述 |
-| ------ | ---- | ---- | ---- |
-| Authorization | String | 是 | Bearer JWT_TOKEN |
+| 参数名        | 类型   | 必选 | 描述             |
+| ------------- | ------ | ---- | ---------------- |
+| Authorization | String | 是   | Bearer JWT_TOKEN |
 
 请求体示例
 
@@ -2735,17 +2510,18 @@ Authorization: Bearer {token}
 
 响应参数
 
-| 状态码 | 内容类型 | 描述 |
-| ------ | -------- | ---- |
-| 201 | application/json | 收藏成功 |
-| 400 | application/json | 参数错误或已收藏 |
-| 401 | application/json | Token无效 |
-| 404 | application/json | 帖子不存在 |
-| 500 | application/json | 服务器错误 |
+| 状态码 | 内容类型         | 描述             |
+| ------ | ---------------- | ---------------- |
+| 201    | application/json | 收藏成功         |
+| 400    | application/json | 参数错误或已收藏 |
+| 401    | application/json | Token 无效       |
+| 404    | application/json | 帖子不存在       |
+| 500    | application/json | 服务器错误       |
 
 响应示例
 
 - 成功响应 (状态码：201)
+
   ```json
   {
     "message": "收藏帖子成功"
@@ -2753,6 +2529,7 @@ Authorization: Bearer {token}
   ```
 
 - 已收藏过 (状态码：400)
+
   ```json
   {
     "message": "已经收藏过该帖子"
@@ -2778,15 +2555,15 @@ Authorization: Bearer {token}
 
 请求参数
 
-| 参数名 | 类型 | 必选 | 描述 |
-| ------ | ---- | ---- | ---- |
-| goods_id | Number | 是 | 商品ID |
+| 参数名   | 类型   | 必选 | 描述    |
+| -------- | ------ | ---- | ------- |
+| goods_id | Number | 是   | 商品 ID |
 
 请求头
 
-| 参数名 | 类型 | 必选 | 描述 |
-| ------ | ---- | ---- | ---- |
-| Authorization | String | 是 | Bearer JWT_TOKEN |
+| 参数名        | 类型   | 必选 | 描述             |
+| ------------- | ------ | ---- | ---------------- |
+| Authorization | String | 是   | Bearer JWT_TOKEN |
 
 请求体示例
 
@@ -2798,17 +2575,18 @@ Authorization: Bearer {token}
 
 响应参数
 
-| 状态码 | 内容类型 | 描述 |
-| ------ | -------- | ---- |
-| 201 | application/json | 收藏成功 |
-| 400 | application/json | 参数错误或已收藏 |
-| 401 | application/json | Token无效 |
-| 404 | application/json | 商品不存在 |
-| 500 | application/json | 服务器错误 |
+| 状态码 | 内容类型         | 描述             |
+| ------ | ---------------- | ---------------- |
+| 201    | application/json | 收藏成功         |
+| 400    | application/json | 参数错误或已收藏 |
+| 401    | application/json | Token 无效       |
+| 404    | application/json | 商品不存在       |
+| 500    | application/json | 服务器错误       |
 
 响应示例
 
 - 成功响应 (状态码：201)
+
   ```json
   {
     "message": "收藏商品成功"
@@ -2816,6 +2594,7 @@ Authorization: Bearer {token}
   ```
 
 - 已收藏过 (状态码：400)
+
   ```json
   {
     "message": "已经收藏过该商品"
@@ -2841,15 +2620,15 @@ Authorization: Bearer {token}
 
 请求参数
 
-| 参数名 | 类型 | 必选 | 描述 |
-| ------ | ---- | ---- | ---- |
-| post_id | Number | 是 | 帖子ID |
+| 参数名  | 类型   | 必选 | 描述    |
+| ------- | ------ | ---- | ------- |
+| post_id | Number | 是   | 帖子 ID |
 
 请求头
 
-| 参数名 | 类型 | 必选 | 描述 |
-| ------ | ---- | ---- | ---- |
-| Authorization | String | 是 | Bearer JWT_TOKEN |
+| 参数名        | 类型   | 必选 | 描述             |
+| ------------- | ------ | ---- | ---------------- |
+| Authorization | String | 是   | Bearer JWT_TOKEN |
 
 请求体示例
 
@@ -2861,17 +2640,18 @@ Authorization: Bearer {token}
 
 响应参数
 
-| 状态码 | 内容类型 | 描述 |
-| ------ | -------- | ---- |
-| 200 | application/json | 取消收藏成功 |
-| 400 | application/json | 参数错误 |
-| 401 | application/json | Token无效 |
-| 404 | application/json | 收藏记录不存在 |
-| 500 | application/json | 服务器错误 |
+| 状态码 | 内容类型         | 描述           |
+| ------ | ---------------- | -------------- |
+| 200    | application/json | 取消收藏成功   |
+| 400    | application/json | 参数错误       |
+| 401    | application/json | Token 无效     |
+| 404    | application/json | 收藏记录不存在 |
+| 500    | application/json | 服务器错误     |
 
 响应示例
 
 - 成功响应 (状态码：200)
+
   ```json
   {
     "message": "取消帖子收藏成功"
@@ -2897,15 +2677,15 @@ Authorization: Bearer {token}
 
 请求参数
 
-| 参数名 | 类型 | 必选 | 描述 |
-| ------ | ---- | ---- | ---- |
-| goods_id | Number | 是 | 商品ID |
+| 参数名   | 类型   | 必选 | 描述    |
+| -------- | ------ | ---- | ------- |
+| goods_id | Number | 是   | 商品 ID |
 
 请求头
 
-| 参数名 | 类型 | 必选 | 描述 |
-| ------ | ---- | ---- | ---- |
-| Authorization | String | 是 | Bearer JWT_TOKEN |
+| 参数名        | 类型   | 必选 | 描述             |
+| ------------- | ------ | ---- | ---------------- |
+| Authorization | String | 是   | Bearer JWT_TOKEN |
 
 请求体示例
 
@@ -2917,17 +2697,18 @@ Authorization: Bearer {token}
 
 响应参数
 
-| 状态码 | 内容类型 | 描述 |
-| ------ | -------- | ---- |
-| 200 | application/json | 取消收藏成功 |
-| 400 | application/json | 参数错误 |
-| 401 | application/json | Token无效 |
-| 404 | application/json | 收藏记录不存在 |
-| 500 | application/json | 服务器错误 |
+| 状态码 | 内容类型         | 描述           |
+| ------ | ---------------- | -------------- |
+| 200    | application/json | 取消收藏成功   |
+| 400    | application/json | 参数错误       |
+| 401    | application/json | Token 无效     |
+| 404    | application/json | 收藏记录不存在 |
+| 500    | application/json | 服务器错误     |
 
 响应示例
 
 - 成功响应 (状态码：200)
+
   ```json
   {
     "message": "取消商品收藏成功"
@@ -2953,74 +2734,77 @@ Authorization: Bearer {token}
 
 请求头
 
-| 参数名 | 类型 | 必选 | 描述 |
-| ------ | ---- | ---- | ---- |
-| Authorization | String | 是 | Bearer JWT_TOKEN |
+| 参数名        | 类型   | 必选 | 描述             |
+| ------------- | ------ | ---- | ---------------- |
+| Authorization | String | 是   | Bearer JWT_TOKEN |
 
 响应参数
 
-| 状态码 | 内容类型 | 描述 |
-| ------ | -------- | ---- |
-| 200 | application/json | 获取成功 |
-| 401 | application/json | Token无效 |
-| 500 | application/json | 服务器错误 |
+| 状态码 | 内容类型         | 描述       |
+| ------ | ---------------- | ---------- |
+| 200    | application/json | 获取成功   |
+| 401    | application/json | Token 无效 |
+| 500    | application/json | 服务器错误 |
 
 响应示例
 
 - 成功响应 (状态码：200)
   ```json
   {
-      "message": "获取收藏列表成功",
-      "data": {
-          "posts": [
-              {
-                  "id": 1,
-                  "title": "开发区美食",
-                  "content": "美食推荐？",
-                  "author_id": 1,
-                  "created_at": "2025-07-15T13:09:07.000Z",
-                  "status": "active",
-                  "campus_id": 1,
-                  "likes": 1,
-                  "complaints": 0
-              }
-          ],
-          "goods": [
-              {
-                  "id": 2,
-                  "title": "笔记本2",
-                  "content": "出售",
-                  "author_id": 1,
-                  "created_at": "2025-07-18T16:05:55.000Z",
-                  "status": "active",
-                  "price": "3500.10",
-                  "campus_id": 1,
-                  "goods_type": "sell",
-                  "tag": "computer"
-              },
-              {
-                  "id": 1,
-                  "title": "笔记本",
-                  "content": "出售",
-                  "author_id": 1,
-                  "created_at": "2025-07-18T15:40:06.000Z",
-                  "status": "active",
-                  "price": "3500.00",
-                  "campus_id": 1,
-                  "goods_type": "sell",
-                  "tag": "computer"
-              }
-          ]
-      }
+    "message": "获取收藏列表成功",
+    "data": {
+      "posts": [
+        {
+          "id": 1,
+          "title": "开发区美食",
+          "content": "美食推荐？",
+          "author_id": 1,
+          "created_at": "2025-07-15T13:09:07.000Z",
+          "status": "active",
+          "campus_id": 1,
+          "likes": 1,
+          "complaints": 0
+        }
+      ],
+      "goods": [
+        {
+          "id": 2,
+          "title": "笔记本2",
+          "content": "出售",
+          "author_id": 1,
+          "created_at": "2025-07-18T16:05:55.000Z",
+          "status": "active",
+          "price": "3500.10",
+          "campus_id": 1,
+          "goods_type": "sell",
+          "tag": "computer"
+        },
+        {
+          "id": 1,
+          "title": "笔记本",
+          "content": "出售",
+          "author_id": 1,
+          "created_at": "2025-07-18T15:40:06.000Z",
+          "status": "active",
+          "price": "3500.00",
+          "campus_id": 1,
+          "goods_type": "sell",
+          "tag": "computer"
+        }
+      ]
+    }
   }
   ```
 
 **前端解构使用示例：**
+
 ```javascript
 // 前端接收响应后可以这样解构
-const { data: { posts, goods } } = response.data;
-console.log('收藏的帖子:', posts);
-console.log('收藏的商品:', goods);
+const {
+  data: { posts, goods },
+} = response.data;
+console.log("收藏的帖子:", posts);
+console.log("收藏的商品:", goods);
 ```
 
 ## adminRoute
@@ -3031,12 +2815,12 @@ console.log('收藏的商品:', goods);
 
 - 路径: `/api/admin/search-user`
 - 方法: `POST`
-- 描述: 管理员根据QQ号查询用户详细信息
+- 描述: 管理员根据 QQ 号查询用户详细信息
 
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
 | ------ | ------ | ---- | ---------- |
-| qq_id | String | 是 | 要查询的QQ号 |
+| qq_id | String | 是 | 要查询的 QQ 号 |
 
 请求头部
 | 参数名 | 类型 | 必选 | 描述 |
@@ -3053,13 +2837,13 @@ console.log('收藏的商品:', goods);
 
 响应参数
 
-| 状态码 | 内容类型         | 描述           |
-| ------ | ---------------- | -------------- |
-| 200    | application/json | 查询成功       |
-| 400    | application/json | 参数错误       |
-| 401    | application/json | 未提供Token    |
-| 403    | application/json | 权限不足       |
-| 404    | application/json | 未找到用户     |
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 200    | application/json | 查询成功     |
+| 400    | application/json | 参数错误     |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 404    | application/json | 未找到用户   |
 
 响应示例
 
@@ -3104,7 +2888,7 @@ console.log('收藏的商品:', goods);
 **备注**
 
 - 该接口仅限管理员使用
-- 需要在请求头中提供有效的管理员JWT令牌
+- 需要在请求头中提供有效的管理员 JWT 令牌
 
 ---
 
@@ -3119,7 +2903,7 @@ console.log('收藏的商品:', goods);
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
 | ------ | ------ | ---- | -------------- |
-| qq_id | String | 是 | 要修改的用户QQ号 |
+| qq_id | String | 是 | 要修改的用户 QQ 号 |
 | credit | Number | 是 | 新的信用值 |
 
 请求头部
@@ -3138,13 +2922,13 @@ console.log('收藏的商品:', goods);
 
 响应参数
 
-| 状态码 | 内容类型         | 描述           |
-| ------ | ---------------- | -------------- |
-| 200    | application/json | 修改成功       |
-| 400    | application/json | 参数错误       |
-| 401    | application/json | 未提供Token    |
-| 403    | application/json | 权限不足       |
-| 404    | application/json | 未找到用户     |
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 200    | application/json | 修改成功     |
+| 400    | application/json | 参数错误     |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 404    | application/json | 未找到用户   |
 
 响应示例
 
@@ -3183,7 +2967,7 @@ console.log('收藏的商品:', goods);
 **备注**
 
 - 该接口仅限管理员使用
-- 需要在请求头中提供有效的管理员JWT令牌
+- 需要在请求头中提供有效的管理员 JWT 令牌
 - 信用值可以为负数、零或正数
 
 ---
@@ -3199,7 +2983,7 @@ console.log('收藏的商品:', goods);
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
 | ------ | ------ | ---- | ---------- |
-| post_id | String | 是 | 要删除的帖子ID |
+| post_id | String | 是 | 要删除的帖子 ID |
 
 请求头部
 | 参数名 | 类型 | 必选 | 描述 |
@@ -3208,12 +2992,12 @@ console.log('收藏的商品:', goods);
 
 响应参数
 
-| 状态码 | 内容类型         | 描述           |
-| ------ | ---------------- | -------------- |
-| 200    | application/json | 删除成功       |
-| 401    | application/json | 未提供Token    |
-| 403    | application/json | 权限不足       |
-| 404    | application/json | 帖子不存在     |
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 200    | application/json | 删除成功     |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 404    | application/json | 帖子不存在   |
 
 响应示例
 
@@ -3260,7 +3044,7 @@ console.log('收藏的商品:', goods);
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
 | ------ | ------ | ---- | ---------- |
-| goods_id | String | 是 | 要删除的商品ID |
+| goods_id | String | 是 | 要删除的商品 ID |
 
 请求头部
 | 参数名 | 类型 | 必选 | 描述 |
@@ -3269,12 +3053,12 @@ console.log('收藏的商品:', goods);
 
 响应参数
 
-| 状态码 | 内容类型         | 描述           |
-| ------ | ---------------- | -------------- |
-| 200    | application/json | 删除成功       |
-| 401    | application/json | 未提供Token    |
-| 403    | application/json | 权限不足       |
-| 404    | application/json | 商品不存在     |
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 200    | application/json | 删除成功     |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 404    | application/json | 商品不存在   |
 
 响应示例
 
