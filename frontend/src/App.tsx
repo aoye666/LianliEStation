@@ -84,10 +84,7 @@ const App: React.FC = () => {
       while (!cancelled && retries < MAX_RETRIES) {
         try {
           // 并行请求用户信息和点赞/投诉信息
-          await Promise.all([
-            useUserStore.getState().fetchUserProfile(),
-            useUserStore.getState().fetchLikesComplaints(),
-          ]);
+          await useUserStore.getState().fetchUserProfile();
 
           // 成功获取用户信息和点赞/投诉信息，退出循环；否则被catch捕获并继续重试直至请求成功或达到最大重试次数
           break;

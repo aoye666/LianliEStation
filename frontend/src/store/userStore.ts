@@ -53,7 +53,6 @@ interface UserState {
 
   // fetchByQQ: (qq: string) => Promise<void>;
   fetchUserProfile: () => Promise<void>;
-  fetchLikesComplaints: () => Promise<void>;
   changeImage: (type: string, image: File) => Promise<void>;
   changeProfile: (
     nickname: string,
@@ -114,7 +113,6 @@ const useUserStore = create<UserState>()(
           set({ isAuthenticated: true, token, isAdmin });
 
           await get().fetchUserProfile(); // 获取当前用户信息
-          await get().fetchLikesComplaints(); // 获取当前用户的点赞、投诉记录
         } catch (error: any) {
           throw error;
         }
@@ -217,27 +215,29 @@ const useUserStore = create<UserState>()(
           const { isAdmin } = get();
 
           // 一般用户获取自己的信息
-          if (!isAdmin) set({ currentUser: res?.data });
+          if (!isAdmin) {
+            const userData = res?.data;
+            
+            if (userData) {
+              // 提取 likes 和 complaints
+              const { records, ...userInfo } = userData;
+              const likes = records?.likes || [];
+              const complaints = records?.complaints || [];
+              
+              // 分别设置用户信息和记录
+              set({ 
+                currentUser: {
+                  ...userInfo,
+                  likes,
+                  complaints
+                }
+              });
+            }
+          }
           // 管理员获取所有用户信息
-          else set({ users: res?.data });
-        } catch (error: any) {
-          throw error;
-        }
-      },
-
-      // 获取当前用户的点赞、投诉记录
-      fetchLikesComplaints: async () => {
-        try {
-          const res = await api.get("/api/users/records");
-          const currentUser = get().currentUser;
-          if (currentUser)
-            set({
-              currentUser: {
-                ...currentUser,
-                likes: res?.data.likes,
-                complaints: res?.data.complaints,
-              },
-            });
+          else {
+            set({ users: res?.data });
+          }
         } catch (error: any) {
           throw error;
         }
