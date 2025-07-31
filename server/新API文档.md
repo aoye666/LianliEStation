@@ -1504,6 +1504,7 @@ Content-Type: multipart/form-data
 POST /api/appeals/publish
 Content-Type: multipart/form-data
 
+title:商品问题
 id: 123
 content: "商品存在问题，描述与实际不符"
 type: "goods"
@@ -1598,7 +1599,7 @@ images: [file1.jpg, file2.jpg]
 请求示例
 
 ```
-GET /api/appeal/search?status=pending
+GET /api/appeals/search?status=pending
 ```
 
 响应参数
@@ -3091,3 +3092,166 @@ console.log("收藏的商品:", goods);
 - 该接口仅限管理员使用
 - 执行硬删除，会彻底删除数据库记录及相关图片文件
 - 删除操作不可恢复
+
+---
+
+### 管理员获取申诉列表
+
+基本信息
+
+- 路径: `/api/admin/appeals`
+- 方法: `GET`
+- 描述: 管理员获取申诉列表，支持分页和多种筛选条件
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ------ | ------ | ---- | ---------- |
+| status | String | 否 | 申诉状态筛选：pending（待处理）、resolved（已处理） |
+| read_status | String | 否 | 阅读状态筛选：unread（未读）、read（已读） |
+| type | String | 否 | 申诉类型筛选：post（帖子申诉）、goods（商品申诉） |
+| page | Number | 否 | 页码，默认为 1 |
+| limit | Number | 否 | 每页数量，默认为 10 |
+
+请求头部
+| 参数名 | 类型 | 必选 | 描述 |
+| ------------- | ------ | ---- | ------------------------ |
+| Authorization | String | 是 | Bearer token（管理员权限） |
+
+响应参数
+
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 200    | application/json | 获取成功     |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 500    | application/json | 服务器错误   |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "获取申诉列表成功",
+    "total": 25,
+    "page": 1,
+    "limit": 10,
+    "pages": 3,
+    "appeals": [
+      {
+        "id": 1,
+        "title": "帖子申诉",
+        "author_id": 123,
+        "post_id": 456,
+        "content": "我认为我的帖子被误删了...",
+        "type": "post",
+        "status": "pending",
+        "read_status": "unread",
+        "created_at": "2024-01-01T10:00:00.000Z",
+        "author_name": "张三",
+        "author_qq_id": "12345678",
+        "author_avatar": "/uploads/avatar.jpg",
+        "author_credit": 85,
+        "target_title": "被申诉的帖子标题",
+        "target_content": "被申诉的帖子内容...",
+        "images": [
+          "/uploads/appeal_image1.jpg",
+          "/uploads/appeal_image2.jpg"
+        ]
+      }
+    ]
+  }
+  ```
+
+- 权限不足 (状态码：403)
+
+  ```json
+  {
+    "message": "您没有权限执行此操作"
+  }
+  ```
+
+**备注**
+
+- 该接口仅限管理员使用
+- 支持多种筛选条件，可以组合使用
+- 返回的申诉包含申诉者信息和被申诉对象的基本信息
+- 申诉相关的图片会一并返回
+
+---
+
+### 管理员更新申诉状态
+
+基本信息
+
+- 路径: `/api/admin/appeals`
+- 方法: `PUT`
+- 描述: 管理员处理申诉，更新申诉状态并可选择性地发送回复
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ------ | ------ | ---- | ---------- |
+| appeal_id | Number | 是 | 申诉 ID |
+| status | String | 否 | 更新申诉状态：pending、resolved、deleted |
+| read_status | String | 否 | 更新阅读状态：unread、read |
+| response_content | String | 否 | 管理员回复内容，如果提供将发送给申诉用户 |
+
+请求头部
+| 参数名 | 类型 | 必选 | 描述 |
+| ------------- | ------ | ---- | ------------------------ |
+| Authorization | String | 是 | Bearer token（管理员权限） |
+
+请求体示例
+
+```json
+{
+  "appeal_id": 1,
+  "status": "resolved",
+  "read_status": "read",
+  "response_content": "经过审核，您的申诉理由充分，我们已恢复您的帖子。"
+}
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 200    | application/json | 更新成功     |
+| 400    | application/json | 参数错误     |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 404    | application/json | 申诉不存在   |
+| 500    | application/json | 服务器错误   |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "申诉状态更新成功"
+  }
+  ```
+
+- 参数错误 (状态码：400)
+
+  ```json
+  {
+    "message": "缺少 appeal_id 参数"
+  }
+  ```
+
+- 申诉不存在 (状态码：404)
+
+  ```json
+  {
+    "message": "申诉不存在"
+  }
+  ```
+
+**备注**
+
+- 该接口仅限管理员使用
+- 至少需要提供 status 或 read_status 中的一个参数
+- 如果提供了 response_content，系统会自动向申诉用户发送回复通知
+- 回复内容会保存到 responses 表中，用户可以在个人中心查看

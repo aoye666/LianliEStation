@@ -207,4 +207,199 @@ router.delete("/goods/:goods_id", async (req, res) => {
   }
 });
 
+// 管理员获取申诉列表
+router.get("/appeals", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  const { status, read_status, type, page = 1, limit = 10 } = req.query;
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+
+    // 通过 isAdmin 字段判断是否为管理员
+    if (!decoded.isAdmin) {
+      return res.status(403).json({ message: "您没有权限执行此操作" });
+    }
+
+    // 构建查询条件
+    let whereConditions = "WHERE a.status != 'deleted'";
+    const queryParams = [];
+
+    if (status) {
+      whereConditions += " AND a.status = ?";
+      queryParams.push(status);
+    }
+
+    if (read_status) {
+      whereConditions += " AND a.read_status = ?";
+      queryParams.push(read_status);
+    }
+
+    if (type) {
+      whereConditions += " AND a.type = ?";
+      queryParams.push(type);
+    }
+
+    // 查询总数
+    const countQuery = `
+      SELECT COUNT(*) as total 
+      FROM appeals a
+      ${whereConditions}
+    `;
+    const [countRows] = await db.query(countQuery, queryParams);
+    const total = countRows[0].total;
+
+    // 构建主查询
+    const mainQuery = `
+      SELECT 
+        a.*,
+        u.nickname as author_name,
+        u.qq_id as author_qq_id,
+        u.avatar as author_avatar,
+        u.credit as author_credit,
+        CASE 
+          WHEN a.type = 'post' THEN p.title
+          WHEN a.type = 'goods' THEN g.title
+        END as target_title,
+        CASE 
+          WHEN a.type = 'post' THEN p.content
+          WHEN a.type = 'goods' THEN g.content
+        END as target_content
+      FROM appeals a
+      JOIN users u ON a.author_id = u.id
+      LEFT JOIN posts p ON a.type = 'post' AND a.post_id = p.id
+      LEFT JOIN goods g ON a.type = 'goods' AND a.post_id = g.id
+      ${whereConditions}
+      ORDER BY a.created_at DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    queryParams.push(parseInt(limit), offset);
+
+    const [appeals] = await db.query(mainQuery, queryParams);
+
+    // 获取申诉的图片
+    if (appeals.length > 0) {
+      const appealIds = appeals.map(appeal => appeal.id);
+      const [imageRows] = await db.query(
+        "SELECT appeal_id, image_url FROM appeal_images WHERE appeal_id IN (?)",
+        [appealIds]
+      );
+
+      // 构建图片映射
+      const imagesMap = imageRows.reduce((map, row) => {
+        if (!map[row.appeal_id]) {
+          map[row.appeal_id] = [];
+        }
+        map[row.appeal_id].push(row.image_url);
+        return map;
+      }, {});
+
+      // 为每个申诉添加图片信息
+      appeals.forEach(appeal => {
+        appeal.images = imagesMap[appeal.id] || [];
+      });
+    }
+
+    res.status(200).json({
+      message: "获取申诉列表成功",
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      pages: Math.ceil(total / parseInt(limit)),
+      appeals
+    });
+
+  } catch (err) {
+    console.error(err);
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "Token 格式无效" });
+    }
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token 已过期" });
+    }
+    return res.status(500).json({ message: "服务器错误" });
+  }
+});
+
+// 管理员更新申诉状态
+router.put("/appeals", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  const { appeal_id, status, read_status, response_content } = req.body;
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  if (!appeal_id) {
+    return res.status(400).json({ message: "缺少 appeal_id 参数" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+
+    // 通过 isAdmin 字段判断是否为管理员
+    if (!decoded.isAdmin) {
+      return res.status(403).json({ message: "您没有权限执行此操作" });
+    }
+
+    // 检查申诉是否存在
+    const [appealRows] = await db.query("SELECT * FROM appeals WHERE id = ? AND status != 'deleted'", [appeal_id]);
+
+    if (appealRows.length === 0) {
+      return res.status(404).json({ message: "申诉不存在" });
+    }
+
+    const appeal = appealRows[0];
+
+    // 构建更新字段
+    let updateFields = [];
+    let updateParams = [];
+
+    if (status) {
+      updateFields.push("status = ?");
+      updateParams.push(status);
+    }
+
+    if (read_status) {
+      updateFields.push("read_status = ?");
+      updateParams.push(read_status);
+    }
+
+    if (updateFields.length === 0) {
+      return res.status(400).json({ message: "没有提供要更新的字段" });
+    }
+
+    updateParams.push(appeal_id);
+
+    // 更新申诉状态
+    const updateQuery = `UPDATE appeals SET ${updateFields.join(", ")} WHERE id = ?`;
+    await db.query(updateQuery, updateParams);
+
+    // 如果提供了回复内容，插入到 responses 表
+    if (response_content && response_content.trim()) {
+      await db.query(
+        "INSERT INTO responses (title, user_id, response_type, related_id, content) VALUES (?, ?, ?, ?, ?)",
+        [`申诉回复：${appeal.title}`, appeal.author_id, 'appeal', appeal_id, response_content.trim()]
+      );
+    }
+
+    res.status(200).json({ message: "申诉状态更新成功" });
+
+  } catch (err) {
+    console.error(err);
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "Token 格式无效" });
+    }
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token 已过期" });
+    }
+    return res.status(500).json({ message: "服务器错误" });
+  }
+});
+
 export default router;
