@@ -402,4 +402,250 @@ router.put("/appeals", async (req, res) => {
   }
 });
 
+
+
+// 管理员获取用户发布历史
+router.get("/search-history", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  const { user_id, qq_id, type = 'all', status = 'all', page = 1, limit = 20 } = req.query;
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  if (!user_id && !qq_id) {
+    return res.status(400).json({ message: "缺少 user_id 或 qq_id 参数" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+
+    // 通过 isAdmin 字段判断是否为管理员
+    if (!decoded.isAdmin) {
+      return res.status(403).json({ message: "您没有权限执行此操作" });
+    }
+
+    // 获取目标用户ID
+    let targetUserId = user_id;
+    if (!user_id && qq_id) {
+      const [userRows] = await db.query("SELECT id FROM users WHERE qq_id = ?", [qq_id]);
+      if (userRows.length === 0) {
+        return res.status(404).json({ message: "用户不存在" });
+      }
+      targetUserId = userRows[0].id;
+    }
+
+    // 验证目标用户是否存在
+    const [targetUserRows] = await db.query(
+      "SELECT id, nickname, qq_id, email, credit, campus_id FROM users WHERE id = ?", 
+      [targetUserId]
+    );
+
+    if (targetUserRows.length === 0) {
+      return res.status(404).json({ message: "用户不存在" });
+    }
+
+    const userInfo = targetUserRows[0];
+
+    // 构建查询条件
+    let statusCondition = "";
+    if (status !== 'all') {
+      statusCondition = `AND status = '${status}'`;
+    }
+
+    // 根据类型构建查询
+    let queries = [];
+    let countQueries = [];
+
+    if (type === 'all' || type === 'posts') {
+      queries.push(`
+        (SELECT 
+          'post' as type,
+          id,
+          title,
+          content,
+          status,
+          created_at,
+          likes,
+          complaints,
+          campus_id
+        FROM posts 
+        WHERE author_id = ? ${statusCondition})
+      `);
+      
+      countQueries.push(`
+        (SELECT COUNT(*) as count, 'post' as type FROM posts WHERE author_id = ? ${statusCondition})
+      `);
+    }
+
+    if (type === 'all' || type === 'goods') {
+      queries.push(`
+        (SELECT 
+          'goods' as type,
+          id,
+          title,
+          content,
+          status,
+          created_at,
+          likes,
+          complaints,
+          campus_id
+        FROM goods 
+        WHERE author_id = ? ${statusCondition})
+      `);
+      
+      countQueries.push(`
+        (SELECT COUNT(*) as count, 'goods' as type FROM goods WHERE author_id = ? ${statusCondition})
+      `);
+    }
+
+    // 执行统计查询
+    const params = queries.length === 2 ? [targetUserId, targetUserId] : [targetUserId];
+    
+    const countQuery = countQueries.join(' UNION ALL ');
+    const [countRows] = await db.query(countQuery, params);
+
+    // 计算统计信息
+    let totalPosts = 0, totalGoods = 0;
+    countRows.forEach(row => {
+      if (row.type === 'post') totalPosts = row.count;
+      if (row.type === 'goods') totalGoods = row.count;
+    });
+
+    const totalItems = totalPosts + totalGoods;
+
+    // 如果没有数据，直接返回
+    if (totalItems === 0) {
+      return res.status(200).json({
+        message: "查询成功",
+        user_info: userInfo,
+        statistics: {
+          total_items: 0,
+          posts: { total: 0 },
+          goods: { total: 0 }
+        },
+        items: [],
+        pagination: {
+          current_page: parseInt(page),
+          total_pages: 0,
+          total_items: 0,
+          per_page: parseInt(limit)
+        }
+      });
+    }
+
+    // 执行主查询（带分页）
+    const mainQuery = `
+      ${queries.join(' UNION ALL ')}
+      ORDER BY created_at DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const mainParams = [...params, parseInt(limit), offset];
+
+    const [items] = await db.query(mainQuery, mainParams);
+
+    // 获取关联图片
+    if (items.length > 0) {
+      const postIds = items.filter(item => item.type === 'post').map(item => item.id);
+      const goodsIds = items.filter(item => item.type === 'goods').map(item => item.id);
+
+      let imagesMap = {};
+
+      // 获取帖子图片
+      if (postIds.length > 0) {
+        const [postImages] = await db.query(
+          "SELECT post_id as item_id, image_url FROM post_image WHERE post_id IN (?)",
+          [postIds]
+        );
+        postImages.forEach(img => {
+          if (!imagesMap[`post_${img.item_id}`]) {
+            imagesMap[`post_${img.item_id}`] = [];
+          }
+          imagesMap[`post_${img.item_id}`].push(img.image_url);
+        });
+      }
+
+      // 获取商品图片
+      if (goodsIds.length > 0) {
+        const [goodsImages] = await db.query(
+          "SELECT goods_id as item_id, image_url FROM goods_images WHERE goods_id IN (?)",
+          [goodsIds]
+        );
+        goodsImages.forEach(img => {
+          if (!imagesMap[`goods_${img.item_id}`]) {
+            imagesMap[`goods_${img.item_id}`] = [];
+          }
+          imagesMap[`goods_${img.item_id}`].push(img.image_url);
+        });
+      }
+
+      // 为每个项目添加图片
+      items.forEach(item => {
+        const key = `${item.type}_${item.id}`;
+        item.images = imagesMap[key] || [];
+      });
+    }
+
+    // 计算详细统计
+    const [detailStatsRows] = await db.query(`
+      SELECT 
+        (SELECT COUNT(*) FROM posts WHERE author_id = ?) as total_posts,
+        (SELECT COUNT(*) FROM posts WHERE author_id = ? AND status = 'active') as active_posts,
+        (SELECT COUNT(*) FROM posts WHERE author_id = ? AND status = 'deleted') as deleted_posts,
+        (SELECT COUNT(*) FROM goods WHERE author_id = ?) as total_goods,
+        (SELECT COUNT(*) FROM goods WHERE author_id = ? AND status = 'active') as active_goods,
+        (SELECT COUNT(*) FROM goods WHERE author_id = ? AND status = 'deleted') as deleted_goods,
+        (SELECT COALESCE(SUM(likes), 0) FROM posts WHERE author_id = ?) as posts_likes,
+        (SELECT COALESCE(SUM(complaints), 0) FROM posts WHERE author_id = ?) as posts_complaints,
+        (SELECT COALESCE(SUM(likes), 0) FROM goods WHERE author_id = ?) as goods_likes,
+        (SELECT COALESCE(SUM(complaints), 0) FROM goods WHERE author_id = ?) as goods_complaints
+    `, [targetUserId, targetUserId, targetUserId, targetUserId, targetUserId, targetUserId, targetUserId, targetUserId, targetUserId, targetUserId]);
+
+    const stats = detailStatsRows[0];
+
+    res.status(200).json({
+      message: "查询成功",
+      user_info: userInfo,
+      statistics: {
+        total_items: stats.total_posts + stats.total_goods,
+        posts: {
+          total: stats.total_posts,
+          active: stats.active_posts,
+          deleted: stats.deleted_posts,
+          total_likes: stats.posts_likes,
+          total_complaints: stats.posts_complaints
+        },
+        goods: {
+          total: stats.total_goods,
+          active: stats.active_goods,
+          deleted: stats.deleted_goods,
+          total_likes: stats.goods_likes,
+          total_complaints: stats.goods_complaints
+        },
+        total_likes: stats.posts_likes + stats.goods_likes,
+        total_complaints: stats.posts_complaints + stats.goods_complaints
+      },
+      items,
+      pagination: {
+        current_page: parseInt(page),
+        total_pages: Math.ceil(totalItems / parseInt(limit)),
+        total_items: totalItems,
+        per_page: parseInt(limit)
+      }
+    });
+
+  } catch (err) {
+    console.error(err);
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "Token 格式无效" });
+    }
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token 已过期" });
+    }
+    return res.status(500).json({ message: "服务器错误" });
+  }
+});
+
 export default router;

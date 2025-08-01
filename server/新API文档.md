@@ -3255,3 +3255,154 @@ console.log("收藏的商品:", goods);
 - 至少需要提供 status 或 read_status 中的一个参数
 - 如果提供了 response_content，系统会自动向申诉用户发送回复通知
 - 回复内容会保存到 responses 表中，用户可以在个人中心查看
+
+---
+
+### 管理员获取用户发布历史
+
+基本信息
+
+- 路径: `/api/admin/search-history`
+- 方法: `GET`
+- 描述: 管理员查询指定用户的发布历史，包含帖子和商品，支持多种筛选条件和分页
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ------ | ------ | ---- | ---------- |
+| user_id | Number | 否 | 用户ID（user_id 和 qq_id 至少提供一个） |
+| qq_id | String | 否 | 用户QQ号（user_id 和 qq_id 至少提供一个） |
+| type | String | 否 | 内容类型筛选：all（全部）、posts（仅帖子）、goods（仅商品），默认 all |
+| status | String | 否 | 状态筛选：all（全部）、active（活跃）、deleted（已删除），默认 all |
+| page | Number | 否 | 页码，默认为 1 |
+| limit | Number | 否 | 每页数量，默认为 20 |
+
+请求头部
+| 参数名 | 类型 | 必选 | 描述 |
+| ------------- | ------ | ---- | ------------------------ |
+| Authorization | String | 是 | Bearer token（管理员权限） |
+
+响应参数
+
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 200    | application/json | 查询成功     |
+| 400    | application/json | 参数错误     |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 404    | application/json | 用户不存在   |
+| 500    | application/json | 服务器错误   |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "查询成功",
+    "user_info": {
+      "id": 123,
+      "nickname": "张三",
+      "qq_id": "12345678",
+      "email": "user@example.com",
+      "credit": 85,
+      "campus_id": 1
+    },
+    "statistics": {
+      "total_items": 25,
+      "posts": {
+        "total": 15,
+        "active": 12,
+        "deleted": 3,
+        "total_likes": 120,
+        "total_complaints": 5
+      },
+      "goods": {
+        "total": 10,
+        "active": 8,
+        "deleted": 2,
+        "total_likes": 80,
+        "total_complaints": 2
+      },
+      "total_likes": 200,
+      "total_complaints": 7
+    },
+    "items": [
+      {
+        "type": "post",
+        "id": 456,
+        "title": "校园生活分享",
+        "content": "今天天气真好...",
+        "status": "active",
+        "created_at": "2024-01-15T10:30:00.000Z",
+        "likes": 25,
+        "complaints": 1,
+        "campus_id": 1,
+        "images": [
+          "/uploads/post1.jpg",
+          "/uploads/post2.jpg"
+        ]
+      },
+      {
+        "type": "goods",
+        "id": 789,
+        "title": "二手教材出售",
+        "content": "高等数学教材，9成新...",
+        "status": "active",
+        "created_at": "2024-01-10T15:20:00.000Z",
+        "likes": 15,
+        "complaints": 0,
+        "campus_id": 1,
+        "images": [
+          "/uploads/goods1.jpg"
+        ]
+      }
+    ],
+    "pagination": {
+      "current_page": 1,
+      "total_pages": 3,
+      "total_items": 25,
+      "per_page": 20
+    }
+  }
+  ```
+
+- 参数错误 (状态码：400)
+
+  ```json
+  {
+    "message": "缺少 user_id 或 qq_id 参数"
+  }
+  ```
+
+- 权限不足 (状态码：403)
+
+  ```json
+  {
+    "message": "您没有权限执行此操作"
+  }
+  ```
+
+- 用户不存在 (状态码：404)
+
+  ```json
+  {
+    "message": "用户不存在"
+  }
+  ```
+
+**备注**
+
+- 该接口仅限管理员使用
+- 支持通过用户ID或QQ号查询，两者至少提供一个
+- 返回的数据按创建时间倒序排列
+- 包含完整的用户统计信息，便于管理员评估用户行为
+- 统计信息包括总发布量、活跃/删除状态分布、点赞投诉数据等
+- 每个发布项目都包含关联的图片信息
+- 支持分页查询，避免大量数据影响性能
+
+**使用场景**
+
+- 审核用户是否有违规发布历史
+- 分析用户行为模式和活跃度
+- 为封禁/处罚决策提供数据支持
+- 关联申诉处理，查看争议内容的上下文
