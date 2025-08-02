@@ -10,6 +10,32 @@ const SECRET_KEY = process.env.SECRET_KEY;
 
 let router = Router();
 
+// AI调用统计变量
+let aiCallStats = {
+  totalCalls: 0,                              // 总调用次数
+  todayCalls: 0,                              // 今日调用次数
+  currentDate: new Date().toDateString()      // 当前日期
+};
+
+// 检查并重置今日统计
+function checkAndResetDaily() {
+  const today = new Date().toDateString();
+  if (aiCallStats.currentDate !== today) {
+    aiCallStats.todayCalls = 0;
+    aiCallStats.currentDate = today;
+  }
+}
+
+// 获取统计数据的函数（供其他模块调用）
+export function getAICallStats() {
+  checkAndResetDaily();
+  return {
+    totalCalls: aiCallStats.totalCalls,
+    todayCalls: aiCallStats.todayCalls,
+    currentDate: aiCallStats.currentDate
+  };
+}
+
 router.post("/generate", async (req, res) => {
   // 验证 token
   const token = req.headers.authorization?.split(" ")[1];
@@ -49,6 +75,11 @@ router.post("/generate", async (req, res) => {
     });
 
     if (completion?.choices?.[0]?.message?.content) {
+      // 记录成功调用
+      checkAndResetDaily();
+      aiCallStats.totalCalls++;
+      aiCallStats.todayCalls++;
+      
       const responseData = JSON.parse(completion.choices[0].message.content);
       return res.status(200).json(responseData);
     }
@@ -57,6 +88,12 @@ router.post("/generate", async (req, res) => {
   } catch (error) {
     console.error("AI 生成错误:", error);
     console.error("req.body:", req.body);
+    
+    // 记录失败调用
+    checkAndResetDaily();
+    aiCallStats.totalCalls++;
+    aiCallStats.todayCalls++;
+    
     if (error.name === "JsonWebTokenError") {
       return res.status(401).json({ message: "无效的 Token" });
     }
@@ -64,4 +101,4 @@ router.post("/generate", async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;

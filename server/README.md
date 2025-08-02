@@ -188,6 +188,18 @@ CREATE TABLE `complaints` (
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY `unique_user_complaint` (`user_id`, `target_id`, `target_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 搜索关键词统计表
+CREATE TABLE `search_keywords` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `keyword` VARCHAR(255) NOT NULL,
+    `search_count` INT NOT NULL DEFAULT 1,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_keyword` (`keyword`),
+    INDEX `idx_search_count` (`search_count`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 ```
 
 ##

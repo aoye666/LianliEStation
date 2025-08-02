@@ -3,6 +3,7 @@ import { Router } from "express";
 import jwt from "jsonwebtoken"; // 用于解析 JWT
 import fs from "fs";
 import db from "../db.js";
+import { getAICallStats } from "./aiTemplate.js";
 
 let router = Router();
 
@@ -645,6 +646,92 @@ router.get("/search-history", async (req, res) => {
       return res.status(401).json({ message: "Token 已过期" });
     }
     return res.status(500).json({ message: "服务器错误" });
+  }
+});
+
+// 管理员获取热门搜索关键词
+router.get("/search-keywords", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  const { limit = 50 } = req.query;
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+
+    // 通过 isAdmin 字段判断是否为管理员
+    if (!decoded.isAdmin) {
+      return res.status(403).json({ message: "您没有权限执行此操作" });
+    }
+
+    // 获取热门搜索关键词
+    const [keywords] = await db.query(`
+      SELECT keyword, search_count, created_at, updated_at
+      FROM search_keywords 
+      ORDER BY search_count DESC 
+      LIMIT ?
+    `, [parseInt(limit)]);
+
+    // 获取统计信息
+    const [stats] = await db.query(`
+      SELECT 
+        COUNT(*) as total_keywords,
+        SUM(search_count) as total_searches,
+        AVG(search_count) as avg_searches_per_keyword,
+        MAX(search_count) as max_searches
+      FROM search_keywords
+    `);
+
+    res.status(200).json({
+      message: "获取热门搜索关键词成功",
+      statistics: stats[0],
+      keywords: keywords
+    });
+
+  } catch (err) {
+    console.error(err);
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "Token 格式无效" });
+    }
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token 已过期" });
+    }
+    return res.status(500).json({ message: "服务器错误" });
+  }
+});
+
+// 获取AI调用统计（仅限管理员）
+router.get('/ai/stats', (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+
+    // 通过 isAdmin 字段判断是否为管理员
+    if (!decoded.isAdmin) {
+      return res.status(403).json({ message: "您没有权限执行此操作" });
+    }
+
+    const stats = getAICallStats();
+    res.json({
+      todayCalls: stats.todayCalls,
+      totalCalls: stats.totalCalls
+    });
+  } catch (error) {
+    console.error('获取AI统计数据失败:', error);
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "Token 格式无效" });
+    }
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token 已过期" });
+    }
+    res.status(500).json({ message: '获取统计数据失败' });
   }
 });
 
