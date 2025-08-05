@@ -1,8 +1,8 @@
-import express from 'express';
-const { Router, text } = express;
 import dotenv from "dotenv";
+import express from "express";
 import jwt from "jsonwebtoken"; // 用于生成 JWT
 import OpenAI from "openai";
+const { Router, text } = express;
 
 dotenv.config();
 const API_KEY = process.env.API_KEY;
@@ -12,9 +12,9 @@ let router = Router();
 
 // AI调用统计变量
 let aiCallStats = {
-  totalCalls: 0,                              // 总调用次数
-  todayCalls: 0,                              // 今日调用次数
-  currentDate: new Date().toDateString()      // 当前日期
+  totalCalls: 0, // 总调用次数
+  todayCalls: 0, // 今日调用次数
+  currentDate: new Date().toDateString(), // 当前日期
 };
 
 // 检查并重置今日统计
@@ -32,7 +32,7 @@ export function getAICallStats() {
   return {
     totalCalls: aiCallStats.totalCalls,
     todayCalls: aiCallStats.todayCalls,
-    currentDate: aiCallStats.currentDate
+    currentDate: aiCallStats.currentDate,
   };
 }
 
@@ -65,7 +65,7 @@ router.post("/generate", async (req, res) => {
       messages: [
         {
           role: "system",
-          content: '请根据用户输入生成符合以下结构的商品信息：{ "title": "商品名"(string), "price": 价格(number), "tag": "学业资料" 或 "跑腿代课" 或 "生活用品" 或 "数码电子" 或 "拼单组队" 或 "捞人询问"(string) , "post_type": "sell" 或 "receive"(string), "details": "详情"(string) }'
+          content: '请根据用户输入生成符合以下结构的商品信息：{ "title": "商品名"(string), "price": 价格(number), "tag": "学业资料" 或 "跑腿代课" 或 "生活用品" 或 "数码电子" 或 "拼单组队" 或 "捞人询问"(string) , "post_type": "sell" 或 "receive"(string), "details": "详情"(string) }',
         },
         {
           role: "user",
@@ -79,7 +79,7 @@ router.post("/generate", async (req, res) => {
       checkAndResetDaily();
       aiCallStats.totalCalls++;
       aiCallStats.todayCalls++;
-      
+
       const responseData = JSON.parse(completion.choices[0].message.content);
       return res.status(200).json(responseData);
     }
@@ -88,12 +88,12 @@ router.post("/generate", async (req, res) => {
   } catch (error) {
     console.error("AI 生成错误:", error);
     console.error("req.body:", req.body);
-    
+
     // 记录失败调用
     checkAndResetDaily();
     aiCallStats.totalCalls++;
     aiCallStats.todayCalls++;
-    
+
     if (error.name === "JsonWebTokenError") {
       return res.status(401).json({ message: "无效的 Token" });
     }
@@ -101,4 +101,4 @@ router.post("/generate", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

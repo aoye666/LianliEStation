@@ -874,4 +874,21 @@ router.get("/user-info/:user_id", async (req, res) => {
 //   }
 // });
 
+// Token 解码
+router.get("/decode-token", (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    res.status(200).json(decoded);
+  } catch (err) {
+    console.error(err);
+    res.status(401).json({ message: "Token 无效" });
+  }
+});
+
 export default router;
