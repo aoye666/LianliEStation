@@ -735,4 +735,113 @@ router.get('/ai/stats', (req, res) => {
   }
 });
 
+// 封禁用户
+router.put("/ban", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  const { user_id, duration, duration_type = 'days', reason } = req.body;
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+  if (!user_id || !duration || !reason) {
+    return res.status(400).json({ message: "缺少必要参数：user_id, duration, reason" });
+  }
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    if (!decoded.isAdmin) {
+      return res.status(403).json({ message: "您没有权限执行此操作" });
+    }
+    const [userRows] = await db.query("SELECT id, username, nickname FROM users WHERE id = ?", [user_id]);
+    if (userRows.length === 0) {
+      return res.status(404).json({ message: "用户不存在" });
+    }
+    const [existingBanRows] = await db.query(
+      "SELECT * FROM user_bans WHERE user_id = ? AND status = 'active' AND (ban_until IS NULL OR ban_until > NOW())",
+      [user_id]
+    );
+    if (existingBanRows.length > 0) {
+      return res.status(400).json({ message: "用户已被封禁" });
+    }
+    let banUntil = null;
+    if (duration_type === 'permanent') {
+      banUntil = null;
+    } else {
+      const now = new Date();
+      if (duration_type === 'hours') {
+        banUntil = new Date(now.getTime() + duration * 60 * 60 * 1000);
+      } else if (duration_type === 'days') {
+        banUntil = new Date(now.getTime() + duration * 24 * 60 * 60 * 1000);
+      } else {
+        return res.status(400).json({ message: "无效的时长类型，支持: hours, days, permanent" });
+      }
+    }
+    await db.query(
+      `INSERT INTO user_bans (user_id, admin_id, reason, ban_until, status, created_at) 
+       VALUES (?, ?, ?, ?, 'active', NOW())`,
+      [user_id, decoded.user_id, reason, banUntil]
+    );
+    res.status(200).json({ 
+      message: "用户封禁成功",
+      user: userRows[0],
+      ban_until: banUntil,
+      reason: reason
+    });
+  } catch (err) {
+    console.error(err);
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "Token 格式无效" });
+    }
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token 已过期" });
+    }
+    return res.status(500).json({ message: "服务器错误" });
+  }
+});
+
+// 解封用户
+router.put("/unban", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  const { user_id } = req.body;
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+  if (!user_id) {
+    return res.status(400).json({ message: "缺少 user_id 参数" });
+  }
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    if (!decoded.isAdmin) {
+      return res.status(403).json({ message: "您没有权限执行此操作" });
+    }
+    const [userRows] = await db.query("SELECT id, username, nickname FROM users WHERE id = ?", [user_id]);
+    if (userRows.length === 0) {
+      return res.status(404).json({ message: "用户不存在" });
+    }
+    const [banRows] = await db.query(
+      "SELECT * FROM user_bans WHERE user_id = ? AND status = 'active' AND (ban_until IS NULL OR ban_until > NOW())",
+      [user_id]
+    );
+    if (banRows.length === 0) {
+      return res.status(400).json({ message: "用户未被封禁" });
+    }
+    await db.query(
+      "UPDATE user_bans SET status = 'lifted', lifted_at = NOW(), lifted_by = ? WHERE user_id = ? AND status = 'active'",
+      [decoded.user_id, user_id]
+    );
+    res.status(200).json({ 
+      message: "用户解封成功",
+      user: userRows[0]
+    });
+  } catch (err) {
+    console.error(err);
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "Token 格式无效" });
+    }
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token 已过期" });
+    }
+    return res.status(500).json({ message: "服务器错误" });
+  }
+});
+
 export default router;

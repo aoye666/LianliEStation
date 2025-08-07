@@ -117,6 +117,22 @@ router.post("/login", loginLimiter, async (req, res) => {
     if (userRows.length > 0) {
       user = userRows[0];
       isAdmin = false;
+      // 检查用户是否被封禁
+      const [banRows] = await db.query(
+        "SELECT * FROM user_bans WHERE user_id = ? AND status = 'active' AND (ban_until IS NULL OR ban_until > NOW())",
+        [user.id]
+      );
+      if (banRows.length > 0) {
+        const ban = banRows[0];
+        const banMessage = ban.ban_until
+          ? `账户已被封禁至 ${new Date(ban.ban_until).toLocaleString('zh-CN')}`
+          : '账户已被永久封禁';
+        return res.status(403).json({
+          message: banMessage,
+          reason: ban.reason,
+          ban_until: ban.ban_until
+        });
+      }
     } else {
       // 如果普通用户表中没有，再在管理员表中查询
       const [adminRows] = await db.query(
