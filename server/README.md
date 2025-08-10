@@ -57,9 +57,11 @@ CREATE TABLE `users` (
     `banner_url` VARCHAR(255) NOT NULL DEFAULT '/uploads/default_banner.png',
     `background_url` VARCHAR(255) NOT NULL DEFAULT '/uploads/default_background.png',
     `theme_id` INT NOT NULL DEFAULT 1,
+    `user_type` ENUM('guest', 'user', 'admin') DEFAULT 'user' COMMENT '用户类型：guest-游客，user-普通用户，admin-管理员',
     PRIMARY KEY (`id`),
     UNIQUE KEY `email_unique` (`email`),
-    UNIQUE KEY `username_unique` (`username`)
+    UNIQUE KEY `username_unique` (`username`),
+    INDEX `idx_user_type` (`user_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `goods` (
