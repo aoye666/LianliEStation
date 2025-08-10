@@ -1,0 +1,13 @@
+.unread-row {
+  background-color: #fff7e6;
+}
+
+.messages-container {
+  .ant-table-tbody > tr.unread-row {
+    background-color: #fff7e6;
+  }
+  
+  .ant-table-tbody > tr.unread-row:hover > td {
+    background-color: #fff7e6 !important;
+  }
+}

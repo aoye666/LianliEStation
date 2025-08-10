@@ -200,6 +200,44 @@ CREATE TABLE `search_keywords` (
     INDEX `idx_search_count` (`search_count`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 广告表
+CREATE TABLE `advertisements` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `title` VARCHAR(255) NOT NULL,
+    `content` TEXT,
+    `image_url` VARCHAR(255),
+    `target_url` VARCHAR(255),
+    `position` ENUM('banner', 'market', 'forum') NOT NULL COMMENT '广告位置：横幅/商城/论坛',
+    `duration` INT NOT NULL DEFAULT 7 COMMENT '广告展示天数',
+    `clicks` INT NOT NULL DEFAULT 0 COMMENT '点击次数',
+    `status` ENUM('active', 'inactive', 'expired') DEFAULT 'active',
+    `start_date` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `end_date` DATETIME GENERATED ALWAYS AS (DATE_ADD(`start_date`, INTERVAL `duration` DAY)) STORED,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_position` (`position`),
+    INDEX `idx_status` (`status`),
+    INDEX `idx_end_date` (`end_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 会员表
+CREATE TABLE `memberships` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `uid` INT NOT NULL COMMENT '用户ID，关联users表',
+    `type` VARCHAR(50) NOT NULL DEFAULT 'basic' COMMENT '会员类型：basic/premium/vip',
+    `duration` INT NOT NULL DEFAULT 30 COMMENT '会员有效期天数',
+    `start_date` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `end_date` DATETIME GENERATED ALWAYS AS (DATE_ADD(`start_date`, INTERVAL `duration` DAY)) STORED,
+    `status` ENUM('active', 'expired', 'cancelled') DEFAULT 'active',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`uid`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    INDEX `idx_uid` (`uid`),
+    INDEX `idx_type` (`type`),
+    INDEX `idx_status` (`status`),
+    INDEX `idx_end_date` (`end_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 ```
 
 ##
