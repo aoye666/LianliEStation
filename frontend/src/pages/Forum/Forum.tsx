@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Col,
@@ -23,7 +23,6 @@ const { Meta } = Card;
 
 const Forum = () => {
   const navigate = useNavigate();
-  const recordStore = useRecordStore();
   const mainStore = useMainStore();
   const { forums } = mainStore;
   const nav: TabsProps["items"] = [
@@ -41,6 +40,10 @@ const Forum = () => {
     },
   ];
 
+  useEffect(() => {
+    mainStore.getForumPosts();
+  }, []);
+
   return (
     <div className="forum-container">
       <div className="navbar">
@@ -51,7 +54,7 @@ const Forum = () => {
         <div className="banner">
           <Tabs className="Tabs" centered items={nav} defaultActiveKey="1" />
         </div>
-
+{/* 
         <div className="top-posts">
           <Row className="Row">
             <Col className="Col" span={24}>
@@ -68,56 +71,34 @@ const Forum = () => {
               <Card className="Card">示例</Card>
             </Col>
           </Row>
-        </div>
+        </div> */}
 
         <div className="posts">
-          <Row className="Row" onClick={() => navigate(`/forum-detail`)}>
-            <Col className="Col" span={24}>
-              <Card className="Card" title="校园墙">
-                11111
-                <Row>
-                  <Col span={8}>
-                    <Image src={takePlace} alt="takePlace" />
-                  </Col>
-                  <Col span={8}>
-                    <Image src={takePlace} alt="takePlace" />
-                  </Col>
-                  <Col span={8}>
-                    <Image src={takePlace} alt="takePlace" />
-                  </Col>
-                </Row>
-              </Card>
-            </Col>
-          </Row>
-          <Row className="Row" onClick={() => navigate(`/forum-detail`)}>
-            <Col className="Col" span={24}>
-              <Card className="Card" title="校园墙">
-                示例内容
-                <Row>
-                  <Col span={8}></Col>
-                </Row>
-              </Card>
-            </Col>
-          </Row>
+          {forums.map((post, index) => (
+            <Row
+              key={index}
+              className="Row"
+              onClick={() => navigate(`/forum-detail?id=${post.id}`)}
+            >
+              <Col className="Col" span={24}>
+                <Card className="Card" title={post.title}>
+                  {post.content}
+                  <Row gutter={[8, 8]}>
+                    {
+                      post.images.map((image, index) => (
+                        <Col key={index} span={8}>
+                          <img src={`${process.env.REACT_APP_API_URL || "http://localhost:5000"}/uploads/${image[index]}`}/>
+                        </Col>
+                      ))
+                    }
+                  </Row>
+
+                </Card>
+              </Col>
+            </Row>
+          ))}
+
         </div>
-        {forums.map((post, index) => (
-          <Row
-            key={index}
-            className="Row"
-            onClick={() => navigate(`/forum-detail`)}
-          >
-            <Col className="Col" span={24}>
-              <Card className="Card" title={post.title}>
-                {post.content}
-                {post.images.length > 0
-                  ? post.images.map((image) => (
-                      <Image src={image} alt={image} />
-                    ))
-                  : null}
-              </Card>
-            </Col>
-          </Row>
-        ))}
       </div>
 
       <div className="tabbar">
@@ -130,7 +111,7 @@ const Forum = () => {
             }}
             icon={<PlusOutlined />}
             onClick={() => {
-              navigate("/publish/forum-publish");
+              navigate(`/publish/forum-publish`);
             }}
           />
         </div>

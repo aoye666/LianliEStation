@@ -118,7 +118,7 @@ const useMainStore = create<MainState>()(
 
       getForumPosts: async () => {
         try {
-          const response = await api.get("/api/campusWall/");
+          const response = await api.get("/api/forum/posts");
           if (response?.status === 200 && response.data) {
             const data = response.data.posts;
             set((state) => ({

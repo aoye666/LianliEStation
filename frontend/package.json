@@ -47,8 +47,10 @@
     ]
   },
   "devDependencies": {
+    "@types/chart.js": "^2.9.41",
     "@types/js-cookie": "^3.0.6",
     "@types/react": "^19.0.8",
+    "@types/react-chartjs-2": "^2.0.2",
     "@types/react-dom": "^19.0.3",
     "@types/react-select": "^5.0.1",
     "@types/w3c-screen-orientation": "^1.0.6",

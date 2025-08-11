@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import useScreenType from "./hooks/useScreenType";
 import Cookies from "js-cookie";
 import "./App.scss";
@@ -76,49 +76,88 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    const MAX_RETRIES = 5;
+    // 使用AbortController提供更好的请求取消机制
+    const abortController = new AbortController();
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 1000; // 重试延迟时间
 
-    const tryFetchUserProfileAndLikes = async () => {
-      let retries = 0;
-      while (!cancelled && retries < MAX_RETRIES) {
-        try {
-          // 并行请求用户信息和点赞/投诉信息
-          await useUserStore.getState().fetchUserProfile();
-
-          // 成功获取用户信息和点赞/投诉信息，退出循环；否则被catch捕获并继续重试直至请求成功或达到最大重试次数
-          break;
-        } catch (e) {
-          console.error("获取用户信息或点赞/投诉信息失败:", e);
+    const fetchUserProfileWithRetry = async () => {
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        // 检查是否已被取消
+        if (abortController.signal.aborted) {
+          console.log("请求已被取消");
+          return;
         }
-        retries++;
-        await new Promise((res) => setTimeout(res, 1000));
+
+        try {
+          console.log(`尝试获取用户信息 (第${attempt + 1}/${MAX_RETRIES}次)`);
+          
+          // 传递abort信号给请求（如果fetchUserProfile支持的话）
+          await useUserStore.getState().fetchUserProfile();
+          
+          console.log("✅ 用户信息获取成功");
+          return; // 成功后退出
+
+        } catch (error) {
+          const isLastAttempt = attempt === MAX_RETRIES - 1;
+          
+          console.error(`❌ 获取用户信息失败 (第${attempt + 1}次):`, error);
+
+          // 如果是网络错误且不是最后一次尝试，继续重试
+          if (!isLastAttempt && !abortController.signal.aborted) {
+            console.log(`⏳ ${RETRY_DELAY/1000}秒后重试...`);
+            
+            // 可被中断的延迟
+            await new Promise((resolve, reject) => {
+              const timeoutId = setTimeout(resolve, RETRY_DELAY);
+              abortController.signal.addEventListener('abort', () => {
+                clearTimeout(timeoutId);
+                reject(new Error('Request aborted'));
+              });
+            }).catch(() => {
+              // 被中断时不做任何处理
+              return;
+            });
+          }
+        }
       }
-      if (retries === MAX_RETRIES) {
-        alert("获取用户信息或点赞/投诉信息失败，请检查网络或稍后重试。");
+
+      // 所有重试失败后的处理
+      if (!abortController.signal.aborted) {
+        console.error("🚫 达到最大重试次数，用户信息获取失败");
+        
+        // 检查是否是认证问题
+        const isAuthError = !useUserStore.getState().currentUser;
+        
+        if (isAuthError) {
+          message.error("登录已过期，请重新登录");
+          Cookies.remove("auth-token");
+          // 可选：重定向到登录页
+          setTimeout(() => {
+            window.location.href = '/auth/login';
+          }, 2000);
+        } else {
+          message.warning("获取用户信息失败，请检查网络连接");
+        }
       }
     };
 
-    if (token&&!useUserStore.getState().currentUser?.likes) {
-      tryFetchUserProfileAndLikes();
+    // ✅ 只有存在有效token时才尝试获取
+    if (token && token.trim()) {
+      fetchUserProfileWithRetry();
     }
 
+    // ✅ 清理函数
     return () => {
-      cancelled = true;
+      console.log("🧹 清理用户信息获取请求");
+      abortController.abort();
     };
   }, [token]);
 
 
 // 路由表抽离为常量
-const mobileRoutes = [
-  {
-    path: "*",
-    element: useUserStore.getState().isAuthenticated ? (
-      <Navigate to="/market" replace />
-    ) : (
-      <Navigate to="/auth/login" replace />
-    ),
-  },
+const mobileRoutes = useMemo(() => [
+  
   { path: "/auth/login", element: <Lazy.Login /> },
   { path: "/auth/register", element: <Lazy.Register /> },
   { path: "/user/settings/reset/:type", element: <Lazy.Reset /> },
@@ -173,9 +212,9 @@ const mobileRoutes = [
   {
     path: "/forum-detail",
     element: (
-      <ProtectedRoute>
+      // <ProtectedRoute>
         <Lazy.ForumDetail />
-      </ProtectedRoute>
+      // </ProtectedRoute>
     ),
   },
   {
@@ -250,15 +289,21 @@ const mobileRoutes = [
       </ProtectedRoute>
     ),
   },
-];
+  {
+    path: "*",
+    element: token ? (
+      <Navigate to="/market" replace />
+    ) : (
+      <Navigate to="/auth/login" replace />
+    ),
+  },
+], [token]);
 
-const webRoutes = [
+const webRoutes = useMemo(() => [
   {
     path: "/admin",
     element: (
-      <ProtectedRoute>
-        <Lazy.Admin />
-      </ProtectedRoute>
+      <Lazy.Admin />
     ),
     children: [
       {
@@ -279,12 +324,19 @@ const webRoutes = [
       },
     ],
   },
-];
+  {
+    path: "*",
+    element: (
+      <Navigate to="/admin" replace/>
+    ),
+  }
+], [token]);
 
-const mobileRouter = createBrowserRouter(mobileRoutes);
-const webRouter = createBrowserRouter(webRoutes);
+  const mobileRouter = useMemo(() => createBrowserRouter(mobileRoutes), [mobileRoutes]);
+  const webRouter = useMemo(() => createBrowserRouter(webRoutes), [webRoutes]);
 
   const isMobile = useScreenType(768);
+  console.log(useScreenType(768),isMobile);
 
   return (
     <div className="App">

@@ -221,7 +221,7 @@ const useRecordStore = create<RecordState>()(
 
       getFavoritesGoods: async () => {
         try {
-          const res = await api.get("/api/favorites/user/favorites");
+          const res = await api.get("/api/favorites");
           if (res?.status === 200 && res.data) {
             set({ favoritesGoods: res.data });
           } else {
@@ -367,7 +367,7 @@ const useRecordStore = create<RecordState>()(
 
       fetchForumPosts: async () => {
         try {
-          const response = await api.get("/api/campusWall");
+          const response = await api.get("/api/forum/posts");
           if (response?.status === 200 && response.data) {
             const data = response.data.posts;
             set((state) => ({
