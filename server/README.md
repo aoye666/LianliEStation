@@ -57,9 +57,11 @@ CREATE TABLE `users` (
     `banner_url` VARCHAR(255) NOT NULL DEFAULT '/uploads/default_banner.png',
     `background_url` VARCHAR(255) NOT NULL DEFAULT '/uploads/default_background.png',
     `theme_id` INT NOT NULL DEFAULT 1,
+    `user_type` ENUM('guest', 'user', 'admin') DEFAULT 'user' COMMENT '用户类型：guest-游客，user-普通用户，admin-管理员',
     PRIMARY KEY (`id`),
     UNIQUE KEY `email_unique` (`email`),
-    UNIQUE KEY `username_unique` (`username`)
+    UNIQUE KEY `username_unique` (`username`),
+    INDEX `idx_user_type` (`user_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `goods` (
@@ -236,6 +238,20 @@ CREATE TABLE `memberships` (
     INDEX `idx_type` (`type`),
     INDEX `idx_status` (`status`),
     INDEX `idx_end_date` (`end_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `user_bans` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL,
+  `admin_id` INT NOT NULL,
+  `reason` TEXT NOT NULL,
+  `ban_until` DATETIME NULL, -- NULL为永久封禁
+  `status` ENUM('active','lifted','expired') DEFAULT 'active',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `lifted_at` DATETIME NULL,
+  `lifted_by` INT NULL,
+  INDEX (`user_id`, `status`),
+  INDEX (`ban_until`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ```
