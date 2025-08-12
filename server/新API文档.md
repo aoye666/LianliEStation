@@ -434,6 +434,13 @@ Authorization: Bearer {token}
   }
   ```
 
+- 服务器错误 (状态码：500)
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
 **备注**
 
 - 该 API 合并了原来的 `/records` 功能，现在一次请求可获取完整的用户信息
@@ -442,6 +449,7 @@ Authorization: Bearer {token}
 - `targetType` 表示目标类型，可能的值包括：`post`（帖子）、`goods`（商品）
 - `targetId` 表示目标对象的 ID
 - 建议前端使用 localStorage 缓存主题相关信息，避免频繁请求
+- **使用中间件验证**: 内部使用统一的身份验证中间件，提高代码复用性和维护性
 
 ### 更新用户资料
 
@@ -527,12 +535,20 @@ Authorization: Bearer {token}
   }
   ```
 
+- 服务器错误 (状态码：500)
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
 **备注**
 
 - 此 API 合并了个人资料更新和主题设置功能
 - 更新成功后会返回新的 JWT 令牌，包含更新后的用户信息
 - 客户端应使用返回的新 token 替换旧 token
 - nickname、qq_id 和 campus_id 为必填项，theme_id 为可选项
+- **使用中间件验证**: 内部使用统一的身份验证中间件，提高代码复用性和维护性
 
 ### 上传用户图片
 
@@ -626,6 +642,13 @@ PUT /api/users/profile/image?type=avatar
   }
   ```
 
+- 服务器错误 (状态码：500)
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
 **备注**
 
 - 此 API 合并了原先的三个图片上传接口（头像/背景/Banner）
@@ -634,6 +657,7 @@ PUT /api/users/profile/image?type=avatar
 - 如果用户已有自定义图片（非默认图片），旧图片将被自动删除
 - 根据不同的图片类型，会更新用户表中的不同字段（avatar/background_url/banner_url）
 - 使用 multipart/form-data 提交图片，字段名必须为"image"
+- **使用中间件验证**: 内部使用统一的身份验证中间件，提高代码复用性和维护性
 
 ### 解码 Token
 
@@ -699,83 +723,22 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
+- 服务器错误 (状态码：500)
+
+```json
+{
+  "message": "服务器错误"
+}
+```
+
 **备注**
 
 - 该接口用于验证和解码 JWT Token，返回其中包含的用户信息
 - 需要提供有效的认证 Token 才能访问
 - 解码成功后返回的信息与登录时生成 Token 的内容一致
+- **使用中间件验证**: 内部使用统一的身份验证中间件，提高代码复用性和维护性
 
 ---
-
-### 获取用户点赞/投诉记录
-
-**基本信息**
-
-- **路径**: `/api/users/records`
-- **方法**: `GET`
-- **描述**: 获取当前用户的点赞记录和投诉记录
-
-**请求参数**
-无
-
-**请求头**
-
-```
-Authorization: Bearer {token}
-```
-
-**请求示例**
-
-```
-GET /api/users/records
-```
-
-**响应参数**
-| 状态码 | 内容类型 | 描述 |
-|------|----------|------|
-| 200 | application/json | 获取成功 |
-| 401 | application/json | 未提供 Token 或 Token 无效 |
-| 500 | application/json | 服务器错误 |
-
-**响应示例**
-
-- 成功响应 (状态码：200)
-  ```json
-  {
-    "likes": [
-      {
-        "targetId": 123,
-        "targetType": "post"
-      },
-      {
-        "targetId": 456,
-        "targetType": "goods"
-      }
-    ]
-  }
-  ```
-- Token 未提供 (状态码：401)
-
-  ```json
-  {
-    "message": "未提供 Token"
-  }
-  ```
-
-- Token 无效 (状态码：401)
-  ```json
-  {
-    "message": "Token 无效"
-  }
-  ```
-
-**备注**
-
-- 此 API 返回用户的所有点赞记录和投诉记录
-- `targetType` 表示目标类型，可能的值包括：`post`、`goods`
-- `targetId` 表示目标对象的 ID
-- 点赞记录从 `likes` 表查询，投诉记录从 `complaints` 表查询
-- 需要提供有效的认证 Token 才能访问
 
 ## goodsRoutes
 
