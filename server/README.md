@@ -240,6 +240,20 @@ CREATE TABLE `memberships` (
     INDEX `idx_end_date` (`end_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `user_bans` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL,
+  `admin_id` INT NOT NULL,
+  `reason` TEXT NOT NULL,
+  `ban_until` DATETIME NULL, -- NULL为永久封禁
+  `status` ENUM('active','lifted','expired') DEFAULT 'active',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `lifted_at` DATETIME NULL,
+  `lifted_by` INT NULL,
+  INDEX (`user_id`, `status`),
+  INDEX (`ban_until`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 ```
 
 ##
