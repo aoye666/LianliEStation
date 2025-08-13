@@ -434,6 +434,13 @@ Authorization: Bearer {token}
   }
   ```
 
+- 服务器错误 (状态码：500)
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
 **备注**
 
 - 该 API 合并了原来的 `/records` 功能，现在一次请求可获取完整的用户信息
@@ -442,6 +449,7 @@ Authorization: Bearer {token}
 - `targetType` 表示目标类型，可能的值包括：`post`（帖子）、`goods`（商品）
 - `targetId` 表示目标对象的 ID
 - 建议前端使用 localStorage 缓存主题相关信息，避免频繁请求
+- **使用中间件验证**: 内部使用统一的身份验证中间件，提高代码复用性和维护性
 
 ### 更新用户资料
 
@@ -527,12 +535,20 @@ Authorization: Bearer {token}
   }
   ```
 
+- 服务器错误 (状态码：500)
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
 **备注**
 
 - 此 API 合并了个人资料更新和主题设置功能
 - 更新成功后会返回新的 JWT 令牌，包含更新后的用户信息
 - 客户端应使用返回的新 token 替换旧 token
 - nickname、qq_id 和 campus_id 为必填项，theme_id 为可选项
+- **使用中间件验证**: 内部使用统一的身份验证中间件，提高代码复用性和维护性
 
 ### 上传用户图片
 
@@ -626,6 +642,13 @@ PUT /api/users/profile/image?type=avatar
   }
   ```
 
+- 服务器错误 (状态码：500)
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
 **备注**
 
 - 此 API 合并了原先的三个图片上传接口（头像/背景/Banner）
@@ -634,16 +657,18 @@ PUT /api/users/profile/image?type=avatar
 - 如果用户已有自定义图片（非默认图片），旧图片将被自动删除
 - 根据不同的图片类型，会更新用户表中的不同字段（avatar/background_url/banner_url）
 - 使用 multipart/form-data 提交图片，字段名必须为"image"
+- **使用中间件验证**: 内部使用统一的身份验证中间件，提高代码复用性和维护性
 
-### 获取用户点赞/投诉记录
+### 解码 Token
 
 **基本信息**
 
-- **路径**: `/api/users/records`
+- **路径**: `/api/users/decode-token`
 - **方法**: `GET`
-- **描述**: 获取当前用户的点赞记录和投诉记录
+- **描述**: 解码 JWT Token 并返回其中包含的用户信息
 
 **请求参数**
+
 无
 
 **请求头**
@@ -655,55 +680,65 @@ Authorization: Bearer {token}
 **请求示例**
 
 ```
-GET /api/users/records
+GET /api/users/decode-token
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 **响应参数**
-| 状态码 | 内容类型 | 描述 |
-|------|----------|------|
-| 200 | application/json | 获取成功 |
-| 401 | application/json | 未提供 Token 或 Token 无效 |
-| 500 | application/json | 服务器错误 |
+
+| 状态码 | 内容类型         | 描述                       |
+| ------ | ---------------- | -------------------------- |
+| 200    | application/json | Token 解码成功             |
+| 401    | application/json | 未提供 Token 或 Token 无效 |
+| 500    | application/json | 服务器错误                 |
 
 **响应示例**
 
 - 成功响应 (状态码：200)
-  ```json
-  {
-    "likes": [
-      {
-        "targetId": 123,
-        "targetType": "post"
-      },
-      {
-        "targetId": 456,
-        "targetType": "goods"
-      }
-    ]
-  }
-  ```
+
+```json
+{
+  "user_id": 1,
+  "username": "testuser",
+  "nickname": "Test User",
+  "campus_id": 1,
+  "qq": "123456789",
+  "isAdmin": false
+}
+```
+
 - Token 未提供 (状态码：401)
 
-  ```json
-  {
-    "message": "未提供 Token"
-  }
-  ```
+```json
+{
+  "message": "未提供 Token"
+}
+```
 
 - Token 无效 (状态码：401)
-  ```json
-  {
-    "message": "Token 无效"
-  }
-  ```
+
+```json
+{
+  "message": "Token 无效"
+}
+```
+
+- 服务器错误 (状态码：500)
+
+```json
+{
+  "message": "服务器错误"
+}
+```
 
 **备注**
 
-- 此 API 返回用户的所有点赞记录和投诉记录
-- `targetType` 表示目标类型，可能的值包括：`post`、`goods`
-- `targetId` 表示目标对象的 ID
-- 点赞记录从 `likes` 表查询，投诉记录从 `complaints` 表查询
+- 该接口用于验证和解码 JWT Token，返回其中包含的用户信息
 - 需要提供有效的认证 Token 才能访问
+- 解码成功后返回的信息与登录时生成 Token 的内容一致
+- **使用中间件验证**: 内部使用统一的身份验证中间件，提高代码复用性和维护性
+
+---
 
 ## goodsRoutes
 
@@ -1504,6 +1539,7 @@ Content-Type: multipart/form-data
 POST /api/appeals/publish
 Content-Type: multipart/form-data
 
+title:商品问题
 id: 123
 content: "商品存在问题，描述与实际不符"
 type: "goods"
@@ -1598,7 +1634,7 @@ images: [file1.jpg, file2.jpg]
 请求示例
 
 ```
-GET /api/appeal/search?status=pending
+GET /api/appeals/search?status=pending
 ```
 
 响应参数
@@ -2113,9 +2149,9 @@ images: [图片1.jpg, 图片2.jpg]
 | status | String | 是 | 状态值，"unread" 表示未读，"read" 表示已读 |
 
 请求头
-| 参数名 | 类型 | 必选 | 描述 |
-| ------------ | ------ | ---- | ------------------------- |
-| Authorization | String | 是 | 身份验证令牌，格式为`Bearer {token}` |
+| 参数名        | 类型   | 必选 | 描述                       |
+| ------------- | ------ | ---- | -------------------------- |
+| Authorization | String | 是   | Bearer token（管理员权限） |
 
 请求体示例
 
@@ -2215,597 +2251,6 @@ images: [图片1.jpg, 图片2.jpg]
 - status 参数必须为"read"或"unread"
 - 接口会返回成功和失败的详细信息，允许部分成功的情况
 - 如果某个通知处理失败，不会影响其他通知的处理
-
-## historyRoutes
-
-### 查询发布历史
-
-基本信息
-
-- **路径**: `/api/history/goods`
-- **方法**: `GET`
-- **描述**: 查询用户发布的商品和帖子历史记录，包括关联的图片信息
-
-请求参数
-
-无需请求参数
-
-请求头
-
-```
-Authorization: Bearer {token}
-```
-
-响应参数
-
-| 状态码 | 内容类型         | 描述                       |
-| ------ | ---------------- | -------------------------- |
-| 200    | application/json | 查询成功                   |
-| 401    | application/json | 未提供 Token 或 Token 无效 |
-| 500    | application/json | 服务器错误                 |
-
-响应示例
-
-- 成功响应 (状态码：200)
-
-  ```json
-  {
-    "goods": [
-      {
-        "id": 1,
-        "title": "全新笔记本电脑",
-        "content": "原价5000元，用了不到3个月，因换新出售",
-        "price": 3500,
-        "campus_id": 1,
-        "goods_type": "sell",
-        "tag": "computer",
-        "author_id": 3,
-        "status": "active",
-        "created_at": "2025-04-14T20:42:47.000Z",
-        "images": ["/uploads/image1.jpg", "/uploads/image2.jpg"]
-      }
-    ],
-    "posts": [
-      {
-        "id": 1,
-        "title": "求推荐开发区美食",
-        "content": "最近搬到开发区，有什么好吃的餐厅推荐吗？",
-        "campus_id": 1,
-        "author_id": 3,
-        "status": "active",
-        "created_at": "2025-04-14T20:42:47.000Z",
-        "images": ["/uploads/post1.jpg", "/uploads/post2.jpg"]
-      }
-    ]
-  }
-  ```
-
-- Token 未提供 (状态码：401)
-
-  ```json
-  {
-    "message": "未提供 Token"
-  }
-  ```
-
-- Token 无效 (状态码：401)
-
-  ```json
-  {
-    "message": "无效的 Token"
-  }
-  ```
-
-- 服务器错误 (状态码：500)
-
-  ```json
-  {
-    "message": "服务器错误"
-  }
-  ```
-
-**备注**
-
-- 用户必须登录才能查询发布历史
-- 返回结果按发布时间倒序排列（最新的在前）
-- 不返回状态为 'deleted' 的记录
-- 自动关联并返回商品和帖子的相关图片
-- 商品图片通过 goods_images 表关联，帖子图片通过 post_image 表关联
-- 返回对象包含 goods 和 posts 两个数组
-
-### 修改商品状态
-
-基本信息
-
-- **路径**: `/api/history/goods/:post_id`
-- **方法**: `PUT`
-- **描述**: 修改指定商品的交易状态
-
-请求参数
-
-| 参数名  | 类型   | 必选 | 描述                  |
-| ------- | ------ | ---- | --------------------- |
-| post_id | Number | 是   | 商品 ID (URL 参数)    |
-| status  | String | 是   | 商品状态 (请求体参数) |
-
-请求头
-
-```
-Authorization: Bearer {token}
-Content-Type: application/json
-```
-
-请求体示例
-
-```json
-{
-  "status": "sold"
-}
-```
-
-响应参数
-
-| 状态码 | 内容类型         | 描述                       |
-| ------ | ---------------- | -------------------------- |
-| 200    | application/json | 状态更新成功               |
-| 401    | application/json | 未提供 Token 或 Token 无效 |
-| 403    | application/json | 无权修改此商品             |
-| 500    | application/json | 服务器错误                 |
-
-响应示例
-
-- 成功响应 (状态码：200)
-
-  ```json
-  {
-    "message": "商品状态已更新"
-  }
-  ```
-
-- Token 未提供 (状态码：401)
-
-  ```json
-  {
-    "message": "未提供 Token"
-  }
-  ```
-
-- Token 无效 (状态码：401)
-
-  ```json
-  {
-    "message": "无效的 Token"
-  }
-  ```
-
-- 无权限 (状态码：403)
-
-  ```json
-  {
-    "message": "无权修改此商品"
-  }
-  ```
-
-- 服务器错误 (状态码：500)
-
-  ```json
-  {
-    "message": "服务器错误"
-  }
-  ```
-
-**备注**
-
-- 用户必须登录才能修改商品状态
-- 只能修改自己发布的商品
-- 常见状态值包括：active（活跃）、sold（已售出）、reserved（已预订）等
-
-### 删除帖子
-
-基本信息
-
-- **路径**: `/api/history/posts/:post_id`
-- **方法**: `DELETE`
-- **描述**: 删除指定的校园墙帖子（软删除，将状态设置为 deleted）
-
-请求参数
-
-| 参数名  | 类型   | 必选 | 描述               |
-| ------- | ------ | ---- | ------------------ |
-| post_id | Number | 是   | 帖子 ID (URL 参数) |
-
-请求头
-
-```
-Authorization: Bearer {token}
-```
-
-响应参数
-
-| 状态码 | 内容类型         | 描述                       |
-| ------ | ---------------- | -------------------------- |
-| 200    | application/json | 删除成功                   |
-| 401    | application/json | 未提供 Token 或 Token 无效 |
-| 403    | application/json | 无权删除此帖子             |
-| 500    | application/json | 服务器错误                 |
-
-响应示例
-
-- 成功响应 (状态码：200)
-
-  ```json
-  {
-    "message": "帖子已删除"
-  }
-  ```
-
-- Token 未提供 (状态码：401)
-
-  ```json
-  {
-    "message": "未提供 Token"
-  }
-  ```
-
-- Token 无效 (状态码：401)
-
-  ```json
-  {
-    "message": "无效的 Token"
-  }
-  ```
-
-- 无权限 (状态码：403)
-
-  ```json
-  {
-    "message": "无权删除此帖子"
-  }
-  ```
-
-- 服务器错误 (状态码：500)
-
-  ```json
-  {
-    "message": "服务器错误"
-  }
-  ```
-
-**备注**
-
-- 用户必须登录才能删除帖子
-- 只能删除自己发布的帖子
-- 采用软删除方式，将帖子状态设置为 'deleted'，不会物理删除数据
-- 删除后的帖子不会在查询发布历史接口中返回
-
-## favoritesRoute
-
-### 添加帖子收藏
-
-基本信息
-
-- 路径: `/api/favorites/posts/add`
-- 方法: `POST`
-- 描述: 用户收藏指定的帖子
-
-请求参数
-
-| 参数名  | 类型   | 必选 | 描述    |
-| ------- | ------ | ---- | ------- |
-| post_id | Number | 是   | 帖子 ID |
-
-请求头
-
-| 参数名        | 类型   | 必选 | 描述             |
-| ------------- | ------ | ---- | ---------------- |
-| Authorization | String | 是   | Bearer JWT_TOKEN |
-
-请求体示例
-
-```json
-{
-  "post_id": 1
-}
-```
-
-响应参数
-
-| 状态码 | 内容类型         | 描述             |
-| ------ | ---------------- | ---------------- |
-| 201    | application/json | 收藏成功         |
-| 400    | application/json | 参数错误或已收藏 |
-| 401    | application/json | Token 无效       |
-| 404    | application/json | 帖子不存在       |
-| 500    | application/json | 服务器错误       |
-
-响应示例
-
-- 成功响应 (状态码：201)
-
-  ```json
-  {
-    "message": "收藏帖子成功"
-  }
-  ```
-
-- 已收藏过 (状态码：400)
-
-  ```json
-  {
-    "message": "已经收藏过该帖子"
-  }
-  ```
-
-- 帖子不存在 (状态码：404)
-  ```json
-  {
-    "message": "帖子未找到或已被删除"
-  }
-  ```
-
----
-
-### 添加商品收藏
-
-基本信息
-
-- 路径: `/api/favorites/goods/add`
-- 方法: `POST`
-- 描述: 用户收藏指定的商品
-
-请求参数
-
-| 参数名   | 类型   | 必选 | 描述    |
-| -------- | ------ | ---- | ------- |
-| goods_id | Number | 是   | 商品 ID |
-
-请求头
-
-| 参数名        | 类型   | 必选 | 描述             |
-| ------------- | ------ | ---- | ---------------- |
-| Authorization | String | 是   | Bearer JWT_TOKEN |
-
-请求体示例
-
-```json
-{
-  "goods_id": 1
-}
-```
-
-响应参数
-
-| 状态码 | 内容类型         | 描述             |
-| ------ | ---------------- | ---------------- |
-| 201    | application/json | 收藏成功         |
-| 400    | application/json | 参数错误或已收藏 |
-| 401    | application/json | Token 无效       |
-| 404    | application/json | 商品不存在       |
-| 500    | application/json | 服务器错误       |
-
-响应示例
-
-- 成功响应 (状态码：201)
-
-  ```json
-  {
-    "message": "收藏商品成功"
-  }
-  ```
-
-- 已收藏过 (状态码：400)
-
-  ```json
-  {
-    "message": "已经收藏过该商品"
-  }
-  ```
-
-- 商品不存在 (状态码：404)
-  ```json
-  {
-    "message": "商品未找到或已被删除"
-  }
-  ```
-
----
-
-### 取消帖子收藏
-
-基本信息
-
-- 路径: `/api/favorites/posts/remove`
-- 方法: `DELETE`
-- 描述: 取消收藏指定的帖子
-
-请求参数
-
-| 参数名  | 类型   | 必选 | 描述    |
-| ------- | ------ | ---- | ------- |
-| post_id | Number | 是   | 帖子 ID |
-
-请求头
-
-| 参数名        | 类型   | 必选 | 描述             |
-| ------------- | ------ | ---- | ---------------- |
-| Authorization | String | 是   | Bearer JWT_TOKEN |
-
-请求体示例
-
-```json
-{
-  "post_id": 1
-}
-```
-
-响应参数
-
-| 状态码 | 内容类型         | 描述           |
-| ------ | ---------------- | -------------- |
-| 200    | application/json | 取消收藏成功   |
-| 400    | application/json | 参数错误       |
-| 401    | application/json | Token 无效     |
-| 404    | application/json | 收藏记录不存在 |
-| 500    | application/json | 服务器错误     |
-
-响应示例
-
-- 成功响应 (状态码：200)
-
-  ```json
-  {
-    "message": "取消帖子收藏成功"
-  }
-  ```
-
-- 收藏记录不存在 (状态码：404)
-  ```json
-  {
-    "message": "未找到收藏记录"
-  }
-  ```
-
----
-
-### 取消商品收藏
-
-基本信息
-
-- 路径: `/api/favorites/goods/remove`
-- 方法: `DELETE`
-- 描述: 取消收藏指定的商品
-
-请求参数
-
-| 参数名   | 类型   | 必选 | 描述    |
-| -------- | ------ | ---- | ------- |
-| goods_id | Number | 是   | 商品 ID |
-
-请求头
-
-| 参数名        | 类型   | 必选 | 描述             |
-| ------------- | ------ | ---- | ---------------- |
-| Authorization | String | 是   | Bearer JWT_TOKEN |
-
-请求体示例
-
-```json
-{
-  "goods_id": 1
-}
-```
-
-响应参数
-
-| 状态码 | 内容类型         | 描述           |
-| ------ | ---------------- | -------------- |
-| 200    | application/json | 取消收藏成功   |
-| 400    | application/json | 参数错误       |
-| 401    | application/json | Token 无效     |
-| 404    | application/json | 收藏记录不存在 |
-| 500    | application/json | 服务器错误     |
-
-响应示例
-
-- 成功响应 (状态码：200)
-
-  ```json
-  {
-    "message": "取消商品收藏成功"
-  }
-  ```
-
-- 收藏记录不存在 (状态码：404)
-  ```json
-  {
-    "message": "未找到收藏记录"
-  }
-  ```
-
----
-
-### 查询用户的所有收藏
-
-基本信息
-
-- 路径: `/api/favorites/`
-- 方法: `GET`
-- 描述: 获取用户收藏的所有帖子和商品，分别返回在两个数组中
-
-请求头
-
-| 参数名        | 类型   | 必选 | 描述             |
-| ------------- | ------ | ---- | ---------------- |
-| Authorization | String | 是   | Bearer JWT_TOKEN |
-
-响应参数
-
-| 状态码 | 内容类型         | 描述       |
-| ------ | ---------------- | ---------- |
-| 200    | application/json | 获取成功   |
-| 401    | application/json | Token 无效 |
-| 500    | application/json | 服务器错误 |
-
-响应示例
-
-- 成功响应 (状态码：200)
-  ```json
-  {
-    "message": "获取收藏列表成功",
-    "data": {
-      "posts": [
-        {
-          "id": 1,
-          "title": "开发区美食",
-          "content": "美食推荐？",
-          "author_id": 1,
-          "created_at": "2025-07-15T13:09:07.000Z",
-          "status": "active",
-          "campus_id": 1,
-          "likes": 1,
-          "complaints": 0
-        }
-      ],
-      "goods": [
-        {
-          "id": 2,
-          "title": "笔记本2",
-          "content": "出售",
-          "author_id": 1,
-          "created_at": "2025-07-18T16:05:55.000Z",
-          "status": "active",
-          "price": "3500.10",
-          "campus_id": 1,
-          "goods_type": "sell",
-          "tag": "computer"
-        },
-        {
-          "id": 1,
-          "title": "笔记本",
-          "content": "出售",
-          "author_id": 1,
-          "created_at": "2025-07-18T15:40:06.000Z",
-          "status": "active",
-          "price": "3500.00",
-          "campus_id": 1,
-          "goods_type": "sell",
-          "tag": "computer"
-        }
-      ]
-    }
-  }
-  ```
-
-**前端解构使用示例：**
-
-```javascript
-// 前端接收响应后可以这样解构
-const {
-  data: { posts, goods },
-} = response.data;
-console.log("收藏的帖子:", posts);
-console.log("收藏的商品:", goods);
-```
 
 ## adminRoute
 
@@ -3091,3 +2536,625 @@ console.log("收藏的商品:", goods);
 - 该接口仅限管理员使用
 - 执行硬删除，会彻底删除数据库记录及相关图片文件
 - 删除操作不可恢复
+
+---
+
+### 管理员获取申诉列表
+
+基本信息
+
+- 路径: `/api/admin/appeals`
+- 方法: `GET`
+- 描述: 管理员获取申诉列表，支持分页和多种筛选条件
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ------ | ------ | ---- | ---------- |
+| status | String | 否 | 申诉状态筛选：pending（待处理）、resolved（已处理） |
+| read_status | String | 否 | 阅读状态筛选：unread（未读）、read（已读） |
+| type | String | 否 | 申诉类型筛选：post（帖子申诉）、goods（商品申诉） |
+| page | Number | 否 | 页码，默认为 1 |
+| limit | Number | 否 | 每页数量，默认为 10 |
+
+请求头部
+| 参数名 | 类型 | 必选 | 描述 |
+| ------------- | ------ | ---- | ------------------------ |
+| Authorization | String | 是 | Bearer token（管理员权限） |
+
+响应参数
+
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 200    | application/json | 获取成功     |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 500    | application/json | 服务器错误   |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "获取申诉列表成功",
+    "total": 25,
+    "page": 1,
+    "limit": 10,
+    "pages": 3,
+    "appeals": [
+      {
+        "id": 1,
+        "title": "帖子申诉",
+        "author_id": 123,
+        "post_id": 456,
+        "content": "我认为我的帖子被误删了...",
+        "type": "post",
+        "status": "pending",
+        "read_status": "unread",
+        "created_at": "2024-01-01T10:00:00.000Z",
+        "author_name": "张三",
+        "author_qq_id": "12345678",
+        "author_avatar": "/uploads/avatar.jpg",
+        "author_credit": 85,
+        "target_title": "被申诉的帖子标题",
+        "target_content": "被申诉的帖子内容...",
+        "images": [
+          "/uploads/appeal_image1.jpg",
+          "/uploads/appeal_image2.jpg"
+        ]
+      }
+    ]
+  }
+  ```
+
+- 权限不足 (状态码：403)
+
+  ```json
+  {
+    "message": "您没有权限执行此操作"
+  }
+  ```
+
+**备注**
+
+- 该接口仅限管理员使用
+- 支持多种筛选条件，可以组合使用
+- 返回的申诉包含申诉者信息和被申诉对象的基本信息
+- 申诉相关的图片会一并返回
+
+---
+
+### 管理员更新申诉状态
+
+基本信息
+
+- 路径: `/api/admin/appeals`
+- 方法: `PUT`
+- 描述: 管理员处理申诉，更新申诉状态并可选择性地发送回复
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ------ | ------ | ---- | ---------- |
+| appeal_id | Number | 是 | 申诉 ID |
+| status | String | 否 | 更新申诉状态：pending、resolved、deleted |
+| read_status | String | 否 | 更新阅读状态：unread、read |
+| response_content | String | 否 | 管理员回复内容，如果提供将发送给申诉用户 |
+
+请求头部
+| 参数名 | 类型 | 必选 | 描述 |
+| ------------- | ------ | ---- | ------------------------ |
+| Authorization | String | 是 | Bearer token（管理员权限） |
+
+请求体示例
+
+```json
+{
+  "appeal_id": 1,
+  "status": "resolved",
+  "read_status": "read",
+  "response_content": "经过审核，您的申诉理由充分，我们已恢复您的帖子。"
+}
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 200    | application/json | 更新成功     |
+| 400    | application/json | 参数错误     |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 404    | application/json | 申诉不存在   |
+| 500    | application/json | 服务器错误   |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "申诉状态更新成功"
+  }
+  ```
+
+- 参数错误 (状态码：400)
+
+  ```json
+  {
+    "message": "缺少 appeal_id 参数"
+  }
+  ```
+
+- 申诉不存在 (状态码：404)
+
+  ```json
+  {
+    "message": "申诉不存在"
+  }
+  ```
+
+**备注**
+
+- 该接口仅限管理员使用
+- 至少需要提供 status 或 read_status 中的一个参数
+- 如果提供了 response_content，系统会自动向申诉用户发送回复通知
+- 回复内容会保存到 responses 表中，用户可以在个人中心查看
+
+---
+
+### 管理员获取用户发布历史
+
+基本信息
+
+- 路径: `/api/admin/search-history`
+- 方法: `GET`
+- 描述: 管理员查询指定用户的发布历史，包含帖子和商品，支持多种筛选条件和分页
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ------ | ------ | ---- | ---------- |
+| user_id | Number | 否 | 用户ID（user_id 和 qq_id 至少提供一个） |
+| qq_id | String | 否 | 用户QQ号（user_id 和 qq_id 至少提供一个） |
+| type | String | 否 | 内容类型筛选：all（全部）、posts（仅帖子）、goods（仅商品），默认 all |
+| status | String | 否 | 状态筛选：all（全部）、active（活跃）、deleted（已删除），默认 all |
+| page | Number | 否 | 页码，默认为 1 |
+| limit | Number | 否 | 每页数量，默认为 20 |
+
+请求头部
+| 参数名 | 类型 | 必选 | 描述 |
+| ------------- | ------ | ---- | ------------------------ |
+| Authorization | String | 是 | Bearer token（管理员权限） |
+
+响应参数
+
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 200    | application/json | 查询成功     |
+| 400    | application/json | 参数错误     |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 404    | application/json | 用户不存在   |
+| 500    | application/json | 服务器错误   |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "查询成功",
+    "user_info": {
+      "id": 123,
+      "nickname": "张三",
+      "qq_id": "12345678",
+      "email": "user@example.com",
+      "credit": 85,
+      "campus_id": 1
+    },
+    "statistics": {
+      "total_items": 25,
+      "posts": {
+        "total": 15,
+        "active": 12,
+        "deleted": 3,
+        "total_likes": 120,
+        "total_complaints": 5
+      },
+      "goods": {
+        "total": 10,
+        "active": 8,
+        "deleted": 2,
+        "total_likes": 80,
+        "total_complaints": 2
+      },
+      "total_likes": 200,
+      "total_complaints": 7
+    },
+    "items": [
+      {
+        "type": "post",
+        "id": 456,
+        "title": "校园生活分享",
+        "content": "今天天气真好...",
+        "status": "active",
+        "created_at": "2024-01-15T10:30:00.000Z",
+        "likes": 25,
+        "complaints": 1,
+        "campus_id": 1,
+        "images": [
+          "/uploads/post1.jpg",
+          "/uploads/post2.jpg"
+        ]
+      },
+      {
+        "type": "goods",
+        "id": 789,
+        "title": "二手教材出售",
+        "content": "高等数学教材，9成新...",
+        "status": "active",
+        "created_at": "2024-01-10T15:20:00.000Z",
+        "likes": 15,
+        "complaints": 0,
+        "campus_id": 1,
+        "images": [
+          "/uploads/goods1.jpg"
+        ]
+      }
+    ],
+    "pagination": {
+      "current_page": 1,
+      "total_pages": 3,
+      "total_items": 25,
+      "per_page": 20
+    }
+  }
+  ```
+
+- 参数错误 (状态码：400)
+
+  ```json
+  {
+    "message": "缺少 user_id 或 qq_id 参数"
+  }
+  ```
+
+- 权限不足 (状态码：403)
+
+  ```json
+  {
+    "message": "您没有权限执行此操作"
+  }
+  ```
+
+- 用户不存在 (状态码：404)
+
+  ```json
+  {
+    "message": "用户不存在"
+  }
+  ```
+
+**备注**
+
+- 该接口仅限管理员使用
+- 支持通过用户ID或QQ号查询，两者至少提供一个
+- 返回的数据按创建时间倒序排列
+- 包含完整的用户统计信息，便于管理员评估用户行为
+- 统计信息包括总发布量、活跃/删除状态分布、点赞投诉数据等
+- 每个发布项目都包含关联的图片信息
+- 支持分页查询，避免大量数据影响性能
+
+**使用场景**
+
+- 审核用户是否有违规发布历史
+- 分析用户行为模式和活跃度
+- 为封禁/处罚决策提供数据支持
+- 关联申诉处理，查看争议内容的上下文
+
+---
+
+### 管理员获取热门搜索关键词
+
+基本信息
+
+- 路径: `/api/admin/search-keywords`
+- 方法: `GET`
+- 描述: 管理员获取平台热门搜索关键词统计，用于分析用户搜索行为和热点内容
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ------ | ------ | ---- | ---------- |
+| limit | Number | 否 | 返回关键词数量，默认为 50 |
+
+请求头部
+| 参数名 | 类型 | 必选 | 描述 |
+| ------------- | ------ | ---- | ------------------------ |
+| Authorization | String | 是 | Bearer token（管理员权限） |
+
+响应参数
+
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 200    | application/json | 查询成功     |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 500    | application/json | 服务器错误   |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "获取热门搜索关键词成功",
+    "statistics": {
+      "total_keywords": 156,
+      "total_searches": 1024,
+      "avg_searches_per_keyword": 6.56,
+      "max_searches": 89
+    },
+    "keywords": [
+      {
+        "keyword": "手机",
+        "search_count": 89,
+        "created_at": "2024-01-01T10:00:00.000Z",
+        "updated_at": "2024-01-02T15:30:00.000Z"
+      },
+      {
+        "keyword": "笔记本电脑",
+        "search_count": 67,
+        "created_at": "2024-01-01T11:00:00.000Z",
+        "updated_at": "2024-01-02T14:20:00.000Z"
+      },
+      {
+        "keyword": "教材",
+        "search_count": 45,
+        "created_at": "2024-01-01T12:00:00.000Z",
+        "updated_at": "2024-01-02T16:45:00.000Z"
+      }
+    ]
+  }
+  ```
+
+- 权限不足 (状态码：403)
+
+  ```json
+  {
+    "message": "您没有权限执行此操作"
+  }
+  ```
+
+**备注**
+
+- 该接口仅限管理员使用
+- 关键词按搜索次数降序排列，显示最热门的关键词
+- 统计信息包含总关键词数、总搜索次数、平均搜索次数等数据
+- 关键词数据自动记录，每次用户搜索时更新计数
+- 可用于生成词云图、热门话题分析等数据可视化
+- 帮助管理员了解用户关注热点和平台内容趋势
+
+---
+
+### 管理员获取AI调用统计
+
+基本信息
+
+- 路径: `/api/admin/ai/stats`
+- 方法: `GET`
+- 描述: 获取AI模板生成的调用统计信息，包括今日调用次数和总调用次数
+
+请求参数
+
+无
+
+请求头部
+
+| 参数名        | 类型   | 必选 | 描述                       |
+| ------------- | ------ | ---- | -------------------------- |
+| Authorization | String | 是   | Bearer token（管理员权限） |
+
+请求示例
+
+```
+GET /api/ai/stats
+Authorization: Bearer {admin_token}
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                       |
+| ------ | ---------------- | -------------------------- |
+| 200    | application/json | 获取成功                   |
+| 401    | application/json | 未提供 Token 或 Token 无效 |
+| 403    | application/json | 权限不足                   |
+| 500    | application/json | 服务器错误                 |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+```json
+{
+  "todayCalls": 15,
+  "totalCalls": 286
+}
+```
+
+- Token 未提供 (状态码：401)
+
+```json
+{
+  "message": "未提供 Token"
+}
+```
+
+- Token 无效 (状态码：401)
+
+```json
+{
+  "message": "Token 格式无效"
+}
+```
+
+- 权限不足 (状态码：403)
+
+```json
+{
+  "message": "您没有权限执行此操作"
+}
+```
+
+- 服务器错误 (状态码：500)
+
+```json
+{
+  "message": "获取统计数据失败"
+}
+```
+
+**备注**
+
+- 该接口仅限管理员使用，需要有效的管理员 Token
+- 统计数据基于服务器内存变量，重启后重置
+- 今日调用次数每天自动重置为 0
+- 总调用次数持续累加，包括成功和失败的调用
+- 用于监控AI模板生成功能的使用情况
+- 可用于分析用户对AI功能的使用频率和趋势
+
+**统计机制**
+
+- AI调用成功时自动记录统计
+- AI调用失败时也会记录（因为消耗了API额度）
+- 每日零点自动重置今日调用次数
+- 总调用次数永久累加，除非服务器重启
+
+---
+
+### 管理员封禁用户
+
+基本信息
+
+- 路径: `/api/admin/ban`
+- 方法: `PUT`
+- 描述: 管理员封禁指定用户，可指定封禁时长或永久封禁
+
+请求参数
+| 参数名 | 类型   | 必选 | 描述                         |
+| ------ | ------ | ---- | ---------------------------- |
+| user_id | Number | 是   | 要封禁的用户ID               |
+| duration | Number | 是   | 封禁时长（单位由duration_type决定） |
+| duration_type | String | 否   | 封禁时长类型，支持`hours`、`days`、`permanent`，默认`days` |
+| reason | String | 是 | 封禁原因                     |
+
+请求头部
+| 参数名        | 类型   | 必选 | 描述                       |
+| ------------- | ------ | ---- | -------------------------- |
+| Authorization | String | 是   | Bearer token（管理员权限） |
+
+请求体示例
+```json
+{
+  "user_id": 123,
+  "duration": 7,
+  "duration_type": "days",
+  "reason": "恶意刷屏"
+}
+```
+
+响应参数
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 200    | application/json | 封禁成功     |
+| 400    | application/json | 参数错误/已封禁 |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 404    | application/json | 用户不存在   |
+| 500    | application/json | 服务器错误   |
+
+响应示例
+- 成功响应 (状态码：200)
+```json
+{
+  "message": "用户封禁成功",
+  "user": {
+    "id": 123,
+    "username": "user123",
+    "nickname": "昵称"
+  },
+  "ban_until": "2025-08-14T12:00:00.000Z",
+  "reason": "恶意刷屏"
+}
+```
+- 已封禁 (状态码：400)
+```json
+{
+  "message": "用户已被封禁"
+}
+```
+
+**备注**
+- 该接口仅限管理员使用
+- 支持按小时、天或永久封禁
+- 封禁信息会被记录到user_bans表
+
+---
+
+### 管理员解封用户
+
+基本信息
+
+- 路径: `/api/admin/unban`
+- 方法: `PUT`
+- 描述: 管理员解除指定用户的封禁状态
+
+请求参数
+| 参数名 | 类型   | 必选 | 描述           |
+| ------ | ------ | ---- | -------------- |
+| user_id | Number | 是   | 要解封的用户ID |
+
+请求头部
+| 参数名        | 类型   | 必选 | 描述                       |
+| ------------- | ------ | ---- | -------------------------- |
+| Authorization | String | 是   | Bearer token（管理员权限） |
+
+请求体示例
+```json
+{
+  "user_id": 123
+}
+```
+
+响应参数
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 200    | application/json | 解封成功     |
+| 400    | application/json | 用户未被封禁 |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 404    | application/json | 用户不存在   |
+| 500    | application/json | 服务器错误   |
+
+响应示例
+- 成功响应 (状态码：200)
+```json
+{
+  "message": "用户解封成功",
+  "user": {
+    "id": 123,
+    "username": "user123",
+    "nickname": "昵称"
+  }
+}
+```
+- 用户未被封禁 (状态码：400)
+```json
+{
+  "message": "用户未被封禁"
+}
+```
+
+**备注**
+- 该接口仅限管理员使用
+- 解封会将user_bans表中该用户的所有active记录状态设为lifted
+
+---

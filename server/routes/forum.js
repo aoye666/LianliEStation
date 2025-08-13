@@ -250,6 +250,20 @@ router.get("/posts", async (req, res) => {
 
     const queryParams = [];
 
+    // 记录搜索关键词到数据库
+    if (keyword && keyword.trim()) {
+      const trimmedKeyword = keyword.trim();
+      
+      // 异步更新关键词统计，不阻塞主查询
+      db.query(
+        `INSERT INTO search_keywords (keyword, search_count) VALUES (?, 1) 
+         ON DUPLICATE KEY UPDATE search_count = search_count + 1`,
+        [trimmedKeyword]
+      ).catch(err => {
+        console.error('记录搜索关键词失败:', err);
+        // 不影响主要功能，只记录错误
+      });
+    }
 
     if (campus_id) {
       query += " AND p.campus_id = ?";

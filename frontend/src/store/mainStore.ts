@@ -51,6 +51,7 @@ interface Forum {
   status: "active" | "inactive" | "deleted";
   created_at: string;
   images: string[];
+  comments: [];
 }
 
 interface MainState {

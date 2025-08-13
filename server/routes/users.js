@@ -4,6 +4,7 @@ import fs from "fs";
 import jwt from "jsonwebtoken"; // 用于生成 JWT
 import db from "../db.js";
 import upload from "../middlewares/uploadImg.js"; // 引入图片上传中间件
+import { authToken, requireAdmin } from "../middlewares/authToken.js"; // 引入token验证中间件
 // import {passwordChangeLimiter, verificationLimiter } from "../middlewares/limiter.js"; // 引入限流中间件
 // import logIP from "../middlewares/logIP.js"; // 记录IP的中间件
 // import sendVerificationCode from "../middlewares/mailer.js"; // 引入邮件发送逻辑
@@ -210,16 +211,9 @@ const SECRET_KEY = process.env.SECRET_KEY;
 // });
 
 // 获取用户个人信息(新)
-router.get("/profile", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ message: "未提供 Token" });
-  }
-
+router.get("/profile", authToken, async (req, res) => {
   try {
-    const decoded = jwt.verify(token, SECRET_KEY);
-    const userId = decoded.user_id;
+    const userId = req.user.user_id;
 
     const [userRows] = await db.query("SELECT email, credit, theme_id, background_url, banner_url, avatar FROM users WHERE id = ?", [userId]);
 
@@ -235,10 +229,10 @@ router.get("/profile", async (req, res) => {
 
     // 返回用户的详细信息
     const userData = {
-      nickname: decoded.nickname,
-      username: decoded.username,
-      campus_id: decoded.campus_id,
-      qq: decoded.qq,
+      nickname: req.user.nickname,
+      username: req.user.username,
+      campus_id: req.user.campus_id,
+      qq: req.user.qq,
       email: userRows[0].email,
       credit: userRows[0].credit,
       theme_id: userRows[0].theme_id,
@@ -332,15 +326,8 @@ router.get("/profile", async (req, res) => {
 // });
 
 // 修改用户信息（需要身份验证）- 合并后的版本
-router.put("/profile", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ message: "未提供 Token" });
-  }
-
+router.put("/profile", authToken, async (req, res) => {
   try {
-    const decoded = jwt.verify(token, SECRET_KEY);
     const { nickname, qq_id, campus_id, theme_id } = req.body;
 
     // 验证必填参数 - nickname, qq_id, campus_id 是必填的
@@ -371,12 +358,12 @@ router.put("/profile", async (req, res) => {
     // 生成新 Token
     const newToken = jwt.sign(
       {
-        user_id: decoded.user_id,
-        username: decoded.username,
+        user_id: req.user.user_id,
+        username: req.user.username,
         nickname: nickname,
         campus_id: campus_id,
         qq: qq_id,
-        isAdmin: decoded.isAdmin || false,
+        isAdmin: req.user.isAdmin || false,
       },
       SECRET_KEY,
       { expiresIn: "7d" }
@@ -385,7 +372,7 @@ router.put("/profile", async (req, res) => {
     res.status(200).json({ message: "更新成功", token: newToken });
   } catch (err) {
     console.error(err);
-    res.status(401).json({ message: "Token 无效" });
+    res.status(500).json({ message: "服务器错误" });
   }
 });
 
@@ -686,8 +673,7 @@ router.put("/profile", async (req, res) => {
 // });
 
 // 统一上传头像/背景/Banner接口
-router.put("/profile/image", upload.single("image"), async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
+router.put("/profile/image", authToken, upload.single("image"), async (req, res) => {
   const imageFile = req.file; // 获取上传的文件
   const { type } = req.query; // 从查询参数获取上传类型: avatar, background, banner
 
@@ -699,15 +685,6 @@ router.put("/profile/image", upload.single("image"), async (req, res) => {
       } catch {}
     }
     return res.status(400).json({ message: "无效的图片类型，必须是 avatar, background 或 banner" });
-  }
-
-  if (!token) {
-    if (imageFile) {
-      try {
-        await fs.promises.unlink(imageFile.path);
-      } catch {}
-    }
-    return res.status(401).json({ message: "未提供 Token" });
   }
 
   // 检查是否上传文件
@@ -738,7 +715,7 @@ router.put("/profile/image", upload.single("image"), async (req, res) => {
     }
 
     // 从数据库获取旧图片路径
-    const [oldUserRows] = await db.query(`SELECT ${fieldName} FROM users WHERE id = ?`, [decoded.user_id]);
+    const [oldUserRows] = await db.query(`SELECT ${fieldName} FROM users WHERE id = ?`, [req.user.user_id]);
     if (!oldUserRows.length) {
       if (imageFile) {
         import("fs").then((fsModule) => fsModule.unlink(imageFile.path, () => {}));
@@ -760,7 +737,7 @@ router.put("/profile/image", upload.single("image"), async (req, res) => {
     }
 
     // 更新用户信息
-    const [result] = await db.query(`UPDATE users SET ${fieldName} = ? WHERE id = ?`, [imagePath, decoded.user_id]);
+    const [result] = await db.query(`UPDATE users SET ${fieldName} = ? WHERE id = ?`, [imagePath, req.user.user_id]);
 
     if (result.affectedRows === 0) {
       if (imageFile) {
@@ -784,7 +761,7 @@ router.put("/profile/image", upload.single("image"), async (req, res) => {
         await fs.promises.unlink(imageFile.path);
       } catch {}
     }
-    res.status(401).json({ message: "Token 无效" });
+    res.status(500).json({ message: "服务器错误" });
   }
 });
 
@@ -873,5 +850,15 @@ router.get("/user-info/:user_id", async (req, res) => {
 //     res.status(401).json({ message: "Token 无效" });
 //   }
 // });
+
+// Token 解码
+router.get("/decode-token", authToken, (req, res) => {
+  try {
+    res.status(200).json(req.user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "服务器错误" });
+  }
+});
 
 export default router;

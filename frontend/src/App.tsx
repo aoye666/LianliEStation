@@ -290,12 +290,12 @@ const mobileRoutes = useMemo(() => [
     ),
   },
   {
-    path: "*",
-    element: token ? (
-      <Navigate to="/market" replace />
-    ) : (
-      <Navigate to="/auth/login" replace />
-    ),
+    path: "/admin",
+    element: (
+      <ProtectedRoute>
+        <Lazy.Market />
+      </ProtectedRoute>
+    )
   },
 ], [token]);
 

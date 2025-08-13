@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from'react';
 import './ForumDetail.scss'
 import Navbar from '../../../components/Navbar/Navbar';
-import { useMainStore,useUserStore } from '../../../store';
+import { useMainStore } from '../../../store';
 import { useLocation } from 'react-router-dom';
+import { Image } from 'antd';
+import dayjs from 'dayjs';
+import takePlace from '../../../assets/takePlace.png';
 
 const ForumDetail = () => {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const forumId = params.get('id');
-    const user = useUserStore(state => state.userData)
     const forum = useMainStore(state => state.forums.find((forum)=> forum.id == (forumId?parseInt(forumId):null)))
 
     return (
@@ -19,40 +21,73 @@ const ForumDetail = () => {
             </div>
 
             <div className='content'>
+                <div className="img">
+                    <Image.PreviewGroup>
+                        <Image preview={{ visible: true, }} src={takePlace} style={{ height: '320px' }}  />
+                    {
+                        forum?.images.map((img, index) => (
+                            <Image preview={{ visible: true, }} key={index} src={`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/uploads/${img[index]}`} alt={`${img[index]}`} />
+                        ))
+                    }
+                    </Image.PreviewGroup>
+                </div>
+
                 <div className="title">
                     {forum?.title}
+                    标题11111111
                 </div>
 
-                <div className="detail">
-                    <div className="text">
-                        {forum?.content}
-                    </div>
-
-                    <div className="img">
-                        {
-                            forum?.images.map((img, index) => (
-                                <img key={index} src={`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/uploads/${img[index]}`} alt={`${img[index]}`} />
-                            ))
-                        }
-                    </div>
+                <div className="text">
+                    {forum?.content}
+                    内容1
+                    内容2111
                 </div>
 
-                <div className="function">
-                    <div className="like">
-                        <div className="icon">
-
-                        </div>
-                    </div>
-
-                    <div className="delete">
-                        <div className="icon">
-
-                        </div>
-                    </div>
+                <div className="date">
+                    发布于 {dayjs(forum?.created_at).format('YYYY-MM-DD HH:mm')}
                 </div>
 
+            </div>
+
+            <div className="comment">
+                <div className="counter">
+                    {`评论${forum?.comments.length}`}
+                </div>
+
+                <div className='comment-list'>
+                    {
+                        forum?.comments.map((comment, index) => (
+                            <div className='comment-item' key={index}>
+                                
+                            </div>
+                        ))
+                    }
+                </div>
+            </div>
+
+            <div className="function">
                 <div className="comment">
+                    <div className="icon">
 
+                    </div>
+                </div>
+
+                <div className="like">
+                    <div className="icon">
+
+                    </div>
+                </div>
+
+                <div className='star'>
+                    <div className="icon">
+
+                    </div>
+                </div>
+
+                <div className="share">
+                    <div className='icon'>
+
+                    </div>
                 </div>
             </div>
         </div>

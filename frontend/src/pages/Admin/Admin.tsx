@@ -1,40 +1,23 @@
 import React, { useState } from 'react';
-import { LaptopOutlined, NotificationOutlined, UserOutlined, BarChartOutlined } from '@ant-design/icons';
+import { LaptopOutlined, NotificationOutlined, UserOutlined, BarChartOutlined, MessageOutlined, LogoutOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Breadcrumb, Layout, Menu, theme } from 'antd';
+import { Breadcrumb, Layout, Menu, theme, Button, Typography } from 'antd';
+import Cookies from 'js-cookie';
 import Dashboard from './Dashboard/Dashboard';
+import Forum from './Forum/Forum';
+import Market from './Market/Market';
+import Messages from './Messages/Messages';
+import Users from './Users/Users';
 
 const { Header, Content, Sider } = Layout;
-
-const items1: MenuProps['items'] = ['1', '2', '3'].map((key) => ({
-  key,
-  label: `nav ${key}`,
-}));
-
-const items2: MenuProps['items'] = [UserOutlined, LaptopOutlined, NotificationOutlined].map(
-  (icon, index) => {
-    const key = String(index + 1);
-
-    return {
-      key: `sub${key}`,
-      icon: React.createElement(icon),
-      label: `subnav ${key}`,
-      children: Array.from({ length: 4 }).map((_, j) => {
-        const subKey = index * 4 + j + 1;
-        return {
-          key: subKey,
-          label: `option${subKey}`,
-        };
-      }),
-    };
-  },
-);
+const { Title } = Typography;
 
 const menuItems: MenuProps['items'] = [
-  { key: 'dashboard', icon: <BarChartOutlined />, label: '监测数据' },
-  { key: 'user', icon: <UserOutlined />, label: '用户管理' },
-  { key: 'market', icon: <LaptopOutlined />, label: '商品管理' },
-  { key: 'forum', icon: <NotificationOutlined />, label: '论坛管理' },
+  { key: 'dashboard', icon: <BarChartOutlined />, label: '数据监控' },
+  { key: 'users', icon: <UserOutlined />, label: '用户管理' },
+  { key: 'forum', icon: <NotificationOutlined />, label: '校园墙管理' },
+  { key: 'market', icon: <LaptopOutlined />, label: '商城管理' },
+  { key: 'messages', icon: <MessageOutlined />, label: '申诉管理' },
 ];
 
 const Admin = () => {
@@ -43,38 +26,71 @@ const Admin = () => {
   } = theme.useToken();
 
   const [selectedKey, setSelectedKey] = useState('dashboard');
-  let content = null;
-  if (selectedKey === 'dashboard') content = <Dashboard />;
-  else {
-    const found = menuItems?.find((i) => i?.key === selectedKey) as { label?: React.ReactNode };
-    content = <div style={{ padding: 24 }}>开发中：{found?.label}</div>;
-  }
+
+  const handleLogout = () => {
+    Cookies.remove('auth-token');
+    window.location.href = '/admin/login';
+  };
+
+  const renderContent = () => {
+    switch (selectedKey) {
+      case 'dashboard':
+        return <Dashboard />;
+      case 'users':
+        return <Users />;
+      case 'forum':
+        return <Forum />;
+      case 'market':
+        return <Market />;
+      case 'messages':
+        return <Messages />;
+      default:
+        const found = menuItems?.find((i) => i?.key === selectedKey) as { label?: React.ReactNode };
+        return <div style={{ padding: 24 }}>开发中：{found?.label}</div>;
+    }
+  };
+
+  const getCurrentPageTitle = () => {
+    const found = menuItems?.find((i) => i?.key === selectedKey);
+    return (found as any)?.label || '后台管理';
+  };
 
   return (
-    <Layout>
-      <Header style={{ display: 'flex', alignItems: 'center' }}>
-        <div className="demo-logo" />
-        <Menu
-          theme="dark"
-          mode="horizontal"
-          defaultSelectedKeys={['2']}
-          items={items1}
-          style={{ flex: 1, minWidth: 0 }}
-        />
+    <Layout style={{ minHeight: '100vh' }}>
+      <Header style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        padding: '0 24px'
+      }}>
+        <Title level={3} style={{ color: 'white', margin: 0 }}>
+          联理E站 - 后台管理系统
+        </Title>
+        <Button 
+          type="text" 
+          icon={<LogoutOutlined />} 
+          onClick={handleLogout}
+          style={{ color: 'white' }}
+        >
+          退出登录
+        </Button>
       </Header>
       <Layout>
         <Sider width={200} style={{ background: colorBgContainer }}>
           <Menu
             mode="inline"
-            defaultSelectedKeys={['1']}
-            defaultOpenKeys={['sub1']}
+            selectedKeys={[selectedKey]}
+            onClick={({ key }) => setSelectedKey(key)}
             style={{ height: '100%', borderRight: 0 }}
-            items={items2}
+            items={menuItems}
           />
         </Sider>
         <Layout style={{ padding: '0 24px 24px' }}>
           <Breadcrumb
-            items={[{ title: 'Home' }, { title: 'List' }, { title: 'App' }]}
+            items={[
+              { title: '后台管理' }, 
+              { title: getCurrentPageTitle() }
+            ]}
             style={{ margin: '16px 0' }}
           />
           <Content
@@ -86,7 +102,7 @@ const Admin = () => {
               borderRadius: borderRadiusLG,
             }}
           >
-            {content}
+            {renderContent()}
           </Content>
         </Layout>
       </Layout>
