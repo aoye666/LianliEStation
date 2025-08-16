@@ -127,7 +127,7 @@ const useUserStore = create<UserState>()(
         campus_id: number;
       }) => {
         try {
-          const res = await api.post("/api/auth/register", { userData });
+          const res = await api.post("/api/auth/register",  userData );
           console.log(res?.data.message); // 注册成功
         } catch (error: any) {
           throw error;

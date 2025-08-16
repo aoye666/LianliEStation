@@ -89,7 +89,7 @@ const Register: React.FC = () => {
       };
 
       await register(userData);
-      navigate("/login");
+      navigate("/auth/login");
     } catch (err: any) {
       if (err.response) {
         setError(err.response.data);
