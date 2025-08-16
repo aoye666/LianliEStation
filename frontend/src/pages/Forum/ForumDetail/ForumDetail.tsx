@@ -3,7 +3,7 @@ import './ForumDetail.scss'
 import Navbar from '../../../components/Navbar/Navbar';
 import { useMainStore } from '../../../store';
 import { useLocation } from 'react-router-dom';
-import { Image } from 'antd';
+import { Image,Card,Avatar, Button } from 'antd';
 import dayjs from 'dayjs';
 import takePlace from '../../../assets/takePlace.png';
 
@@ -12,6 +12,8 @@ const ForumDetail = () => {
     const params = new URLSearchParams(location.search);
     const forumId = params.get('id');
     const forum = useMainStore(state => state.forums.find((forum)=> forum.id == (forumId?parseInt(forumId):null)))
+    const {Meta} = Card;
+    const [openReplies, setOpenReplies] = useState<number | null>(null);
 
     return (
         <div className='forum-detail'>
@@ -51,14 +53,48 @@ const ForumDetail = () => {
 
             <div className="comment">
                 <div className="counter">
-                    {`评论${forum?.comments.length}`}
+                    {`评论${forum?.comments.length||0}`}
                 </div>
 
                 <div className='comment-list'>
                     {
                         forum?.comments.map((comment, index) => (
                             <div className='comment-item' key={index}>
-                                
+                                <Card >
+                                    <Meta
+                                        avatar={<Avatar src={comment.user.avatar} />}
+                                        title={comment.user.nickname}
+                                        description={comment.content}
+                                    />
+
+                                    {
+                                        comment.replies.length > 0 && (
+                                            <Button type='link' onClick={() => setOpenReplies(openReplies === index ? null : index)}>
+                                                {openReplies === index ? '收起回复' : `展开${comment.replies.length}条回复`}
+                                            </Button>
+                                        )
+                                    }
+
+                                    {
+                                        openReplies === index && (
+                                            <div className='replies'>
+                                                {
+                                                    comment.replies.map((reply, index) => (
+                                                        <div className='reply-item' key={index}>
+                                                            <Card >
+                                                                <Meta
+                                                                    avatar={<Avatar src={reply.user.avatar} />}
+                                                                    title={reply.user.nickname}
+                                                                    description={reply.content}
+                                                                />
+                                                            </Card>
+                                                        </div>
+                                                    ))
+                                                }
+                                            </div>
+                                        )
+                                    }
+                                </Card>
                             </div>
                         ))
                     }
@@ -68,7 +104,7 @@ const ForumDetail = () => {
             <div className="function">
                 <div className="comment">
                     <div className="icon">
-
+                        
                     </div>
                 </div>
 

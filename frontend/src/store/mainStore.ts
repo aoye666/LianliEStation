@@ -42,6 +42,27 @@ interface Filters {
   campus_id: number | null;
 }
 
+interface User {
+  id: number;
+  nickname: string;
+  avatar: string;
+}
+
+interface Reply {
+  id: number;
+  content: string;
+  created_at: string;
+  user: User;
+}
+
+interface Comment {
+  id: number;
+  content: string;
+  created_at: string;
+  user: User;
+  replies: Reply[];
+}
+
 interface Forum {
   id: number;
   title: string;
@@ -51,7 +72,7 @@ interface Forum {
   status: "active" | "inactive" | "deleted";
   created_at: string;
   images: string[];
-  comments: [];
+  comments: Comment[];
 }
 
 interface MainState {
