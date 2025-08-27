@@ -740,6 +740,76 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ---
 
+### 获取用户点赞/投诉记录
+
+**基本信息**
+
+- **路径**: `/api/users/records`
+- **方法**: `GET`
+- **描述**: 获取当前用户的点赞记录和投诉记录
+
+**请求参数**
+无
+
+**请求头**
+
+```
+Authorization: Bearer {token}
+```
+
+**请求示例**
+
+```
+GET /api/users/records
+```
+
+**响应参数**
+| 状态码 | 内容类型         | 描述                       |
+| ------ | ---------------- | -------------------------- |
+| 200    | application/json | 获取成功                   |
+| 401    | application/json | 未提供 Token 或 Token 无效 |
+| 500    | application/json | 服务器错误                 |
+
+**响应示例**
+
+- 成功响应 (状态码：200)
+  ```json
+  {
+    "likes": [
+      {
+        "targetId": 123,
+        "targetType": "post"
+      },
+      {
+        "targetId": 456,
+        "targetType": "goods"
+      }
+    ]
+  }
+  ```
+- Token 未提供 (状态码：401)
+
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token 无效 (状态码：401)
+  ```json
+  {
+    "message": "Token 无效"
+  }
+  ```
+
+**备注**
+
+- 此 API 返回用户的所有点赞记录和投诉记录
+- `targetType` 表示目标类型，可能的值包括：`post`、`goods`
+- `targetId` 表示目标对象的 ID
+- 点赞记录从 `likes` 表查询，投诉记录从 `complaints` 表查询
+- 需要提供有效的认证 Token 才能访问
+
 ## goodsRoutes
 
 ### 软删除商品
@@ -2251,6 +2321,597 @@ images: [图片1.jpg, 图片2.jpg]
 - status 参数必须为"read"或"unread"
 - 接口会返回成功和失败的详细信息，允许部分成功的情况
 - 如果某个通知处理失败，不会影响其他通知的处理
+
+## historyRoutes
+
+### 查询发布历史
+
+基本信息
+
+- **路径**: `/api/history/goods`
+- **方法**: `GET`
+- **描述**: 查询用户发布的商品和帖子历史记录，包括关联的图片信息
+
+请求参数
+
+无需请求参数
+
+请求头
+
+```
+Authorization: Bearer {token}
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                       |
+| ------ | ---------------- | -------------------------- |
+| 200    | application/json | 查询成功                   |
+| 401    | application/json | 未提供 Token 或 Token 无效 |
+| 500    | application/json | 服务器错误                 |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "goods": [
+      {
+        "id": 1,
+        "title": "全新笔记本电脑",
+        "content": "原价5000元，用了不到3个月，因换新出售",
+        "price": 3500,
+        "campus_id": 1,
+        "goods_type": "sell",
+        "tag": "computer",
+        "author_id": 3,
+        "status": "active",
+        "created_at": "2025-04-14T20:42:47.000Z",
+        "images": ["/uploads/image1.jpg", "/uploads/image2.jpg"]
+      }
+    ],
+    "posts": [
+      {
+        "id": 1,
+        "title": "求推荐开发区美食",
+        "content": "最近搬到开发区，有什么好吃的餐厅推荐吗？",
+        "campus_id": 1,
+        "author_id": 3,
+        "status": "active",
+        "created_at": "2025-04-14T20:42:47.000Z",
+        "images": ["/uploads/post1.jpg", "/uploads/post2.jpg"]
+      }
+    ]
+  }
+  ```
+
+- Token 未提供 (状态码：401)
+
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token 无效 (状态码：401)
+
+  ```json
+  {
+    "message": "无效的 Token"
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 用户必须登录才能查询发布历史
+- 返回结果按发布时间倒序排列（最新的在前）
+- 不返回状态为 'deleted' 的记录
+- 自动关联并返回商品和帖子的相关图片
+- 商品图片通过 goods_images 表关联，帖子图片通过 post_image 表关联
+- 返回对象包含 goods 和 posts 两个数组
+
+### 修改商品状态
+
+基本信息
+
+- **路径**: `/api/history/goods/:post_id`
+- **方法**: `PUT`
+- **描述**: 修改指定商品的交易状态
+
+请求参数
+
+| 参数名  | 类型   | 必选 | 描述                  |
+| ------- | ------ | ---- | --------------------- |
+| post_id | Number | 是   | 商品 ID (URL 参数)    |
+| status  | String | 是   | 商品状态 (请求体参数) |
+
+请求头
+
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+请求体示例
+
+```json
+{
+  "status": "sold"
+}
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                       |
+| ------ | ---------------- | -------------------------- |
+| 200    | application/json | 状态更新成功               |
+| 401    | application/json | 未提供 Token 或 Token 无效 |
+| 403    | application/json | 无权修改此商品             |
+| 500    | application/json | 服务器错误                 |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "商品状态已更新"
+  }
+  ```
+
+- Token 未提供 (状态码：401)
+
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token 无效 (状态码：401)
+
+  ```json
+  {
+    "message": "无效的 Token"
+  }
+  ```
+
+- 无权限 (状态码：403)
+
+  ```json
+  {
+    "message": "无权修改此商品"
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 用户必须登录才能修改商品状态
+- 只能修改自己发布的商品
+- 常见状态值包括：active（活跃）、sold（已售出）、reserved（已预订）等
+
+### 删除帖子
+
+基本信息
+
+- **路径**: `/api/history/posts/:post_id`
+- **方法**: `DELETE`
+- **描述**: 删除指定的校园墙帖子（软删除，将状态设置为 deleted）
+
+请求参数
+
+| 参数名  | 类型   | 必选 | 描述               |
+| ------- | ------ | ---- | ------------------ |
+| post_id | Number | 是   | 帖子 ID (URL 参数) |
+
+请求头
+
+```
+Authorization: Bearer {token}
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                       |
+| ------ | ---------------- | -------------------------- |
+| 200    | application/json | 删除成功                   |
+| 401    | application/json | 未提供 Token 或 Token 无效 |
+| 403    | application/json | 无权删除此帖子             |
+| 500    | application/json | 服务器错误                 |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "帖子已删除"
+  }
+  ```
+
+- Token 未提供 (状态码：401)
+
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token 无效 (状态码：401)
+
+  ```json
+  {
+    "message": "无效的 Token"
+  }
+  ```
+
+- 无权限 (状态码：403)
+
+  ```json
+  {
+    "message": "无权删除此帖子"
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 用户必须登录才能删除帖子
+- 只能删除自己发布的帖子
+- 采用软删除方式，将帖子状态设置为 'deleted'，不会物理删除数据
+- 删除后的帖子不会在查询发布历史接口中返回
+
+## favoritesRoute
+
+### 添加帖子收藏
+
+基本信息
+
+- 路径: `/api/favorites/posts/add`
+- 方法: `POST`
+- 描述: 用户收藏指定的帖子
+
+请求参数
+
+| 参数名  | 类型   | 必选 | 描述    |
+| ------- | ------ | ---- | ------- |
+| post_id | Number | 是   | 帖子 ID |
+
+请求头
+
+| 参数名        | 类型   | 必选 | 描述             |
+| ------------- | ------ | ---- | ---------------- |
+| Authorization | String | 是   | Bearer JWT_TOKEN |
+
+请求体示例
+
+```json
+{
+  "post_id": 1
+}
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述             |
+| ------ | ---------------- | ---------------- |
+| 201    | application/json | 收藏成功         |
+| 400    | application/json | 参数错误或已收藏 |
+| 401    | application/json | Token 无效       |
+| 404    | application/json | 帖子不存在       |
+| 500    | application/json | 服务器错误       |
+
+响应示例
+
+- 成功响应 (状态码：201)
+
+  ```json
+  {
+    "message": "收藏帖子成功"
+  }
+  ```
+
+- 已收藏过 (状态码：400)
+
+  ```json
+  {
+    "message": "已经收藏过该帖子"
+  }
+  ```
+
+- 帖子不存在 (状态码：404)
+  ```json
+  {
+    "message": "帖子未找到或已被删除"
+  }
+  ```
+
+---
+
+### 添加商品收藏
+
+基本信息
+
+- 路径: `/api/favorites/goods/add`
+- 方法: `POST`
+- 描述: 用户收藏指定的商品
+
+请求参数
+
+| 参数名   | 类型   | 必选 | 描述    |
+| -------- | ------ | ---- | ------- |
+| goods_id | Number | 是   | 商品 ID |
+
+请求头
+
+| 参数名        | 类型   | 必选 | 描述             |
+| ------------- | ------ | ---- | ---------------- |
+| Authorization | String | 是   | Bearer JWT_TOKEN |
+
+请求体示例
+
+```json
+{
+  "goods_id": 1
+}
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述             |
+| ------ | ---------------- | ---------------- |
+| 201    | application/json | 收藏成功         |
+| 400    | application/json | 参数错误或已收藏 |
+| 401    | application/json | Token 无效       |
+| 404    | application/json | 商品不存在       |
+| 500    | application/json | 服务器错误       |
+
+响应示例
+
+- 成功响应 (状态码：201)
+
+  ```json
+  {
+    "message": "收藏商品成功"
+  }
+  ```
+
+- 已收藏过 (状态码：400)
+
+  ```json
+  {
+    "message": "已经收藏过该商品"
+  }
+  ```
+
+- 商品不存在 (状态码：404)
+  ```json
+  {
+    "message": "商品未找到或已被删除"
+  }
+  ```
+
+---
+
+### 取消帖子收藏
+
+基本信息
+
+- 路径: `/api/favorites/posts/remove`
+- 方法: `DELETE`
+- 描述: 取消收藏指定的帖子
+
+请求参数
+
+| 参数名  | 类型   | 必选 | 描述    |
+| ------- | ------ | ---- | ------- |
+| post_id | Number | 是   | 帖子 ID |
+
+请求头
+
+| 参数名        | 类型   | 必选 | 描述             |
+| ------------- | ------ | ---- | ---------------- |
+| Authorization | String | 是   | Bearer JWT_TOKEN |
+
+请求体示例
+
+```json
+{
+  "post_id": 1
+}
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述           |
+| ------ | ---------------- | -------------- |
+| 200    | application/json | 取消收藏成功   |
+| 400    | application/json | 参数错误       |
+| 401    | application/json | Token 无效     |
+| 404    | application/json | 收藏记录不存在 |
+| 500    | application/json | 服务器错误     |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "取消帖子收藏成功"
+  }
+  ```
+
+- 收藏记录不存在 (状态码：404)
+  ```json
+  {
+    "message": "未找到收藏记录"
+  }
+  ```
+
+---
+
+### 取消商品收藏
+
+基本信息
+
+- 路径: `/api/favorites/goods/remove`
+- 方法: `DELETE`
+- 描述: 取消收藏指定的商品
+
+请求参数
+
+| 参数名   | 类型   | 必选 | 描述    |
+| -------- | ------ | ---- | ------- |
+| goods_id | Number | 是   | 商品 ID |
+
+请求头
+
+| 参数名        | 类型   | 必选 | 描述             |
+| ------------- | ------ | ---- | ---------------- |
+| Authorization | String | 是   | Bearer JWT_TOKEN |
+
+请求体示例
+
+```json
+{
+  "goods_id": 1
+}
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述           |
+| ------ | ---------------- | -------------- |
+| 200    | application/json | 取消收藏成功   |
+| 400    | application/json | 参数错误       |
+| 401    | application/json | Token 无效     |
+| 404    | application/json | 收藏记录不存在 |
+| 500    | application/json | 服务器错误     |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "取消商品收藏成功"
+  }
+  ```
+
+- 收藏记录不存在 (状态码：404)
+  ```json
+  {
+    "message": "未找到收藏记录"
+  }
+  ```
+
+---
+
+### 查询用户的所有收藏
+
+基本信息
+
+- 路径: `/api/favorites/`
+- 方法: `GET`
+- 描述: 获取用户收藏的所有帖子和商品，分别返回在两个数组中
+
+请求头
+
+| 参数名        | 类型   | 必选 | 描述             |
+| ------------- | ------ | ---- | ---------------- |
+| Authorization | String | 是   | Bearer JWT_TOKEN |
+
+响应参数
+
+| 状态码 | 内容类型         | 描述       |
+| ------ | ---------------- | ---------- |
+| 200    | application/json | 获取成功   |
+| 401    | application/json | Token 无效 |
+| 500    | application/json | 服务器错误 |
+
+响应示例
+
+- 成功响应 (状态码：200)
+  ```json
+  {
+    "message": "获取收藏列表成功",
+    "data": {
+      "posts": [
+        {
+          "id": 1,
+          "title": "开发区美食",
+          "content": "美食推荐？",
+          "author_id": 1,
+          "created_at": "2025-07-15T13:09:07.000Z",
+          "status": "active",
+          "campus_id": 1,
+          "likes": 1,
+          "complaints": 0
+        }
+      ],
+      "goods": [
+        {
+          "id": 2,
+          "title": "笔记本2",
+          "content": "出售",
+          "author_id": 1,
+          "created_at": "2025-07-18T16:05:55.000Z",
+          "status": "active",
+          "price": "3500.10",
+          "campus_id": 1,
+          "goods_type": "sell",
+          "tag": "computer"
+        },
+        {
+          "id": 1,
+          "title": "笔记本",
+          "content": "出售",
+          "author_id": 1,
+          "created_at": "2025-07-18T15:40:06.000Z",
+          "status": "active",
+          "price": "3500.00",
+          "campus_id": 1,
+          "goods_type": "sell",
+          "tag": "computer"
+        }
+      ]
+    }
+  }
+  ```
+
+**前端解构使用示例：**
+
+```javascript
+// 前端接收响应后可以这样解构
+const {
+  data: { posts, goods },
+} = response.data;
+console.log("收藏的帖子:", posts);
+console.log("收藏的商品:", goods);
+```
 
 ## adminRoute
 
