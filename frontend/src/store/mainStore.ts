@@ -4,6 +4,8 @@ import api from "../api/index";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import Cookies from "js-cookie"; // 从 cookie 中获取 token
+import { data } from "react-router-dom";
+import { AxiosError } from "axios";
 
 // 获取 token
 const token = Cookies.get("auth-token");
@@ -67,9 +69,12 @@ interface Forum {
   id: number;
   title: string;
   content: string;
-  auther_id: number;
+  author_id: number;
   campus_id: number;
+  author_avatar: string;
+  author_name: string;
   status: "active" | "inactive" | "deleted";
+  likes: number;
   created_at: string;
   images: string[];
   comments: Comment[];
@@ -88,6 +93,7 @@ interface MainState {
   setFilters: (newFilters: Partial<Filters>) => void;
   updateGoods: () => Promise<void>;
   getForumPosts: () => Promise<void>;
+  updateForumInteract: (id: number, action: string,content?:string,parent_id?:number,value?:number) => Promise<number|undefined>;
   clearGoods: () => void;
   clearFilters: () => void;
   changeGoodsResponse: (
@@ -111,7 +117,22 @@ const useMainStore = create<MainState>()(
       marketPage: 1,
       forumPage: 1,
       goods: [],
-      forums: [],
+      forums: [
+        {
+          id:1,
+          title:"test",
+          content:"test",
+          author_id:1,
+          campus_id:1,
+          status:"active",
+          author_avatar:"",
+          author_name:"",
+          created_at:" ",
+          likes:0,
+          images:[],
+          comments:[],
+        }
+      ],
       posts: [],
       filters: {
         searchTerm: "",
@@ -140,7 +161,13 @@ const useMainStore = create<MainState>()(
 
       getForumPosts: async () => {
         try {
-          const response = await api.get("/api/forum/posts");
+          const response = await api.get("/api/forum/posts",
+            {
+              params: {
+                with_comments: true,
+              }
+            }
+          );
           if (response?.status === 200 && response.data) {
             const data = response.data.posts;
             set((state) => ({
@@ -168,6 +195,34 @@ const useMainStore = create<MainState>()(
             data: {},
           });
         } catch (error) {}
+      },
+      updateForumInteract: async (id: number, action: string,content?:string,parent_id?:number,value?:number) => {
+        try {
+          const response = await api.post(`api/forum/posts/interact/${id}`,{
+              post_id: id,
+              action: action,           
+              content:content?content:null,
+              parent_id:parent_id?parent_id:null,
+              value:value?value:null
+          })
+
+          // if (response?.status === 200) {
+          //   if(action === "like"){
+          //     set((state) => ({
+          //       forums: state.forums.map((forum) =>
+          //         forum.id === id ? { ...forum, like: !forum.like } : forum
+          //       ),
+          //     }));
+          //   }
+          // }
+          return response.status;
+        }
+        catch(error){
+          console.log(error)
+          const err = error as AxiosError;
+          if (err.response)
+            return err.response.status;
+        }
       },
 
       fetchGoods: async () => {

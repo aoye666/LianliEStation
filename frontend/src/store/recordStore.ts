@@ -3,6 +3,8 @@ import api from "../api/index";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import Cookies from "js-cookie"; // 从 cookie 中获取 token
+import { AxiosError } from "axios";
+import { data } from "react-router-dom";
 
 // 获取 token
 const token = Cookies.get("auth-token");
@@ -51,6 +53,12 @@ interface FavoritePost {
   id: number;
   title: string;
   content: string | null;
+  author_id: number;
+  created_at: string;
+  status: "active" | "inactive" | "deleted";
+  campus_id: number;
+  likes: number;
+  images: string[];
   // 待具体开发时补充
 }
 
@@ -58,6 +66,12 @@ interface HistoryPost {
   id: number;
   title: string;
   content: string | null;
+  author_id: number;
+  created_at: string;
+  status: "active" | "inactive" | "deleted";
+  campus_id: number;
+  likes: number;
+  images: string[];
   // 待具体实现时补充
 }
 
@@ -91,8 +105,9 @@ interface RecordState {
   // history 相关的状态管理及方法
   historyGoods: HistoryGoods[];
   historyPosts: HistoryPost[];
-  getHistoryGoods: () => Promise<void>;
+  getHistory: () => Promise<void>;
   removeHistoryGoods: (id: number) => void;
+  removeHistoryPost: (id: number) => void;
   setPage: () => void;
   page: number;
   clear: () => void;
@@ -101,8 +116,10 @@ interface RecordState {
   // favorites 相关的状态管理及方法
   favoritesGoods: FavoriteGoods[];
   favoritePosts: FavoritePost[];
-  getFavoritesGoods: () => Promise<void>;
-  addFavoriteGoods: (favoriteGoods: FavoriteGoods) => void;
+  getFavorites: () => Promise<void>;
+  addFavoriteGoods: (favoriteGoods: FavoriteGoods) => Promise<number|undefined>;
+  addFavoritePost: (favoritePost: number) => Promise<number|undefined>;
+  removeFavoritePost: (favoriteId: number) => Promise<number|undefined>;
   removeFavoriteGoods: (favoriteId: number) => void;
 
   // messages 相关的状态管理及方法
@@ -130,6 +147,8 @@ interface RecordState {
   //forum相关的状态管理及方法
   forumPosts: ForumPost[];
   fetchForumPosts: () => Promise<void>; // 获取论坛帖子列表
+  favorateForum:(id: number,action: string) => Promise<void>; // 收藏帖子
+  
 }
 
 const useRecordStore = create<RecordState>()(
@@ -143,6 +162,7 @@ const useRecordStore = create<RecordState>()(
       appeals: [],
       responses: [],
       page: 1,
+
 
       reset: () => {
         set({
@@ -166,6 +186,10 @@ const useRecordStore = create<RecordState>()(
         set(() => ({
           historyGoods: [],
         })),
+
+      favorateForum: async (id: number, action: string) => {
+        
+      },
 
       initialHistoryGoods: async () => {
         try {
@@ -191,15 +215,16 @@ const useRecordStore = create<RecordState>()(
         }
       },
 
-      getHistoryGoods: async () => {
+      getHistory: async () => {
         try {
           const response = await api.get("/api/history/goods");
 
           // 检查返回数据是否有效
           if (response?.status === 200 && response.data) {
-            const data = response.data.goods;
+            const data = response.data;
             set((state) => ({
-              historyGoods: data, // 更新 goods 状态
+              historyGoods: data.goods,
+              historyPosts: data.posts, // 更新 goods 状态
             }));
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
@@ -219,11 +244,22 @@ const useRecordStore = create<RecordState>()(
         api.delete(`/api/goods/${id}`);
       },
 
-      getFavoritesGoods: async () => {
+      removeHistoryPost: (id) => {
+        api.delete(`/api/posts/${id}`,{
+          data:{
+            post_id: id,
+          }
+        });
+      },
+
+      getFavorites: async () => {
         try {
           const res = await api.get("/api/favorites");
           if (res?.status === 200 && res.data) {
-            set({ favoritesGoods: res.data });
+            set({ 
+              favoritesGoods:  res.data.data.goods ,
+              favoritePosts:  res.data.data.posts ,
+            });
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
             console.log("No goods available or unexpected response status");
@@ -233,16 +269,62 @@ const useRecordStore = create<RecordState>()(
         }
       },
 
-      addFavoriteGoods: (favoriteGoods) => {
-        api.post("/api/favorites/add", { id: favoriteGoods.id });
+      addFavoriteGoods: async (favoriteGoods) => {
+        try{
+          const response = await api.post("/api/favorites/add", { id: favoriteGoods.id });
+          return response.status
+        }
+        catch(error){
+          console.log(error)
+          const err = error as AxiosError;
+          console.log(err)
+          if (err.response)
+            return err.response.status;
+        }
       },
 
       removeFavoriteGoods: (favoriteId: number) => {
-        api.post("/api/favorites/remove", undefined, {
+        try{
+          api.post("/api/favorites/remove", undefined, {
           params: {
             post_id: favoriteId,
           },
         });
+        }
+        catch(error){
+          console.error("未知错误:", error);
+        }
+
+      },
+
+      addFavoritePost: async (favoriteId: number) => {
+        try{
+          const response = await api.post("/api/favorites/posts/add", { post_id: favoriteId });
+          return response.status
+        }
+        catch(error){
+          const err = error as AxiosError;
+          console.log(err)
+          if (err.response)
+            return err.response.status;
+        }
+      },
+
+      removeFavoritePost: async (favoriteId: number) => {
+        try{
+          const response = await api.delete("/api/favorites/posts/remove", {
+            data:{
+              post_id: favoriteId,
+            }
+        });
+          return response.status
+        }
+        catch(error){
+          const err = error as AxiosError;
+          console.log(err)
+          if (err.response)
+            return err.response.status;
+        }
       },
 
       // 获取全部申诉(管理员)

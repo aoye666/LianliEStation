@@ -9,12 +9,14 @@ import "./Favorites.scss"
 type checkBox={[number:number]:boolean}
 
 const Favorites: React.FC = () => {
-  const { favoritesGoods, getFavoritesGoods, removeFavoriteGoods } = useRecordStore()
+  const { favoritesGoods,favoritePosts, getFavorites, removeFavoriteGoods,removeFavoritePost } = useRecordStore()
   const [checked, setChecked] = useState<checkBox>({})
   const [isVisible, setIsVisible] = useState(false)
+  const [isPosts, setIsPosts] = useState(false)
 
   useEffect(() => {
-    getFavoritesGoods()
+    getFavorites()
+    console.log(favoritesGoods,favoritePosts)
   }, [])
 
   const handleOnClick = () => {
@@ -26,7 +28,12 @@ const Favorites: React.FC = () => {
   }
   const handleOnDelete = () => {
     const ids = Object.keys(checked).filter(id => checked[parseInt(id)]).map(id => parseInt(id))
-    ids.forEach(id => removeFavoriteGoods(id))
+    if(isPosts){
+      ids.forEach(id => removeFavoritePost(id))
+    }
+    else{
+      ids.forEach(id => removeFavoriteGoods(id))
+    }
   }
 
   return (
@@ -37,11 +44,13 @@ const Favorites: React.FC = () => {
       
       <div className="body">
         
-        <div className="manage">
+        <div className="button-group">
           <button onClick={() => handleOnClick()}>管理</button>
+          <button onClick={() => setIsPosts(!isPosts)}>{isPosts? "收藏帖子" : "收藏商品"}</button>
         </div>
         <div className="content">
           {
+            !isPosts && (
             favoritesGoods.map((post:any) => (
               <div className='commodity'>
 
@@ -76,60 +85,29 @@ const Favorites: React.FC = () => {
                   </div> 
                 </div>
               </div>
-            ))
+            )))
           }
-              <div className='commodity'>
+          {
+            isPosts && (
+            favoritePosts.map((post:any, index:number) => (
+              <div className='commodity' key={index}>
 
                 {
-                  isVisible?<div className="commodity-delete" key={1} onClick={() => handleCheck(1)} style={checked[1] ? {backgroundColor: "#3498db",border: "none"} : {backgroundColor: "white"}} />:null
+                  isVisible?<div className="commodity-delete" key={post.id} onClick={() => handleCheck(post.id)} style={checked[post.id] ? {backgroundColor: "#3498db",border: "none"} : {backgroundColor: "white"}} />:null
                 }
 
-                <div className='commodity-img'>
-                <img src={background1} alt="" />
-                </div>
                 <div className="commodity-description">
                   <div className='commodity-title'>
-                    c语言教材
+                    {post.title}
                   </div>
                   <div className="commodity-detail">
-                    有勾画，开发区校区面交
+                    {post.content}
                   </div>
-                  <div className='commodity-bottom'>
-                    <div className='commodity-price'>
-                      15r
-                    </div>
-                    <div className='commodity-tag'>
-                      教材
-                    </div>
-                  </div> 
                 </div>
               </div>
+            )))
+          }
 
-              <div className='commodity'>
-
-                {
-                  isVisible?<div className="commodity-delete" key={1} onClick={() => handleCheck(1)} style={checked[1] ? {backgroundColor: "#3498db",border: "none"} : {backgroundColor: "white"}} />:null
-                }
-                <div className='commodity-img'>
-                <img src={background2} alt="" />
-                </div>
-                <div className="commodity-description">
-                  <div className='commodity-title'>
-                    模电教材
-                  </div>
-                  <div className="commodity-detail">
-                    有勾画，开发区校区面交
-                  </div>
-                  <div className='commodity-bottom'>
-                    <div className='commodity-price'>
-                      5r
-                    </div>
-                    <div className='commodity-tag'>
-                      教材
-                    </div>
-                  </div> 
-                </div>
-              </div>
         </div>
       </div>
 

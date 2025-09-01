@@ -212,9 +212,9 @@ const mobileRoutes = useMemo(() => [
   {
     path: "/forum-detail",
     element: (
-      // <ProtectedRoute>
+      <ProtectedRoute>
         <Lazy.ForumDetail />
-      // </ProtectedRoute>
+      </ProtectedRoute>
     ),
   },
   {

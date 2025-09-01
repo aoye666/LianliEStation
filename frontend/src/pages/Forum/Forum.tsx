@@ -15,8 +15,8 @@ import { useMainStore } from "../../store";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
 import Tabbar from "../../components/Tabbar/Tabbar";
-import takePlace from "../../assets/takePlace.png";
 import publish from "../../assets/publish-white.svg";
+import Like from '../../assets/like.svg';
 import { PlusOutlined } from "@ant-design/icons";
 
 const { Meta } = Card;
@@ -28,14 +28,10 @@ const Forum = () => {
   const nav: TabsProps["items"] = [
     {
       key: "1",
-      label: "时间",
+      label: "主页",
     },
     {
       key: "2",
-      label: "热度",
-    },
-    {
-      key: "3",
       label: "精选",
     },
   ];
@@ -87,11 +83,15 @@ const Forum = () => {
                     {
                       post.images.map((image, index) => (
                         <Col key={index} span={8}>
-                          <img src={`${process.env.REACT_APP_API_URL || "http://localhost:5000"}/uploads/${image[index]}`}/>
+                          <img src={`${process.env.REACT_APP_API_URL || "http://localhost:5000"}${image}`}/>
                         </Col>
                       ))
                     }
                   </Row>
+                  <div className="likes">
+                    <img src={Like} alt="likes" />
+                    {/* <span>{post.likes}</span> */}
+                  </div>
 
                 </Card>
               </Col>

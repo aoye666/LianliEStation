@@ -1,0 +1,20 @@
+.chat-input {
+    padding: 10px;
+    border-top: 1px solid #eee;
+    z-index: 999;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #eee;
+  
+    &__space {
+      width: 100%;
+    }
+  
+    &__emoji-picker {
+      position: absolute;
+      bottom: 60px;
+      z-index: 1000;
+    }
+  }
+  

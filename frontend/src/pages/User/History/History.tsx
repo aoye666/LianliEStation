@@ -9,20 +9,20 @@ type checkBox = { [number: number]: boolean };
 const History = () => {
   const {
     historyGoods,
-    getHistoryGoods,
+    getHistory,
     removeHistoryGoods,
-    initialHistoryGoods,
-    page,
+    historyPosts,
+    removeHistoryPost,
     clear,
-    setPage,
   } = useRecordStore();
   const [checked, setChecked] = useState<checkBox>({});
   const [isVisible, setIsVisible] = useState(false);
+  const [isPosts, setIsPosts] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
 
   useEffect(() => {
-    getHistoryGoods();
+    getHistory();
   }, [isVisible]);
 
   window.addEventListener("beforeunload", () => {
@@ -40,7 +40,11 @@ const History = () => {
     const ids = Object.keys(checked)
       .filter((id) => checked[parseInt(id)])
       .map((id) => parseInt(id));
-    ids.forEach((id) => removeHistoryGoods(id));
+    if(!isPosts)
+      ids.forEach((id) => removeHistoryGoods(id));
+    else
+      ids.forEach((id) => removeHistoryPost(id));
+
   };
 
   return (
@@ -50,11 +54,14 @@ const History = () => {
       </div>
 
       <div className="body">
-        <div className="manange">
+        <div className="button-group">
           <button onClick={() => handleOnClick()}>管理</button>
+          <button onClick={() => setIsPosts(!isPosts)}>{isPosts? "发布帖子" : "发布商品"}</button>
         </div>
         <div className="content">
-          {historyGoods.map((goods) => (
+          {
+          !isPosts&&(
+          historyGoods.map((goods) => (
             <div
               className="commodity"
               key={goods.id}
@@ -92,7 +99,35 @@ const History = () => {
                 </div>
               </div>
             </div>
-          ))}
+          )))}
+          {
+          isPosts&&(
+          historyPosts.map((goods) => (
+            <div
+              className="commodity"
+              key={goods.id}
+              ref={scrollRef}
+            >
+              {isVisible ? (
+                <div
+                  className="commodity-delete"
+                  key={goods.id}
+                  onClick={() => handleCheck(goods.id)}
+                  style={
+                    checked[goods.id]
+                      ? { backgroundColor: "#3498db", border: "none" }
+                      : { backgroundColor: "white" }
+                  }
+                />
+              ) : null}
+              <div className="commodity-description">
+                <div className="commodity-title">{goods.title}</div>
+                <div className="commodity-detail">{goods.content}</div>
+                <div className="commodity-bottom">
+                </div>
+              </div>
+            </div>
+          )))}
         </div>
       </div>
 

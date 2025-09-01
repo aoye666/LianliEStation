@@ -1,3 +1,7 @@
+.body{
+    border: 0;
+}
+
 .forum-detail {
     display: flex;
     flex-direction: column;
@@ -7,12 +11,14 @@
     overflow-wrap: break-word;
     white-space: pre-wrap;
     width: 100vw;
+    overflow-y: scroll;
 
     .content{
         display: flex;
         flex-direction: column;
         border-bottom: 1px solid #ccc;
         width: 100%;
+        margin-bottom: 50px;
 
         .img{
             display: flex;
@@ -41,19 +47,85 @@
             margin-left: 10px;
 
         }
-        
-    }
 
-    .comment{
-        display: flex;
-        flex-direction: column;
-        margin-top: 5px;
-
-        .counter{
+        .author_info{
             display: flex;
             font-size: 16px;
-            margin-left: 10px;
-            font-weight: bold;
+            margin: 10px;
+
+            img{
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                }
+            
+        }
+     
+        
+        .comment{
+            display: flex;
+            flex-direction: column;
+            margin-top: 5px;
+
+            .counter{
+                display: flex;
+                font-size: 16px;
+                margin-left: 10px;
+                font-weight: bold;
+            }
+        }
+    }
+
+    .function{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-top: 10px;
+        padding-left: 5px;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        border-top: #ccc 1px solid;
+        height: 50px;
+        background-color: #fff;
+
+        .comment{
+            display: flex;
+            width: 150px;
+            background-color: #eae4e4;
+            border-radius: 20px;
+            padding-left: 15px;
+            margin: 10px;
+            font-size: 14px;
+            align-items: center;
+        }
+        
+        .like{
+            padding: 10px;
+            .icon{
+                img{
+                    width: 30px;
+                }
+            }
+        }
+
+        .star{
+            padding: 10px;
+
+            .icon{
+                img{
+                    width: 30px;
+                }
+            }
+        }
+
+        .share{
+            padding: 10px;
+            .icon{
+                img{
+                    width: 30px;
+                }
+            }
         }
     }
 }
