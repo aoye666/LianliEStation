@@ -31,7 +31,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
 }
 
 .market-container {
-  background-color: #f5f5f5;
+  background-color: var(--bg-color);
   display: flex;
   flex-direction: column;
   height: calc(100vh - 55px); // 只减去底部 Tabbar (55px)，不需要顶部 margin
