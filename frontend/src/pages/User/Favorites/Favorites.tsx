@@ -34,6 +34,7 @@ const Favorites: React.FC = () => {
     else{
       ids.forEach(id => removeFavoriteGoods(id))
     }
+    window.location.reload()
   }
 
   return (

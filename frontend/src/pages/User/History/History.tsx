@@ -44,6 +44,7 @@ const History = () => {
       ids.forEach((id) => removeHistoryGoods(id));
     else
       ids.forEach((id) => removeHistoryPost(id));
+    window.location.reload()
 
   };
 

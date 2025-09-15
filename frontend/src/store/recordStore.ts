@@ -245,7 +245,7 @@ const useRecordStore = create<RecordState>()(
       },
 
       removeHistoryPost: (id) => {
-        api.delete(`/api/posts/${id}`,{
+        api.delete(`/api/forum/posts/${id}`,{
           data:{
             post_id: id,
           }

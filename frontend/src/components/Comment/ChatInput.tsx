@@ -42,6 +42,7 @@ const ChatInput: React.FC<Props> = ({id, parent_id}) => {
           onChange={(e) => setText(e.target.value)}
           rows={3}
           placeholder="输入文字..."
+          autoFocus
         />
 
         {/* 已选择的图片预览
