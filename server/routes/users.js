@@ -346,7 +346,7 @@ router.put("/profile", authToken, async (req, res) => {
     }
 
     // 添加WHERE条件参数
-    updateParams.push(decoded.user_id);
+    updateParams.push(req.user.user_id);
 
     // 更新用户信息
     const [result] = await db.query(`UPDATE users SET ${updateFields} WHERE id = ?`, updateParams);
@@ -695,8 +695,6 @@ router.put("/profile/image", authToken, upload.single("image"), async (req, res)
   }
 
   try {
-    const decoded = jwt.verify(token, SECRET_KEY);
-
     // 根据类型确定字段名和默认图片路径
     let fieldName, defaultImage;
     switch (type) {
