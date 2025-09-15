@@ -9,6 +9,14 @@ $shadow-color: rgba(0, 0, 0, 0.1);
 .template-container {
     display: flex;
     flex-direction: column;
+    height: calc(100vh - 50px);
+    width: 100vw;
+    max-width: 100vw;
+    max-height: calc(100vh - 50px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin-top: 50px;
+    box-sizing: border-box;
     transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0.5s;
 
     .alert{

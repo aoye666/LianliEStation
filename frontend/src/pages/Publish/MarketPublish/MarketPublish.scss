@@ -1,7 +1,12 @@
 .publish-container {
-    margin-top: 50px;
-    width: 100%;
+    width: 100vw;
+    max-width: 100vw;
     height: calc(100vh - 50px);
+    max-height: calc(100vh - 50px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin-top: 50px;
+    box-sizing: border-box;
     .dialog-container {
         overflow: scroll;
         display: flex;

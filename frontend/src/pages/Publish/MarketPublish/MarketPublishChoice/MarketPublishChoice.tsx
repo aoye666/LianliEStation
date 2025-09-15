@@ -13,10 +13,7 @@ const MarketPublishChoice = () => {
       <div className="choice-content">
         <div className="decoration-lines"></div>
         
-        <div className="title-section">
-          <h2 className="main-title">选择发布方式</h2>
-          <p className="subtitle">发布你的商品，让更多人看到</p>
-        </div>
+
 
         <div className="cards-container">
           <div className="choice-card basic-card" onClick={() => navigate('/publish/market-publish-basic')}>
