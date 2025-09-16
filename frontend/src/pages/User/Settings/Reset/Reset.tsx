@@ -14,7 +14,7 @@ interface Profile {
   nickname: string | undefined;
   campus_id: number | undefined;
   qq_id: string | undefined;
-  avatar: File | undefined; // 文件类型
+  avatar: File | undefined;
   theme_id: number | undefined;
   background_url: File | undefined;
   banner_url: File | undefined;
@@ -63,10 +63,6 @@ const Reset = () => {
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   const { type } = useParams();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    console.log(profile);
-  }, [profile, currentUser]);
 
   // 清理预览URL，防止内存泄露
   useEffect(() => {
