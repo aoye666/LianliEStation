@@ -695,7 +695,7 @@ router.put("/profile/image", authToken, upload.single("image"), async (req, res)
   }
 
   try {
-    const decoded = jwt.verify(token, SECRET_KEY);
+    // const decoded = jwt.verify(token, SECRET_K EY);
 
     // 根据类型确定字段名和默认图片路径
     let fieldName, defaultImage;

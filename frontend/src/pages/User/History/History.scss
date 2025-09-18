@@ -18,26 +18,15 @@ $shadow-color: rgba(0, 0, 0, 0.1);
         margin-top: 50px;
         flex-direction: column;
 
-        .button-group{
+        .tabs-container{
             display: flex;
-            padding: 5px 20px;
-            justify-content: space-between;
-            button{
-                width: 70px;
-                height: 20px;
-                border: none;
-                border-radius: 10px;
-                transition: all 0.3s ease;
-                background-color: $primary-color;
+            width: 100vw;
 
-                &:active{
-                    background-color: $hover-color;
-                    cursor: pointer;
-                    transform: translateY(3px);
-                }
-
+            .tabs{
+                width: 100vw;
             }
         }
+
 
         .content{
             display: flex;
@@ -141,6 +130,29 @@ $shadow-color: rgba(0, 0, 0, 0.1);
         position: fixed;
         bottom: 20px;
 
+        .manage-button{
+            display: flex;
+
+            button{
+                position: fixed;
+                border: none;
+                border-radius: 10px;
+                width: 100px;
+                height: 25px;
+                background-color: $primary-color;
+                color: white;
+                transition: all 0.3s ease;
+                bottom: 20px;
+                left: 37%;
+                box-shadow: $shadow-color 0px 0px 8px 0px;
+
+                &:active{
+                    transform: translateY(3px);
+                    background-color: $hover-color;
+                }
+            }
+        }
+
         .delete-button{
             display: flex;
 
@@ -152,7 +164,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
                 height: 25px;
                 background-color: rgb(241, 69, 69);
                 transition: all 0.3s ease;
-                bottom: 20px;
+                bottom: 50px;
                 left: 37%;
                 box-shadow: #b00202 0px 0px 8px 0px;
 

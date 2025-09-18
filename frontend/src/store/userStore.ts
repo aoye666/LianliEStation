@@ -261,38 +261,66 @@ const useUserStore = create<UserState>()(
       // 上传用户的图片
       changeImage: async (type: string, image: File) => {
         try {
+          // 验证图片类型参数
+          if (!['avatar', 'background', 'banner'].includes(type)) {
+            throw new Error('无效的图片类型，必须是 avatar, background 或 banner');
+          }
+
+          // 验证是否选择了图片
+          if (!image) {
+            throw new Error('请选择要上传的图片文件');
+          }
+
           const formData = new FormData();
           formData.append("image", image);
 
-          const res = await api.put(
-            "/api/users/profile/image",
-            { formData },
-            {
-              params: {
-                type: type,
+          const res = await api.put(`/api/users/profile/image?type=${type}`, formData);
+
+          if (res?.data?.url) {
+            set((state: any) => ({
+              currentUser: {
+                ...state.currentUser,
+                [type === "avatar" ? "avatar" : `${type}_url`]: res.data.url,
               },
+            }));
+
+            // 更新 localStorage
+            let localStorageKey = "";
+            if (type === "background") {
+              localStorageKey = "userBackground";
+            } else if (type === "banner") {
+              localStorageKey = "userBanner";
+            } else if (type === "avatar") {
+              localStorageKey = "userAvatar";
             }
-          );
-          set((state: any) => ({
-            currentUser: {
-              ...state.currentUser,
-              [type === "avatar" ? "avatar" : `${type}_url`]: res?.data.url,
-            },
-          }));
+            localStorage.removeItem(localStorageKey);
 
-          // 更新 localStorage
-          let localStorageKey = "";
-          if (type === "background") {
-            localStorageKey = "userBackground";
-          } else if (type === "banner") {
-            localStorageKey = "userBanner";
-          } else if (type === "avatar") {
-            localStorageKey = "userAvatar";
+            message.success(res.data.message || '图片上传成功');
+            console.log('图片上传成功:', res.data);
           }
-          localStorage.removeItem(localStorageKey);
-
-          console.log(res?.data);
         } catch (error: any) {
+          // 根据API文档处理不同的错误状态
+          const errorMessage = error.response?.data?.message || error.message || '图片上传失败';
+          
+          switch (error.response?.status) {
+            case 400:
+              message.error(errorMessage);
+              break;
+            case 401:
+              message.error('登录已过期，请重新登录');
+              // 可选择性地触发登出
+              break;
+            case 404:
+              message.error('用户不存在');
+              break;
+            case 500:
+              message.error('服务器错误，请稍后重试');
+              break;
+            default:
+              message.error(errorMessage);
+          }
+          
+          console.error('图片上传失败:', error);
           throw error;
         }
       },

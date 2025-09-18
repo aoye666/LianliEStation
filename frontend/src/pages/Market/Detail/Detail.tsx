@@ -1,4 +1,4 @@
-import { useMainStore, useUserStore } from "../../../store";
+import { useMainStore, useUserStore,useRecordStore } from "../../../store";
 import { useState, useEffect, useRef, use } from "react";
 import { useNavigate, useParams } from "react-router-dom"; // 使用 useParams 从路由获取参数
 import { timeFormat } from "../../../utils/formatters";
@@ -50,8 +50,10 @@ const Detail = () => {
   const [isMine, setIsMine] = useState("user"); // 当前互动类型 user/manage
   const [isLiked, setIsLiked] = useState(false); // 当前商品是否已点赞
   const [isDisliked, setIsDisliked] = useState(false); // 当前商品是否已踩
+  const [isStared, setIsStared] = useState(false); // 当前商品是否已收藏
   const touchStartX = useRef(0); // 记录触摸起始位置
   const touchEndX = useRef(0); // 记录触摸结束位置
+  const { addFavoriteGoods } = useRecordStore();
 
   const handleIsRecorded = () => {
     if (currentUser && currentGoods) {
@@ -83,7 +85,21 @@ const Detail = () => {
         console.log("未举报");
       }
     }
+
+    
   };
+
+  const handleStar = () => {
+    if (currentGoods) {
+      addFavoriteGoods(currentGoods.id).then((status) => {
+        if (status === 200) {
+          message.success("已加入收藏");
+        } else {
+          message.error("加入收藏失败");
+        }
+      });
+    }
+  }
 
   const fetchData = () => {
     const numericID = Number(ID);
@@ -324,7 +340,7 @@ const Detail = () => {
         )}
       </div>
       <div className="detail-btn">
-        <div className="star-btn" onClick={() => message.info("收藏功能正在开发，暂不支持")}>
+        <div className="star-btn" onClick={handleStar}>
           <img className="starBtn-icon" src={stars} alt="收藏" />
           <div className="starBtn-text">加入收藏</div>
         </div>

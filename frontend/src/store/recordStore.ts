@@ -117,7 +117,7 @@ interface RecordState {
   favoritesGoods: FavoriteGoods[];
   favoritePosts: FavoritePost[];
   getFavorites: () => Promise<void>;
-  addFavoriteGoods: (favoriteGoods: FavoriteGoods) => Promise<number|undefined>;
+  addFavoriteGoods: (goods_id: number) => Promise<number|undefined>;
   addFavoritePost: (favoritePost: number) => Promise<number|undefined>;
   removeFavoritePost: (favoriteId: number) => Promise<number|undefined>;
   removeFavoriteGoods: (favoriteId: number) => void;
@@ -269,9 +269,9 @@ const useRecordStore = create<RecordState>()(
         }
       },
 
-      addFavoriteGoods: async (favoriteGoods) => {
+      addFavoriteGoods: async (goods_id: number) => {
         try{
-          const response = await api.post("/api/favorites/add", { id: favoriteGoods.id });
+          const response = await api.post("/api/favorites/goods/add", { goods_id: goods_id });
           return response.status
         }
         catch(error){
@@ -285,9 +285,9 @@ const useRecordStore = create<RecordState>()(
 
       removeFavoriteGoods: (favoriteId: number) => {
         try{
-          api.post("/api/favorites/remove", undefined, {
+          api.delete("/api/favorites/goods/remove", {
           params: {
-            post_id: favoriteId,
+            goods_id: favoriteId,
           },
         });
         }

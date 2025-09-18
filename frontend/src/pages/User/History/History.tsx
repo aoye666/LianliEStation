@@ -2,6 +2,8 @@ import Navbar from "../../../components/Navbar/Navbar";
 import { useEffect, useState, useRef } from "react";
 import { useRecordStore } from "../../../store";
 import takePlace from "../../../assets/takePlace.png";
+import { Tabs } from "antd"
+import type { TabsProps } from "antd/lib/tabs"
 import "./History.scss";
 
 type checkBox = { [number: number]: boolean };
@@ -19,6 +21,17 @@ const History = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isPosts, setIsPosts] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  const items: TabsProps['items'] = [
+    {
+      key: 'goods',
+      label: '商品',
+    },
+    {
+      key: 'posts',
+      label: '帖子',
+    },
+  ]
 
 
   useEffect(() => {
@@ -55,10 +68,10 @@ const History = () => {
       </div>
 
       <div className="body">
-        <div className="button-group">
-          <button onClick={() => handleOnClick()}>管理</button>
-          <button onClick={() => setIsPosts(!isPosts)}>{isPosts? "发布帖子" : "发布商品"}</button>
+        <div className="tabs-container">
+          <Tabs className="tabs" defaultActiveKey="goods" items={items} onChange={(key) => {setIsPosts(key === "posts")}} centered />
         </div>
+        
         <div className="content">
           {
           !isPosts&&(
@@ -133,6 +146,9 @@ const History = () => {
       </div>
 
       <div className="footer">
+        <div className="manage-button">
+          <button onClick={() => handleOnClick()}>管理</button>
+        </div>
         {isVisible ? (
           <div className="delete-button">
             <button onClick={() => handleOnDelete()}>删除</button>
