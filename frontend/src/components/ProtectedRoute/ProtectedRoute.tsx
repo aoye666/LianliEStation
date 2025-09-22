@@ -1,7 +1,7 @@
-// src/components/ProtectedRoute.tsx
+// 避免一般用户访问管理员路由
 import React from "react";
 import { Navigate } from "react-router-dom";
-import Cookies from "js-cookie";
+import { useUserStore } from "../../store";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,9 +9,11 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
-  // if (!Cookies.get("auth-token")) {
-  //   return <Navigate to="/auth/login" replace />;
-  // }
+  const { isAdmin } = useUserStore();
+
+  if (!isAdmin) {
+    return <Navigate to="/pc-page" replace />;
+  }
 
   return <>{children}</>;
 };

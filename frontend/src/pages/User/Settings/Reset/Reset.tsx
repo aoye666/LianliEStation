@@ -20,20 +20,28 @@ interface Profile {
   banner_url: File | undefined;
 }
 
-const dbPromise = openDB('userImagesDB', 1, {
-  upgrade(db) {
-    if (!db.objectStoreNames.contains('images')) {
-      db.createObjectStore('images');
-    }
-  },
-});
+// 创建数据库连接的函数
+const createDBConnection = async () => {
+  return await openDB('userImagesDB', 1, {
+    upgrade(db) {
+      if (!db.objectStoreNames.contains('images')) {
+        db.createObjectStore('images');
+      }
+    },
+  });
+};
 
 const storeImageInDB = async (key: string, file: File) => {
-  const db = await dbPromise;
-  const tx = db.transaction('images', 'readwrite');
-  const store = tx.objectStore('images');
-  await store.put(file, key);
-  await tx.done;
+  try {
+    const db = await createDBConnection();
+    const tx = db.transaction('images', 'readwrite');
+    const store = tx.objectStore('images');
+    await store.put(file, key);
+    await tx.done;
+    db.close(); // 立即关闭连接
+  } catch (error) {
+    console.error('存储图片到 IndexedDB 失败:', error);
+  }
 };
 
 // 从indexedDB中获取缓存的图片，此页面暂不需要

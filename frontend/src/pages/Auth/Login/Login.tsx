@@ -77,9 +77,12 @@ const Login: React.FC = () => {
             />
           </div>
           <button type="submit">登录</button>
-          <div className="register-forget">
+          <div className="login-links">
             <Link className="link" to="/auth/register">
               立即注册
+            </Link>
+            <Link className="link" to="/market">
+              游客登录
             </Link>
             <Link className="link" to="/user/settings/reset/password">
               忘记密码
