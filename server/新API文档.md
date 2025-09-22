@@ -353,7 +353,7 @@
 
 - **路径**: `/api/users/profile`
 - **方法**: `GET`
-- **描述**: 获取当前用户的个人资料，包括基本信息、主题设置和用户记录
+- **描述**: 获取当前用户的个人资料，包括基本信息、主题设置、用户记录和用户收藏
 
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
@@ -390,6 +390,7 @@ Authorization: Bearer {token}
     "background_url": "/uploads/background.jpg",
     "banner_url": "/uploads/banner.jpg",
     "avatar": "/uploads/avatar.jpg",
+    "isAdmin": false, 
     "records": {
       "likes": [
         {
@@ -407,7 +408,11 @@ Authorization: Bearer {token}
           "targetType": "post"
         }
       ]
-    }
+    },
+    "favorites": {
+    	"posts": [],
+      "goods": []
+      }
   }
   ```
 
@@ -657,85 +662,6 @@ PUT /api/users/profile/image?type=avatar
 - 如果用户已有自定义图片（非默认图片），旧图片将被自动删除
 - 根据不同的图片类型，会更新用户表中的不同字段（avatar/background_url/banner_url）
 - 使用 multipart/form-data 提交图片，字段名必须为"image"
-- **使用中间件验证**: 内部使用统一的身份验证中间件，提高代码复用性和维护性
-
-### 解码 Token
-
-**基本信息**
-
-- **路径**: `/api/users/decode-token`
-- **方法**: `GET`
-- **描述**: 解码 JWT Token 并返回其中包含的用户信息
-
-**请求参数**
-
-无
-
-**请求头**
-
-```
-Authorization: Bearer {token}
-```
-
-**请求示例**
-
-```
-GET /api/users/decode-token
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-**响应参数**
-
-| 状态码 | 内容类型         | 描述                       |
-| ------ | ---------------- | -------------------------- |
-| 200    | application/json | Token 解码成功             |
-| 401    | application/json | 未提供 Token 或 Token 无效 |
-| 500    | application/json | 服务器错误                 |
-
-**响应示例**
-
-- 成功响应 (状态码：200)
-
-```json
-{
-  "user_id": 1,
-  "username": "testuser",
-  "nickname": "Test User",
-  "campus_id": 1,
-  "qq": "123456789",
-  "isAdmin": false
-}
-```
-
-- Token 未提供 (状态码：401)
-
-```json
-{
-  "message": "未提供 Token"
-}
-```
-
-- Token 无效 (状态码：401)
-
-```json
-{
-  "message": "Token 无效"
-}
-```
-
-- 服务器错误 (状态码：500)
-
-```json
-{
-  "message": "服务器错误"
-}
-```
-
-**备注**
-
-- 该接口用于验证和解码 JWT Token，返回其中包含的用户信息
-- 需要提供有效的认证 Token 才能访问
-- 解码成功后返回的信息与登录时生成 Token 的内容一致
 - **使用中间件验证**: 内部使用统一的身份验证中间件，提高代码复用性和维护性
 
 ---
