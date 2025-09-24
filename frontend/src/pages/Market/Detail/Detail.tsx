@@ -53,7 +53,7 @@ const Detail = () => {
   const [isStared, setIsStared] = useState(false); // 当前商品是否已收藏
   const touchStartX = useRef(0); // 记录触摸起始位置
   const touchEndX = useRef(0); // 记录触摸结束位置
-  const { addFavoriteGoods } = useRecordStore();
+  const { addFavoriteGoods,removeFavoriteGoods } = useRecordStore();
 
   const handleIsRecorded = () => {
     if (currentUser && currentGoods) {
@@ -86,18 +86,29 @@ const Detail = () => {
       }
     }
 
-    
   };
 
   const handleStar = () => {
-    if (currentGoods) {
+    if (currentGoods && !isStared) {
       addFavoriteGoods(currentGoods.id).then((status) => {
-        if (status === 200) {
+        if (status === 201) {
           message.success("已加入收藏");
+          setIsStared(true);
         } else {
           message.error("加入收藏失败");
         }
       });
+    }
+    else if(currentGoods && isStared){
+      removeFavoriteGoods(currentGoods.id).then((status) => {
+        if (status === 200) {
+          message.success("已取消收藏");
+          setIsStared(false);
+        } else {
+          message.error("取消收藏失败");
+        }
+      });
+    
     }
   }
 

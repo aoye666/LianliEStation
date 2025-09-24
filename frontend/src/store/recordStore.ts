@@ -120,7 +120,7 @@ interface RecordState {
   addFavoriteGoods: (goods_id: number) => Promise<number|undefined>;
   addFavoritePost: (favoritePost: number) => Promise<number|undefined>;
   removeFavoritePost: (favoriteId: number) => Promise<number|undefined>;
-  removeFavoriteGoods: (favoriteId: number) => void;
+  removeFavoriteGoods: (favoriteId: number) => Promise<number|undefined>;
 
   // messages 相关的状态管理及方法
   appeals: Appeal[];
@@ -241,7 +241,11 @@ const useRecordStore = create<RecordState>()(
       },
 
       removeHistoryGoods: (id) => {
-        api.delete(`/api/goods/${id}`);
+        api.delete(`/api/goods/${id}`,{
+          data:{
+            post_id: id,
+          }
+        });
       },
 
       removeHistoryPost: (id) => {
@@ -283,18 +287,21 @@ const useRecordStore = create<RecordState>()(
         }
       },
 
-      removeFavoriteGoods: (favoriteId: number) => {
+      removeFavoriteGoods: async (favoriteId: number) => {
         try{
-          api.delete("/api/favorites/goods/remove", {
-          params: {
-            goods_id: favoriteId,
-          },
+          const response = await api.delete("/api/favorites/goods/remove", {
+            data:{
+              goods_id: favoriteId,
+            }
         });
+          return response.status
         }
         catch(error){
-          console.error("未知错误:", error);
+          const err = error as AxiosError;
+          console.log(err)
+          if (err.response)
+            return err.response.status;
         }
-
       },
 
       addFavoritePost: async (favoriteId: number) => {

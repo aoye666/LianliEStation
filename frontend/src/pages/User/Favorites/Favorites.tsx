@@ -39,16 +39,20 @@ const Favorites: React.FC = () => {
   const handleCheck = (id:number) => {
     setChecked({...checked, [id]:!checked[id]})
   }
-  const handleOnDelete = () => {
-    const ids = Object.keys(checked).filter(id => checked[parseInt(id)]).map(id => parseInt(id))
-    if(isPosts){
-      ids.forEach(id => removeFavoritePost(id))
-    }
-    else{
-      ids.forEach(id => removeFavoriteGoods(id))
-    }
-    window.location.reload()
+const handleOnDelete = async () => {
+  const ids = Object.keys(checked)
+    .filter(id => checked[parseInt(id)])
+    .map(id => parseInt(id))
+
+  if(isPosts){
+    await Promise.all(ids.map(id => removeFavoritePost(id)))
+  } else {
+    await Promise.all(ids.map(id => removeFavoriteGoods(id)))
   }
+
+  window.location.reload()
+}
+
 
   return (
     <div className="favorites-container">

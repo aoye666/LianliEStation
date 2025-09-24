@@ -49,17 +49,20 @@ const History = () => {
   const handleCheck = (id: number) => {
     setChecked({ ...checked, [id]: !checked[id] });
   };
-  const handleOnDelete = () => {
-    const ids = Object.keys(checked)
-      .filter((id) => checked[parseInt(id)])
-      .map((id) => parseInt(id));
-    if(!isPosts)
-      ids.forEach((id) => removeHistoryGoods(id));
-    else
-      ids.forEach((id) => removeHistoryPost(id));
-    window.location.reload()
+ const handleOnDelete = async () => {
+  const ids = Object.keys(checked)
+    .filter(id => checked[parseInt(id)])
+    .map(id => parseInt(id))
 
-  };
+  if(isPosts){
+    await Promise.all(ids.map(id => removeHistoryPost(id)))
+  } else {
+    await Promise.all(ids.map(id => removeHistoryGoods(id)))
+  }
+
+  window.location.reload()
+}
+
 
   return (
     <div className="history-container">
