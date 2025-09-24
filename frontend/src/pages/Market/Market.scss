@@ -316,7 +316,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
           cursor: pointer;
           background-color: $primary-color;
           border: none;
-          border-radius: 5px;
+          border-radius: 15px;
           //box-shadow: $primary-color 0px 2px 5px;
           //transition: all 0.2s ease;
 
@@ -384,7 +384,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
       overflow-y: scroll;
       justify-content: flex-start;
       margin-left: 4px;
-      height: calc(100vh - 105px - 31.25vw - 45px);
+      height: calc(100vh - 105px - 31.25vw - 39px);
       width: 100vw;
       .commodity-item {
         display: flex;
