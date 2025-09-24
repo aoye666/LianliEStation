@@ -1,7 +1,7 @@
 import React from 'react'
 import './Template.scss'
 
-import { useState, useEffect, useReducer } from 'react'
+import { useEffect, useReducer } from 'react'
 import { useUserStore } from '../../../../store'
 import useMainStore from '../../../../store/mainStore'
 import { useLocation } from 'react-router-dom'
@@ -160,14 +160,13 @@ const Template = () => {
 
   const currentUser = useUserStore(state => state.currentUser)
   const publishMarketGoods = useMainStore(state => state.publishMarketGoods)
-  const [isSuccess, setIsSuccess] = useState(false);
   const navigate = useNavigate()
 
   useEffect(() => {
     setCreateAt(new Date().toISOString())
     setCampusId(currentUser?.campus_id || 1)
     initialPostType(templateData?.post_type || 'receive')
-    initialTag(templateData?.tag || '商品类型')
+    initialTag(templateData?.tag || '商品标签')
     initialContent(templateData?.details || '')
     initialTitle(templateData?.title || '')
     initialPrice(templateData?.price || 0)
@@ -187,7 +186,7 @@ const Template = () => {
     }
   ];
 
-  // 商品分类下拉菜单配置
+  // 商品标签下拉菜单配置
   const categoryItems: MenuProps['items'] = [
     {
       key: '学习资料',
@@ -263,14 +262,10 @@ const Template = () => {
     previewImages,
     campus_id,
     campus_name,
-    author_id,
-    create_at,
     price,
-    likes,
-    complaints,
   } = state
 
-  // 原生文件上传处理
+  // 文件上传处理
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     
@@ -306,32 +301,19 @@ const Template = () => {
     dispatch({ type: 'SET_PREVIEW_IMAGES', payload: newPreviewUrls });
   };
 
-  const handleSuccess = async () => {
-    setIsSuccess(true);
-    // 设置 3 秒后提示消失
-    setTimeout(() => {
-      setIsSuccess(false);
-    }, 3000);
-  };
-
   const handlePublish = async () => {
     try {
       const success = await publishMarketGoods(
         title,
-        content,
-        author_id,
-        create_at,
-        price ?? 0,
         campus_id,
         post_type,
+        content,
+        price ?? undefined,
         tag,
-        images,
-        likes,
-        complaints
+        images
       );
       
       if (success) {
-        handleSuccess();
         console.log('发布成功');
         navigate('/market');
       }
