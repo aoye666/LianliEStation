@@ -24,7 +24,6 @@ const Lazy = {
   Reset: React.lazy(() => import("./pages/User/Settings/Reset/Reset")),
   User: React.lazy(() => import("./pages/User/User")),
   Forum: React.lazy(() => import("./pages/Forum/Forum")),
-  ForumDisable: React.lazy(() => import("./pages/ForumDisable/Forum")),
   Settings: React.lazy(() => import("./pages/User/Settings/Settings")),
   About: React.lazy(() => import("./pages/User/Settings/About/About")),
   Favorites: React.lazy(() => import("./pages/User/Favorites/Favorites")),
@@ -37,6 +36,7 @@ const Lazy = {
   AdminMessages: React.lazy(() => import("./pages/Admin/Messages/Messages")),
   AdminMarket: React.lazy(() => import("./pages/Admin/Market/Market")),
   AdminForum: React.lazy(() => import("./pages/Admin/Forum/Forum")),
+  PCPage: React.lazy(() => import("./pages/PCPage/PCPage")),
 };
 
 const App: React.FC = () => {
@@ -91,22 +91,22 @@ const App: React.FC = () => {
 
         try {
           console.log(`尝试获取用户信息 (第${attempt + 1}/${MAX_RETRIES}次)`);
-          
+
           // 传递abort信号给请求（如果fetchUserProfile支持的话）
           await useUserStore.getState().fetchUserProfile();
-          
+
           console.log("✅ 用户信息获取成功");
           return; // 成功后退出
 
         } catch (error) {
           const isLastAttempt = attempt === MAX_RETRIES - 1;
-          
+
           console.error(`❌ 获取用户信息失败 (第${attempt + 1}次):`, error);
 
           // 如果是网络错误且不是最后一次尝试，继续重试
           if (!isLastAttempt && !abortController.signal.aborted) {
-            console.log(`⏳ ${RETRY_DELAY/1000}秒后重试...`);
-            
+            console.log(`⏳ ${RETRY_DELAY / 1000}秒后重试...`);
+
             // 可被中断的延迟
             await new Promise((resolve, reject) => {
               const timeoutId = setTimeout(resolve, RETRY_DELAY);
@@ -125,10 +125,10 @@ const App: React.FC = () => {
       // 所有重试失败后的处理
       if (!abortController.signal.aborted) {
         console.error("🚫 达到最大重试次数，用户信息获取失败");
-        
+
         // 检查是否是认证问题
         const isAuthError = !useUserStore.getState().currentUser;
-        
+
         if (isAuthError) {
           message.error("登录已过期，请重新登录");
           Cookies.remove("auth-token");
@@ -155,188 +155,73 @@ const App: React.FC = () => {
   }, [token]);
 
 
-// 路由表抽离为常量
-const mobileRoutes = useMemo(() => [
-  
-  { path: "/auth/login", element: <Lazy.Login /> },
-  { path: "/auth/register", element: <Lazy.Register /> },
-  { path: "/user/settings/reset/:type", element: <Lazy.Reset /> },
-  {
-    path: "/user/settings/about",
-    element: (
-      <ProtectedRoute>
-        <Lazy.About />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/market",
-    element: (
-      <ProtectedRoute>
-        <Lazy.Market />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/market/:goodsId",
-    element: (
-      <ProtectedRoute>
-        <Lazy.Detail />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/market/:goodsId/appeal/:goodsTitle",
-    element: (
-      <ProtectedRoute>
-        <Lazy.DetailAppeal />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/forum",
-    element: (
-      <ProtectedRoute>
-        <Lazy.Forum />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/forum-test",
-    element: (
-      <ProtectedRoute>
-        <Lazy.ForumDisable />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/forum-detail",
-    element: (
-      <ProtectedRoute>
-        <Lazy.ForumDetail />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/publish/market-publish-choice",
-    element: (
-      <ProtectedRoute>
-        <Lazy.MarketPublishChoice />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/publish/market-publish-ai",
-    element: (
-      <ProtectedRoute>
-        <Lazy.MarketPublish />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/publish/forum-publish",
-    element: (
-      <ProtectedRoute>
-        <Lazy.ForumPublish />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/publish/market-publish-basic",
-    element: (
-      <ProtectedRoute>
-        <Lazy.Template />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/user",
-    element: (
-      <ProtectedRoute>
-        <Lazy.User />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/user/favorites",
-    element: (
-      <ProtectedRoute>
-        <Lazy.Favorites />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/user/messages",
-    element: (
-      <ProtectedRoute>
-        <Lazy.Messages />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/user/history",
-    element: (
-      <ProtectedRoute>
-        <Lazy.History />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/user/settings",
-    element: (
-      <ProtectedRoute>
-        <Lazy.Settings />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/admin",
-    element: (
-      <ProtectedRoute>
-        <Lazy.Market />
-      </ProtectedRoute>
-    )
-  },
-], [token]);
+  // 路由表抽离为常量
+  const mobileRoutes = useMemo(() => [
+    { path: "*", element: <Navigate to="/auth/login" replace /> },
+    { path: "/auth/login", element: <Lazy.Login /> },
+    { path: "/auth/register", element: <Lazy.Register /> },
+    { path: "/user/settings/reset/:type", element: <Lazy.Reset /> },
+    { path: "/user/settings/about", element: <Lazy.About /> },
+    { path: "/market", element: <Lazy.Market /> },
+    { path: "/market/:goodsId", element: <Lazy.Detail /> },
+    { path: "/market/:goodsId/appeal/:goodsTitle", element: <Lazy.DetailAppeal /> },
+    { path: "/forum", element: <Lazy.Forum /> },
+    { path: "/forum-detail", element: <Lazy.ForumDetail /> },
+    { path: "/publish/market-publish-choice", element: <Lazy.MarketPublishChoice /> },
+    { path: "/publish/market-publish-ai", element: <Lazy.MarketPublish /> },
+    { path: "/publish/forum-publish", element: <Lazy.ForumPublish /> },
+    { path: "/publish/market-publish-basic", element: <Lazy.Template /> },
+    { path: "/user", element: <Lazy.User /> },
+    { path: "/user/favorites", element: <Lazy.Favorites /> },
+    { path: "/user/messages", element: <Lazy.Messages /> },
+    { path: "/user/history", element: <Lazy.History /> },
+    { path: "/user/settings", element: <Lazy.Settings /> }
+  ], [token]);
 
-const webRoutes = useMemo(() => [
-  {
-    path: "/admin",
-    element: (
-      <Lazy.Admin />
-    ),
-    children: [
-      {
-        index: true,
-        element: <Lazy.Dashboard />,
-      },
-      {
-        path: "messages",
-        element: <Lazy.AdminMessages />,
-      },
-      {
-        path: "market",
-        element: <Lazy.AdminMarket />,
-      },
-      {
-        path: "forum",
-        element: <Lazy.AdminForum />,
-      },
-    ],
-  },
-  {
-    path: "*",
-    element: (
-      <Navigate to="/admin" replace/>
-    ),
-  }
-], [token]);
+  const webRoutes = useMemo(() => [
+    {
+      path: "/admin",
+      element: (
+        (<ProtectedRoute><Lazy.Admin />
+        </ProtectedRoute>)
+      ),
+      children: [
+        {
+          index: true,
+          element: <Lazy.Dashboard />,
+        },
+        {
+          path: "messages",
+          element: <Lazy.AdminMessages />,
+        },
+        {
+          path: "market",
+          element: <Lazy.AdminMarket />,
+        },
+        {
+          path: "forum",
+          element: <Lazy.AdminForum />,
+        },
+      ],
+    },
+    {
+      path: "/pc-page",
+      element: <Lazy.PCPage />
+    },
+    {
+      path: "*",
+      element: (
+        <Navigate to="/pc-page" replace />
+      ),
+    }
+    
+  ], [token]);
 
   const mobileRouter = useMemo(() => createBrowserRouter(mobileRoutes), [mobileRoutes]);
   const webRouter = useMemo(() => createBrowserRouter(webRoutes), [webRoutes]);
 
   const isMobile = useScreenType(768);
-  console.log(useScreenType(768),isMobile);
+  console.log(useScreenType(768), isMobile);
 
   return (
     <div className="App">

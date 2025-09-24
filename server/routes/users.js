@@ -227,6 +227,44 @@ router.get("/profile", authToken, async (req, res) => {
     // 获取投诉记录
     const [complaintRecords] = await db.query("SELECT target_id, target_type FROM complaints WHERE user_id = ?", [userId]);
 
+    let posts = [];
+    let goods = [];
+
+    // 并行查询用户收藏的帖子和商品
+    Promise.all([
+      // 查询收藏的帖子（posts表结构：id, title, content, author_id, campus_id, status, created_at, likes, complaints）
+      db.query(
+        `
+        SELECT p.id, p.title, p.content, p.author_id, p.created_at, p.status, p.campus_id, p.likes, p.complaints
+        FROM user_favorites uf
+        INNER JOIN posts p ON uf.post_id = p.id
+        WHERE uf.user_id = ? AND uf.post_id IS NOT NULL AND uf.goods_id IS NULL AND p.status != 'deleted'
+        ORDER BY uf.created_at DESC
+      `,
+        [userId]
+      ),
+      // 查询收藏的商品（goods表结构：id, title, content, author_id, created_at, status, price, campus_id, goods_type, tag）
+      db.query(
+        `
+        SELECT g.id, g.title, g.content, g.author_id, g.created_at, g.status, g.price, g.campus_id, g.goods_type, g.tag
+        FROM user_favorites uf
+        INNER JOIN goods g ON uf.goods_id = g.id
+        WHERE uf.user_id = ? AND uf.goods_id IS NOT NULL AND uf.post_id IS NULL AND g.status != 'deleted'
+        ORDER BY uf.created_at DESC
+      `,
+        [userId]
+      )
+    ])
+      .then(([postsResult, goodsResult]) => {
+         [posts] = postsResult;
+         [goods] = goodsResult;
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).json({ message: "服务器错误" });
+      });
+
+
     // 返回用户的详细信息
     const userData = {
       nickname: req.user.nickname,
@@ -248,6 +286,10 @@ router.get("/profile", authToken, async (req, res) => {
           targetId: record.target_id,
           targetType: record.target_type,
         })),
+      },
+      favorites: {
+        posts: posts || [],
+        goods: goods || [],
       },
     };
 
@@ -346,7 +388,7 @@ router.put("/profile", authToken, async (req, res) => {
     }
 
     // 添加WHERE条件参数
-    updateParams.push(decoded.user_id);
+    updateParams.push(req.user.user_id);
 
     // 更新用户信息
     const [result] = await db.query(`UPDATE users SET ${updateFields} WHERE id = ?`, updateParams);
@@ -695,8 +737,6 @@ router.put("/profile/image", authToken, upload.single("image"), async (req, res)
   }
 
   try {
-    // const decoded = jwt.verify(token, SECRET_K EY);
-
     // 根据类型确定字段名和默认图片路径
     let fieldName, defaultImage;
     switch (type) {

@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { message, Select } from "antd";
 import { useUserStore } from "../../../store";
 import "./Register.scss";
-import logo from "../../../assets/logo.png";
+import logo_title from "../../../assets/logo-title.png";
 import background from "../../../assets/background2.jpg";
 
 type RegisterInputs = {
@@ -13,10 +14,6 @@ type RegisterInputs = {
   qq_id: string;
   username: string;
   campus_id: number;
-};
-
-type ErrorType = {
-  message: string;
 };
 
 const Register: React.FC = () => {
@@ -31,9 +28,6 @@ const Register: React.FC = () => {
     campus_id: 1,
   });
 
-  // 错误信息
-  const [error, setError] = useState<ErrorType | null>(null);
-
   const navigate = useNavigate();
   const { register } = useUserStore();
 
@@ -45,36 +39,40 @@ const Register: React.FC = () => {
     setInputs((prev) => ({ ...prev, [name]: name === "campus_id" ? parseInt(value, 10) : value }));
   };
 
+  // 校区选项
+  const campusOptions = [
+    { value: 1, label: '凌水主校区' },
+    { value: 2, label: '开发区校区' },
+    { value: 3, label: '盘锦校区' },
+  ];
+
   // 提交表单
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       // 检查密码是否一致
       if (inputs.password !== inputs.confirmPassword) {
-        setError({ message: "密码不一致" });
+        message.error("密码不一致");
         return;
       }
 
       // 格式验证
       if (!/\S+@\S+\.\S+/.test(inputs.email)) {
-        setError({ message: "请输入有效的邮箱地址" });
+        message.error("请输入有效的邮箱地址");
         return;
       }
       if (!/^\d{5,12}$/.test(inputs.qq_id)) {
-        setError({ message: "请输入有效的QQ号" });
+        message.error("请输入有效的QQ号");
         return;
       }
       if (!/^[a-zA-Z0-9_]{3,16}$/.test(inputs.username)) {
-        setError({ message: "用户名不符合要求" });
+        message.error("用户名不符合要求");
         return;
       }
       if (
         !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}/.test(inputs.password)
       ) {
-        setError({
-          message:
-            "密码不符合要求",
-        });
+        message.error("密码不符合要求");
         return;
       }
 
@@ -89,12 +87,15 @@ const Register: React.FC = () => {
       };
 
       await register(userData);
-      navigate("/auth/login");
+      message.success("注册成功！正在跳转到登录页面...");
+      setTimeout(() => {
+        navigate("/auth/login");
+      }, 1500);
     } catch (err: any) {
       if (err.response) {
-        setError(err.response.data);
+        message.error(err.response.data.message || "注册失败");
       } else {
-        setError({ message: "发生未知错误" });
+        message.error("发生未知错误，请稍后重试");
       }
     }
   };
@@ -107,8 +108,7 @@ const Register: React.FC = () => {
         alt="background"
       ></img>
       <div className="register-box">
-        <img className="register-logo" src={logo} alt="logo"></img>
-        <div className="register-title">连理e站</div>
+        <img className="register-logo-title" src={logo_title} alt="logo-title"></img>
         <form className="register-form" onSubmit={handleSubmit}>
           <div className="form-item">
             <label htmlFor="nickname">昵称（用于应用内展示）</label>
@@ -158,19 +158,13 @@ const Register: React.FC = () => {
           </div>
           <div className="form-item">
             <label htmlFor="campus_id">请选择校区</label>
-            <select
-              required
-              name="campus_id"
-              id="campus_id"
-              value={inputs.campus_id.toString()}
-              onChange={handleChange}
-            >
-              <option value="1">凌水主校区</option>
-              <option value="2">开发区校区</option>
-              <option value="3">盘锦校区</option>
-            </select>
+            <Select
+              className="register-campus-dropdown"
+              options={campusOptions}
+              value={inputs.campus_id}
+              onChange={v => setInputs({ ...inputs, campus_id: v })}
+            />
           </div>
-
           <div className="form-item">
             <label htmlFor="password" style={{ height: "40px" }}>
               密码（至少含1个大写字母、1个数字，长度至少为8位）
@@ -196,13 +190,9 @@ const Register: React.FC = () => {
             />
           </div>
           <button type="submit">注册</button>
-          {error ? (
-            <div className="error-message">{error.message}</div>
-          ) : (
-            <div>
-              <Link to="/login">立即登录！</Link>
-            </div>
-          )}
+          <div className="register-link">
+            <Link to="/auth/login" className="link">立即登录</Link>
+          </div>
         </form>
       </div>
     </div>

@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { message } from "antd";
 import { useUserStore } from "../../../store";
 import "./Login.scss";
-import logo from "../../../assets/logo.png";
+import logo_title from "../../../assets/logo-title.png";
 import background from "../../../assets/background1.jpg";
 
 type LoginInputs = {
   identifier: string;
   password: string;
-};
-
-type ErrorType = {
-  message: string;
 };
 
 const Login: React.FC = () => {
@@ -20,9 +17,6 @@ const Login: React.FC = () => {
     identifier: "",
     password: "",
   });
-
-  // 错误信息
-  const [error, setError] = useState<ErrorType | null>(null);
 
   const navigate = useNavigate();
   const { login, token, isAuthenticated } = useUserStore();
@@ -38,11 +32,12 @@ const Login: React.FC = () => {
     e.preventDefault();
     try {
       await login(inputs.identifier, inputs.password); // 调用 login 方法
+      message.success("登录成功！");
     } catch (err: any) {
       if (err.response) {
-        setError(err.response.data);
+        message.error(err.response.data.message || "登录失败");
       } else {
-        setError({ message: "登录错误" });
+        message.error("登录错误，请稍后重试");
       }
     }
   };
@@ -51,14 +46,13 @@ const Login: React.FC = () => {
     if (isAuthenticated) {
       navigate("/market");
     }
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated, token, navigate]);
 
   return (
     <div className="login-container">
       <img className="login-background" src={background} alt="background"></img>
       <div className="login-box">
-        <img className="login-logo" src={logo} alt="logo"></img>
-        <div className="login-title">连理e站</div>
+        <img className="login-logo-title" src={logo_title} alt="logo-title"></img>
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-item">
             <label htmlFor="identifier">用户名或邮箱:</label>
@@ -83,13 +77,15 @@ const Login: React.FC = () => {
             />
           </div>
           <button type="submit">登录</button>
-          {error && <div>{error.message}</div>}
-          <div className="register-forget">
+          <div className="login-links">
             <Link className="link" to="/auth/register">
-              立即注册！
+              立即注册
+            </Link>
+            <Link className="link" to="/market">
+              游客登录
             </Link>
             <Link className="link" to="/user/settings/reset/password">
-              忘记密码?
+              忘记密码
             </Link>
           </div>
         </form>

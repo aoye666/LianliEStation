@@ -5,6 +5,7 @@ import { persist } from "zustand/middleware";
 import Cookies from "js-cookie"; // 使用cookie存储token
 import api from "../api/index";
 import { message } from "antd";
+import { clearIDB } from "../utils/idbManager";
 import { useRecordStore, useMainStore } from "./index";
 
 interface RecordItem {
@@ -155,7 +156,9 @@ const useUserStore = create<UserState>()(
         localStorage.removeItem("mainStore");
 
         // 清理 indexedDB
-        // 可选
+        clearIDB("userImagesDB").catch(error => {
+          console.error("清理 IndexedDB 失败:", error);
+        });
 
         // 清理 Cookies
         Cookies.remove("auth-token");

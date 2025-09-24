@@ -1,9 +1,8 @@
-import React, { use } from 'react'
+import React from 'react'
 import './Template.scss'
 import add from '../../../../assets/more.png'
 import takePlace from '../../../../assets/takePlace.png'
-import logo from '../../../assets/logo.png'
-import { useState,useEffect,useReducer } from 'react'
+import { useState, useEffect, useReducer } from 'react'
 import { useUserStore } from '../../../../store'
 import axios from 'axios'
 import { useLocation } from 'react-router-dom'
@@ -12,12 +11,12 @@ import Cookies from 'js-cookie'
 import Navbar from '../../../../components/Navbar/Navbar'
 
 const initialState = {
-  id:1,
+  id: 1,
   title: '',
   content: '',
   author_id: null as number | null,
   create_at: '',
-  status:"active",
+  status: "active",
   price: 0,
   campus_id: 1,
   post_type: '买/卖',
@@ -29,7 +28,7 @@ const initialState = {
   complaints: 0,
 }
 
-type Action=
+type Action =
   | { type: 'SET_POST_TYPE', payload: string }
   | { type: 'SET_TAG', payload: string }
   | { type: 'SET_CONTENT', payload: string }
@@ -41,58 +40,58 @@ type Action=
   | { type: 'SET_AUTHOR_ID', payload: number | null }
   | { type: 'SET_CREATE_AT', payload: string }
   | { type: 'SET_PRICE', payload: number }
-  | { type: 'SET_ID', payload: number}
+  | { type: 'SET_ID', payload: number }
 
 const reducer = (state: typeof initialState, action: Action) => {
   switch (action.type) {
     case 'SET_ID':
       return {
-       ...state,
+        ...state,
         id: action.payload,
       }
     case 'SET_POST_TYPE':
       return {
-       ...state,
+        ...state,
         post_type: action.payload,
       }
     case 'SET_PRICE':
       return {
-       ...state,
+        ...state,
         price: action.payload,
       }
     case 'SET_TAG':
       return {
-       ...state,
+        ...state,
         tag: action.payload,
       }
     case 'SET_CONTENT':
       return {
-       ...state,
+        ...state,
         content: action.payload,
       }
     case 'SET_TITLE':
       return {
-       ...state,
+        ...state,
         title: action.payload,
       }
     case 'SET_IMAGES':
       return {
-       ...state,
+        ...state,
         images: action.payload,
       }
     case 'SET_ERROR':
       return {
-       ...state,
+        ...state,
         error: action.payload,
       }
     case 'SET_CAMPUS_ID':
       return {
-       ...state,
+        ...state,
         campus_id: action.payload,
       }
     case 'SET_CAMPUS_NAME':
       return {
-       ...state,
+        ...state,
         campus_name: action.payload,
       }
     case 'SET_AUTHOR_ID':
@@ -102,7 +101,7 @@ const reducer = (state: typeof initialState, action: Action) => {
       }
     case 'SET_CREATE_AT':
       return {
-       ...state,
+        ...state,
         create_at: action.payload,
       }
     default:
@@ -132,12 +131,12 @@ const Template = () => {
     dispatch({ type: 'SET_PRICE', payload: value })
   }
   const setPostType = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    dispatch({ type: 'SET_POST_TYPE', payload: (e.currentTarget.innerText==='买'?'receive':'sell') })
+    dispatch({ type: 'SET_POST_TYPE', payload: (e.currentTarget.innerText === '买' ? 'receive' : 'sell') })
   }
   const setPrice = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: 'SET_PRICE', payload: e.target.valueAsNumber })
   }
-  const setTag = (e:React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const setTag = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     dispatch({ type: 'SET_TAG', payload: e.currentTarget.innerText })
   }
   const setContent = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -154,7 +153,7 @@ const Template = () => {
   }
   const setCampusId = (value: number) => {
     dispatch({ type: 'SET_CAMPUS_ID', payload: value })
-    dispatch({ type: 'SET_CAMPUS_NAME', payload: document.getElementById(value.toString())?.innerText?? '校区选择' })
+    dispatch({ type: 'SET_CAMPUS_NAME', payload: document.getElementById(value.toString())?.innerText ?? '校区选择' })
   }
   const setCampusName = (value: string) => {
     dispatch({ type: 'SET_CAMPUS_NAME', payload: value })
@@ -174,9 +173,9 @@ const Template = () => {
     initialPostType(templateData?.post_type || 'receive')
     initialTag(templateData?.tag || '商品类型')
     initialContent(templateData?.details || '')
-    initialTitle(templateData?.title || '')    
+    initialTitle(templateData?.title || '')
     initialPrice(templateData?.price || 0)
-  },[])
+  }, [])
 
   const {
     id,
@@ -205,7 +204,7 @@ const Template = () => {
     setError(null)
   }
 
-  const handleSuccess =async () => {
+  const handleSuccess = async () => {
     setIsSuccess(true);
     // 设置 3 秒后提示消失
     setTimeout(() => {
@@ -222,7 +221,7 @@ const Template = () => {
     const formData = new FormData();
     formData.append('title', title);
     formData.append('content', content);
-    formData.append('author_id', author_id?.toString()?? '');
+    formData.append('author_id', author_id?.toString() ?? '');
     formData.append('create_at', create_at);
     formData.append('status', 'active');
     formData.append('price', price.toString());
@@ -234,7 +233,7 @@ const Template = () => {
     });
     formData.append('likes', likes.toString());
     formData.append('complaints', complaints.toString());
-    axios.post(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/publish/goods`, formData,{
+    axios.post(`${process.env.REACT_APP_API_URL || "http://localhost:5000"}/api/publish/goods`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         'Authorization': `Bearer ${token}`
@@ -242,60 +241,52 @@ const Template = () => {
     }).then(() => {
       handleSuccess()
       console.log('发布成功')
-      window.location.href = '/target-page'
-  })
-  .catch((error) => {
-      console.log(error)
-
-  })
-}
+      navigate('/market')
+    })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
 
   return (
     <div className='template-container'>
       <div className='navbar'>
-        {/* <div className='logo'>
-          <img src={logo} alt="logo" />          
-        </div>
-        <div className='text'>
-          连理e站
-        </div> */}
         <Navbar backActive={true} backPath='/publish/market-publish-choice' title='商品发布模板' />
       </div>
-       
+
       <div className='content'>
         <div className='title'>
           <label htmlFor="title-input">标题</label>
           <div className='title-input'>
-            <input type='text' placeholder='标题' value={title} onChange={(e)=>setTitle(e)}/>
+            <input type='text' placeholder='标题' value={title} onChange={(e) => setTitle(e)} />
           </div>
         </div>
 
-      <div>
+        <div>
 
-      {/* 显示提示框 */}
-      {isSuccess && (
-        <div className='alert'>
-          <div className='publish-success'>
-            <p>发布成功</p>
-          </div>
+          {/* 显示提示框 */}
+          {isSuccess && (
+            <div className='alert'>
+              <div className='publish-success'>
+                <p>发布成功</p>
+              </div>
+            </div>
+          )}
+
         </div>
-      )}
-
-    </div>
-
         <div className='sort'>
           <label htmlFor="sort-input">分类</label>
           <div className='sort-input'>
-          <div className="dropdown">
-            <div className='dropdown-sellOrBuy'>
-              <button className="dropdown-button">{`${post_type==='receive'?'买':'卖'}`}</button>
-              <div className="dropdown-menu">
-                <div className="dropdown-item" onClick={(e) => setPostType(e)}>买</div>
-                <div className="dropdown-item" onClick={(e) => setPostType(e)}>卖</div>
+            <div className="dropdown">
+              <div className='dropdown-sellOrBuy'>
+                <button className="dropdown-button">{`${post_type === 'receive' ? '买' : '卖'}`}</button>
+                <div className="dropdown-menu">
+                  <div className="dropdown-item" onClick={(e) => setPostType(e)}>买</div>
+                  <div className="dropdown-item" onClick={(e) => setPostType(e)}>卖</div>
+                </div>
               </div>
-            </div>
-            <div className='dropdown-category'>
-              <button className="dropdown-button">{`${tag}`}</button>
+              <div className='dropdown-category'>
+                <button className="dropdown-button">{`${tag}`}</button>
                 <div className="dropdown-menu">
                   <div className="dropdown-item" onClick={(e) => setTag(e)}>服务</div>
                   <div className="dropdown-item" onClick={(e) => setTag(e)}>电子产品</div>
@@ -305,25 +296,25 @@ const Template = () => {
                   <div className="dropdown-item" onClick={(e) => setTag(e)}>捞人询问</div>
                   <div className="dropdown-item" onClick={(e) => setTag(e)}>其他</div>
                 </div>
-            </div>
-            <div className='dropdown-campus'>
-              <button className="dropdown-button">{`${campus_name}`}</button>
+              </div>
+              <div className='dropdown-campus'>
+                <button className="dropdown-button">{`${campus_name}`}</button>
                 <div className="dropdown-menu">
                   <div className="dropdown-item" id="1" onClick={(e) => handleCampusChange(e)}>凌水校区</div>
                   <div className="dropdown-item" id="2" onClick={(e) => handleCampusChange(e)}>开发区校区</div>
                   <div className="dropdown-item" id="3" onClick={(e) => handleCampusChange(e)}>盘锦校区</div>
                 </div>
+              </div>
+
             </div>
-            
-          </div>
           </div>
         </div>
 
         <div className='price'>
-            <label htmlFor="price">价格</label>
-              <div className='price-num'>
-                <input type="number" placeholder='商品价格' value={price} onChange={(e) =>setPrice(e) }/>
-              </div>
+          <label htmlFor="price">价格</label>
+          <div className='price-num'>
+            <input type="number" placeholder='商品价格' value={price} onChange={(e) => setPrice(e)} />
+          </div>
         </div>
 
         <div className='img-upload'>
@@ -332,38 +323,38 @@ const Template = () => {
               上传图片
             </label>
             <div className='img-upload-icon'>
-              <input type="file" accept="image/*" id='upload-icon' multiple onChange={(e) => handleImageChange(e)}/>
-              <img src={add} alt="add" onClick={()=>(document.getElementById('upload-icon') as HTMLInputElement)?.click()}/>
+              <input type="file" accept="image/*" id='upload-icon' multiple onChange={(e) => handleImageChange(e)} />
+              <img src={add} alt="add" onClick={() => (document.getElementById('upload-icon') as HTMLInputElement)?.click()} />
             </div>
           </div>
           <div className='img-upload-down'>
-            {error? 
-              <div className='error'>{error}</div> 
-              : 
+            {error ?
+              <div className='error'>{error}</div>
+              :
               <div>
                 <img src={images[0] ? URL.createObjectURL(images[0]) : takePlace} alt="takePlace" />
                 <img src={images[1] ? URL.createObjectURL(images[1]) : takePlace} alt="takePlace" />
                 <img src={images[2] ? URL.createObjectURL(images[2]) : takePlace} alt="takePlace" />
               </div>
-              }
+            }
 
           </div>
 
         </div>
 
         <div className='detail'>
-            <label htmlFor="detail-input">
-                商品详情
-            </label>
-            <div className='detail-input'>
-              <textarea placeholder={"商品详情"} value={content} onChange={(e)=>setContent(e)} />
-            </div>
+          <label htmlFor="detail-input">
+            商品详情
+          </label>
+          <div className='detail-input'>
+            <textarea placeholder={"商品详情"} value={content} onChange={(e) => setContent(e)} />
+          </div>
         </div>
-    </div>
+      </div>
 
-    <div className='submit'>
-      <button onClick={() => handlePublish()}>发布</button>
-    </div>
+      <div className='submit'>
+        <button onClick={() => handlePublish()}>发布</button>
+      </div>
     </div>
   )
 }

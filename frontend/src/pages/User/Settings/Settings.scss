@@ -1,9 +1,14 @@
 $bg:#EDEDED;
 .settings-container {
-    width: 100%;
+    width: 100vw;
+    max-width: 100vw;
     height: calc(100vh - 50px);
-    background: $bg;
+    max-height: calc(100vh - 50px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: var(--bg-color);
     margin-top: 50px;
+    box-sizing: border-box;
     .settings-item {
         display: flex;
         flex-direction: row;
