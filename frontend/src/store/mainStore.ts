@@ -3,12 +3,7 @@ import { message } from "antd";
 import api from "../api/index";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import Cookies from "js-cookie"; // 从 cookie 中获取 token
-import { data } from "react-router-dom";
 import { AxiosError } from "axios";
-
-// 获取 token
-const token = Cookies.get("auth-token");
 
 interface Goods {
   id: number;
@@ -93,7 +88,36 @@ interface MainState {
   setFilters: (newFilters: Partial<Filters>) => void;
   updateGoods: () => Promise<void>;
   getForumPosts: () => Promise<void>;
-  updateForumInteract: (id: number, action: string,content?:string,parent_id?:number,value?:number) => Promise<number|undefined>;
+  publishForumPost: (
+    title: string,
+    content: string,
+    author_id: number | null,
+    create_at: string,
+    campus_id: number,
+    images: File[],
+    likes: number,
+    complaints: number
+  ) => Promise<boolean>;
+  publishMarketGoods: (
+    title: string,
+    content: string,
+    author_id: number | null,
+    create_at: string,
+    price: number,
+    campus_id: number,
+    post_type: string,
+    tag: string,
+    images: File[],
+    likes: number,
+    complaints: number
+  ) => Promise<boolean>;
+  updateForumInteract: (
+    id: number,
+    action: string,
+    content?: string,
+    parent_id?: number,
+    value?: number
+  ) => Promise<number | undefined>;
   clearGoods: () => void;
   clearFilters: () => void;
   changeGoodsResponse: (
@@ -119,19 +143,19 @@ const useMainStore = create<MainState>()(
       goods: [],
       forums: [
         {
-          id:1,
-          title:"test",
-          content:"test",
-          author_id:1,
-          campus_id:1,
-          status:"active",
-          author_avatar:"",
-          author_name:"",
-          created_at:" ",
-          likes:0,
-          images:[],
-          comments:[],
-        }
+          id: 1,
+          title: "test",
+          content: "test",
+          author_id: 1,
+          campus_id: 1,
+          status: "active",
+          author_avatar: "",
+          author_name: "",
+          created_at: " ",
+          likes: 0,
+          images: [],
+          comments: [],
+        },
       ],
       posts: [],
       filters: {
@@ -161,13 +185,11 @@ const useMainStore = create<MainState>()(
 
       getForumPosts: async () => {
         try {
-          const response = await api.get("/api/forum/posts",
-            {
-              params: {
-                with_comments: true,
-              }
-            }
-          );
+          const response = await api.get("/api/forum/posts", {
+            params: {
+              with_comments: true,
+            },
+          });
           if (response?.status === 200 && response.data) {
             const data = response.data.posts;
             set((state) => ({
@@ -186,25 +208,106 @@ const useMainStore = create<MainState>()(
           }
         }
       },
-      publishForumPost: async () => {
+      publishForumPost: async (
+        title: string,
+        content: string,
+        author_id: number | null,
+        create_at: string,
+        campus_id: number,
+        images: File[],
+        likes: number,
+        complaints: number
+      ) => {
         try {
-          const response = await api.post("/api/campusWall/publish", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            data: {},
+          const formData = new FormData();
+          formData.append('title', title);
+          formData.append('content', content);
+          formData.append('author_id', author_id?.toString() ?? '');
+          formData.append('create_at', create_at);
+          formData.append('status', 'active');
+          formData.append('campus_id', campus_id.toString());
+          images.forEach((image) => {
+            formData.append('images', image);
           });
-        } catch (error) {}
+          formData.append('likes', likes.toString());
+          formData.append('complaints', complaints.toString());
+
+          const response = await api.post("/api/publish/posts", formData
+          );
+
+          if (response.status === 200 || response.status === 201) {
+            message.success('发布成功');
+            return true;
+          } else {
+            message.error('发布失败，请稍后重试');
+            return false;
+          }
+        } catch (error) {
+          console.error('发布失败:', error);
+          message.error('发布失败，请稍后重试');
+          return false;
+        }
       },
-      updateForumInteract: async (id: number, action: string,content?:string,parent_id?:number,value?:number) => {
+      publishMarketGoods: async (
+        title: string,
+        content: string,
+        author_id: number | null,
+        create_at: string,
+        price: number,
+        campus_id: number,
+        post_type: string,
+        tag: string,
+        images: File[],
+        likes: number,
+        complaints: number
+      ) => {
         try {
-          const response = await api.post(`api/forum/posts/interact/${id}`,{
-              post_id: id,
-              action: action,           
-              content:content?content:null,
-              parent_id:parent_id?parent_id:null,
-              value:value?value:null
-          })
+          const formData = new FormData();
+          formData.append('title', title);
+          formData.append('content', content);
+          formData.append('author_id', author_id?.toString() ?? '');
+          formData.append('create_at', create_at);
+          formData.append('status', 'active');
+          formData.append('price', price.toString());
+          formData.append('campus_id', campus_id.toString());
+          formData.append('goods_type', post_type);
+          formData.append('tag', tag);
+          images.forEach((image) => {
+            formData.append('images', image);
+          });
+          formData.append('likes', likes.toString());
+          formData.append('complaints', complaints.toString());
+
+          const response = await api.post("/api/publish/goods", formData);
+
+          if (response.status === 200 || response.status === 201) {
+            message.success('发布成功');
+            return true;
+          } else {
+            message.error('发布失败，请稍后重试');
+            return false;
+          }
+        } catch (error) {
+          console.error('发布失败:', error);
+          message.error('发布失败，请稍后重试');
+          return false;
+        }
+      },
+      updateForumInteract: async (
+        id: number,
+        action: string,
+        content?: string,
+        parent_id?: number,
+        value?: number
+      ) => {
+        try {
+          const response = await api.post(`api/forum/posts/interact/${id}`, {
+            post_id: id,
+            action: action,
+            content: content ? content : null,
+            parent_id: parent_id ? parent_id : null,
+            value: value ? value : null,
+          });
 
           // if (response?.status === 200) {
           //   if(action === "like"){
@@ -385,9 +488,7 @@ const useMainStore = create<MainState>()(
             formData.append("images", images[i]);
           }
 
-          const response = await api.post("/api/appeals/publish", {
-            formData,
-          });
+          const response = await api.post("/api/appeals/publish", formData);
           console.log(response);
           if (response?.status === 201) {
             return true;

@@ -8,7 +8,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { useUserStore } from "./store";
-import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"; //保护路由，未登录将只能导航至login和register页面
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import { message } from "antd";
 
 // 懒加载页面组件统一管理
@@ -182,27 +182,12 @@ const App: React.FC = () => {
     {
       path: "/admin",
       element: (
-        (<ProtectedRoute><Lazy.Admin />
-        </ProtectedRoute>)
-      ),
-      children: [
-        {
-          index: true,
-          element: <Lazy.Dashboard />,
-        },
-        {
-          path: "messages",
-          element: <Lazy.AdminMessages />,
-        },
-        {
-          path: "market",
-          element: <Lazy.AdminMarket />,
-        },
-        {
-          path: "forum",
-          element: <Lazy.AdminForum />,
-        },
-      ],
+        (
+          <ProtectedRoute>
+            <Lazy.Admin />
+          </ProtectedRoute>
+        )
+      )
     },
     {
       path: "/pc-page",
@@ -211,17 +196,18 @@ const App: React.FC = () => {
     {
       path: "*",
       element: (
-        <Navigate to="/pc-page" replace />
+        <ProtectedRoute>
+          <Lazy.Admin />
+        </ProtectedRoute>
       ),
     }
-    
   ], [token]);
 
   const mobileRouter = useMemo(() => createBrowserRouter(mobileRoutes), [mobileRoutes]);
   const webRouter = useMemo(() => createBrowserRouter(webRoutes), [webRoutes]);
 
   const isMobile = useScreenType(768);
-  console.log(useScreenType(768), isMobile);
+  console.log(useScreenType(768), '移动端', isMobile);
 
   return (
     <div className="App">

@@ -1,4 +1,4 @@
-import './Dashboard_new.scss'
+import './Dashboard.scss'
 import React, { useState } from 'react';
 import { Card, Spin, Row, Col, Statistic, Select, DatePicker, Space, Table, Tag } from 'antd';
 import { Bar, Pie, Line, Doughnut } from 'react-chartjs-2';
