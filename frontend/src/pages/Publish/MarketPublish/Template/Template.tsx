@@ -4,10 +4,9 @@ import add from '../../../../assets/more.png'
 import takePlace from '../../../../assets/takePlace.png'
 import { useState, useEffect, useReducer } from 'react'
 import { useUserStore } from '../../../../store'
-import axios from 'axios'
+import useMainStore from '../../../../store/mainStore'
 import { useLocation } from 'react-router-dom'
 import { useNavigate } from "react-router-dom";
-import Cookies from 'js-cookie'
 import Navbar from '../../../../components/Navbar/Navbar'
 
 const initialState = {
@@ -162,8 +161,8 @@ const Template = () => {
     dispatch({ type: 'SET_CREATE_AT', payload: value })
   }
 
-  const token = Cookies.get("auth-token");
   const currentUser = useUserStore(state => state.currentUser)
+  const publishMarketGoods = useMainStore(state => state.publishMarketGoods)
   const [isSuccess, setIsSuccess] = useState(false);
   const navigate = useNavigate()
 
@@ -175,10 +174,9 @@ const Template = () => {
     initialContent(templateData?.details || '')
     initialTitle(templateData?.title || '')
     initialPrice(templateData?.price || 0)
-  }, [])
+  }, [currentUser?.campus_id, templateData?.post_type, templateData?.tag, templateData?.details, templateData?.title, templateData?.price])
 
   const {
-    id,
     post_type,
     tag,
     content,
@@ -218,34 +216,29 @@ const Template = () => {
   }
 
   const handlePublish = async () => {
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('content', content);
-    formData.append('author_id', author_id?.toString() ?? '');
-    formData.append('create_at', create_at);
-    formData.append('status', 'active');
-    formData.append('price', price.toString());
-    formData.append('campus_id', campus_id.toString());
-    formData.append('goods_type', post_type);
-    formData.append('tag', tag);
-    images.forEach((image) => {
-      formData.append('images', image);
-    });
-    formData.append('likes', likes.toString());
-    formData.append('complaints', complaints.toString());
-    axios.post(`${process.env.REACT_APP_API_URL || "http://localhost:5000"}/api/publish/goods`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${token}`
+    try {
+      const success = await publishMarketGoods(
+        title,
+        content,
+        author_id,
+        create_at,
+        price,
+        campus_id,
+        post_type,
+        tag,
+        images,
+        likes,
+        complaints
+      );
+      
+      if (success) {
+        handleSuccess();
+        console.log('发布成功');
+        navigate('/market');
       }
-    }).then(() => {
-      handleSuccess()
-      console.log('发布成功')
-      navigate('/market')
-    })
-      .catch((error) => {
-        console.log(error)
-      })
+    } catch (error) {
+      console.error('发布失败:', error);
+    }
   }
 
   return (

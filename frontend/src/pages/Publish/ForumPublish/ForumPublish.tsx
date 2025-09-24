@@ -1,14 +1,12 @@
-import React, { use } from 'react'
+import React from 'react'
 import './ForumPublish.scss'
 import add from '../../../assets/more.png'
 import takePlace from '../../../assets/takePlace.png'
-import logo from '../../assets/logo.png'
 import { useState,useEffect,useReducer } from 'react'
 import { useUserStore } from '../../../store'
-import axios from 'axios'
+import useMainStore from '../../../store/mainStore'
 import { useLocation } from 'react-router-dom'
 import { useNavigate } from "react-router-dom";
-import Cookies from 'js-cookie'
 import Navbar from '../../../components/Navbar/Navbar'
 
 const initialState = {
@@ -23,7 +21,7 @@ const initialState = {
   error: null as string | null,
   campus_name: '校区选择',
   likes: 0,
-  complints: 0,
+  complaints: 0,
 }
 
 type Action=
@@ -133,8 +131,8 @@ const ForumPublish = () => {
     dispatch({ type: 'SET_CREATE_AT', payload: value })
   }
 
-  const token = Cookies.get("auth-token");
   const currentUser = useUserStore(state => state.currentUser)
+  const publishForumPost = useMainStore(state => state.publishForumPost)
   const [isSuccess, setIsSuccess] = useState(false);
   const navigate = useNavigate()
 
@@ -144,10 +142,9 @@ const ForumPublish = () => {
     initialPostType(templateData?.post_type || 'receive')
     initialContent(templateData?.details || '')
     initialTitle(templateData?.title || '')    
-  },[])
+  },[currentUser?.campus_id, templateData?.post_type, templateData?.details, templateData?.title])
 
   const {
-    id,
     content,
     title,
     images,
@@ -157,7 +154,7 @@ const ForumPublish = () => {
     author_id,
     create_at,
     likes,
-    complints,
+    complaints,
   } = state
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,47 +178,34 @@ const ForumPublish = () => {
   const handleCampusChange = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     setCampusId(parseInt(e.currentTarget.id))
     setCampusName(e.currentTarget.innerText)
-    
   }
 
   const handlePublish = async () => {
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('content', content);
-    formData.append('author_id', author_id?.toString()?? '');
-    formData.append('create_at', create_at);
-    formData.append('status', 'active');
-    formData.append('campus_id', campus_id.toString());
-    images.forEach((image) => {
-      formData.append('images', image);
-    });
-    formData.append('likes', likes.toString());
-    formData.append('complints', complints.toString());
-    axios.post(`${process.env.REACT_APP_API_URL||"http://localhost:5000"}/api/publish/posts`, formData,{
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${token}`
+    try {
+      const success = await publishForumPost(
+        title,
+        content,
+        author_id,
+        create_at,
+        campus_id,
+        images,
+        likes,
+        complaints
+      );
+      
+      if (success) {
+        handleSuccess();
+        console.log('发布成功');
+        navigate('/forum');
       }
-    }).then(() => {
-      handleSuccess()
-      console.log('发布成功')
-      window.location.href = '/forum'
-  })
-  .catch((error) => {
-      console.log(error)
-
-  })
-}
+    } catch (error) {
+      console.error('发布失败:', error);
+    }
+  }
 
   return (
     <div className='template-container'>
       <div className='navbar'>
-        {/* <div className='logo'>
-          <img src={logo} alt="logo" />          
-        </div>
-        <div className='text'>
-          连理e站
-        </div> */}
         <Navbar backActive={true} backPath='/forum' title='帖子发布' />
       </div>
        

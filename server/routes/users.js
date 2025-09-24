@@ -214,6 +214,7 @@ const SECRET_KEY = process.env.SECRET_KEY;
 router.get("/profile", authToken, async (req, res) => {
   try {
     const userId = req.user.user_id;
+    const isAdmin = req.user.isAdmin || false;
 
     const [userRows] = await db.query("SELECT email, credit, theme_id, background_url, banner_url, avatar FROM users WHERE id = ?", [userId]);
 
@@ -277,6 +278,7 @@ router.get("/profile", authToken, async (req, res) => {
       background_url: userRows[0].background_url,
       banner_url: userRows[0].banner_url,
       avatar: userRows[0].avatar,
+      isAdmin: isAdmin,
       records: {
         likes: likeRecords.map((record) => ({
           targetId: record.target_id,
@@ -891,14 +893,6 @@ router.get("/user-info/:user_id", async (req, res) => {
 //   }
 // });
 
-// Token 解码
-router.get("/decode-token", authToken, (req, res) => {
-  try {
-    res.status(200).json(req.user);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "服务器错误" });
-  }
-});
+
 
 export default router;

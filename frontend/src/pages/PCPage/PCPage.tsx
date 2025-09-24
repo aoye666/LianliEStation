@@ -5,7 +5,7 @@ import './PCPage.scss'
 const PCPage = () => {
   return (
     <div className='pc-page'>
-      PC端测试占位页
+      PC端测试占位页，PC端页面开发中......
     </div>
   )
 }

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { LaptopOutlined, NotificationOutlined, UserOutlined, BarChartOutlined, MessageOutlined, LogoutOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme, Button, Typography } from 'antd';
-import Cookies from 'js-cookie';
+import { useUserStore } from '../../store'
+import { useNavigate } from 'react-router-dom';
 import Dashboard from './Dashboard/Dashboard';
 import Forum from './Forum/Forum';
 import Market from './Market/Market';
@@ -21,6 +22,7 @@ const menuItems: MenuProps['items'] = [
 ];
 
 const Admin = () => {
+  const navigate = useNavigate();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -28,8 +30,8 @@ const Admin = () => {
   const [selectedKey, setSelectedKey] = useState('dashboard');
 
   const handleLogout = () => {
-    Cookies.remove('auth-token');
-    window.location.href = '/admin/login';
+    useUserStore.getState().logout();
+    navigate('/pc-page');
   };
 
   const renderContent = () => {
@@ -64,7 +66,7 @@ const Admin = () => {
         padding: '0 24px'
       }}>
         <Title level={3} style={{ color: 'white', margin: 0 }}>
-          联理E站 - 后台管理系统
+          连理e站 - 后台管理系统
         </Title>
         <Button 
           type="text" 

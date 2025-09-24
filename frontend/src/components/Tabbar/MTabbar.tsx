@@ -1,5 +1,4 @@
 import "./Tabbar.scss"
-import axios from "axios"
 
 const MTabbar = () => {
   return (

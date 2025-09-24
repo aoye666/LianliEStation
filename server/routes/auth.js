@@ -67,34 +67,34 @@ router.post("/register", registerLimiter, logIP, async (req, res) => {
   }
 });
 
-// 管理员注册
-// router.post("/admin/register", async (req, res) => {
-//   const { username, password, email } = req.body;
+//管理员注册
+router.post("/admin/register", async (req, res) => {
+  const { username, password, email } = req.body;
 
-//   if (!username || !password || !email) {
-//     return res.status(400).json({ message: "请提供用户名、密码和邮箱" });
-//   }
+  if (!username || !password || !email) {
+    return res.status(400).json({ message: "请提供用户名、密码和邮箱" });
+  }
 
-//   try {
-//     // 检查管理员是否已经存在
-//     const [existingAdmin] = await db.query("SELECT * FROM admins WHERE username = ? OR email = ?", [username, email]);
-//     if (existingAdmin.length > 0) {
-//       return res.status(400).json({ message: "管理员用户名或邮箱已存在" });
-//     }
+  try {
+    // 检查管理员是否已经存在
+    const [existingAdmin] = await db.query("SELECT * FROM admins WHERE username = ? OR email = ?", [username, email]);
+    if (existingAdmin.length > 0) {
+      return res.status(400).json({ message: "管理员用户名或邮箱已存在" });
+    }
 
-//     // 加密密码
-//     const hashedPassword = await bcrypt.hash(password, 10);
+    // 加密密码
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-//     // 创建管理员账户
-//     const [result] = await db.query("INSERT INTO admins (username, password, email) VALUES (?, ?, ?)", [username, hashedPassword, email]);
+    // 创建管理员账户
+    const [result] = await db.query("INSERT INTO admins (username, password, email) VALUES (?, ?, ?)", [username, hashedPassword, email]);
 
-//     // 返回成功消息
-//     res.status(201).json({ message: "管理员注册成功" });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "服务器错误" });
-//   }
-// });
+    // 返回成功消息
+    res.status(201).json({ message: "管理员注册成功" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "服务器错误" });
+  }
+});
 
 // 用户(管理员)登录
 router.post("/login", loginLimiter, async (req, res) => {

@@ -2,12 +2,7 @@
 import api from "../api/index";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import Cookies from "js-cookie"; // 从 cookie 中获取 token
 import { AxiosError } from "axios";
-import { data } from "react-router-dom";
-
-// 获取 token
-const token = Cookies.get("auth-token");
 
 interface Response {
   id: number;
