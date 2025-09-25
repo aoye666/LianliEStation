@@ -26,34 +26,36 @@ $shadow-color: rgba(0, 0, 0, 0.1);
         flex: 1;
         flex-direction: column;
 
-        .tabs-container{
+        .select-container{
             display: flex;
             width: 100vw;
+            height: 85px;
 
-            .tabs{
-                width: 100vw;
+            .select{
+                width: 50vw;
+                height: 40px;
+            }
+
+            .button{
+                width: 50vw;
+                height: 40px;
             }
         }
 
-
         .content{
             display: flex;
-            gap: 5px;
             flex-direction: column;
+            padding: 0 10px;
             height: 65vh;
-            margin-right: 25px;
-            margin-left: 6px;
-            .commodity{
+
+            .goods{
                 display: flex;
-                border: 1px solid #acacac;
                 width: 100%;
                 height: 100px;
-                margin: 2px;
-                border-radius: 7px;
                 align-items: center;
-                padding-left: 8px;
+                margin-bottom: 80px;
 
-                .commodity-delete{
+                .goods-delete{
                     display: flex;
                     justify-content: center;
                     align-items: center;
@@ -64,69 +66,59 @@ $shadow-color: rgba(0, 0, 0, 0.1);
                     transition: all 0.3s ease;
                     cursor: pointer;
                 }
-    
-                .commodity-img{
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                margin-top: 6px;
-                margin-bottom: 6px;
-    
-                    img{
-                        width: 85px;
-                        height: 85px;
-                    }
-    
-                }
 
-                .commodity-description{
+                .goods-description{
                     display: flex;
                     flex-direction: column;
                     gap: 5px;
+                    width: 100vw;
 
-                    .commodity-title{
-                        font-size: 15px;
+                    .goods-img{
                         display: flex;
-                        justify-self: start;
-                        align-items: start;
-                        margin-left: 10px;
-                        margin-top: 5px;
-                        font-size: 16px;
-                        font-weight: 500;
-                        }
-
-                        .commodity-detail{
-                            font-size: 14px;
-                            display: flex;
-                            margin-left: 10px;
-                            overflow: hidden;
-                            height: 35px;
-                            text-overflow: ellipsis;
-                        }
-        
-                        .commodity-bottom{
-                            display: flex;
-                            align-items: end;
-                            padding: 0 10px;
-                            width: 100%;
-                            
-                            .commodity-price{
-                                font-size: 16px;
-                                font-weight: 600;
-                                color: $hover-color;
-                                margin-right: 80px;
+                        justify-content: center;
+                        align-items: center;
+                        margin-top: 6px;
+                        margin-bottom: 6px;
+            
+                            img{
+                                width: 85px;
+                                height: 85px;
                             }
+            
+                    }
 
-                            .commodity-tag{
-                                border: 1px solid #c7c7c7;
-                                border-radius: 5px;
-                                padding: 2px;
-
-                                }
+                    .goods-detail{
+                        font-size: 14px;
+                        display: flex;
+                        margin-left: 10px;
+                        overflow: hidden;
+                        height: 35px;
+                        text-overflow: ellipsis;
+                    }
+    
+                    .goods-bottom{
+                        display: flex;
+                        align-items: end;
+                        padding: 0 10px;
+                        width: 100%;
+                        
+                        .goods-price{
+                            font-size: 16px;
+                            font-weight: 600;
+                            color: $hover-color;
+                            margin-right:100px ;
                         }
+
+                        .goods-tag{
+                            border: 1px solid #c7c7c7;
+                            border-radius: 5px;
+                            padding: 2px;
+
+                            }
+                    }
                 }
     
-                }  
+            }  
         }
 
     }

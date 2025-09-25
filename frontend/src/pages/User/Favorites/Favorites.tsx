@@ -1,7 +1,7 @@
 import Navbar from "../../../components/Navbar/Navbar"
 import React,{ useEffect, useState } from "react"
 import { useRecordStore } from "../../../store"
-import { Tabs } from "antd"
+import { Select,Card,Button } from "antd"
 import type { TabsProps } from "antd/lib/tabs"
 import takePlace from "../../../assets/takePlace.png"
 import background1 from "../../../assets/background1.jpg"
@@ -21,13 +21,13 @@ const Favorites: React.FC = () => {
     console.log(favoritesGoods,favoritePosts)
   }, [])
 
-  const items: TabsProps['items'] = [
+  const items = [
     {
-      key: 'goods',
+      value: 'goods',
       label: '商品',
     },
     {
-      key: 'posts',
+      value: 'posts',
       label: '帖子',
     },
   ]
@@ -61,21 +61,22 @@ const handleOnDelete = async () => {
       </div>
       
       <div className="body">
-        <div className="tabs-container">
-          <Tabs className="tabs" defaultActiveKey="goods" items={items} onChange={(key) => {setIsPosts(key === "posts")}} centered />
+        <div className="select-container">
+          <Select className="select" defaultValue={"goods"} options={items} onChange={(key) => {setIsPosts(key === "posts")}} />
+          <Button onClick={() => handleOnClick()} className="button">管理</Button>
         </div>
         
         <div className="content">
           {
             !isPosts && (
             favoritesGoods.map((post:any) => (
-              <div className='commodity' key={post.id}>
+              <div className='goods' key={post.id}>
 
                 {
-                  isVisible?<div className="commodity-delete" key={post.id} onClick={() => handleCheck(post.id)} style={checked[post.id] ? {backgroundColor: "#3498db",border: "none"} : {backgroundColor: "white"}} />:null
+                  isVisible?<div className="goods-delete" key={post.id} onClick={() => handleCheck(post.id)} style={checked[post.id] ? {backgroundColor: "#3498db",border: "none"} : {backgroundColor: "white"}} />:null
                 }
 
-                {/* <div className='commodity-img'>
+                {/* <div className='goods-img'>
                 <img src={
                   post.images[0]
                   ? `${
@@ -85,42 +86,36 @@ const handleOnDelete = async () => {
                   : takePlace
                 } alt="" />
                 </div> */}
-                <div className="commodity-description">
-                  <div className='commodity-title'>
-                    {post.title}
-                  </div>
-                  <div className="commodity-detail">
+                <Card className="goods-description" title={post.title} hoverable>
+                  <div className="goods-detail">
                     {post.content}
                   </div>
-                  <div className='commodity-bottom'>
-                    <div className='commodity-price'>
+                  <div className='goods-bottom'>
+                    <div className='goods-price'>
                       {post.price}r
                     </div>
-                    <div className='commodity-tag'>
+                    <div className='goods-tag'>
                       {post.tag}
                     </div>
                   </div> 
-                </div>
+                </Card>
               </div>
             )))
           }
           {
             isPosts && (
             favoritePosts.map((post:any, index:number) => (
-              <div className='commodity' key={index}>
+              <div className='goods' key={index}>
 
                 {
-                  isVisible?<div className="commodity-delete" key={post.id} onClick={() => handleCheck(post.id)} style={checked[post.id] ? {backgroundColor: "#3498db",border: "none"} : {backgroundColor: "white"}} />:null
+                  isVisible?<div className="goods-delete" key={post.id} onClick={() => handleCheck(post.id)} style={checked[post.id] ? {backgroundColor: "#3498db",border: "none"} : {backgroundColor: "white"}} />:null
                 }
 
-                <div className="commodity-description">
-                  <div className='commodity-title'>
-                    {post.title}
-                  </div>
-                  <div className="commodity-detail">
+                <Card className="goods-description" title={post.title} hoverable>
+                  <div className="goods-detail">
                     {post.content}
                   </div>
-                </div>
+                </Card>
               </div>
             )))
           }
@@ -130,9 +125,6 @@ const handleOnDelete = async () => {
 
 
       <div className="footer">
-        <div className="manage-button">
-          <button onClick={() => handleOnClick()}>管理</button>
-        </div>
         {isVisible ? (
           <div className="delete-button">
             <button onClick={() => handleOnDelete()}>删除</button>

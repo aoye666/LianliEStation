@@ -27,6 +27,7 @@ interface User {
   avatar: string | undefined;
   likes: RecordItem[];
   complaints: RecordItem[];
+  favorites: []
 }
 
 // 管理员获取所有用户
@@ -226,13 +227,17 @@ const useUserStore = create<UserState>()(
               const { records, ...userInfo } = userData;
               const likes = records?.likes || [];
               const complaints = records?.complaints || [];
+              const favorites = records?.favorites || [];
+
+              console.log("用户信息:", userData);
               
               // 分别设置用户信息和记录
               set({ 
                 currentUser: {
                   ...userInfo,
                   likes,
-                  complaints
+                  complaints,
+                  favorites,
                 }
               });
             }

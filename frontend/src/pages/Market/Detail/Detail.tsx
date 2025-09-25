@@ -86,6 +86,22 @@ const Detail = () => {
       }
     }
 
+    // if (currentUser && currentGoods) {
+    //   if (
+    //     currentUser.favorites.find((item) => {
+    //       return (
+    //         item.targetId === currentGoods.id 
+    //       );
+    //     })
+    //   ) {
+    //     setIsStared(true);
+    //     console.log("已收藏");
+    //   } else {
+    //     setIsStared(false);
+    //     console.log("未收藏");
+    //   }
+    // }
+
   };
 
   const handleStar = () => {

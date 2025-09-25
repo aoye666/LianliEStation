@@ -20,11 +20,25 @@
         width: 100%;
         margin-bottom: 50px;
 
-        .img{
-            display: flex;
+        .img-container{
             margin-bottom: 10px;
             width: 100%;
-            justify-content: center;
+            background: #f8f8f8;
+
+            .carousel-item{
+                height: 300px;
+                background: #f8f8f8;
+
+                .img{
+                    width: 100vw;
+                    height: 300px;
+                    object-fit: contain;
+                    background: #f8f8f8;
+                    display: block;
+                }
+            }
+
+
         }
 
         .title{

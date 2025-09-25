@@ -2,7 +2,7 @@ import Navbar from "../../../components/Navbar/Navbar";
 import { useEffect, useState, useRef } from "react";
 import { useRecordStore } from "../../../store";
 import takePlace from "../../../assets/takePlace.png";
-import { Tabs } from "antd"
+import { Card, Select, Button } from "antd"
 import type { TabsProps } from "antd/lib/tabs"
 import "./History.scss";
 
@@ -22,17 +22,16 @@ const History = () => {
   const [isPosts, setIsPosts] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  const items: TabsProps['items'] = [
+  const items = [
     {
-      key: 'goods',
+      value: 'goods',
       label: '商品',
     },
     {
-      key: 'posts',
+      value: 'posts',
       label: '帖子',
     },
   ]
-
 
   useEffect(() => {
     getHistory();
@@ -71,8 +70,9 @@ const History = () => {
       </div>
 
       <div className="body">
-        <div className="tabs-container">
-          <Tabs className="tabs" defaultActiveKey="goods" items={items} onChange={(key) => {setIsPosts(key === "posts")}} centered />
+        <div className="select-container">
+          <Select className="select" defaultValue={"goods"} options={items} onChange={(key) => {setIsPosts(key === "posts")}} />
+          <Button onClick={() => handleOnClick()} className="button">管理</Button>
         </div>
         
         <div className="content">
@@ -80,13 +80,13 @@ const History = () => {
           !isPosts&&(
           historyGoods.map((goods) => (
             <div
-              className="commodity"
+              className="goods"
               key={goods.id}
               ref={scrollRef}
             >
               {isVisible ? (
                 <div
-                  className="commodity-delete"
+                  className="goods-delete"
                   key={goods.id}
                   onClick={() => handleCheck(goods.id)}
                   style={
@@ -96,38 +96,36 @@ const History = () => {
                   }
                 />
               ) : null}
-
-              <div className="commodity-img">
-                <img
-                  src={
-                    goods.images[0]
-                      ? `${process.env.REACT_APP_API_URL||"http://localhost:5000"}${goods.images[0]}`
-                      : takePlace
-                  }
-                  alt=""
-                />
-              </div>
-              <div className="commodity-description">
-                <div className="commodity-title">{goods.title}</div>
-                <div className="commodity-detail">{goods.content}</div>
-                <div className="commodity-bottom">
-                  <div className="commodity-price">{goods.price}r</div>
-                  <div className="commodity-tag">{goods.tag}</div>
+              <Card className="goods-description" title={goods.title} hoverable>
+                {/* <div className="goods-img">
+                  <img
+                    src={
+                      goods.images[0]
+                        ? `${process.env.REACT_APP_API_URL||"http://localhost:5000"}${goods.images[0]}`
+                        : takePlace
+                    }
+                    alt=""
+                  />
+                </div> */}
+                <div className="goods-detail">{goods.content}</div>
+                <div className="goods-bottom">
+                  <div className="goods-price">{goods.price}r</div>
+                  <div className="goods-tag">{goods.tag}</div>
                 </div>
-              </div>
+              </Card>
             </div>
           )))}
           {
           isPosts&&(
           historyPosts.map((goods) => (
             <div
-              className="commodity"
+              className="goods"
               key={goods.id}
               ref={scrollRef}
             >
               {isVisible ? (
                 <div
-                  className="commodity-delete"
+                  className="goods-delete"
                   key={goods.id}
                   onClick={() => handleCheck(goods.id)}
                   style={
@@ -137,12 +135,11 @@ const History = () => {
                   }
                 />
               ) : null}
-              <div className="commodity-description">
-                <div className="commodity-title">{goods.title}</div>
-                <div className="commodity-detail">{goods.content}</div>
-                <div className="commodity-bottom">
+              <Card className="goods-description" title={goods.title} hoverable>
+                <div className="goods-detail">{goods.content}</div>
+                <div className="goods-bottom">
                 </div>
-              </div>
+              </Card>
             </div>
           )))}
         </div>

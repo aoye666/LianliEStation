@@ -161,7 +161,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
             }
           }
 
-          .commodity-type {
+          .Goods-type {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -386,7 +386,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
       margin-left: 4px;
       height: calc(100vh - 105px - 31.25vw - 39px);
       width: 100vw;
-      .commodity-item {
+      .Goods-item {
         display: flex;
         flex-direction: column;
         border: 1px solid #acacac;
@@ -398,7 +398,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
         overflow: hidden;
         flex-shrink: 1;
 
-        .commodity-img {
+        .Goods-img {
           display: flex;
           justify-content: center;
           align-items: center;
@@ -411,7 +411,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
           }
         }
 
-        .commodity-title {
+        .Goods-title {
           font-size: 15px;
           width: 140px;
           display: flex;
@@ -420,13 +420,13 @@ $shadow-color: rgba(0, 0, 0, 0.1);
           margin-left: 10px;
         }
 
-        .commodity-bottom {
+        .Goods-bottom {
           display: flex;
           justify-content: space-between;
           align-items: center;
           padding: 0 10px;
 
-          .commodity-tag {
+          .Goods-tag {
             border: 1px solid #c7c7c7;
             border-radius: 5px;
             padding: 2px;
@@ -434,7 +434,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
             margin-bottom: 2px;
           }
 
-          .commodity-price {
+          .Goods-price {
             font-size: 15px;
             font-weight: bold;
             color: $hover-color;

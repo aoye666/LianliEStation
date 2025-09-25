@@ -27,7 +27,7 @@ const Market = () => {
     clearFilters,
   } = useMainStore();
   const [marketTypeState, setMarketTypeState] = useState<string | null>(null);
-  const [commodityTypeState, setCommodityTypeState] = useState<string | null>(
+  const [GoodsTypeState, setGoodsTypeState] = useState<string | null>(
     null
   );
   const [campusState, setCampusState] = useState<string | null>(null);
@@ -190,18 +190,18 @@ const Market = () => {
                   </button>
                 </div>
               </div>
-              <div className="commodity-type">
+              <div className="Goods-type">
                 <div className="detail">
                   <div
                     className={
-                      commodityTypeState === "学习资料" ? "active-button" : "null"
+                      GoodsTypeState === "学习资料" ? "active-button" : "null"
                     }
                   >
                     <button
                       onClick={async () => {
                         setFilters({ tag: "学习资料" });
                         handleOnConfirm();
-                        setCommodityTypeState("学习资料");
+                        setGoodsTypeState("学习资料");
                       }}
                     >
                       学习资料
@@ -209,7 +209,7 @@ const Market = () => {
                   </div>
                   <div
                     className={
-                      commodityTypeState === "数码电子"
+                      GoodsTypeState === "数码电子"
                         ? "active-button"
                         : "null"
                     }
@@ -218,7 +218,7 @@ const Market = () => {
                       onClick={async () => {
                         setFilters({ tag: "数码电子" });
                         handleOnConfirm();
-                        setCommodityTypeState("数码电子");
+                        setGoodsTypeState("数码电子");
                       }}
                     >
                       数码
@@ -226,14 +226,14 @@ const Market = () => {
                   </div>
                   <div
                     className={
-                      commodityTypeState === null ? "active-button" : "null"
+                      GoodsTypeState === null ? "active-button" : "null"
                     }
                   >
                     <button
                       onClick={async () => {
                         setFilters({ tag: null });
                         handleOnConfirm();
-                        setCommodityTypeState(null);
+                        setGoodsTypeState(null);
                       }}
                     >
                       全部
@@ -338,88 +338,88 @@ const Market = () => {
               <div className="sort-list">
                 <div
                   className={
-                    commodityTypeState === "学习资料" ? "item-active" : "item"
+                    GoodsTypeState === "学习资料" ? "item-active" : "item"
                   }
                   onClick={() => {
                     setFilters({ tag: "学习资料" });
-                    setCommodityTypeState("学习资料");
+                    setGoodsTypeState("学习资料");
                   }}
                 >
                   学习资料
                 </div>
                 <div
                   className={
-                    commodityTypeState === "代办跑腿" ? "item-active" : "item"
+                    GoodsTypeState === "代办跑腿" ? "item-active" : "item"
                   }
                   onClick={() => {
                     setFilters({ tag: "代办跑腿" });
-                    setCommodityTypeState("代办跑腿");
+                    setGoodsTypeState("代办跑腿");
                   }}
                 >
                   代办跑腿
                 </div>
                 <div
                   className={
-                    commodityTypeState === "生活用品" ? "item-active" : "item"
+                    GoodsTypeState === "生活用品" ? "item-active" : "item"
                   }
                   onClick={() => {
                     setFilters({ tag: "生活用品" });
-                    setCommodityTypeState("生活用品");
+                    setGoodsTypeState("生活用品");
                   }}
                 >
                   生活用品
                 </div>
                 <div
                   className={
-                    commodityTypeState === "数码电子" ? "item-active" : "item"
+                    GoodsTypeState === "数码电子" ? "item-active" : "item"
                   }
                   onClick={() => {
                     setFilters({ tag: "数码电子" });
-                    setCommodityTypeState("数码电子");
+                    setGoodsTypeState("数码电子");
                   }}
                 >
                   数码电子
                 </div>
                 <div
                   className={
-                    commodityTypeState === "账号会员" ? "item-active" : "item"
+                    GoodsTypeState === "账号会员" ? "item-active" : "item"
                   }
                   onClick={() => {
                     setFilters({ tag: "账号会员" });
-                    setCommodityTypeState("账号会员");
+                    setGoodsTypeState("账号会员");
                   }}
                 >
                   账号会员
                 </div>
                 <div
                   className={
-                    commodityTypeState === "咨询答疑" ? "item-active" : "item"
+                    GoodsTypeState === "咨询答疑" ? "item-active" : "item"
                   }
                   onClick={() => {
                     setFilters({ tag: "咨询答疑" });
-                    setCommodityTypeState("咨询答疑");
+                    setGoodsTypeState("咨询答疑");
                   }}
                 >
                   咨询答疑
                 </div>
                 <div
                   className={
-                    commodityTypeState === "其他" ? "item-active" : "item"
+                    GoodsTypeState === "其他" ? "item-active" : "item"
                   }
                   onClick={() => {
                     setFilters({ tag: "其他" });
-                    setCommodityTypeState("其他");
+                    setGoodsTypeState("其他");
                   }}
                 >
                   其他
                 </div>
                 <div
                   className={
-                    commodityTypeState === null ? "item-active" : "item"
+                    GoodsTypeState === null ? "item-active" : "item"
                   }
                   onClick={() => {
                     setFilters({ tag: null });
-                    setCommodityTypeState(null);
+                    setGoodsTypeState(null);
                   }}
                 >
                   全部
@@ -443,7 +443,7 @@ const Market = () => {
         >
           {goods.map((item) => (
             <div
-              className="commodity-item"
+              className="Goods-item"
               key={item.id}
               onClick={() => {
                 navigate(`/market/${item.id}`);
@@ -453,7 +453,7 @@ const Market = () => {
                   "calc((100vw - 4px) / var(--elements-per-row) - var(--elements-per-row)*1px - (var(--elements-per-row) - 1)*2px)",
               }}
             >
-              <div className="commodity-img">
+              <div className="Goods-img">
                 <img
                   src={
                     item.images[0]
@@ -466,10 +466,10 @@ const Market = () => {
                   alt="takePlace"
                 />
               </div>
-              <div className="commodity-title">{item.title}</div>
-              <div className="commodity-bottom">
-                <div className="commodity-price">{item.price}</div>
-                <div className="commodity-tag">{item.tag}</div>
+              <div className="Goods-title">{item.title}</div>
+              <div className="Goods-bottom">
+                <div className="Goods-price">{item.price}</div>
+                <div className="Goods-tag">{item.tag}</div>
               </div>
             </div>
           ))}

@@ -4,6 +4,7 @@ import Navbar from '../../../components/Navbar/Navbar';
 import { useMainStore,useRecordStore } from '../../../store';
 import { useLocation } from 'react-router-dom';
 import { Image,Card,Avatar, Button,Input } from 'antd';
+import { Carousel } from 'antd';
 import dayjs from 'dayjs';
 import Liked from '../../../assets/liked.svg';
 import Star from '../../../assets/star.svg';
@@ -111,15 +112,21 @@ const ForumDetail = () => {
             </div>
 
             <div className='content'>
-                <div className="img">
+                <div className="img-container">
                     <Image.PreviewGroup>
-                    {
-                        forum?.images.map((img, index) => (
-                            <Image preview={{ visible: true, }} key={index} src={`${process.env.REACT_APP_API_URL||"http://localhost:5000"}${img}`} alt={`${img}`} />
-                        ))
-                    }
+                        <Carousel>
+                            {forum?.images.map((img, index) => (
+                            <div key={index} className="carousel-item">
+                                <Image className='img'
+                                src={`${process.env.REACT_APP_API_URL || "http://localhost:5000"}${img}`}
+                                alt={`image-${index}`}
+                                />
+                            </div>
+                            ))}
+                        </Carousel>
                     </Image.PreviewGroup>
                 </div>
+
 
                 <div className="title">
                     {forum?.title}
