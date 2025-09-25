@@ -308,7 +308,7 @@ const ForumPublish = () => {
         </div>
 
         <div className='sort'>
-          <label htmlFor="sort-input">分类</label>
+          <label htmlFor="sort-input">分类（请选择合适的分类）</label>
           <div className='sort-input'>
             <div className="antd-dropdown-container">
               <Dropdown menu={{ items: tagItems }} placement="bottom" arrow>
@@ -381,6 +381,7 @@ const ForumPublish = () => {
                 onChange={setContent}
                 maxLength={500}
                 className="native-textarea"
+                style={{ height: '180px' }}
               />
             </div>
           </div>

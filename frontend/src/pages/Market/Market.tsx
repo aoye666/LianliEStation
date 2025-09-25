@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { FloatButton, Carousel } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import "./Market.scss";
@@ -24,16 +24,52 @@ const Market = () => {
     clearGoods,
     clear,
     fetchGoods,
-    clearFilters,
   } = useMainStore();
-  const [marketTypeState, setMarketTypeState] = useState<string | null>(null);
-  const [GoodsTypeState, setGoodsTypeState] = useState<string | null>(
-    null
-  );
-  const [campusState, setCampusState] = useState<string | null>(null);
-  const [elementsPerRow, setElementsPerRow] = useState(1);
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
+
+  // 使用 useMemo 优化列数计算
+  const elementsPerRow = useMemo(() => {
+    const containerWidth = windowSize.width - 12; // 减去左右padding 6px + 6px
+    const minItemWidth = 140; // 最小商品项宽度
+    const maxItemWidth = 220; // 最大商品项宽度
+    const gap = 6; // 商品项之间的间距
+    
+    // 根据屏幕宽度设置响应式断点
+    let columns;
+    if (containerWidth < 400) {
+      // 小屏幕：2列
+      columns = 2;
+    } else if (containerWidth < 600) {
+      // 中小屏幕：3列
+      columns = 3;
+    } else if (containerWidth < 800) {
+      // 中等屏幕：4列
+      columns = 4;
+    } else {
+      // 大屏幕：根据最小宽度动态计算
+      columns = Math.floor((containerWidth + gap) / (minItemWidth + gap));
+    }
+    
+    columns = Math.max(2, Math.min(columns, 6)); // 限制在2-6列之间
+    
+    // 验证计算的宽度是否合理
+    const availableWidth = containerWidth - (columns - 1) * gap;
+    const itemWidth = availableWidth / columns;
+    
+    // 如果计算出的宽度太大，增加列数
+    if (itemWidth > maxItemWidth && columns < 6) {
+      columns = Math.min(6, Math.floor((containerWidth + gap) / (maxItemWidth + gap)));
+    }
+    
+    // 如果计算出的宽度太小，减少列数
+    if (itemWidth < minItemWidth && columns > 2) {
+      columns = Math.max(2, columns - 1);
+    }
+    
+    return columns;
+  }, [windowSize.width]);
 
   window.addEventListener("beforeunload", () => {
     clear();
@@ -41,20 +77,16 @@ const Market = () => {
 
   useEffect(() => {
     fetchGoods();
-    // 监听分布排列
+    
+    // 监听窗口尺寸变化
     const handleResize = () => {
-      const maxCount = Math.floor(window.innerWidth / 155);
-      // console.log(window.innerWidth)
-      // console.log(maxCount);
-      // console.log(window.innerWidth / maxCount)
-      setElementsPerRow(maxCount || 1);
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
     };
 
     window.addEventListener("resize", handleResize);
-    handleResize();
 
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [fetchGoods]);
 
   // useEffect(() => {
   //   return () => {
@@ -146,14 +178,13 @@ const Market = () => {
               <div className="market-type">
                 <div
                   className={
-                    marketTypeState === "sell" ? "active-button" : "sell"
+                    filters.goods_type === "sell" ? "active-button" : "sell"
                   }
                 >
                   <button
                     onClick={async () => {
                       setFilters({ goods_type: "sell" });
                       handleOnConfirm();
-                      setMarketTypeState("sell");
                     }}
                   >
                     出
@@ -161,14 +192,13 @@ const Market = () => {
                 </div>
                 <div
                   className={
-                    marketTypeState === "receive" ? "active-button" : "receive"
+                    filters.goods_type === "receive" ? "active-button" : "receive"
                   }
                 >
                   <button
                     onClick={async () => {
                       setFilters({ goods_type: "receive" });
                       handleOnConfirm();
-                      setMarketTypeState("receive");
                     }}
                   >
                     收
@@ -176,40 +206,38 @@ const Market = () => {
                 </div>
                 <div
                   className={
-                    marketTypeState === null ? "active-button" : "null"
+                    filters.goods_type === null ? "active-button" : "null"
                   }
                 >
                   <button
                     onClick={async () => {
                       setFilters({ goods_type: null });
                       handleOnConfirm();
-                      setMarketTypeState(null);
                     }}
                   >
                     全部
                   </button>
                 </div>
               </div>
-              <div className="Goods-type">
+              <div className="commodity-type">
                 <div className="detail">
                   <div
                     className={
-                      GoodsTypeState === "学习资料" ? "active-button" : "null"
+                      filters.tag === "学习资料" ? "active-button" : "null"
                     }
                   >
                     <button
                       onClick={async () => {
                         setFilters({ tag: "学习资料" });
                         handleOnConfirm();
-                        setGoodsTypeState("学习资料");
                       }}
                     >
-                      学习资料
+                      学习
                     </button>
                   </div>
                   <div
                     className={
-                      GoodsTypeState === "数码电子"
+                      filters.tag === "数码电子"
                         ? "active-button"
                         : "null"
                     }
@@ -218,7 +246,6 @@ const Market = () => {
                       onClick={async () => {
                         setFilters({ tag: "数码电子" });
                         handleOnConfirm();
-                        setGoodsTypeState("数码电子");
                       }}
                     >
                       数码
@@ -226,14 +253,13 @@ const Market = () => {
                   </div>
                   <div
                     className={
-                      GoodsTypeState === null ? "active-button" : "null"
+                      filters.tag === null ? "active-button" : "null"
                     }
                   >
                     <button
                       onClick={async () => {
                         setFilters({ tag: null });
                         handleOnConfirm();
-                        setGoodsTypeState(null);
                       }}
                     >
                       全部
@@ -297,7 +323,7 @@ const Market = () => {
               </div>
               <div className="location-list">
                 <div
-                  className="item"
+                  className={filters.campus_id === 1 ? "item-active" : "item"}
                   onClick={() => {
                     setFilters({ campus_id: 1 });
                   }}
@@ -305,7 +331,7 @@ const Market = () => {
                   凌水校区
                 </div>
                 <div
-                  className="item"
+                  className={filters.campus_id === 2 ? "item-active" : "item"}
                   onClick={() => {
                     setFilters({ campus_id: 2 });
                   }}
@@ -313,7 +339,7 @@ const Market = () => {
                   开发区校区
                 </div>
                 <div
-                  className="item"
+                  className={filters.campus_id === 3 ? "item-active" : "item"}
                   onClick={() => {
                     setFilters({ campus_id: 3 });
                   }}
@@ -321,7 +347,7 @@ const Market = () => {
                   盘锦校区
                 </div>
                 <div
-                  className="item"
+                  className={filters.campus_id === null ? "item-active" : "item"}
                   onClick={() => {
                     setFilters({ campus_id: null });
                   }}
@@ -338,88 +364,82 @@ const Market = () => {
               <div className="sort-list">
                 <div
                   className={
-                    GoodsTypeState === "学习资料" ? "item-active" : "item"
+                    filters.tag === "学习资料" ? "item-active" : "item"
                   }
                   onClick={() => {
                     setFilters({ tag: "学习资料" });
-                    setGoodsTypeState("学习资料");
                   }}
                 >
                   学习资料
                 </div>
                 <div
                   className={
-                    GoodsTypeState === "代办跑腿" ? "item-active" : "item"
+                    filters.tag === "代办跑腿" ? "item-active" : "item"
                   }
                   onClick={() => {
                     setFilters({ tag: "代办跑腿" });
-                    setGoodsTypeState("代办跑腿");
                   }}
                 >
                   代办跑腿
                 </div>
                 <div
                   className={
-                    GoodsTypeState === "生活用品" ? "item-active" : "item"
+                    filters.tag === "生活用品" ? "item-active" : "item"
                   }
                   onClick={() => {
                     setFilters({ tag: "生活用品" });
-                    setGoodsTypeState("生活用品");
                   }}
                 >
                   生活用品
                 </div>
                 <div
                   className={
-                    GoodsTypeState === "数码电子" ? "item-active" : "item"
+                    filters.tag === "数码电子" ? "item-active" : "item"
                   }
                   onClick={() => {
                     setFilters({ tag: "数码电子" });
-                    setGoodsTypeState("数码电子");
                   }}
                 >
                   数码电子
                 </div>
                 <div
                   className={
-                    GoodsTypeState === "账号会员" ? "item-active" : "item"
+                    filters.tag === "账号会员" ? "item-active" : "item"
                   }
                   onClick={() => {
                     setFilters({ tag: "账号会员" });
-                    setGoodsTypeState("账号会员");
                   }}
                 >
                   账号会员
                 </div>
                 <div
                   className={
-                    GoodsTypeState === "咨询答疑" ? "item-active" : "item"
+                    filters.tag === "咨询答疑" ? "item-active" : "item"
                   }
                   onClick={() => {
                     setFilters({ tag: "咨询答疑" });
-                    setGoodsTypeState("咨询答疑");
                   }}
                 >
                   咨询答疑
                 </div>
                 <div
                   className={
-                    GoodsTypeState === "其他" ? "item-active" : "item"
+                    filters.tag === "其他" ? "item-active" : "item"
                   }
                   onClick={() => {
                     setFilters({ tag: "其他" });
-                    setGoodsTypeState("其他");
+                    console.log(filters);
                   }}
                 >
                   其他
                 </div>
                 <div
                   className={
-                    GoodsTypeState === null ? "item-active" : "item"
+                    filters.tag === null ? "item-active" : "item"
                   }
                   onClick={() => {
                     setFilters({ tag: null });
-                    setGoodsTypeState(null);
+                    console.log(filters);
                   }}
                 >
                   全部
@@ -443,17 +463,17 @@ const Market = () => {
         >
           {goods.map((item) => (
             <div
-              className="Goods-item"
+              className="commodity-item"
               key={item.id}
               onClick={() => {
                 navigate(`/market/${item.id}`);
               }}
               style={{
-                width:
-                  "calc((100vw - 4px) / var(--elements-per-row) - var(--elements-per-row)*1px - (var(--elements-per-row) - 1)*2px)",
+                width: `calc((100vw - 12px - ${elementsPerRow - 1} * 6px) / ${elementsPerRow})`,
+                minHeight: 'fit-content',
               }}
             >
-              <div className="Goods-img">
+              <div className="commodity-img">
                 <img
                   src={
                     item.images[0]
@@ -466,10 +486,12 @@ const Market = () => {
                   alt="takePlace"
                 />
               </div>
-              <div className="Goods-title">{item.title}</div>
-              <div className="Goods-bottom">
-                <div className="Goods-price">{item.price}</div>
-                <div className="Goods-tag">{item.tag}</div>
+              <div className="commodity-title">{item.title}</div>
+              <div className="commodity-bottom">
+                <div className="commodity-price">{item.price}</div>
+                {item.tag && item.tag !== "商品标签" && (
+                  <div className="commodity-tag">{item.tag}</div>
+                )}
               </div>
             </div>
           ))}

@@ -347,11 +347,11 @@ const Template = () => {
         </div>
 
         <div className='sort'>
-          <label htmlFor="sort-input">分类</label>
+          <label htmlFor="sort-input">分类（请选择合适的分类）</label>
           <div className='sort-input'>
             <div className="antd-dropdown-container">
               <Dropdown menu={{ items: postTypeItems }} placement="bottomLeft">
-                <Button className="dropdown-button dropdown-posttype">{post_type === 'receive' ? '收' : '出'}</Button>
+                <Button className="dropdown-button dropdown-goodstype">{post_type === 'receive' ? '收' : '出'}</Button>
               </Dropdown>
               <Dropdown menu={{ items: categoryItems }} placement="bottomLeft">
                 <Button className="dropdown-button dropdown-category">{tag}</Button>
@@ -440,6 +440,7 @@ const Template = () => {
                 maxLength={500}
                 rows={4}
                 className="native-textarea"
+                style={{ height: '130px' }}
               />
             </div>
           </div>

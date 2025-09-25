@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import useScreenType from "./hooks/useScreenType";
 import Cookies from "js-cookie";
 import "./App.scss";
@@ -10,6 +10,7 @@ import {
 import { useUserStore } from "./store";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import { message } from "antd";
+import SwitchDirection from "./components/SwitchDirection/SwitchDirection";
 
 // 懒加载页面组件统一管理
 const Lazy = {
@@ -42,38 +43,57 @@ const Lazy = {
 const App: React.FC = () => {
   // 检查是否登录并获取用户信息
   const token = Cookies.get("auth-token");
+  const [showOrientationOverlay, setShowOrientationOverlay] = useState(false);
+  const [userDismissedOverlay, setUserDismissedOverlay] = useState(false);
 
   // 仅在移动端开启竖屏监控和提示
   useEffect(() => {
-    const isMobile = window.innerWidth < 768;
-    if (!isMobile) return;
-
-    const lockOrientation = () => {
-      if (window.screen.orientation && window.screen.orientation.lock) {
-        window.screen.orientation.lock("portrait").catch((err) => {
-          console.error("锁定竖屏失败:", err);
-        });
-      }
-    };
+    const isMobileDevice = window.innerWidth < 768;
+    if (!isMobileDevice) {
+      setShowOrientationOverlay(false);
+      return;
+    }
 
     const handleOrientationChange = () => {
-      if (window.matchMedia("(orientation: landscape)").matches) {
-        message.info("请将设备旋转到竖屏模式以获得最佳体验。");
-        lockOrientation();
+      // 使用多种方式检测横屏状态，提高准确性
+      const isLandscapeByMediaQuery = window.matchMedia("(orientation: landscape)").matches;
+      const isLandscapeByDimensions = window.innerWidth > window.innerHeight;
+      const isLandscape = isLandscapeByMediaQuery || isLandscapeByDimensions;
+      
+      if (isLandscape && !userDismissedOverlay) {
+        setShowOrientationOverlay(true);
+      } else if (!isLandscape) {
+        setShowOrientationOverlay(false);
+        // 重置用户关闭状态，当回到竖屏时允许再次显示
+        setUserDismissedOverlay(false);
       }
     };
 
-    window.addEventListener("resize", handleOrientationChange);
-    window.addEventListener("orientationchange", handleOrientationChange);
+    // 添加防抖处理，避免频繁触发
+    let timeoutId: NodeJS.Timeout;
+    const debouncedOrientationChange = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(handleOrientationChange, 100);
+    };
+
+    window.addEventListener("resize", debouncedOrientationChange);
+    window.addEventListener("orientationchange", debouncedOrientationChange);
 
     // 初始检测
     handleOrientationChange();
 
     return () => {
-      window.removeEventListener("resize", handleOrientationChange);
-      window.removeEventListener("orientationchange", handleOrientationChange);
+      clearTimeout(timeoutId);
+      window.removeEventListener("resize", debouncedOrientationChange);
+      window.removeEventListener("orientationchange", debouncedOrientationChange);
     };
-  }, []);
+  }, [userDismissedOverlay]);
+
+  // 处理用户手动关闭方向提示
+  const handleCloseOrientationOverlay = () => {
+    setShowOrientationOverlay(false);
+    setUserDismissedOverlay(true);
+  };
 
   useEffect(() => {
     // 使用AbortController提供更好的请求取消机制
@@ -176,7 +196,7 @@ const App: React.FC = () => {
     { path: "/user/messages", element: <Lazy.Messages /> },
     { path: "/user/history", element: <Lazy.History /> },
     { path: "/user/settings", element: <Lazy.Settings /> }
-  ], [token]);
+  ], []);
 
   const webRoutes = useMemo(() => [
     {
@@ -201,7 +221,7 @@ const App: React.FC = () => {
         </ProtectedRoute>
       ),
     }
-  ], [token]);
+  ], []);
 
   const mobileRouter = useMemo(() => createBrowserRouter(mobileRoutes), [mobileRoutes]);
   const webRouter = useMemo(() => createBrowserRouter(webRoutes), [webRoutes]);
@@ -214,6 +234,10 @@ const App: React.FC = () => {
       <React.Suspense fallback={<div>加载中......请稍候......</div>}>
         <RouterProvider router={isMobile ? mobileRouter : webRouter} />
       </React.Suspense>
+      {/* 横屏提示蒙版 - 仅在移动端横屏时显示 */}
+      {isMobile && showOrientationOverlay && (
+        <SwitchDirection onClose={handleCloseOrientationOverlay} />
+      )}
     </div>
   );
 };
