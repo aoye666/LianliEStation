@@ -105,7 +105,7 @@ router.post("/template", async (req, res) => {
       messages: [
         {
           role: "system",
-          content: '请根据用户输入生成符合以下结构的商品信息：{ "title": "商品名"(string), "price": 价格(number), "tag": "学业资料" 或 "跑腿代课" 或 "生活用品" 或 "数码电子" 或 "拼单组队" 或 "捞人询问"(string) , "post_type": "sell" 或 "receive"(string), "details": "详情"(string) }',
+          content: '请根据用户输入生成符合以下结构的商品信息：{ "title": "商品名"(string), "price": 价格(number), "tag": "学习资料" 或 "代办跑腿" 或 "生活用品" 或 "数码电子" 或 "账号会员" 或 "咨询答疑"(string) , "post_type": "sell" 或 "receive"(string), "details": "详情"(string) }',
         },
         {
           role: "user",

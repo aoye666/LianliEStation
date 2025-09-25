@@ -6,6 +6,25 @@ $text-color: #333;
 $border-radius: 8px;
 $shadow-color: rgba(0, 0, 0, 0.1);
 
+// 三种不同的浅色系下拉按钮颜色
+// 浅蓝色系 - 买/卖选择
+$dropdown-blue-bg: #e3f2fd;
+$dropdown-blue-text: #1565c0;
+$dropdown-blue-border: #bbdefb;
+$dropdown-blue-hover: #c1e8ff;
+
+// 浅绿色系 - 商品分类
+$dropdown-green-bg: #e8f5e8;
+$dropdown-green-text: #2e7d32;
+$dropdown-green-border: #c8e6c9;
+$dropdown-green-hover: #d7f0d7;
+
+// 浅橙色系 - 校区选择
+$dropdown-orange-bg: #fff3e0;
+$dropdown-orange-text: #e65100;
+$dropdown-orange-border: #ffcc80;
+$dropdown-orange-hover: #ffe0b2;
+
 .template-container {
     display: flex;
     flex-direction: column;
@@ -18,25 +37,6 @@ $shadow-color: rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
     transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0.5s;
 
-    .alert{
-        position: fixed; 
-        top: 20px; 
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 10px 20px;
-        background-color: green; 
-        color: white;
-        border-radius: 5px; 
-        z-index: 9999;
-        animation: fade-in 1s, fade-out 1s 2s;
-    }
-
-
-    input,textarea:focus {
-        border-color: #007bff; /* 聚焦时的边框颜色 */
-        box-shadow: 0 0 5px $hover-color; /* 聚焦时的阴影效果 */
-    }
-
     input{
         outline: none;
         padding-left:5px ;
@@ -47,31 +47,81 @@ $shadow-color: rgba(0, 0, 0, 0.1);
         padding: 5px;
     }
     
-    // .navbar{
-    //     display: flex;
-    //     justify-content: center;
-    //     align-items: center;
-    //     height: 10vh;
-    //     border-bottom: 1px solid #ccc;
-    //     box-shadow: 0px 3px 5px #ccc;
-    //     img{
-    //         width: 40px;
-    //     }
-    // }
+    // 下拉按钮样式 - 合并自独立的 .antd-dropdown-container
+    .antd-dropdown-container {
+        // 收/出选择 - 浅蓝色
+        .ant-btn.dropdown-posttype {
+            background-color: $dropdown-blue-bg;
+            color: $dropdown-blue-text;
+            border: 1px solid $dropdown-blue-border;
+            transition: all 0.2s ease;
+            
+            &:hover, &:focus {
+                background-color: $dropdown-blue-hover;
+                color: #0d47a1;
+                border-color: #90caf9;
+                transform: translateY(-1px);
+            }
 
-    .tabbar{
-        display: flex;
-        height: 10vh;
+            &:active {
+                background-color: #b3e5fc;
+                color: #0d47a1;
+                transform: translateY(0);
+            }
+        }
+        
+        // 商品分类 - 浅绿色  
+        .ant-btn.dropdown-category {
+            background-color: $dropdown-green-bg;
+            color: $dropdown-green-text;
+            border: 1px solid $dropdown-green-border;
+            transition: all 0.2s ease;
+            
+            &:hover, &:focus {
+                background-color: $dropdown-green-hover;
+                color: #1b5e20;
+                border-color: #a5d6a7;
+                transform: translateY(-1px);
+            }
+
+            &:active {
+                background-color: #c8e6c9;
+                color: #1b5e20;
+                transform: translateY(0);
+            }
+        }
+        
+        // 校区选择 - 浅橙色
+        .ant-btn.dropdown-campus {
+            background-color: $dropdown-orange-bg;
+            color: $dropdown-orange-text;
+            border: 1px solid $dropdown-orange-border;
+            transition: all 0.2s ease;
+            
+            &:hover, &:focus {
+                background-color: $dropdown-orange-hover;
+                color: #bf360c;
+                border-color: #ffb74d;
+                transform: translateY(-1px);
+            }
+
+            &:active {
+                background-color: #ffcc80;
+                color: #bf360c;
+                transform: translateY(0);
+            }
+        }
     }
 
+    // 主要内容区域样式
     .content{
         display: flex;
         flex-direction: column;
         gap: 10px;
         justify-content: center;
         align-items: center;
-        margin-top: 13px;
-        height: calc(100vh - 100px);
+        margin-top: 100px;
+        height: calc(100vh - 245px);
 
         label{
             font-size: 16px;
@@ -85,11 +135,70 @@ $shadow-color: rgba(0, 0, 0, 0.1);
             margin-top: 10px;
             width: 250px;
 
-            input{
-                border: 1px solid #ccc;
-                height: 20px;
-                border-radius: 10px;
-                width: 250px;
+            .title-input {
+                .input-wrapper {
+                    input.native-input {
+                        width: 100%;
+                        padding: 8px 12px;
+                        border-radius: 6px;
+                        border: 1px solid #ddd !important;
+                        transition: border-color 0.2s ease;
+                        background-color: #f8f8f8 !important;
+                        font-size: 14px;
+                        outline: none;
+                        box-sizing: border-box;
+
+                        &::placeholder {
+                            color: #aaa;
+                        }
+
+                        &:hover {
+                            border-color: #ddd !important;
+                        }
+
+                        &:focus {
+                            border-color: #1890ff !important;
+                            background-color: #fff !important;
+                            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+                        }
+                    }
+                }
+            }
+        }
+
+        .sort{
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 250px;
+
+            .antd-dropdown-container {
+                display: flex;
+                gap: 10px;
+                
+                .ant-btn.dropdown-button {
+                    height: 26px;
+                    padding: 0;
+                    font-size: 15px;
+                    line-height: 26px;
+                    border-radius: 6px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.3s ease;
+                    font-weight: 500;
+                    outline: none;
+
+                    &:first-child {
+                        width: 40px;
+                    }
+                    &:nth-child(2) {
+                        width: 100px;
+                    }
+                    &:last-child {
+                        width: 100px;
+                    }
+                }
             }
         }
 
@@ -100,148 +209,77 @@ $shadow-color: rgba(0, 0, 0, 0.1);
             gap: 6px;
 
             .price-num{
-                display: flex;
-                gap: 0 10px;
-                input{
-                    border: 1px solid #ccc;
-                    height: 20px;
-                    width: 120px;
-                    border-radius: 10px;
-                }
+                .input-number-wrapper {
+                    width: 80px;
+                    display: flex;
+                    border-radius: 6px;
+                    border: 1px solid #ddd;
+                    transition: border-color 0.2s ease;
 
-            }
-        }
-
-        .sort{
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            width: 250px;
-
-            // 下拉菜单基础样式
-            .dropdown {
-                position: relative;
-                display: flex;
-                gap: 0 20px;
-            
-                // 菜单按钮样式
-                .dropdown-sellOrBuy{
-                    .dropdown-button{
-                        width: 72px;
-                        height: 25px;
-                    }   
-                }
-
-                .dropdown-category{
-                    .dropdown-button{
-                        width: 72px;
-                        height: 25px;
-                    }
-                }
-
-                .dropdown-campus{
-                    .dropdown-button{
-                        width: 72px;
-                        height: 25px;
-                    }   
-                }
-                .dropdown-button {
-                background-color: $primary-color;
-                color: $background-color;
-                border: none;
-                font-size: 16px;
-
-                cursor: pointer;
-                border-radius: $border-radius;
-                transition: background-color 0.3s ease;
-                border-radius: 10px;
-            
-                &:hover {
-                    background-color: $hover-color;
-                }
-            
-                &:focus {
-                    outline: none;
-                }
-                }
-            
-                // 下拉菜单内容
-                .dropdown-menu {
-                display: block;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                background-color: $background-color;
-                min-width: 300px;
-                border-radius: $border-radius;
-                box-shadow: 0 4px 8px $shadow-color;
-                z-index: 1;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.3s ease, transform 0.3s ease;
-                transform: translateY(-10px);
-            
-                // 显示时
-                &.show {
-                    display: block;
-                    opacity: 1;
-                    transform: translateY(0);
-                    pointer-events: auto;
-                }
-            
-                // 下拉菜单项样式
-                .dropdown-item {
-                    padding: 12px 20px;
-                    font-size: 16px;
-                    color: $text-color;
-                    text-align: left;
-                    cursor: pointer;
-                    transition: background-color 0.3s ease;
-            
                     &:hover {
-                    background-color: $hover-color;
-                    color: #fff;
+                        border-color: #ddd;
                     }
-            
-                    &:focus {
-                    outline: none;
+
+                    &:focus-within {
+                        border-color: #1890ff;
+                        background-color: #fff;
+                        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+                    }
+
+                    .native-input-number {
+                        width: 80px;
+                        flex: 1;
+                        padding: 8px 12px;
+                        border: none;
+                        background-color: transparent;
+                        font-size: 14px;
+                        outline: none;
+                        text-align: left;
+
+                        &::placeholder {
+                            color: #aaa;
+                        }
+
+                        /* Chrome, Safari, Edge, Opera */
+                        &::-webkit-outer-spin-button,
+                        &::-webkit-inner-spin-button {
+                            -webkit-appearance: none;
+                            margin: 0;
+                        }
+
+                        /* Firefox */
+                        &[type=number] {
+                            -moz-appearance: textfield;
+                            appearance: textfield;
+                        }
+                    }
+
+                    .input-addon {
+                        display: flex;
+                        align-items: center;
+                        font-weight: 500;
+                        font-size: 16px;
+                        margin-left: 10px;
                     }
                 }
-                }
             }
-            
-            // 激活下拉菜单
-            .dropdown-sellOrBuy:hover .dropdown-menu {
-                display: block;
-                opacity: 1;
-                transform: translateY(0);
-                pointer-events: auto;
-            }
-
-            .dropdown-category:hover .dropdown-menu {
-                display: block;
-                opacity: 1;
-                transform: translateY(0);
-                pointer-events: auto;
-            }
-
-            .dropdown-campus:hover .dropdown-menu {
-                display: block;
-                opacity: 1;
-                transform: translateY(0);
-                pointer-events: auto;
-            }
-
-            // .dropdown-menu:active.dropdown-menu {
-            //     display: none;
-            // }
-
         }
 
         .img-upload{
             display: flex;
             flex-direction: column;
             width: 250px;
+            margin: 8px 0;
+            min-height: 84px;
+            height: 84px;
+
+            .img-upload-label {
+                font-size: 16px;
+                font-weight: 600;
+                color: $text-color;
+                margin-bottom: 8px;
+                display: block;
+            }
 
             .img-upload-up{
                 display: flex;
@@ -275,31 +313,147 @@ $shadow-color: rgba(0, 0, 0, 0.1);
                     width: 60px;
                 }
             }
+            
+            .template-upload {
+                display: flex;
+                flex-direction: row;
+                gap: 2px;
+                width: 100%;
+                height: 80px;
+                
+                .upload-item {
+                    width: 80px;
+                    height: 80px;
+                    border-radius: $border-radius;
+                    position: relative;
+                    flex-shrink: 0;
+                    
+                    &.uploaded {
+                        border: 1px solid #d9d9d9;
+                        overflow: hidden;
+                        
+                        img {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                            display: block;
+                        }
+                        
+                        .upload-actions {
+                            position: absolute;
+                            top: 0;
+                            right: 0;
+                            background: rgba(0, 0, 0, 0.5);
+                            
+                            .remove-btn {
+                                background: transparent;
+                                border: none;
+                                color: white;
+                                font-size: 16px;
+                                width: 20px;
+                                height: 20px;
+                                cursor: pointer;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                
+                                &:hover {
+                                    background: rgba(255, 0, 0, 0.6);
+                                }
+                            }
+                        }
+                    }
+                    
+                    &.upload-button {
+                        border: 2px dashed #d9d9d9;
+                        background-color: #fafafa;
+                        transition: all 0.3s ease;
+                        
+                        &:hover {
+                            border-color: $primary-color;
+                            background-color: #f0f9ff;
+                        }
+                        
+                        .upload-label {
+                            width: 100%;
+                            height: 100%;
+                            cursor: pointer;
+                            display: block;
+                            
+                            .upload-content {
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                justify-content: center;
+                                height: 100%;
+                                color: #999;
+                                
+                                .plus-icon {
+                                    font-size: 14px;
+                                    line-height: 1;
+                                }
+                                
+                                .upload-text {
+                                    font-size: 10px;
+                                    margin-top: 2px;
+                                    line-height: 1;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                &.upload-max-reached {
+                    .upload-button {
+                        display: none;
+                    }
+                }
+            }
         }
 
         .detail{
             display: flex;
             flex-direction: column;
             width: 250px;
-
-            .detail-text{
-                font-size: 16px;
-                font-weight: bold;
-            }
+            margin-top: 20px;
 
             .detail-input{
-                word-wrap: break-word;
-                white-space: pre-wrap; 
-                textarea{
-                    border: 1px solid #ccc;
-                    height: 120px;
-                    width: 250px;
-                    border-radius: 10px;
-                }
+                margin-top: 5px;
                 
+                .textarea-wrapper {
+                    
+                    .native-textarea {
+                        width: 100%;
+                        padding: 8px 12px;
+                        border-radius: 6px;
+                        border: 1px solid #ddd !important;
+                        transition: border-color 0.2s ease;
+                        resize: none;
+                        background-color: #f8f8f8 !important;
+                        line-height: 1.6;
+                        height: 140px;
+                        font-size: 14px;
+                        outline: none;
+                        box-sizing: border-box;
+                        font-family: inherit;
+
+                        &::placeholder {
+                            color: #aaa;
+                        }
+
+                        &:hover {
+                            border-color: #ddd !important;
+                        }
+
+                        &:focus {
+                            border-color: #1890ff !important;
+                            background-color: #fff !important;
+                            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+                        }
+                    }
+                }
             }
         }
-        
     }
 
     .submit{
@@ -308,20 +462,16 @@ $shadow-color: rgba(0, 0, 0, 0.1);
         align-items: center;
 
         button{
-            margin-top: 20px;
-            width: 150px;
+            font-size: 15px;
+            line-height: 30px;
+            margin-top: 15px;
+            width: 130px;
             height: 30px;
             cursor: pointer;
             background-color: $primary-color;
             border: none;
-            border-radius: 7px;
-            box-shadow: $primary-color 0px 2px 5px;
-            transition: all 0.2s ease;
-
-            &:active{
-                transform: translateY(2px);
-                background-color: $hover-color;
-            }
+            border-radius: 15px;
+            color: #ffffff
         }
     }
 }

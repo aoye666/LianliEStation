@@ -171,7 +171,7 @@ const Market: React.FC = () => {
 
   const getTypeTag = (type: string) => {
     const typeMap = {
-      'electronic': { color: 'blue', text: '电子产品' },
+      'electronic': { color: 'blue', text: '数码电子' },
       'book': { color: 'green', text: '图书教材' },
       'clothing': { color: 'purple', text: '服装配饰' },
       'sports': { color: 'orange', text: '运动用品' },
@@ -346,7 +346,7 @@ const Market: React.FC = () => {
             onChange={(value) => handleFilterChange('goods_type', value)}
           >
             <Option value="all">全部类型</Option>
-            <Option value="electronic">电子产品</Option>
+            <Option value="electronic">数码电子</Option>
             <Option value="book">图书教材</Option>
             <Option value="clothing">服装配饰</Option>
             <Option value="sports">运动用品</Option>

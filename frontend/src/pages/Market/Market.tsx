@@ -194,34 +194,34 @@ const Market = () => {
                 <div className="detail">
                   <div
                     className={
-                      commodityTypeState === "教材" ? "active-button" : "null"
+                      commodityTypeState === "学习资料" ? "active-button" : "null"
                     }
                   >
                     <button
                       onClick={async () => {
-                        setFilters({ tag: "教材" });
+                        setFilters({ tag: "学习资料" });
                         handleOnConfirm();
-                        setCommodityTypeState("教材");
+                        setCommodityTypeState("学习资料");
                       }}
                     >
-                      教材
+                      学习资料
                     </button>
                   </div>
                   <div
                     className={
-                      commodityTypeState === "电子产品"
+                      commodityTypeState === "数码电子"
                         ? "active-button"
                         : "null"
                     }
                   >
                     <button
                       onClick={async () => {
-                        setFilters({ tag: "电子产品" });
+                        setFilters({ tag: "数码电子" });
                         handleOnConfirm();
-                        setCommodityTypeState("电子产品");
+                        setCommodityTypeState("数码电子");
                       }}
                     >
-                      电子
+                      数码
                     </button>
                   </div>
                   <div
@@ -338,25 +338,25 @@ const Market = () => {
               <div className="sort-list">
                 <div
                   className={
-                    commodityTypeState === "教材" ? "item-active" : "item"
+                    commodityTypeState === "学习资料" ? "item-active" : "item"
                   }
                   onClick={() => {
-                    setFilters({ tag: "教材" });
-                    setCommodityTypeState("教材");
+                    setFilters({ tag: "学习资料" });
+                    setCommodityTypeState("学习资料");
                   }}
                 >
-                  教材
+                  学习资料
                 </div>
                 <div
                   className={
-                    commodityTypeState === "服务" ? "item-active" : "item"
+                    commodityTypeState === "代办跑腿" ? "item-active" : "item"
                   }
                   onClick={() => {
-                    setFilters({ tag: "服务" });
-                    setCommodityTypeState("服务");
+                    setFilters({ tag: "代办跑腿" });
+                    setCommodityTypeState("代办跑腿");
                   }}
                 >
-                  服务
+                  代办跑腿
                 </div>
                 <div
                   className={
@@ -371,36 +371,36 @@ const Market = () => {
                 </div>
                 <div
                   className={
-                    commodityTypeState === "电子产品" ? "item-active" : "item"
+                    commodityTypeState === "数码电子" ? "item-active" : "item"
                   }
                   onClick={() => {
-                    setFilters({ tag: "电子产品" });
-                    setCommodityTypeState("电子产品");
+                    setFilters({ tag: "数码电子" });
+                    setCommodityTypeState("数码电子");
                   }}
                 >
-                  电子产品
+                  数码电子
                 </div>
                 <div
                   className={
-                    commodityTypeState === "拼单组队" ? "item-active" : "item"
+                    commodityTypeState === "账号会员" ? "item-active" : "item"
                   }
                   onClick={() => {
-                    setFilters({ tag: "拼单组队" });
-                    setCommodityTypeState("拼单组队");
+                    setFilters({ tag: "账号会员" });
+                    setCommodityTypeState("账号会员");
                   }}
                 >
-                  拼单组队
+                  账号会员
                 </div>
                 <div
                   className={
-                    commodityTypeState === "捞人询问" ? "item-active" : "item"
+                    commodityTypeState === "咨询答疑" ? "item-active" : "item"
                   }
                   onClick={() => {
-                    setFilters({ tag: "捞人询问" });
-                    setCommodityTypeState("捞人询问");
+                    setFilters({ tag: "咨询答疑" });
+                    setCommodityTypeState("咨询答疑");
                   }}
                 >
-                  捞人询问
+                  咨询答疑
                 </div>
                 <div
                   className={

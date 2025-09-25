@@ -91,25 +91,18 @@ interface MainState {
   publishForumPost: (
     title: string,
     content: string,
-    author_id: number | null,
-    create_at: string,
     campus_id: number,
-    images: File[],
-    likes: number,
-    complaints: number
+    // tag: string,
+    images?: File[]
   ) => Promise<boolean>;
   publishMarketGoods: (
     title: string,
-    content: string,
-    author_id: number | null,
-    create_at: string,
-    price: number,
     campus_id: number,
-    post_type: string,
-    tag: string,
-    images: File[],
-    likes: number,
-    complaints: number
+    goods_type: string,
+    content?: string,
+    price?: number,
+    tag?: string,
+    images?: File[]
   ) => Promise<boolean>;
   updateForumInteract: (
     id: number,
@@ -211,29 +204,25 @@ const useMainStore = create<MainState>()(
       publishForumPost: async (
         title: string,
         content: string,
-        author_id: number | null,
-        create_at: string,
         campus_id: number,
-        images: File[],
-        likes: number,
-        complaints: number
+        // tag: string,
+        images?: File[]
       ) => {
         try {
           const formData = new FormData();
           formData.append('title', title);
           formData.append('content', content);
-          formData.append('author_id', author_id?.toString() ?? '');
-          formData.append('create_at', create_at);
-          formData.append('status', 'active');
           formData.append('campus_id', campus_id.toString());
-          images.forEach((image) => {
-            formData.append('images', image);
-          });
-          formData.append('likes', likes.toString());
-          formData.append('complaints', complaints.toString());
+          // formData.append('tag', tag);
+          
+          // 如果有图片，添加到formData
+          if (images && images.length > 0) {
+            images.forEach((image) => {
+              formData.append('images', image);
+            });
+          }
 
-          const response = await api.post("/api/publish/posts", formData
-          );
+          const response = await api.post("/api/publish/posts", formData);
 
           if (response.status === 200 || response.status === 201) {
             message.success('发布成功');
@@ -250,33 +239,40 @@ const useMainStore = create<MainState>()(
       },
       publishMarketGoods: async (
         title: string,
-        content: string,
-        author_id: number | null,
-        create_at: string,
-        price: number,
         campus_id: number,
-        post_type: string,
-        tag: string,
-        images: File[],
-        likes: number,
-        complaints: number
+        goods_type: string,
+        content?: string,
+        price?: number,
+        tag?: string,
+        images?: File[]
       ) => {
         try {
           const formData = new FormData();
+          
+          // 必需参数
           formData.append('title', title);
-          formData.append('content', content);
-          formData.append('author_id', author_id?.toString() ?? '');
-          formData.append('create_at', create_at);
-          formData.append('status', 'active');
-          formData.append('price', price.toString());
           formData.append('campus_id', campus_id.toString());
-          formData.append('goods_type', post_type);
-          formData.append('tag', tag);
-          images.forEach((image) => {
-            formData.append('images', image);
-          });
-          formData.append('likes', likes.toString());
-          formData.append('complaints', complaints.toString());
+          formData.append('goods_type', goods_type);
+          
+          // 可选参数
+          if (content && content.trim() !== '') {
+            formData.append('content', content);
+          }
+          
+          if (price !== undefined && price !== null) {
+            formData.append('price', price.toString());
+          }
+          
+          if (tag && tag !== '商品类型') {
+            formData.append('tag', tag);
+          }
+          
+          // 图片上传（最多3张）
+          if (images && images.length > 0) {
+            images.forEach((image) => {
+              formData.append('images', image);
+            });
+          }
 
           const response = await api.post("/api/publish/goods", formData);
 

@@ -12,7 +12,7 @@ host: "localhost",
 port: 3306,
 user: root,
 password: root,
-database: makertplace,
+database: lianli,
 ```
 
 使用 `dotenv` 开发依赖进行环境变量管理，如以上环境有改动，请自行在 `server` 根目录下新建`.env`文件，用以下格式修改(SECRET_KEY 随你修改，也可以问 fanzdstar 设的是啥,最后两个也可以填入您自己的邮箱账户和邮箱授权码，也可以问 fanzdstar 设的是啥)
@@ -30,20 +30,16 @@ EMAIL_PASS=
 API_KEY
 ```
 
-## 临时管理员账户
+## 管理员账户
 
-```json
-"identifier":"胡骏阳",
-"password":"123456",
-"role":"admin"
-```
+请联系项目运维人员获取。
 
 ## 数据库环境
 
-代码中并没有新建数据库的命令，请确保本地数据库中存在`marketplace`库，示例 api 中的 users 表初始化代码如下，仅供测试
+代码中并没有新建数据库的命令，请确保本地数据库中存在`lianli`库，示例 api 中的 users 表初始化代码如下，仅供测试
 
 ```sql
-use marketplace;
+use lianli;
 CREATE TABLE `users` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `nickname` VARCHAR(50) NOT NULL DEFAULT 'DUTers',
@@ -1050,7 +1046,7 @@ Authorization: Bearer <your_token_here>
       "status": "active", // 帖子状态
       "campus_id": 1, // 校区ID
       "post_type": "buy", // 帖子类型
-      "tag": "电子产品", // 标签
+      "tag": "数码电子", // 标签
       "price": 100, // 价格
       "images": ["image_url_1", "image_url_2"] // 关联的图片URL列表
     },
@@ -1479,7 +1475,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...0
   {
   "title": "商品名", // 生成的商品名称
   "price": 价格,     // 商品价格
-  "tag": "标签",      // 商品标签，可选值： "学业资料" 或 "跑腿代课" 或 "生活用品" 或 "数码电子" 或 "拼单组队" 或 "捞人询问"
+  "tag": "标签",      // 商品标签，可选值： "学习资料" 或 "代办跑腿" 或 "生活用品" 或 "数码电子" 或 "账号会员" 或 "咨询答疑" 或 "其他"
   "post_type": "交易类型", // 交易类型，可选值： "sell" 或 "receive"
   "details": "详情"   // 商品详情描述
   }
