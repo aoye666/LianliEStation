@@ -71,31 +71,25 @@ const Forum = () => {
 
         <div className="posts">
           {forums.map((post, index) => (
-            <Row
-              key={index}
-              className="Row"
-              onClick={() => navigate(`/forum-detail?id=${post.id}`)}
-            >
-              <Col className="Col" span={24}>
-                <Card className="Card" title={post.title}>
-                  {post.content}
-                  <Row gutter={[8, 8]}>
-                    {
-                      post.images.map((image, index) => (
-                        <Col key={index} span={8}>
-                          <img src={`${process.env.REACT_APP_API_URL || "http://localhost:5000"}${image}`}/>
-                        </Col>
-                      ))
-                    }
-                  </Row>
-                  <div className="likes">
-                    <img src={Like} alt="likes" />
-                    {/* <span>{post.likes}</span> */}
+                <Card className="Card" title={post.title} key={index} onClick={() => navigate(`/forum-detail?id=${post.id}`)}>
+                  <div className="post-content">
+                    {post.content}
                   </div>
+                  <div className="post-other">
+                    <div className="post-img">
+                      {
+                        post.images.map((image, index) => (
+                            <img key={index} src={`${process.env.REACT_APP_API_URL || "http://localhost:5000"}${image}`}/>
+                        ))
+                      }
+                    </div>
 
+                    <div className="likes">
+                      <img src={Like} alt="likes" />
+                      <span>{post.likes} likes</span>
+                    </div>
+                    </div>
                 </Card>
-              </Col>
-            </Row>
           ))}
 
         </div>

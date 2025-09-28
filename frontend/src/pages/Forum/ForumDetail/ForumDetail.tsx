@@ -3,7 +3,7 @@ import './ForumDetail.scss'
 import Navbar from '../../../components/Navbar/Navbar';
 import { useMainStore,useRecordStore } from '../../../store';
 import { useLocation } from 'react-router-dom';
-import { Image,Card,Avatar, Button,Input } from 'antd';
+import { Image,Card,Avatar, Button} from 'antd';
 import { Carousel } from 'antd';
 import dayjs from 'dayjs';
 import Liked from '../../../assets/liked.svg';
@@ -12,6 +12,7 @@ import Share from '../../../assets/share.svg';
 import Like from '../../../assets/like.svg';
 import Stared from '../../../assets/stared.svg';
 import ChatInput from '../../../components/Comment/ChatInput';
+import ShareBar from '../../../components/ShareBar/ShareBar';
 
 const ForumDetail = () => {
     const location = useLocation();
@@ -20,11 +21,13 @@ const ForumDetail = () => {
     const updateForumInteract = useMainStore(state => state.updateForumInteract)
     const {Meta} = Card;
     const [openReplies, setOpenReplies] = useState<number | null>(null);
+    const [showShare, setShowShare] = useState(false)
     const [forumState, setForumState] = useState(false)
     const [showComment, setShowComment] = useState(false)
     const [likeState, setLikeState] = useState(false)
     const [parent_id,setParentId] = useState<number | undefined>(undefined)
     const commentRef = useRef<HTMLDivElement>(null)
+    const shareRef = useRef<HTMLDivElement>(null)
     const mainStore = useMainStore()
     const recordStore = useRecordStore()
 
@@ -38,6 +41,9 @@ const ForumDetail = () => {
         function handleClickOutside(event: MouseEvent) {
             if (commentRef.current && !commentRef.current.contains(event.target as Node)) {
                 setShowComment(false)
+            }
+            if (shareRef.current && !shareRef.current.contains(event.target as Node)) {
+                setShowShare(false)
             }
         }
 
@@ -102,6 +108,7 @@ const ForumDetail = () => {
 
     const share = () => {
         console.log('share')
+        setShowShare(true)
     }
 
     return (
@@ -211,6 +218,14 @@ const ForumDetail = () => {
                 {
                     showComment && (
                     <ChatInput id={forumId?parseInt(forumId):1} parent_id={parent_id}></ChatInput>
+                    )
+                }
+            </div>
+
+            <div className='shareBar' ref={shareRef}>
+                {
+                    showShare && (
+                    <ShareBar></ShareBar>
                     )
                 }
             </div>

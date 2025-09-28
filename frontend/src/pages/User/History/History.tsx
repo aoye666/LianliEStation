@@ -97,21 +97,27 @@ const History = () => {
                 />
               ) : null}
               <Card className="goods-description" title={goods.title} hoverable>
-                {/* <div className="goods-img">
-                  <img
-                    src={
-                      goods.images[0]
-                        ? `${process.env.REACT_APP_API_URL||"http://localhost:5000"}${goods.images[0]}`
-                        : takePlace
-                    }
-                    alt=""
-                  />
-                </div> */}
-                <div className="goods-detail">{goods.content}</div>
-                <div className="goods-bottom">
-                  <div className="goods-price">{goods.price}r</div>
-                  <div className="goods-tag">{goods.tag}</div>
+                <div className="goods-content">
+                  <div className="goods-img">
+                    <img
+                      src={
+                        goods.images[0]
+                          ? `${process.env.REACT_APP_API_URL||"http://localhost:5000"}${goods.images[0]}`
+                          : takePlace
+                      }
+                      alt=""
+                    />
+                  </div>
+                  <div className="goods-info">
+                    <div className="goods-detail">{goods.content}</div>
+                    <div className="goods-bottom">
+                      <div className="goods-price">{goods.price}r</div>
+                      <div className="goods-tag">{goods.tag}</div>
+                    </div>
+                  </div>
+                  
                 </div>
+                
               </Card>
             </div>
           )))}
@@ -136,9 +142,23 @@ const History = () => {
                 />
               ) : null}
               <Card className="goods-description" title={goods.title} hoverable>
-                <div className="goods-detail">{goods.content}</div>
-                <div className="goods-bottom">
+                <div className="goods-content">
+                  <div className="goods-img">
+                    <img
+                      src={
+                        goods.images[0]
+                          ? `${process.env.REACT_APP_API_URL||"http://localhost:5000"}${goods.images[0]}`
+                          : takePlace
+                      }
+                      alt=""
+                    />
+                  </div>
+                  <div className="goods-info">
+                    <div className="goods-detail">{goods.content}</div>
+                  </div>
+                  
                 </div>
+                
               </Card>
             </div>
           )))}
@@ -146,9 +166,6 @@ const History = () => {
       </div>
 
       <div className="footer">
-        <div className="manage-button">
-          <button onClick={() => handleOnClick()}>管理</button>
-        </div>
         {isVisible ? (
           <div className="delete-button">
             <button onClick={() => handleOnDelete()}>删除</button>

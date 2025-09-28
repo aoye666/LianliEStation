@@ -1,5 +1,5 @@
 // src/components/ChatInput.tsx
-import React, { use, useState,useEffect } from "react";
+import React, { useRef, useState,useEffect } from "react";
 import { Input, Button, Upload, Space, Image } from "antd";
 import { SmileOutlined, UploadOutlined, SendOutlined } from "@ant-design/icons";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react"; 
@@ -17,12 +17,25 @@ const ChatInput: React.FC<Props> = ({id, parent_id}) => {
   const [showEmoji, setShowEmoji] = useState(false);
   const [parentId, setParentId] = useState<number | null>(null);
   const updateForumInteract = useMainStore((state)=>state.updateForumInteract);
+  const emojiRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (parent_id) {
     setParentId(parent_id);
     }
   }, [parent_id]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (emojiRef.current && !emojiRef.current.contains(event.target as Node)) {
+        setShowEmoji(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [emojiRef]);
   
   const handleEmojiClick = (emojiData: EmojiClickData) => {
     setText((prev) => prev + emojiData.emoji); // 把表情加到文本后面
@@ -61,7 +74,7 @@ const ChatInput: React.FC<Props> = ({id, parent_id}) => {
             onClick={() => setShowEmoji(!showEmoji)}
           />
           {showEmoji && (
-            <div className="chat-input__emoji-picker">
+            <div className="chat-input__emoji-picker" ref={emojiRef}>
               <EmojiPicker
                 onEmojiClick={handleEmojiClick}
               />

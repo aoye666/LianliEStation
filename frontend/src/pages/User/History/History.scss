@@ -24,20 +24,22 @@ $shadow-color: rgba(0, 0, 0, 0.1);
     .body{
         display: flex;
         flex: 1;
+        width: 100%;
         flex-direction: column;
 
         .select-container{
             display: flex;
-            width: 100vw;
             height: 85px;
 
             .select{
-                width: 50vw;
+                display: flex;
+                flex: 1;
                 height: 40px;
             }
 
             .button{
-                width: 50vw;
+                display: flex;
+                flex: 1;
                 height: 40px;
             }
         }
@@ -70,52 +72,65 @@ $shadow-color: rgba(0, 0, 0, 0.1);
                 .goods-description{
                     display: flex;
                     flex-direction: column;
-                    gap: 5px;
                     width: 100vw;
+                    overflow: hidden;
 
-                    .goods-img{
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        margin-top: 6px;
-                        margin-bottom: 6px;
-            
-                            img{
-                                width: 85px;
-                                height: 85px;
-                            }
-            
-                    }
-
-                    .goods-detail{
-                        font-size: 14px;
-                        display: flex;
-                        margin-left: 10px;
-                        overflow: hidden;
-                        height: 35px;
-                        text-overflow: ellipsis;
-                    }
-    
-                    .goods-bottom{
-                        display: flex;
-                        align-items: end;
-                        padding: 0 10px;
-                        width: 100%;
-                        
-                        .goods-price{
-                            font-size: 16px;
-                            font-weight: 600;
-                            color: $hover-color;
-                            margin-right:100px ;
+                    .goods-content{
+                        display:flex;
+                        .goods-img{
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            width: 70px;
+                            height: 70px;
+                
+                                img{
+                                    object-fit: contain;
+                                    width: 70px;
+                                    height: 70px;
+                                }
+                
                         }
 
-                        .goods-tag{
-                            border: 1px solid #c7c7c7;
-                            border-radius: 5px;
-                            padding: 2px;
+                        .goods-info{
+                            display: flex;
+                            flex-direction: column;
+                            width: calc(100% - 80px);
 
+                            .goods-detail{
+                                font-size: 14px;
+                                display: flex;
+                                margin-left: 10px;
+                                overflow: hidden;
+                                height: 35px;
+                                text-overflow: ellipsis;
                             }
+            
+                            .goods-bottom{
+                                display: flex;
+                                padding: 0 10px;
+                                width: 100%;
+                                position: relative;
+                                justify-content: space-between;
+                                .goods-price{
+                                    font-size: 16px;
+                                    font-weight: 600;
+                                    color: $hover-color;
+                                }
+
+                                .goods-tag{
+                                    border: 1px solid #c7c7c7;
+                                    border-radius: 5px;
+                                    padding: 2px;
+                                    width: 70px;
+
+                                }
+                            }
+                        }
+
+                        
                     }
+                    
                 }
     
             }  

@@ -13,6 +13,8 @@
 
         .banner{
             display: flex;
+            height: 13vw;
+            z-index: 1;
             .Tabs{
                 width: 100%;
                 display: flex;
@@ -38,7 +40,6 @@
                           font-size: 12px;
                           overflow: hidden;
                         }
-
                         
                     }
                 }
@@ -52,53 +53,76 @@
             height:100%;
             row-gap: 7px;
             overflow: scroll;
+            padding: 10px;
 
-            .Row{
-                padding:0 5px;
-                .Col{
-                    .Card{
-                        border: false;
-                        height: auto;
+            .Card{
+                border: false;
+                height: auto;
+                display: flex;
+                flex-direction: column;
+                height: 60vw;
+                .post-content{
+                    font-size: calc(100vw / 26);
+                }
 
-                        img{
-                            width: 100%;
-                            height: auto;
-                            object-fit: cover;
-                            display: block;
-                        }
-                        .ant-card-body {
-                            padding: 15px;
-                            height: auto;
-                            white-space: normal;
-                            word-wrap: break-word;
-                        }
+                img{
+                    width: calc((80vw) / 3);
+                    height: calc((80vw) / 3);
+                    object-fit: contain;
+                    display: block;
+                }
+                .ant-card-body {
+                    padding: 15px;
+                    height:auto;
+                    white-space: normal;
+                    word-wrap: break-word;
+                    position: relative;
 
-                        .ant-card-head {
-                            padding: 15px;
+                    .post-other{
+                        display: flex;
+                        flex-direction: column;
+                        position: relative;
+                        justify-content: space-between;
+
+                        .post-img{
                             display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            height: 100%;
+                            gap: 2vw;
                         }
 
                         .likes{
                             display: flex;
-                             align-items: center;
+                            position: relative;
+                            align-items: center;
+                            bottom: 10vw;
+                            font-size: calc(100vw / 26);
                             img{
-                                width: 20px;
+                                width: 5vw;
                             }
                         }
                     }
                 }
-            }
 
+                .ant-card-head {
+                    padding: 15px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    height: 100%;
+                    font-size: calc(100vw / 22);
+                }
+
+                
+            }
         }
+    }
+
+        
 
         // .top-posts{
         //     height: 100px;
         //     background-color: antiquewhite;
         // }
-    }
+    
 
     .tabbar{
         display: flex;
