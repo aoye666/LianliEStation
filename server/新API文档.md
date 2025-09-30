@@ -410,9 +410,17 @@ Authorization: Bearer {token}
       ]
     },
     "favorites": {
-    	"posts": [],
-      "goods": []
-      }
+    	"posts": [
+      	{
+      		"id": 1
+        }
+       ],
+       "goods": [
+       	{
+        	"id": 1
+        }
+       ]
+    }
   }
   ```
 

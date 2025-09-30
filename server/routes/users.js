@@ -228,15 +228,11 @@ router.get("/profile", authToken, async (req, res) => {
     // 获取投诉记录
     const [complaintRecords] = await db.query("SELECT target_id, target_type FROM complaints WHERE user_id = ?", [userId]);
 
-    let posts = [];
-    let goods = [];
-
     // 并行查询用户收藏的帖子和商品
-    Promise.all([
-      // 查询收藏的帖子（posts表结构：id, title, content, author_id, campus_id, status, created_at, likes, complaints）
+    const [[posts], [goods]] = await Promise.all([
       db.query(
         `
-        SELECT p.id, p.title, p.content, p.author_id, p.created_at, p.status, p.campus_id, p.likes, p.complaints
+        SELECT p.id
         FROM user_favorites uf
         INNER JOIN posts p ON uf.post_id = p.id
         WHERE uf.user_id = ? AND uf.post_id IS NOT NULL AND uf.goods_id IS NULL AND p.status != 'deleted'
@@ -247,24 +243,15 @@ router.get("/profile", authToken, async (req, res) => {
       // 查询收藏的商品（goods表结构：id, title, content, author_id, created_at, status, price, campus_id, goods_type, tag）
       db.query(
         `
-        SELECT g.id, g.title, g.content, g.author_id, g.created_at, g.status, g.price, g.campus_id, g.goods_type, g.tag
+        SELECT g.id
         FROM user_favorites uf
         INNER JOIN goods g ON uf.goods_id = g.id
         WHERE uf.user_id = ? AND uf.goods_id IS NOT NULL AND uf.post_id IS NULL AND g.status != 'deleted'
         ORDER BY uf.created_at DESC
       `,
         [userId]
-      )
-    ])
-      .then(([postsResult, goodsResult]) => {
-         [posts] = postsResult;
-         [goods] = goodsResult;
-      })
-      .catch((err) => {
-        console.error(err);
-        res.status(500).json({ message: "服务器错误" });
-      });
-
+      ),
+    ]);
 
     // 返回用户的详细信息
     const userData = {
@@ -298,7 +285,7 @@ router.get("/profile", authToken, async (req, res) => {
     return res.status(200).json(userData);
   } catch (err) {
     console.error(err);
-    res.status(401).json({ message: "Token 无效" });
+     res.status(401).json({ message: "Token 无效" });
   }
 });
 
