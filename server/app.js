@@ -3,6 +3,7 @@ import cors from "cors";
 import express, { json, urlencoded } from "express";
 import createError from "http-errors";
 import logger from "morgan";
+import { scheduleExpiredAdsCleanup } from "./utils/adScheduler.js";
 
 // 示例路由
 import aiTemplateRouter from "./routes/aiTemplate.js";
@@ -19,6 +20,7 @@ import adminRouter from "./routes/admin.js";
 import historyRouter from "./routes/history.js";
 import messagesRouter from "./routes/messages.js";
 import publishRouter from "./routes/publish.js";
+import advertisementsRouter from "./routes/advertisements.js";
 
 let app = express();
 
@@ -47,6 +49,7 @@ app.use("/api/admin", adminRouter);
 app.use("/api/history", historyRouter);
 app.use("/api/messages", messagesRouter);
 app.use("/api/publish", publishRouter);
+app.use("/api/advertisements", advertisementsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -67,6 +70,9 @@ app.use(function (err, req, res, next) {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+  
+  // 启动广告清理定时任务
+  scheduleExpiredAdsCleanup();
 });
 
 export default app;

@@ -3754,3 +3754,339 @@ Authorization: Bearer {admin_token}
 - 解封会将user_bans表中该用户的所有active记录状态设为lifted
 
 ---
+
+## advertisementRoutes
+
+### 获取所有广告
+
+基本信息
+
+- 路径: `/api/advertisements/list`
+- 方法: `GET`
+- 描述: 获取所有广告列表
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                        |
+| ------ | ---------------- | --------------------------- |
+| 200    | application/json | 获取成功                    |
+| 500    | application/json | 服务器错误                  |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  [
+    {
+      "id": 1,
+      "title": "春季促销活动",
+      "content": "全场商品8折优惠",
+      "image_url": "/uploads/ad1.jpg",
+      "target_url": "https://example.com/sale",
+      "position": "banner",
+      "duration": 7,
+      "clicks": 150,
+      "status": "active",
+      "start_date": "2025-10-01T00:00:00.000Z",
+      "end_date": "2025-10-08T00:00:00.000Z",
+      "created_at": "2025-10-01T00:00:00.000Z",
+      "updated_at": "2025-10-01T00:00:00.000Z"
+    }
+  ]
+  ```
+
+**备注**
+- 该接口为公开接口，无需身份验证
+- 广告按创建时间倒序排列
+
+---
+
+### 获取单个广告详情
+
+基本信息
+
+- 路径: `/api/advertisements/detail/:id`
+- 方法: `GET`
+- 描述: 根据ID获取单个广告详情
+
+路径参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ----------- | ------ | ---- | ------------------------ |
+| id | Number | 是 | 广告ID |
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                        |
+| ------ | ---------------- | --------------------------- |
+| 200    | application/json | 获取成功                    |
+| 404    | application/json | 广告不存在                  |
+| 500    | application/json | 服务器错误                  |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "id": 1,
+    "title": "春季促销活动",
+    "content": "全场商品8折优惠",
+    "image_url": "/uploads/ad1.jpg",
+    "target_url": "https://example.com/sale",
+    "position": "banner",
+    "duration": 7,
+    "clicks": 150,
+    "status": "active",
+    "start_date": "2025-10-01T00:00:00.000Z",
+    "end_date": "2025-10-08T00:00:00.000Z",
+    "created_at": "2025-10-01T00:00:00.000Z",
+    "updated_at": "2025-10-01T00:00:00.000Z"
+  }
+  ```
+
+**备注**
+- 该接口为公开接口，无需身份验证
+
+---
+
+### 记录广告点击
+
+基本信息
+
+- 路径: `/api/advertisements/click/:id`
+- 方法: `POST`
+- 描述: 记录广告点击次数
+
+路径参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ----------- | ------ | ---- | ------------------------ |
+| id | Number | 是 | 广告ID |
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                        |
+| ------ | ---------------- | --------------------------- |
+| 200    | application/json | 点击记录成功                |
+| 404    | application/json | 广告不存在或已失效          |
+| 500    | application/json | 服务器错误                  |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "点击记录成功"
+  }
+  ```
+
+**备注**
+- 该接口为公开接口，无需身份验证
+- 只有状态为active的广告才能记录点击
+
+---
+
+### 添加广告
+
+基本信息
+
+- 路径: `/api/advertisements/add`
+- 方法: `POST`
+- 描述: 添加新广告（仅限管理员）
+
+请求头部
+| 参数名        | 类型   | 必选 | 描述                       |
+| ------------- | ------ | ---- | -------------------------- |
+| Authorization | String | 是   | Bearer token（管理员权限） |
+| Content-Type  | String | 是   | multipart/form-data        |
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ----------- | ------ | ---- | ------------------------ |
+| title | String | 是 | 广告标题 |
+| content | String | 否 | 广告内容描述 |
+| image | File | 否 | 广告图片文件 |
+| target_url | String | 否 | 点击跳转链接 |
+| position | String | 是 | 广告位置，可选值：banner/market/forum |
+| duration | Number | 否 | 广告展示天数，默认7天 |
+
+请求体示例 (multipart/form-data)
+```
+title: "春季促销活动"
+content: "全场商品8折优惠"
+image: [广告图片文件]
+target_url: "https://example.com/sale"
+position: "banner"
+duration: 7
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                        |
+| ------ | ---------------- | --------------------------- |
+| 201    | application/json | 广告创建成功                |
+| 400    | application/json | 参数错误                    |
+| 401    | application/json | 未提供 Token                |
+| 403    | application/json | 权限不足                    |
+| 500    | application/json | 服务器错误                  |
+
+响应示例
+
+- 成功响应 (状态码：201)
+
+  ```json
+  {
+    "message": "广告创建成功",
+    "id": 1
+  }
+  ```
+
+**备注**
+- 该接口仅限管理员使用
+- 支持图片上传，图片会保存到 /uploads/ 目录
+- position参数必须是 banner、market 或 forum 之一
+
+---
+
+### 修改广告
+
+基本信息
+
+- 路径: `/api/advertisements/update/:id`
+- 方法: `PUT`
+- 描述: 修改指定广告（仅限管理员）
+
+请求头部
+| 参数名        | 类型   | 必选 | 描述                       |
+| ------------- | ------ | ---- | -------------------------- |
+| Authorization | String | 是   | Bearer token（管理员权限） |
+| Content-Type  | String | 是   | multipart/form-data        |
+
+路径参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ----------- | ------ | ---- | ------------------------ |
+| id | Number | 是 | 广告ID |
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ----------- | ------ | ---- | ------------------------ |
+| title | String | 否 | 广告标题 |
+| content | String | 否 | 广告内容描述 |
+| image | File | 否 | 广告图片文件（上传新图片会替换旧图片） |
+| target_url | String | 否 | 点击跳转链接 |
+| position | String | 否 | 广告位置，可选值：banner/market/forum |
+| duration | Number | 否 | 广告展示天数 |
+| status | String | 否 | 广告状态，可选值：active/inactive/expired |
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                        |
+| ------ | ---------------- | --------------------------- |
+| 200    | application/json | 广告更新成功                |
+| 400    | application/json | 参数错误                    |
+| 401    | application/json | 未提供 Token                |
+| 403    | application/json | 权限不足                    |
+| 404    | application/json | 广告不存在                  |
+| 500    | application/json | 服务器错误                  |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "广告更新成功"
+  }
+  ```
+
+**备注**
+- 该接口仅限管理员使用
+- 所有参数都是可选的，只更新提供的字段
+- 如果上传新图片，会自动删除旧图片文件
+
+---
+
+### 删除广告
+
+基本信息
+
+- 路径: `/api/advertisements/delete/:id`
+- 方法: `DELETE`
+- 描述: 删除指定广告（仅限管理员）
+
+请求头部
+| 参数名        | 类型   | 必选 | 描述                       |
+| ------------- | ------ | ---- | -------------------------- |
+| Authorization | String | 是   | Bearer token（管理员权限） |
+
+路径参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ----------- | ------ | ---- | ------------------------ |
+| id | Number | 是 | 广告ID |
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                        |
+| ------ | ---------------- | --------------------------- |
+| 200    | application/json | 广告删除成功                |
+| 401    | application/json | 未提供 Token                |
+| 403    | application/json | 权限不足                    |
+| 404    | application/json | 广告不存在                  |
+| 500    | application/json | 服务器错误                  |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "广告删除成功"
+  }
+  ```
+
+**备注**
+- 该接口仅限管理员使用
+- 删除广告时会同时删除相关的图片文件
+
+---
+
+### 批量删除过期广告
+
+基本信息
+
+- 路径: `/api/advertisements/cleanup/expired`
+- 方法: `DELETE`
+- 描述: 批量清理过期广告（仅限管理员）
+
+请求头部
+| 参数名        | 类型   | 必选 | 描述                       |
+| ------------- | ------ | ---- | -------------------------- |
+| Authorization | String | 是   | Bearer token（管理员权限） |
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                        |
+| ------ | ---------------- | --------------------------- |
+| 200    | application/json | 清理完成                    |
+| 401    | application/json | 未提供 Token                |
+| 403    | application/json | 权限不足                    |
+| 500    | application/json | 服务器错误                  |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "过期广告清理完成",
+    "deletedCount": 3
+  }
+  ```
+
+**备注**
+- 该接口仅限管理员使用
+- 会删除所有过期状态的广告和相关图片文件
+- 返回删除的广告数量
+
+---
