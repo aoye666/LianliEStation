@@ -414,6 +414,25 @@ $shadow-color: rgba(0, 0, 0, 0.1);
           border-radius: 4px;
           background-color: #f8f9fa;
 
+          // Ant Design Image 组件
+          .ant-image {
+            width: 100%;
+            display: block;
+          }
+
+          // 图片加载中的骨架屏样式
+          .ant-skeleton {
+            width: 100%;
+            display: block;
+          }
+
+          .ant-skeleton-image {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1.3;
+            display: block;
+          }
+
           img {
             width: 100%;
             height: auto;

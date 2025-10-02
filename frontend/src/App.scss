@@ -33,13 +33,32 @@ html, body {
 
 // 全局 Antd 组件 z-index 设置，确保显示在 Navbar 之上
 .ant-message {
-    z-index: 2000 !important;
+    z-index: 2000;
 }
 
 .ant-notification {
-    z-index: 2000 !important;
+    z-index: 2000;
 }
 
 .ant-modal-mask, .ant-modal-wrap {
-    z-index: 1500 !important;
+    z-index: 1500;
+}
+
+// Entry 欢迎页蒙版
+.entry-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99999; // 确保最高层级，高于所有组件（包括 Tabbar、LoadingManager 等）
+    background: #f5f5f5;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+    pointer-events: all; // 确保在显示时阻止下方交互
+
+    &.fade-out {
+        opacity: 0;
+        pointer-events: none; // 淡出时允许下方交互
+    }
 }

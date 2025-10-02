@@ -11,6 +11,7 @@ import { useUserStore } from "./store";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import { message } from "antd";
 import SwitchDirection from "./components/SwitchDirection/SwitchDirection";
+import LoadingManager from "./components/LoadingManager/LoadingManager";
 
 // 懒加载页面组件统一管理
 const Lazy = {
@@ -38,6 +39,10 @@ const Lazy = {
   AdminMarket: React.lazy(() => import("./pages/Admin/Market/Market")),
   AdminForum: React.lazy(() => import("./pages/Admin/Forum/Forum")),
   PCPage: React.lazy(() => import("./pages/PCPage/PCPage")),
+  Entry: React.lazy(() => import("./components/Loading/Entry/Entry")),
+  LoadingMarket: React.lazy(() => import("./components/Loading/Market/Market")),
+  LoadingForum: React.lazy(() => import("./components/Loading/Forum/Forum")),
+  LoadingUser: React.lazy(() => import("./components/Loading/User/User")),
 };
 
 const App: React.FC = () => {
@@ -45,6 +50,24 @@ const App: React.FC = () => {
   const token = Cookies.get("auth-token");
   const [showOrientationOverlay, setShowOrientationOverlay] = useState(false);
   const [userDismissedOverlay, setUserDismissedOverlay] = useState(false);
+  const [showEntry, setShowEntry] = useState(true);
+  const [entryFadingOut, setEntryFadingOut] = useState(false);
+
+  // Entry 加载动画
+  useEffect(() => {
+    const ENTRY_DISPLAY_TIME = 1500; // Entry 显示 1.5 秒
+    const ENTRY_FADE_OUT_TIME = 500; // Entry 淡出动画 0.5 秒
+
+    const entryTimer = setTimeout(() => {
+      setEntryFadingOut(true);
+      
+      setTimeout(() => {
+        setShowEntry(false);
+      }, ENTRY_FADE_OUT_TIME);
+    }, ENTRY_DISPLAY_TIME);
+
+    return () => clearTimeout(entryTimer);
+  }, []);
 
   // 仅在移动端开启竖屏监控和提示
   useEffect(() => {
@@ -182,20 +205,42 @@ const App: React.FC = () => {
     { path: "/auth/register", element: <Lazy.Register /> },
     { path: "/user/settings/reset/:type", element: <Lazy.Reset /> },
     { path: "/user/settings/about", element: <Lazy.About /> },
-    { path: "/market", element: <Lazy.Market /> },
+    { 
+      path: "/market", 
+      element: (
+        <LoadingManager>
+          <Lazy.Market />
+        </LoadingManager>
+      ) 
+    },
     { path: "/market/:goodsId", element: <Lazy.Detail /> },
     { path: "/market/:goodsId/appeal/:goodsTitle", element: <Lazy.DetailAppeal /> },
-    { path: "/forum", element: <Lazy.Forum /> },
+    { 
+      path: "/forum", 
+      element: (
+        <LoadingManager>
+          <Lazy.Forum />
+        </LoadingManager>
+      ) 
+    },
     { path: "/forum-detail", element: <Lazy.ForumDetail /> },
     { path: "/publish/market-publish-choice", element: <Lazy.MarketPublishChoice /> },
     { path: "/publish/market-publish-ai", element: <Lazy.MarketPublish /> },
     { path: "/publish/forum-publish", element: <Lazy.ForumPublish /> },
     { path: "/publish/market-publish-basic", element: <Lazy.Template /> },
-    { path: "/user", element: <Lazy.User /> },
+    { 
+      path: "/user", 
+      element: (
+        <LoadingManager>
+          <Lazy.User />
+        </LoadingManager>
+      ) 
+    },
     { path: "/user/favorites", element: <Lazy.Favorites /> },
     { path: "/user/messages", element: <Lazy.Messages /> },
     { path: "/user/history", element: <Lazy.History /> },
-    { path: "/user/settings", element: <Lazy.Settings /> }
+    { path: "/user/settings", element: <Lazy.Settings /> },
+    { path: "test", element: <Lazy.LoadingUser /> }
   ], []);
 
   const webRoutes = useMemo(() => [
@@ -231,7 +276,14 @@ const App: React.FC = () => {
 
   return (
     <div className="App">
-      <React.Suspense fallback={<div>加载中......请稍候......</div>}>
+      {/* Entry 欢迎页 - 首次加载 */}
+      {showEntry && (
+        <div className={`entry-overlay ${entryFadingOut ? 'fade-out' : ''}`}>
+          <Lazy.Entry />
+        </div>
+      )}
+
+      <React.Suspense fallback={<div style={{ display: 'none' }}>加载中...</div>}>
         <RouterProvider router={isMobile ? mobileRouter : webRouter} />
       </React.Suspense>
       {/* 横屏提示蒙版 - 仅在移动端横屏时显示 */}

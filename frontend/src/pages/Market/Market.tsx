@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useMemo } from "react";
-import { FloatButton, Carousel } from "antd";
+import { FloatButton, Carousel, Image, Skeleton } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import "./Market.scss";
 import Tabbar from "../../components/Tabbar/Tabbar";
@@ -474,7 +474,7 @@ const Market = () => {
               }}
             >
               <div className="commodity-img">
-                <img
+                <Image
                   src={
                     item.images[0]
                       ? `${
@@ -483,7 +483,13 @@ const Market = () => {
                         }${item.images[0]}`
                       : takePlace
                   }
-                  alt="takePlace"
+                  alt="商品图片"
+                  preview={false}
+                  placeholder={
+                    <div style={{ width: '100%', aspectRatio: '1.3' }}>
+                      <Skeleton.Input active style={{ width: '100%', height: '100%' }} />
+                    </div>
+                  }
                 />
               </div>
               <div className="commodity-title">{item.title}</div>

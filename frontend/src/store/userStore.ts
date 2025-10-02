@@ -57,6 +57,10 @@ interface UserState {
   isAuthenticated: boolean;
   token: string | null;
   isAdmin: boolean;
+  
+  // ========== 新增：加载状态 ==========
+  isUserLoading: boolean;
+  setUserLoading: (loading: boolean) => void;
 
   // fetchByQQ: (qq: string) => Promise<void>;
   fetchUserProfile: () => Promise<void>;
@@ -102,6 +106,13 @@ const useUserStore = create<UserState>()(
       users: [],
       currentUser: null,
       // searchedUser: null,
+      
+      // ========== 新增：加载状态初始值 ==========
+      isUserLoading: false,
+      
+      // ========== 新增：设置加载状态 ==========
+      setUserLoading: (loading) => set({ isUserLoading: loading }),
+      
       login: async (identifier: string, password: string) => {
         try {
           const res = await api.post("/api/auth/login", {
@@ -219,6 +230,9 @@ const useUserStore = create<UserState>()(
 
       // 一般用户获取自己的信息、管理员获取所有用户信息
       fetchUserProfile: async () => {
+        // ========== 新增：开始加载 ==========
+        set({ isUserLoading: true });
+        
         try {
           const res = await api.get("/api/users/profile");
           const { isAdmin } = get();
@@ -251,6 +265,9 @@ const useUserStore = create<UserState>()(
           }
         } catch (error: any) {
           throw error;
+        } finally {
+          // ========== 新增：加载完成 ==========
+          set({ isUserLoading: false });
         }
       },
 

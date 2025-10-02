@@ -230,7 +230,7 @@ const User = () => {
           <img src={right} alt="右箭头" className="right-icon" />
         </div>
       </div>
-      <Tabbar initialIndex={3} />
+      <Tabbar initialIndex={2} />
     </div>
   );
 };

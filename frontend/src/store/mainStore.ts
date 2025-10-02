@@ -76,6 +76,13 @@ interface MainState {
   goods: Goods[];
   posts: Post[];
   filters: Filters;
+  
+  // ========== 新增：加载状态 ==========
+  isMarketLoading: boolean;
+  isForumLoading: boolean;
+  setMarketLoading: (loading: boolean) => void;
+  setForumLoading: (loading: boolean) => void;
+  
   clear: () => void;
   fetchGoods: () => Promise<void>;
   setFilters: (newFilters: Partial<Filters>) => void;
@@ -152,6 +159,14 @@ const useMainStore = create<MainState>()(
         priceRange: [0, 1000000],
         campus_id: null,
       },
+      
+      // ========== 新增：加载状态初始值 ==========
+      isMarketLoading: false,
+      isForumLoading: false,
+      
+      // ========== 新增：设置加载状态 ==========
+      setMarketLoading: (loading) => set({ isMarketLoading: loading }),
+      setForumLoading: (loading) => set({ isForumLoading: loading }),
 
       reset: () => {
         set({
@@ -170,6 +185,9 @@ const useMainStore = create<MainState>()(
       },
 
       getForumPosts: async () => {
+        // ========== 新增：开始加载 ==========
+        set({ isForumLoading: true });
+        
         try {
           const response = await api.get("/api/forum/posts", {
             params: {
@@ -193,6 +211,9 @@ const useMainStore = create<MainState>()(
           } else {
             console.error("Error fetching posts:", error);
           }
+        } finally {
+          // ========== 新增：加载完成 ==========
+          set({ isForumLoading: false });
         }
       },
       updateforumPosts: async () => {
@@ -348,6 +369,9 @@ const useMainStore = create<MainState>()(
       },
 
       fetchGoods: async () => {
+        // ========== 新增：开始加载 ==========
+        set({ isMarketLoading: true });
+        
         try {
           const response = await api.get("/api/goods", {
             page: get().marketPage,
@@ -378,6 +402,9 @@ const useMainStore = create<MainState>()(
           } else {
             console.error("Error fetching posts:", error);
           }
+        } finally {
+          // ========== 新增：加载完成 ==========
+          set({ isMarketLoading: false });
         }
       },
 
