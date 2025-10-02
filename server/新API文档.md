@@ -750,14 +750,14 @@ GET /api/users/records
 
 基本信息
 
-- **路径**: `/api/goods/:post_id`
+- **路径**: `/api/goods/:goods_id`
 - **方法**: `DELETE`
 - **描述**: 用户软删除商品，将商品状态标记为已删除
 
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
 |-------|------|------|------|
-| post_id | String | 是 | 商品 ID，作为 URL 路径参数提供 |
+| goods_id | String | 是 | 商品 ID，作为 URL 路径参数提供 |
 
 请求头
 
@@ -938,14 +938,14 @@ GET /api/goods?keyword=电脑&campus_id=1&min_price=1000&max_price=5000&page=1&l
 
 基本信息
 
-- **路径**: `/api/goods/:post_id`
+- **路径**: `/api/goods/:goods_id`
 - **方法**: `PUT`
 - **描述**: 更新指定商品的信息，包括文本信息和图片
 
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
 |-------|------|------|------|
-| post_id | String | 是 | 商品 ID，作为 URL 路径参数提供 |
+| goods_id | String | 是 | 商品 ID，作为 URL 路径参数提供 |
 | title | String | 是 | 商品标题 |
 | content | String | 否 | 商品描述内容 |
 | price | Number | 是 | 商品价格 |
@@ -2358,15 +2358,15 @@ Authorization: Bearer {token}
 
 基本信息
 
-- **路径**: `/api/history/goods/:post_id`
+- **路径**: `/api/history/goods/:goods_id`
 - **方法**: `PUT`
 - **描述**: 修改指定商品的交易状态
 
 请求参数
 
-| 参数名  | 类型   | 必选 | 描述                  |
-| ------- | ------ | ---- | --------------------- |
-| post_id | Number | 是   | 商品 ID (URL 参数)    |
+| 参数名   | 类型   | 必选 | 描述                  |
+| -------- | ------ | ---- | --------------------- |
+| goods_id | Number | 是   | 商品 ID (URL 参数)    |
 | status  | String | 是   | 商品状态 (请求体参数) |
 
 请求头
@@ -2441,83 +2441,6 @@ Content-Type: application/json
 - 只能修改自己发布的商品
 - 常见状态值包括：active（活跃）、sold（已售出）、reserved（已预订）等
 
-### 删除帖子
-
-基本信息
-
-- **路径**: `/api/history/posts/:post_id`
-- **方法**: `DELETE`
-- **描述**: 删除指定的校园墙帖子（软删除，将状态设置为 deleted）
-
-请求参数
-
-| 参数名  | 类型   | 必选 | 描述               |
-| ------- | ------ | ---- | ------------------ |
-| post_id | Number | 是   | 帖子 ID (URL 参数) |
-
-请求头
-
-```
-Authorization: Bearer {token}
-```
-
-响应参数
-
-| 状态码 | 内容类型         | 描述                       |
-| ------ | ---------------- | -------------------------- |
-| 200    | application/json | 删除成功                   |
-| 401    | application/json | 未提供 Token 或 Token 无效 |
-| 403    | application/json | 无权删除此帖子             |
-| 500    | application/json | 服务器错误                 |
-
-响应示例
-
-- 成功响应 (状态码：200)
-
-  ```json
-  {
-    "message": "帖子已删除"
-  }
-  ```
-
-- Token 未提供 (状态码：401)
-
-  ```json
-  {
-    "message": "未提供 Token"
-  }
-  ```
-
-- Token 无效 (状态码：401)
-
-  ```json
-  {
-    "message": "无效的 Token"
-  }
-  ```
-
-- 无权限 (状态码：403)
-
-  ```json
-  {
-    "message": "无权删除此帖子"
-  }
-  ```
-
-- 服务器错误 (状态码：500)
-
-  ```json
-  {
-    "message": "服务器错误"
-  }
-  ```
-
-**备注**
-
-- 用户必须登录才能删除帖子
-- 只能删除自己发布的帖子
-- 采用软删除方式，将帖子状态设置为 'deleted'，不会物理删除数据
-- 删除后的帖子不会在查询发布历史接口中返回
 
 ## favoritesRoute
 
@@ -4088,5 +4011,58 @@ duration: 7
 - 该接口仅限管理员使用
 - 会删除所有过期状态的广告和相关图片文件
 - 返回删除的广告数量
+
+---
+
+### 获取广告统计信息
+
+基本信息
+
+- 路径: `/api/advertisements/stats`
+- 方法: `GET`
+- 描述: 获取所有广告的标题和点击数统计（仅限管理员）
+
+请求头部
+| 参数名        | 类型   | 必选 | 描述                       |
+| ------------- | ------ | ---- | -------------------------- |
+| Authorization | String | 是   | Bearer token（管理员权限） |
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                        |
+| ------ | ---------------- | --------------------------- |
+| 200    | application/json | 获取成功                    |
+| 401    | application/json | 未提供 Token                |
+| 403    | application/json | 权限不足                    |
+| 500    | application/json | 服务器错误                  |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  [
+    {
+      "id": 1,
+      "title": "春季促销活动",
+      "clicks": 150
+    },
+    {
+      "id": 2,
+      "title": "新品发布会",
+      "clicks": 89
+    },
+    {
+      "id": 3,
+      "title": "限时优惠",
+      "clicks": 45
+    }
+  ]
+  ```
+
+**备注**
+- 该接口仅限管理员使用
+- 返回所有广告的ID、标题和点击数
+- 结果按点击数从高到低排序
 
 ---

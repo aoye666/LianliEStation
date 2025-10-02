@@ -11,8 +11,8 @@ dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY;
 
 // 软删除商品
-router.delete("/:post_id", async (req, res) => {
-  const { post_id } = req.params;
+router.delete("/:goods_id", async (req, res) => {
+  const { goods_id } = req.params;
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
@@ -24,18 +24,18 @@ router.delete("/:post_id", async (req, res) => {
     const author_id = decoded.user_id;
 
     // 确保必需的参数存在
-    if (!post_id || !author_id) {
+    if (!goods_id || !author_id) {
       return res.status(400).json({ message: "缺少必要参数" });
     }
 
     // 查找商品并验证用户是否是作者
-    const [rows] = await db.query("SELECT * FROM goods WHERE id = ? AND author_id = ?", [post_id, author_id]);
+    const [rows] = await db.query("SELECT * FROM goods WHERE id = ? AND author_id = ?", [goods_id, author_id]);
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "商品未找到或用户无权删除" });
     }
 
-    await db.query("UPDATE goods SET status = 'deleted' WHERE id = ?", [post_id]);
+    await db.query("UPDATE goods SET status = 'deleted' WHERE id = ?", [goods_id]);
     return res.status(200).json({ message: "商品已标记为删除" });
   } catch (err) {
     console.error(err);
@@ -215,8 +215,8 @@ router.get("/", async (req, res) => {
 });
 
 // 修改商品
-router.put("/:post_id", upload.array("images", 3), async (req, res) => {
-  const { post_id } = req.params;
+router.put("/:goods_id", upload.array("images", 3), async (req, res) => {
+  const { goods_id } = req.params;
   const { title, content, price, campus_id, status, goods_type, tag } = req.body;
   const files = req.files;
 
@@ -260,10 +260,10 @@ router.put("/:post_id", upload.array("images", 3), async (req, res) => {
 
     if (isAdmin) {
       query = "SELECT * FROM goods WHERE id = ? AND status != 'deleted'";
-      queryParams = [post_id];
+      queryParams = [goods_id];
     } else {
       query = "SELECT * FROM goods WHERE id = ? AND author_id = ? AND status != 'deleted'";
-      queryParams = [post_id, author_id];
+      queryParams = [goods_id, author_id];
     }
 
     const [rows] = await db.query(query, queryParams);
@@ -280,16 +280,16 @@ router.put("/:post_id", upload.array("images", 3), async (req, res) => {
     // 只在有新图片上传时才处理图片
     if (files && files.length > 0) {
       // 删除旧图片
-      const [oldImages] = await db.query("SELECT image_url FROM goods_images WHERE goods_id = ?", [post_id]);
+      const [oldImages] = await db.query("SELECT image_url FROM goods_images WHERE goods_id = ?", [goods_id]);
       for (const img of oldImages) {
         const oldFilePath = "public" + img.image_url;
         await fs.promises.unlink(oldFilePath).catch(() => {});
       }
-      await db.query("DELETE FROM goods_images WHERE goods_id = ?", [post_id]);
+      await db.query("DELETE FROM goods_images WHERE goods_id = ?", [goods_id]);
 
       // 插入新图片
       const imageUrls = files.map((file) => `/uploads/${file.filename}`);
-      const imagePromises = imageUrls.map((url) => db.query("INSERT INTO goods_images (goods_id, image_url) VALUES (?, ?)", [post_id, url]));
+      const imagePromises = imageUrls.map((url) => db.query("INSERT INTO goods_images (goods_id, image_url) VALUES (?, ?)", [goods_id, url]));
       await Promise.all(imagePromises);
     }
 
@@ -298,7 +298,7 @@ router.put("/:post_id", upload.array("images", 3), async (req, res) => {
       UPDATE goods
       SET title = ?, content = ?, price = ?, campus_id = ?, status = ?, goods_type = ?, tag = ? WHERE id = ?`;
 
-    await db.query(updateQuery, [title, content, price, campus_id, status, goods_type, tag, post_id]);
+    await db.query(updateQuery, [title, content, price, campus_id, status, goods_type, tag, goods_id]);
 
     // 返回成功信息
     res.status(200).json({ message: "商品更新成功" });
@@ -317,8 +317,8 @@ router.put("/:post_id", upload.array("images", 3), async (req, res) => {
 });
 
 // 修改点赞数和投诉数
-router.put("/:action/:post_id", async (req, res) => {
-  const { post_id, action } = req.params;
+router.put("/:action/:goods_id", async (req, res) => {
+  const { goods_id, action } = req.params;
   const { value } = req.body;
   const target_type = "goods";
 
@@ -353,7 +353,7 @@ router.put("/:action/:post_id", async (req, res) => {
 
     try {
       // 检查商品是否存在
-      const [targetCheck] = await connection.query(`SELECT id FROM goods WHERE id = ? AND status != 'deleted'`, [post_id]);
+      const [targetCheck] = await connection.query(`SELECT id FROM goods WHERE id = ? AND status != 'deleted'`, [goods_id]);
 
       if (targetCheck.length === 0) {
         await connection.rollback();
@@ -369,11 +369,11 @@ router.put("/:action/:post_id", async (req, res) => {
       if (valueChange === 1) {
         // 添加点赞/投诉
         try {
-          const [insertResult] = await connection.query(`INSERT INTO ${targetTable} (user_id, target_id, target_type) VALUES (?, ?, ?)`, [user_id, post_id, target_type]);
+          const [insertResult] = await connection.query(`INSERT INTO ${targetTable} (user_id, target_id, target_type) VALUES (?, ?, ?)`, [user_id, goods_id, target_type]);
 
           if (insertResult.affectedRows > 0) {
             const columnName = action === "like" ? "likes" : "complaints";
-            await connection.query(`UPDATE goods SET ${columnName} = ${columnName} + 1 WHERE id = ?`, [post_id]);
+            await connection.query(`UPDATE goods SET ${columnName} = ${columnName} + 1 WHERE id = ?`, [goods_id]);
 
             message = action === "like" ? "点赞成功" : "投诉成功";
           } else {
@@ -394,11 +394,11 @@ router.put("/:action/:post_id", async (req, res) => {
         }
       } else if (valueChange === -1) {
         // 取消点赞/投诉
-        const [deleteResult] = await connection.query(`DELETE FROM ${targetTable} WHERE user_id = ? AND target_id = ? AND target_type = ?`, [user_id, post_id, target_type]);
+        const [deleteResult] = await connection.query(`DELETE FROM ${targetTable} WHERE user_id = ? AND target_id = ? AND target_type = ?`, [user_id, goods_id, target_type]);
 
         if (deleteResult.affectedRows > 0) {
           const columnName = action === "like" ? "likes" : "complaints";
-          await connection.query(`UPDATE goods SET ${columnName} = GREATEST(${columnName} - 1, 0) WHERE id = ?`, [post_id]);
+          await connection.query(`UPDATE goods SET ${columnName} = GREATEST(${columnName} - 1, 0) WHERE id = ?`, [goods_id]);
 
           message = action === "like" ? "取消点赞成功" : "取消投诉成功";
         } else {

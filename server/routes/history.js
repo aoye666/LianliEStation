@@ -83,7 +83,7 @@ router.get("/goods", async (req, res) => {
 });
 
 // 修改交易状态
-router.put("/goods/:post_id", async (req, res) => {
+router.put("/goods/:goods_id", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
     return res.status(401).json({ message: "未提供 Token" });
@@ -92,17 +92,17 @@ router.put("/goods/:post_id", async (req, res) => {
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
     const userId = decoded.user_id;
-    const postId = req.params.post_id;
+    const goodsId = req.params.goods_id;
 
     // 检查用户是否有权限修改该商品
-    const [checkRows] = await db.query("SELECT * FROM goods WHERE id = ? AND author_id = ?", [postId, userId]);
+    const [checkRows] = await db.query("SELECT * FROM goods WHERE id = ? AND author_id = ?", [goodsId, userId]);
     if (checkRows.length === 0) {
       return res.status(403).json({ message: "无权修改此商品" });
     }
 
     // 更新商品状态
     const { status } = req.body;
-    await db.query("UPDATE goods SET status = ? WHERE id = ?", [status, postId]);
+    await db.query("UPDATE goods SET status = ? WHERE id = ?", [status, goodsId]);
 
     res.status(200).json({ message: "商品状态已更新" });
   } catch (err) {
@@ -115,34 +115,34 @@ router.put("/goods/:post_id", async (req, res) => {
 });
 
 // 删除帖子
-router.delete("/posts/:post_id", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) {
-    return res.status(401).json({ message: "未提供 Token" });
-  }
+// router.delete("/posts/:post_id", async (req, res) => {
+//   const token = req.headers.authorization?.split(" ")[1];
+//   if (!token) {
+//     return res.status(401).json({ message: "未提供 Token" });
+//   }
 
-  try {
-    const decoded = jwt.verify(token, SECRET_KEY);
-    const userId = decoded.user_id;
-    const postId = req.params.post_id;
+//   try {
+//     const decoded = jwt.verify(token, SECRET_KEY);
+//     const userId = decoded.user_id;
+//     const postId = req.params.post_id;
 
-    // 检查用户是否有权限删除该帖子
-    const [checkRows] = await db.query("SELECT * FROM posts WHERE id = ? AND author_id = ?", [postId, userId]);
-    if (checkRows.length === 0) {
-      return res.status(403).json({ message: "无权删除此帖子" });
-    }
+//     // 检查用户是否有权限删除该帖子
+//     const [checkRows] = await db.query("SELECT * FROM posts WHERE id = ? AND author_id = ?", [postId, userId]);
+//     if (checkRows.length === 0) {
+//       return res.status(403).json({ message: "无权删除此帖子" });
+//     }
 
-    // 更新帖子状态为已删除
-    await db.query("UPDATE posts SET status = 'deleted' WHERE id = ?", [postId]);
+//     // 更新帖子状态为已删除
+//     await db.query("UPDATE posts SET status = 'deleted' WHERE id = ?", [postId]);
 
-    res.status(200).json({ message: "帖子已删除" });
-  } catch (err) {
-    console.error(err);
-    if (err.name === "JsonWebTokenError") {
-      return res.status(401).json({ message: "无效的 Token" });
-    }
-    res.status(500).json({ message: "服务器错误" });
-  }
-});
+//     res.status(200).json({ message: "帖子已删除" });
+//   } catch (err) {
+//     console.error(err);
+//     if (err.name === "JsonWebTokenError") {
+//       return res.status(401).json({ message: "无效的 Token" });
+//     }
+//     res.status(500).json({ message: "服务器错误" });
+//   }
+// });
 
 export default router;
