@@ -3,7 +3,7 @@ import './ForumDetail.scss'
 import Navbar from '../../../components/Navbar/Navbar';
 import { useMainStore,useRecordStore } from '../../../store';
 import { useLocation } from 'react-router-dom';
-import { Image,Card,Avatar, Button} from 'antd';
+import { Image,Card,Avatar, Button, message} from 'antd';
 import { Carousel } from 'antd';
 import dayjs from 'dayjs';
 import Liked from '../../../assets/liked.svg';
@@ -108,7 +108,9 @@ const ForumDetail = () => {
 
     const share = () => {
         console.log('share')
-        setShowShare(true)
+        // setShowShare(true)
+        navigator.clipboard.writeText(window.location.href);
+        message.success('链接已复制到剪贴板');
     }
 
     return (
@@ -222,13 +224,13 @@ const ForumDetail = () => {
                 }
             </div>
 
-            <div className='shareBar' ref={shareRef}>
+            {/* <div className='shareBar' ref={shareRef}>
                 {
                     showShare && (
                     <ShareBar></ShareBar>
                     )
                 }
-            </div>
+            </div> */}
 
             <div className="function">
                 <div className="comment" onClick={comment}>

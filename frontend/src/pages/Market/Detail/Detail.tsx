@@ -11,6 +11,8 @@ import like_true from "../../../assets/like-true.svg";
 import like_false from "../../../assets/like-false.svg";
 import dislike_true from "../../../assets/dislike-true.svg";
 import dislike_false from "../../../assets/dislike-false.svg";
+import star from "../../../assets/star.svg";
+import stared from "../../../assets/stared.svg";
 import drop from "../../../assets/drop-black.svg";
 import share from "../../../assets/share-black.svg";
 import left from "../../../assets/left-black.svg";
@@ -39,7 +41,7 @@ interface Goods {
 const Detail = () => {
   const { goods, changeGoodsResponse, updateGoodsItem } =
     useMainStore();
-  const { currentUser, updateLikesComplaints } = useUserStore();
+  const { currentUser, updateLikesComplaints,fetchUserProfile } = useUserStore();
 
   const param = useParams();
   const navigate = useNavigate();
@@ -83,6 +85,20 @@ const Detail = () => {
       } else {
         setIsDisliked(false);
         console.log("未举报");
+      }
+
+      if (
+        currentUser.favorites.goods.find((item) => {
+          return (
+            item.id === currentGoods.id
+          );
+        })
+      ){
+        setIsStared(true);
+        console.log("已收藏");
+      } else {
+        setIsStared(false);
+        console.log("未收藏");
       }
     }
 
@@ -136,8 +152,7 @@ const Detail = () => {
   useEffect(() => {
     fetchData();
     handleIsRecorded();
-    // console.log(currentGoods);
-    // console.log(currentUser);
+    console.log(currentUser);
   }, [currentUser, currentGoods, isLiked, isDisliked,  goods]);
 
   // 处理滑动事件
@@ -189,6 +204,11 @@ const Detail = () => {
       message.error("未获取到当前用户QQ号");
     }
   };
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    message.success("链接已复制到剪贴板");
+  }
 
   // 处理点赞
   const handleLike = async () => {
@@ -262,7 +282,7 @@ const Detail = () => {
           className="navbar-icon"
           src={share}
           alt="分享"
-          onClick={() => message.info("分享功能正在开发，暂不支持")}
+          onClick={handleShare}
         />
       </div>
       <div
@@ -368,7 +388,7 @@ const Detail = () => {
       </div>
       <div className="detail-btn">
         <div className="star-btn" onClick={handleStar}>
-          <img className="starBtn-icon" src={stars} alt="收藏" />
+          <img className="starBtn-icon" src={isStared ? stared : star} alt="收藏" />
           <div className="starBtn-text">加入收藏</div>
         </div>
         <div className="contact-btn" onClick={handleCopy}>

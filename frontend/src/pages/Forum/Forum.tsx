@@ -1,10 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import {
-  Button,
-  Col,
-  Row,
   Card,
-  Image,
   Tabs,
   TabsProps,
   FloatButton,
@@ -15,7 +11,6 @@ import { useMainStore } from "../../store";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
 import Tabbar from "../../components/Tabbar/Tabbar";
-import publish from "../../assets/publish-white.svg";
 import Like from '../../assets/like.svg';
 import { PlusOutlined } from "@ant-design/icons";
 
@@ -25,6 +20,9 @@ const Forum = () => {
   const navigate = useNavigate();
   const mainStore = useMainStore();
   const { forums } = mainStore;
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+
   const nav: TabsProps["items"] = [
     {
       key: "1",
@@ -39,6 +37,14 @@ const Forum = () => {
   useEffect(() => {
     mainStore.getForumPosts();
   }, []);
+
+  useEffect(() => {
+    if (bodyRef.current) {
+      if(bodyRef.current.scrollTop + bodyRef.current.clientHeight >= bodyRef.current.scrollHeight - 5){
+        mainStore.updateforumPosts();
+      }
+    }
+  }, [forums]);
 
   return (
     <div className="forum-container">
@@ -69,7 +75,7 @@ const Forum = () => {
           </Row>
         </div> */}
 
-        <div className="posts">
+        <div className="posts" ref={bodyRef}>
           {forums.map((post, index) => (
                 <Card className="Card" title={post.title} key={index} onClick={() => navigate(`/forum-detail?id=${post.id}`)}>
                   <div className="post-content">

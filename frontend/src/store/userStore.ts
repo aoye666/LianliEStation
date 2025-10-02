@@ -13,6 +13,11 @@ interface RecordItem {
   targetType: string; // "goods" 或 "post"
 }
 
+interface Favorite {
+  goods:{id:number}[],
+  posts:{id:number}[],
+}
+
 // 一般用户
 interface User {
   nickname: string;
@@ -27,7 +32,7 @@ interface User {
   avatar: string | undefined;
   likes: RecordItem[];
   complaints: RecordItem[];
-  favorites: []
+  favorites: Favorite;
 }
 
 // 管理员获取所有用户
@@ -224,12 +229,10 @@ const useUserStore = create<UserState>()(
             
             if (userData) {
               // 提取 likes 和 complaints
-              const { records, ...userInfo } = userData;
+              const { records, favorites, ...userInfo } = userData;
               const likes = records?.likes || [];
               const complaints = records?.complaints || [];
-              const favorites = records?.favorites || [];
 
-              console.log("用户信息:", userData);
               
               // 分别设置用户信息和记录
               set({ 

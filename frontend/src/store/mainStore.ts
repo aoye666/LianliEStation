@@ -88,6 +88,7 @@ interface MainState {
   setFilters: (newFilters: Partial<Filters>) => void;
   updateGoods: () => Promise<void>;
   getForumPosts: () => Promise<void>;
+  updateforumPosts: () => Promise<void>;
   publishForumPost: (
     title: string,
     content: string,
@@ -181,6 +182,7 @@ const useMainStore = create<MainState>()(
           const response = await api.get("/api/forum/posts", {
             params: {
               with_comments: true,
+              limit: 16,
             },
           });
           if (response?.status === 200 && response.data) {
@@ -200,6 +202,35 @@ const useMainStore = create<MainState>()(
             console.error("Error fetching posts:", error);
           }
         }
+      },
+      updateforumPosts: async () => {
+        try {
+          const response = await api.get("/api/forum/posts", {
+            params: {
+              with_comments: true,
+              limit: 16,
+              page: get().forumPage,
+            },
+          });
+          if (response?.status === 200 && response.data) {
+            const data = response.data.posts;
+            set((state) => ({
+              forums: [...data], // 更新 goods 状态
+              forumPage: state.forumPage + 1,
+            }));
+          } else {
+            // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
+            console.log("No goods available or unexpected response status");
+          }
+        } catch (error) {
+          // 捕获请求失败的错误（如 404 或网络问题）
+          if (error instanceof Error) {
+            console.error("Error fetching posts:", error.message);
+          } else {
+            console.error("Error fetching posts:", error);
+          }
+        }
+
       },
       publishForumPost: async (
         title: string,
