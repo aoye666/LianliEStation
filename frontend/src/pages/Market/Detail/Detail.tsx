@@ -153,7 +153,7 @@ const Detail = () => {
     fetchData();
     handleIsRecorded();
     console.log(currentUser);
-  }, [currentUser, currentGoods, isLiked, isDisliked,  goods]);
+  }, [currentUser, currentGoods, isLiked, isDisliked,goods]);
 
   // 处理滑动事件
   const handleTouchStart = (e: any) => {
@@ -276,7 +276,7 @@ const Detail = () => {
           className="navbar-icon"
           src={left}
           alt="返回"
-          onClick={() => navigate("/market")}
+          onClick={() => window.location.href = "/market"}
         />
         <img
           className="navbar-icon"

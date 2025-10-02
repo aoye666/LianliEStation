@@ -25,12 +25,6 @@ interface Goods {
   author_credit: number;
 }
 
-interface Post {
-  id: number;
-  title: string;
-  content: string | null;
-}
-
 interface Filters {
   searchTerm: string | null;
   priceRange: [number, number];
@@ -60,7 +54,7 @@ interface Comment {
   replies: Reply[];
 }
 
-interface Forum {
+interface Post {
   id: number;
   title: string;
   content: string;
@@ -81,7 +75,6 @@ interface MainState {
   forumPage: number;
   goods: Goods[];
   posts: Post[];
-  forums: Forum[];
   filters: Filters;
   clear: () => void;
   fetchGoods: () => Promise<void>;
@@ -165,7 +158,6 @@ const useMainStore = create<MainState>()(
           marketPage: 1,
           forumPage: 1,
           goods: [],
-          forums: [],
           posts: [],
           filters: {
             searchTerm: "",
@@ -188,7 +180,7 @@ const useMainStore = create<MainState>()(
           if (response?.status === 200 && response.data) {
             const data = response.data.posts;
             set((state) => ({
-              forums: [...data], // 更新 goods 状态
+              posts: [...data], // 更新 goods 状态
             }));
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
@@ -215,7 +207,7 @@ const useMainStore = create<MainState>()(
           if (response?.status === 200 && response.data) {
             const data = response.data.posts;
             set((state) => ({
-              forums: [...data], // 更新 goods 状态
+              posts: [...data], // 更新 goods 状态
               forumPage: state.forumPage + 1,
             }));
           } else {

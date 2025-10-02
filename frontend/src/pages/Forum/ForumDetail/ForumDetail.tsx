@@ -35,7 +35,7 @@ const ForumDetail = () => {
         mainStore.getForumPosts();
       }, []);
 
-    const forum = mainStore.forums.find((forum)=> forum.id == (forumId?parseInt(forumId):null))
+    const forum = mainStore.posts.find((forum)=> forum.id == (forumId?parseInt(forumId):null))
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {

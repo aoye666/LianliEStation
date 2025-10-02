@@ -19,7 +19,7 @@ const { Meta } = Card;
 const Forum = () => {
   const navigate = useNavigate();
   const mainStore = useMainStore();
-  const { forums } = mainStore;
+  const { posts } = mainStore;
   const bodyRef = useRef<HTMLDivElement>(null);
 
 
@@ -36,15 +36,17 @@ const Forum = () => {
 
   useEffect(() => {
     mainStore.getForumPosts();
+    console.log(posts)
   }, []);
 
-  useEffect(() => {
-    if (bodyRef.current) {
-      if(bodyRef.current.scrollTop + bodyRef.current.clientHeight >= bodyRef.current.scrollHeight - 5){
-        mainStore.updateforumPosts();
-      }
-    }
-  }, [forums]);
+  // useEffect(() => {
+  //   if (bodyRef.current) {
+  //     if(bodyRef.current.scrollTop + bodyRef.current.clientHeight >= bodyRef.current.scrollHeight - 5){
+  //       mainStore.updateforumPosts();
+  //     }
+  //   }
+  //   console.log(posts)
+  // }, [posts]);
 
   return (
     <div className="forum-container">
@@ -76,7 +78,7 @@ const Forum = () => {
         </div> */}
 
         <div className="posts" ref={bodyRef}>
-          {forums.map((post, index) => (
+          {posts.map((post, index) => (
                 <Card className="Card" title={post.title} key={index} onClick={() => navigate(`/forum-detail?id=${post.id}`)}>
                   <div className="post-content">
                     {post.content}
