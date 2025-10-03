@@ -126,7 +126,7 @@ interface MainState {
     type: string,
     images: File[]
   ) => Promise<boolean>;
-  updateGoodsItem: (action: string, post_id: number, value: number) => void;
+  updateGoodsItem: (action: string, goods_id: number, value: number) => void;
 }
 
 const useMainStore = create<MainState>()(
@@ -549,10 +549,10 @@ const useMainStore = create<MainState>()(
         }
       },
 
-      updateGoodsItem: (action: string, post_id: number, value: number) => {
+      updateGoodsItem: (action: string, goods_id: number, value: number) => {
         const goods = get().goods;
-        const newGoodsItem = goods.filter((item) => item.id === post_id);
-        const newGoods: Goods[] = goods.filter((item) => item.id !== post_id);
+        const newGoodsItem = goods.filter((item) => item.id === goods_id);
+        const newGoods: Goods[] = goods.filter((item) => item.id !== goods_id);
         if (value === 1) {
           if (action === "like") {
             newGoodsItem[0].likes += 1;

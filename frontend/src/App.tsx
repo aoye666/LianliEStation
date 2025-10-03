@@ -200,7 +200,7 @@ const App: React.FC = () => {
 
   // 路由表抽离为常量
   const mobileRoutes = useMemo(() => [
-    { path: "*", element: <Navigate to="/auth/login" replace /> },
+    { path: "*", element: <Navigate to="/market" replace /> },
     { path: "/auth/login", element: <Lazy.Login /> },
     { path: "/auth/register", element: <Lazy.Register /> },
     { path: "/user/settings/reset/:type", element: <Lazy.Reset /> },

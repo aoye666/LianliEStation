@@ -6,12 +6,15 @@ import type { TabsProps } from "antd/lib/tabs"
 import takePlace from "../../../assets/takePlace.png"
 import background1 from "../../../assets/background1.jpg"
 import background2 from "../../../assets/background2.jpg"
+import NoticeLogin from "../../../components/NoticeLogin/NoticeLogin"
+import { useUserStore } from "../../../store"
 import "./Favorites.scss"
 
 type checkBox={[number:number]:boolean}
 
 const Favorites: React.FC = () => {
   const { favoritesGoods,favoritePosts, getFavorites, removeFavoriteGoods,removeFavoritePost } = useRecordStore()
+  const { isAuthenticated } = useUserStore()
   const [checked, setChecked] = useState<checkBox>({})
   const [isVisible, setIsVisible] = useState(false)
   const [isPosts, setIsPosts] = useState(false)
@@ -56,6 +59,7 @@ const handleOnDelete = async () => {
 
   return (
     <div className="favorites-container">
+      {!isAuthenticated && <NoticeLogin />}
       <div className="header">
         <Navbar title="收藏" backActive={true} backPath="/user" />
       </div>

@@ -8,12 +8,17 @@ import about from "../../../assets/about-black.svg"
 
 const Settings = () => {
   const navigate = useNavigate();
-  // 调用 useUserStore 来获取 logout 方法
+  // 调用 useUserStore 来获取 logout 方法和认证状态
   const logout = useUserStore((state) => state.logout);
   const currentUser = useUserStore((state) => state.currentUser);
+  const isAuthenticated = useUserStore((state) => state.isAuthenticated);
 
   const handleLogout = () => {
     logout();
+    navigate("/auth/login");
+  }
+  
+  const handleLogin = () => {
     navigate("/auth/login");
   }
 
@@ -55,12 +60,18 @@ const Settings = () => {
         <div className="settings-item" style={{ marginTop: "3px" }} onClick={() => navigate('/user/settings/about')}>
           <div className="item-text">关于连理e站</div><img src={about} alt="详情" className="right-icon"></img>
         </div>
-      <div className="logout-container" onClick={handleLogout}>
-        <div className="logout-icon">
-          <img src={logoutIcon} alt="退出"></img>
+      {isAuthenticated ? (
+        <div className="logout-container" onClick={handleLogout}>
+          <div className="logout-icon">
+            <img src={logoutIcon} alt="退出"></img>
+          </div>
+          <div className="logout-text">退出当前账号</div>
         </div>
-        <div className="logout-text">退出当前账号</div>
-      </div>
+      ) : (
+        <div className="login-container" onClick={handleLogin}>
+          <div className="login-text">立即登录</div>
+        </div>
+      )}
     </div>
   );
 };

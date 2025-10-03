@@ -195,15 +195,23 @@ const User = () => {
           <img src={avatarFile} alt="用户头像" />
         </div>
         <div className="user-text">
-          <div className="user-name">
-            昵称：{currentUser?.nickname || "游客"}
-          </div>
-          <div className="user-credit">
-            信誉：{currentUser?.credit || "登陆后可用"}
-          </div>
-          <div className="user-email">
-            邮箱：{currentUser?.email || "登陆后可用"}
-          </div>
+          {isAuthenticated ? (
+            <>
+              <div className="user-name">
+                昵称：{currentUser?.nickname || "游客"}
+              </div>
+              <div className="user-credit">
+                信誉：{currentUser?.credit || "登陆后可用"}
+              </div>
+              <div className="user-email">
+                邮箱：{currentUser?.email || "登陆后可用"}
+              </div>
+            </>
+          ) : (
+            <div className="user-login-prompt" onClick={() => navigate("/auth/login")}>
+              登录 / 注册
+            </div>
+          )}
         </div>
       </div>
       <div className="user-settings">
