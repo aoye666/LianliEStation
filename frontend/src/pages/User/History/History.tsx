@@ -1,9 +1,10 @@
 import Navbar from "../../../components/Navbar/Navbar";
 import { useEffect, useState, useRef } from "react";
-import { useRecordStore } from "../../../store";
+import { useRecordStore, useUserStore } from "../../../store";
 import takePlace from "../../../assets/takePlace.png";
 import { Card, Select, Button } from "antd"
 import type { TabsProps } from "antd/lib/tabs"
+import NoticeLogin from "../../../components/NoticeLogin/NoticeLogin";
 import "./History.scss";
 
 type checkBox = { [number: number]: boolean };
@@ -17,6 +18,7 @@ const History = () => {
     removeHistoryPost,
     clear,
   } = useRecordStore();
+  const { isAuthenticated } = useUserStore();
   const [checked, setChecked] = useState<checkBox>({});
   const [isVisible, setIsVisible] = useState(false);
   const [isPosts, setIsPosts] = useState(false);
@@ -65,6 +67,7 @@ const History = () => {
 
   return (
     <div className="history-container">
+      {!isAuthenticated && <NoticeLogin />}
       <div className="header">
         <Navbar title="历史" backActive={true} backPath="/user" />
       </div>

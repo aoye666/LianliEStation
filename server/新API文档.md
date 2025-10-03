@@ -752,12 +752,13 @@ GET /api/users/records
 
 - **路径**: `/api/goods/:goods_id`
 - **方法**: `DELETE`
-- **描述**: 用户软删除商品，将商品状态标记为已删除
+- **描述**: 用户软删除商品，将商品状态标记为已删除。可通过reason参数区分是完成交易还是普通删除
 
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
 |-------|------|------|------|
 | goods_id | String | 是 | 商品 ID，作为 URL 路径参数提供 |
+| reason | String | 否 | 删除原因，查询参数。'transaction'表示完成交易，'delete'或不传表示普通删除 |
 
 请求头
 
@@ -776,7 +777,15 @@ Authorization: Bearer {token}
 
 响应示例
 
-- 成功响应 (状态码：200)
+- 完成交易成功 (状态码：200)
+
+  ```json
+  {
+    "message": "交易已完成，商品已标记为删除"
+  }
+  ```
+
+- 普通删除成功 (状态码：200)
 
   ```json
   {
@@ -3678,6 +3687,95 @@ Authorization: Bearer {admin_token}
 
 ---
 
+### 管理员获取事件统计数据
+
+基本信息
+
+- 路径: `/api/admin/event-stats`
+- 方法: `GET`
+- 描述: 获取record_event表中各类型事件的统计数据（仅限管理员）
+
+请求头部
+| 参数名        | 类型   | 必选 | 描述                       |
+| ------------- | ------ | ---- | -------------------------- |
+| Authorization | String | 是   | Bearer token（管理员权限） |
+
+响应参数
+| 状态码 | 内容类型         | 描述           |
+| ------ | ---------------- | -------------- |
+| 200    | application/json | 获取统计数据成功 |
+| 401    | application/json | 未提供 Token 或 Token 无效 |
+| 403    | application/json | 权限不足       |
+| 500    | application/json | 服务器错误     |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+```json
+{
+  "message": "事件统计数据获取成功",
+  "data": {
+    "visit": {
+      "active_users": 150
+    },
+    "publish_goods_tag": {
+      "total_count": 45
+    },
+    "publish_post_tag": {
+      "total_count": 32
+    },
+    "favorite_goods_tag": {
+      "total_count": 89
+    },
+    "favorite_post_tag": {
+      "total_count": 67
+    },
+    "completed_transaction": {
+      "total_count": 23
+    },
+    "membership": {
+      "total_count": 12
+    },
+    "ad_click": {
+      "total_clicks": 234
+    },
+    "ad_add": {
+      "total_count": 5
+    },
+    "total": {
+      "total_events": 657
+    },
+    "recent_7_days": {
+      "visit": 45,
+      "publish_goods_tag": 8,
+      "favorite_goods_tag": 15,
+      "ad_click": 23
+    }
+  }
+}
+```
+
+**数据说明**
+- `visit`: 活跃用户数（基于info字段去重统计不同用户）
+- `publish_goods_tag`: 商品发布总次数
+- `publish_post_tag`: 帖子发布总次数
+- `favorite_goods_tag`: 商品收藏总次数
+- `favorite_post_tag`: 帖子收藏总次数
+- `completed_transaction`: 完成交易总次数
+- `membership`: 会员开通总次数
+- `ad_click`: 广告点击总次数
+- `ad_add`: 广告添加总次数
+- `total`: 所有事件总数
+- `recent_7_days`: 最近7天各类型事件数量
+
+**备注**
+- 该接口仅限管理员使用
+- 提供平台整体活动数据分析
+- visit类型统计去重用户数，其他类型统计事件总次数
+
+---
+
 ## advertisementRoutes
 
 ### 获取所有广告
@@ -3773,7 +3871,7 @@ Authorization: Bearer {admin_token}
 
 ---
 
-### 记录广告点击
+### 记录广告点击（对应广告表里的clicks）
 
 基本信息
 
@@ -3807,6 +3905,115 @@ Authorization: Bearer {admin_token}
 **备注**
 - 该接口为公开接口，无需身份验证
 - 只有状态为active的广告才能记录点击
+
+---
+
+### 广告点击API
+
+基本信息
+
+- 路径: `/api/advertisements/click`
+- 方法: `POST`
+- 描述: 记录广告点击次数并记录点击事件
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ----------- | ------ | ---- | ------------------------ |
+| ad_id | Number | 是 | 广告ID |
+
+请求体示例
+```json
+{
+  "ad_id": 1
+}
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                        |
+| ------ | ---------------- | --------------------------- |
+| 200    | application/json | 广告点击记录成功            |
+| 400    | application/json | 缺少广告ID参数              |
+| 404    | application/json | 广告不存在或已失效          |
+| 500    | application/json | 服务器错误                  |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "广告点击记录成功"
+  }
+  ```
+
+**备注**
+- 该接口为公开接口，无需身份验证
+- 只有状态为active的广告才能记录点击
+- 会自动记录ad_click类型的事件到record_event表
+
+---
+
+### 广告添加API
+
+基本信息
+
+- 路径: `/api/advertisements/add`
+- 方法: `POST`
+- 描述: 添加新广告并记录添加事件（仅限管理员）
+
+请求头部
+| 参数名        | 类型   | 必选 | 描述                       |
+| ------------- | ------ | ---- | -------------------------- |
+| Authorization | String | 是   | Bearer token（管理员权限） |
+| Content-Type  | String | 是   | multipart/form-data        |
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+| ----------- | ------ | ---- | ------------------------ |
+| title | String | 是 | 广告标题 |
+| content | String | 否 | 广告内容描述 |
+| image | File | 否 | 广告图片文件 |
+| target_url | String | 否 | 点击跳转链接 |
+| position | String | 是 | 广告位置，可选值：banner/market/forum |
+| duration | Number | 否 | 广告展示天数，默认7天 |
+
+请求体示例 (multipart/form-data)
+```
+title: "春季促销活动"
+content: "全场商品8折优惠"
+image: [广告图片文件]
+target_url: "https://example.com/sale"
+position: "banner"
+duration: 7
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                        |
+| ------ | ---------------- | --------------------------- |
+| 201    | application/json | 广告添加成功                |
+| 400    | application/json | 参数错误                    |
+| 401    | application/json | 未提供 Token                |
+| 403    | application/json | 权限不足                    |
+| 500    | application/json | 服务器错误                  |
+
+响应示例
+
+- 成功响应 (状态码：201)
+
+  ```json
+  {
+    "message": "广告添加成功",
+    "id": 1
+  }
+  ```
+
+**备注**
+- 该接口仅限管理员使用
+- 支持图片上传，图片会保存到 /uploads/ 目录
+- position参数必须是 banner、market 或 forum 之一
+- 会自动记录ad_add类型的事件到record_event表
 
 ---
 

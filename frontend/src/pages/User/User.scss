@@ -46,12 +46,22 @@ $bg: #ededed;
       align-self: center;
       display: flex;
       flex-direction: column;
-      // .user-name {
-      // }
-      // .user-credit {
-      // }
-      // .user-email {
-      // }
+      
+      .user-login-prompt {
+        font-size: 18px;
+        font-weight: 500;
+        color: #1890ff;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        
+        &:hover {
+          opacity: 0.8;
+        }
+        
+        &:active {
+          opacity: 0.6;
+        }
+      }
     }
   }
   .user-settings {

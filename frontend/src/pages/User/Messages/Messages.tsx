@@ -2,7 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import { Image, Button } from "antd";
 import Navbar from "../../../components/Navbar/Navbar";
 import "./Messages.scss";
-import { useRecordStore } from "../../../store";
+import { useRecordStore, useUserStore } from "../../../store";
+import NoticeLogin from "../../../components/NoticeLogin/NoticeLogin";
 import {
   ProductOutlined,
   MessageOutlined,
@@ -22,6 +23,7 @@ interface Conditions {
 }
 
 const Messages = () => {
+  const { isAuthenticated } = useUserStore();
   // 三个筛选条件
   const [conditions, setConditions] = useState<Conditions>({
     type: "all", // 'appeal' 或 'response' 或 'all'
@@ -212,6 +214,7 @@ const Messages = () => {
 
   return (
     <div>
+      {!isAuthenticated && <NoticeLogin />}
       <Navbar title="信箱" backActive={true} backPath="/user" />
       <div className="messages-container">
         <div className="messages-control">

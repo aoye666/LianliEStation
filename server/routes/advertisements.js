@@ -50,6 +50,14 @@ router.post("/click/:id", async (req, res) => {
       return res.status(404).json({ message: "广告不存在或已失效" });
     }
     
+    // 记录广告点击事件
+    try {
+      await db.query("INSERT INTO record_event (info, type) VALUES (?, 'ad_click')", [id.toString()]);
+    } catch (recordErr) {
+      console.error("记录广告点击事件失败:", recordErr);
+      // 不影响主要功能，继续执行
+    }
+    
     res.status(200).json({ message: "点击记录成功" });
   } catch (err) {
     console.error(err);
@@ -94,9 +102,19 @@ router.post("/add", authToken, requireAdmin, upload.single("image"), async (req,
       [title, content, image_url, target_url, position, duration || 7]
     );
     
+    const adId = result.insertId;
+    
+    // 记录广告添加事件
+    try {
+      await db.query("INSERT INTO record_event (info, type) VALUES (?, 'ad_add')", [adId.toString()]);
+    } catch (recordErr) {
+      console.error("记录广告添加事件失败:", recordErr);
+      // 不影响主要功能，继续执行
+    }
+    
     res.status(201).json({ 
       message: "广告创建成功", 
-      id: result.insertId 
+      id: adId 
     });
   } catch (err) {
     console.error(err);
@@ -290,6 +308,102 @@ router.get("/stats", authToken, requireAdmin, async (req, res) => {
     res.status(200).json(rows);
   } catch (err) {
     console.error(err);
+    res.status(500).json({ message: "服务器错误" });
+  }
+});
+
+// 广告点击API（新增）
+router.post("/click", async (req, res) => {
+  try {
+    const { ad_id } = req.body;
+    
+    if (!ad_id) {
+      return res.status(400).json({ message: "缺少广告ID参数" });
+    }
+    
+    // 检查广告是否存在且有效
+    const [adRows] = await db.query("SELECT id FROM advertisements WHERE id = ? AND status = 'active'", [ad_id]);
+    
+    if (adRows.length === 0) {
+      return res.status(404).json({ message: "广告不存在或已失效" });
+    }
+    
+    // 增加点击次数
+    await db.query("UPDATE advertisements SET clicks = clicks + 1 WHERE id = ?", [ad_id]);
+    
+    // 记录广告点击事件
+    try {
+      await db.query("INSERT INTO record_event (info, type) VALUES (?, 'ad_click')", [ad_id.toString()]);
+    } catch (recordErr) {
+      console.error("记录广告点击事件失败:", recordErr);
+      // 不影响主要功能，继续执行
+    }
+    
+    res.status(200).json({ message: "广告点击记录成功" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "服务器错误" });
+  }
+});
+
+// 广告添加API（新增）
+router.post("/add", authToken, requireAdmin, upload.single("image"), async (req, res) => {
+  try {
+    const { title, content, target_url, position, duration } = req.body;
+    const imageFile = req.file;
+    
+    // 验证必填参数
+    if (!title || !position) {
+      if (imageFile) {
+        try {
+          await fs.promises.unlink(imageFile.path);
+        } catch {}
+      }
+      return res.status(400).json({ message: "标题和位置为必填项" });
+    }
+    
+    // 验证位置参数
+    if (!["banner", "market", "forum"].includes(position)) {
+      if (imageFile) {
+        try {
+          await fs.promises.unlink(imageFile.path);
+        } catch {}
+      }
+      return res.status(400).json({ message: "位置参数无效，必须是 banner, market 或 forum" });
+    }
+    
+    let image_url = null;
+    if (imageFile) {
+      image_url = "/uploads/" + imageFile.filename;
+    }
+    
+    const [result] = await db.query(
+      `INSERT INTO advertisements (title, content, image_url, target_url, position, duration, status) 
+       VALUES (?, ?, ?, ?, ?, ?, 'active')`,
+      [title, content, image_url, target_url, position, duration || 7]
+    );
+    
+    const adId = result.insertId;
+    
+    // 记录广告添加事件
+    try {
+      await db.query("INSERT INTO record_event (info, type) VALUES (?, 'ad_add')", [adId.toString()]);
+    } catch (recordErr) {
+      console.error("记录广告添加事件失败:", recordErr);
+      // 不影响主要功能，继续执行
+    }
+    
+    res.status(201).json({ 
+      message: "广告添加成功", 
+      id: adId 
+    });
+  } catch (err) {
+    console.error(err);
+    if (req.file) {
+      try {
+        await fs.promises.unlink(req.file.path);
+      } catch {}
+    }
     res.status(500).json({ message: "服务器错误" });
   }
 });

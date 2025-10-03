@@ -57,6 +57,13 @@ router.post("/posts/add", (req, res) => {
               [user_id, post_id]
             )
               .then(() => {
+                // 记录收藏帖子事件
+                db.query("INSERT INTO record_event (info, type) VALUES (?, 'favorite_post_tag')", [post_id.toString()])
+                  .catch((recordErr) => {
+                    console.error("记录收藏帖子事件失败:", recordErr);
+                    // 不影响主要功能，继续执行
+                  });
+                
                 res.status(201).json({ message: "收藏帖子成功" });
               })
               .catch((err) => {
@@ -124,6 +131,13 @@ router.post("/goods/add", (req, res) => {
               [user_id, goods_id]
             )
               .then(() => {
+                // 记录收藏商品事件
+                db.query("INSERT INTO record_event (info, type) VALUES (?, 'favorite_goods_tag')", [goods_id.toString()])
+                  .catch((recordErr) => {
+                    console.error("记录收藏商品事件失败:", recordErr);
+                    // 不影响主要功能，继续执行
+                  });
+                
                 res.status(201).json({ message: "收藏商品成功" });
               })
               .catch((err) => {
