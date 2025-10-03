@@ -250,6 +250,25 @@ CREATE TABLE `user_bans` (
   INDEX (`ban_until`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+CREATE TABLE `record_event` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `info` VARCHAR(255), -- 额外记录信息，可为空，不同类型的记录灵活添加，如访问的记录可添加用户的id以记录活跃用户
+    `type` ENUM(
+        'visit', 
+        'publish_goods_tag', 
+        'publish_post_tag', 
+        'favorite_goods_tag', 
+        'favorite_post_tag', 
+        'completed_transaction', 
+        'membership', 
+        'ad_click', 
+        'ad_add'
+    ) NOT NULL COMMENT '记录类型：visit-访问, publish_goods_tag-发布商品时记录标签, publish_post_tag-发布帖子时记录标签, favorite_goods_tag-收藏商品时记录标签, favorite_post_tag-收藏帖子时记录标签, completed_transaction-完成交易, membership-会员开通, ad_click-广告点击, ad_add-广告添加',
+    `recorded_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_type` (`type`),
+    INDEX `idx_recorded_at` (`recorded_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='事件记录表';
 ```
 
 ##

@@ -253,6 +253,14 @@ router.get("/profile", authToken, async (req, res) => {
       ),
     ]);
 
+    // 记录访问事件
+    try {
+      await db.query("INSERT INTO record_event (info, type) VALUES (?, 'visit')", [userId.toString()]);
+    } catch (recordErr) {
+      console.error("记录访问事件失败:", recordErr);
+      // 不影响主要功能，继续执行
+    }
+
     // 返回用户的详细信息
     const userData = {
       nickname: req.user.nickname,
@@ -880,6 +888,14 @@ router.get("/user-info/:user_id", async (req, res) => {
 //   }
 // });
 
-
+// Token 解码
+router.get("/decode-token", authToken, (req, res) => {
+  try {
+    res.status(200).json(req.user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "服务器错误" });
+  }
+});
 
 export default router;

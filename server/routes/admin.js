@@ -844,4 +844,151 @@ router.put("/unban", async (req, res) => {
   }
 });
 
+// 获取事件统计数据（仅限管理员）
+router.get("/event-stats", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1]; // 获取 token
+
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY); // 解码 Token 获取用户信息
+
+    // 通过 isAdmin 字段判断是否为管理员
+    if (!decoded.isAdmin) {
+      return res.status(403).json({ message: "您没有权限执行此操作" });
+    }
+
+    // 统计各种类型的事件数据
+    const stats = {};
+
+    // 1. 统计访问事件 - 活跃用户数（去重用户ID）
+    const [visitStats] = await db.query(`
+      SELECT COUNT(DISTINCT info) as active_users
+      FROM record_event 
+      WHERE type = 'visit'
+    `);
+    stats.visit = {
+      active_users: visitStats[0].active_users || 0
+    };
+
+    // 2. 统计发布商品事件 - 总发布次数
+    const [publishGoodsStats] = await db.query(`
+      SELECT COUNT(*) as total_count
+      FROM record_event 
+      WHERE type = 'publish_goods_tag'
+    `);
+    stats.publish_goods_tag = {
+      total_count: publishGoodsStats[0].total_count || 0
+    };
+
+    // 3. 统计发布帖子事件 - 总发布次数
+    const [publishPostsStats] = await db.query(`
+      SELECT COUNT(*) as total_count
+      FROM record_event 
+      WHERE type = 'publish_post_tag'
+    `);
+    stats.publish_post_tag = {
+      total_count: publishPostsStats[0].total_count || 0
+    };
+
+    // 4. 统计收藏商品事件 - 总收藏次数
+    const [favoriteGoodsStats] = await db.query(`
+      SELECT COUNT(*) as total_count
+      FROM record_event 
+      WHERE type = 'favorite_goods_tag'
+    `);
+    stats.favorite_goods_tag = {
+      total_count: favoriteGoodsStats[0].total_count || 0
+    };
+
+    // 5. 统计收藏帖子事件 - 总收藏次数
+    const [favoritePostsStats] = await db.query(`
+      SELECT COUNT(*) as total_count
+      FROM record_event 
+      WHERE type = 'favorite_post_tag'
+    `);
+    stats.favorite_post_tag = {
+      total_count: favoritePostsStats[0].total_count || 0
+    };
+
+    // 6. 统计完成交易事件 - 总交易次数
+    const [transactionStats] = await db.query(`
+      SELECT COUNT(*) as total_count
+      FROM record_event 
+      WHERE type = 'completed_transaction'
+    `);
+    stats.completed_transaction = {
+      total_count: transactionStats[0].total_count || 0
+    };
+
+    // 7. 统计会员开通事件 - 总开通次数
+    const [membershipStats] = await db.query(`
+      SELECT COUNT(*) as total_count
+      FROM record_event 
+      WHERE type = 'membership'
+    `);
+    stats.membership = {
+      total_count: membershipStats[0].total_count || 0
+    };
+
+    // 8. 统计广告点击事件 - 点击次数
+    const [adClickStats] = await db.query(`
+      SELECT COUNT(*) as total_clicks
+      FROM record_event 
+      WHERE type = 'ad_click'
+    `);
+    stats.ad_click = {
+      total_clicks: adClickStats[0].total_clicks || 0
+    };
+
+    // 9. 统计广告添加事件 - 总添加次数
+    const [adAddStats] = await db.query(`
+      SELECT COUNT(*) as total_count
+      FROM record_event 
+      WHERE type = 'ad_add'
+    `);
+    stats.ad_add = {
+      total_count: adAddStats[0].total_count || 0
+    };
+
+    // 10. 获取总体统计
+    const [totalStats] = await db.query(`
+      SELECT COUNT(*) as total_events
+      FROM record_event
+    `);
+    stats.total = {
+      total_events: totalStats[0].total_events || 0
+    };
+
+    // 11. 获取最近7天的事件统计
+    const [recentStats] = await db.query(`
+      SELECT type, COUNT(*) as count
+      FROM record_event 
+      WHERE recorded_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+      GROUP BY type
+    `);
+    stats.recent_7_days = {};
+    recentStats.forEach(row => {
+      stats.recent_7_days[row.type] = row.count;
+    });
+
+    res.status(200).json({
+      message: "事件统计数据获取成功",
+      data: stats
+    });
+
+  } catch (err) {
+    console.error(err);
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "Token 格式无效" });
+    }
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token 已过期" });
+    }
+    return res.status(500).json({ message: "服务器错误" });
+  }
+});
+
 export default router;

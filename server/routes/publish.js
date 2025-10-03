@@ -60,6 +60,14 @@ router.post("/goods", upload.array("images", 3), async (req, res) => {
       await Promise.all(imagePromises);
     }
 
+    // 记录发布商品事件
+    try {
+      await db.query("INSERT INTO record_event (info, type) VALUES (?, 'publish_goods_tag')", [goodsId.toString()]);
+    } catch (recordErr) {
+      console.error("记录商品发布事件失败:", recordErr);
+      // 不影响主要功能，继续执行
+    }
+
     // 返回成功信息
     res.status(201).json({ message: "发布成功", image_urls: imageUrls });
   } catch (err) {
@@ -185,6 +193,14 @@ router.post("/posts", upload.array("images", 5), async (req, res) => {
       imageUrls = files.map((file) => `/uploads/${file.filename}`);
       const imagePromises = imageUrls.map((url) => db.query("INSERT INTO post_image (post_id, image_url) VALUES (?, ?)", [postId, url]));
       await Promise.all(imagePromises);
+    }
+
+    // 记录发布帖子事件
+    try {
+      await db.query("INSERT INTO record_event (info, type) VALUES (?, 'publish_post_tag')", [postId.toString()]);
+    } catch (recordErr) {
+      console.error("记录帖子发布事件失败:", recordErr);
+      // 不影响主要功能，继续执行
     }
 
     // 返回成功信息

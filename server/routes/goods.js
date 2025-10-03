@@ -13,6 +13,7 @@ const SECRET_KEY = process.env.SECRET_KEY;
 // 软删除商品
 router.delete("/:goods_id", async (req, res) => {
   const { goods_id } = req.params;
+  const { reason } = req.query; // 添加reason参数：'transaction'表示完成交易，'delete'表示删除
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
@@ -36,7 +37,19 @@ router.delete("/:goods_id", async (req, res) => {
     }
 
     await db.query("UPDATE goods SET status = 'deleted' WHERE id = ?", [goods_id]);
-    return res.status(200).json({ message: "商品已标记为删除" });
+
+    // 如果是完成交易，记录交易事件
+    if (reason === 'transaction') {
+      try {
+        await db.query("INSERT INTO record_event (info, type) VALUES (?, 'completed_transaction')", [goods_id.toString()]);
+      } catch (recordErr) {
+        console.error("记录交易完成事件失败:", recordErr);
+        // 不影响主要功能，继续执行
+      }
+      return res.status(200).json({ message: "交易已完成，商品已标记为删除" });
+    } else {
+      return res.status(200).json({ message: "商品已标记为删除" });
+    }
   } catch (err) {
     console.error(err);
     res.status(401).json({ message: "无效的 Token" });
