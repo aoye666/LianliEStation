@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LaptopOutlined, NotificationOutlined, UserOutlined, BarChartOutlined, MessageOutlined, LogoutOutlined } from '@ant-design/icons';
+import { LaptopOutlined, NotificationOutlined, UserOutlined, BarChartOutlined, MessageOutlined, LogoutOutlined, BulbOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme, Button, Typography } from 'antd';
 import { useUserStore } from '../../store'
@@ -9,6 +9,7 @@ import Forum from './Forum/Forum';
 import Market from './Market/Market';
 import Messages from './Messages/Messages';
 import Users from './Users/Users';
+import Advertisement from './Advertisement/Advertisement';
 
 const { Header, Content, Sider } = Layout;
 const { Title } = Typography;
@@ -19,6 +20,7 @@ const menuItems: MenuProps['items'] = [
   { key: 'forum', icon: <NotificationOutlined />, label: '校园墙管理' },
   { key: 'market', icon: <LaptopOutlined />, label: '商城管理' },
   { key: 'messages', icon: <MessageOutlined />, label: '申诉管理' },
+  { key: 'advertisement', icon: <BulbOutlined />, label: '广告管理' },
 ];
 
 const Admin = () => {
@@ -46,6 +48,8 @@ const Admin = () => {
         return <Market />;
       case 'messages':
         return <Messages />;
+      case 'advertisement':
+        return <Advertisement />;
       default:
         const found = menuItems?.find((i) => i?.key === selectedKey) as { label?: React.ReactNode };
         return <div style={{ padding: 24 }}>开发中：{found?.label}</div>;
