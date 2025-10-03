@@ -22,29 +22,29 @@
             }
         }
 
-        .top-posts{
-            height:15%;
-            overflow: scroll;
+        // .top-posts{
+        //     height:15%;
+        //     overflow: scroll;
 
-            .Row{
-                padding: 5px;
-                .Col{
-                    .Card{
-                        height: 30px;
-                        .ant-card-body {
-                          padding: 0; 
-                          display: flex;
-                          justify-content: center;
-                          align-items: center;
-                          height: 100%;
-                          font-size: 12px;
-                          overflow: hidden;
-                        }
+        //     .Row{
+        //         padding: 5px;
+        //         .Col{
+        //             .Card{
+        //                 height: 30px;
+        //                 .ant-card-body {
+        //                   padding: 0; 
+        //                   display: flex;
+        //                   justify-content: center;
+        //                   align-items: center;
+        //                   height: 100%;
+        //                   font-size: 12px;
+        //                   overflow: hidden;
+        //                 }
                         
-                    }
-                }
-            }
-        }
+        //             }
+        //         }
+        //     }
+        // }
 
         .posts{
             display: flex;
@@ -82,7 +82,7 @@
                         display: flex;
                         flex-direction: column;
                         position: relative;
-                        justify-content: space-between;
+                        height: 35vw;
 
                         .post-img{
                             display: flex;
@@ -93,7 +93,7 @@
                             display: flex;
                             position: relative;
                             align-items: center;
-                            bottom: 10vw;
+                            height: 10vw;
                             font-size: calc(100vw / 26);
                             img{
                                 width: 5vw;

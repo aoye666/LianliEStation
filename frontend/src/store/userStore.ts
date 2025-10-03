@@ -95,6 +95,7 @@ interface UserState {
     post_id: number,
     value: number
   ) => void;
+  updateFavorite: (type: string, goods_id: number,value: number) => void;
 }
 
 const useUserStore = create<UserState>()(
@@ -412,7 +413,8 @@ const useUserStore = create<UserState>()(
                     },
                   } as Partial<UserState>)
               );
-            } else {
+            }
+            else {
               const complaints = currentUser.complaints;
               complaints.push({ targetId: post_id, targetType: type });
               set(
@@ -453,6 +455,45 @@ const useUserStore = create<UserState>()(
                   } as Partial<UserState>)
               );
             }
+          }
+        }
+      },
+      updateFavorite: (type: string, goods_id: number,value: number) => {
+        const currentUser = get().currentUser;
+        if (currentUser) {
+          if (value === 1) {
+            const favorites = currentUser.favorites;
+            if (type === "goods") {
+              favorites.goods.push({ id: goods_id });
+            } else if (type === "post") {
+              favorites.posts.push({ id: goods_id });
+            }
+            set(
+              (state: UserState) =>
+                ({
+                  currentUser: {
+                    ...state.currentUser,
+                    favorites,
+                  },
+                } as Partial<UserState>)
+            );
+          }
+          else { 
+            const favorites = currentUser.favorites;
+            if (type === "goods") {
+              favorites.goods = favorites.goods.filter((item) => item.id !== goods_id);
+            } else if (type === "post") {
+              favorites.posts = favorites.posts.filter((item) => item.id !== goods_id);
+            }
+            set(
+              (state: UserState) =>
+                ({
+                  currentUser: {
+                    ...state.currentUser,
+                    favorites,
+                  },
+                } as Partial<UserState>)
+            );
           }
         }
       },

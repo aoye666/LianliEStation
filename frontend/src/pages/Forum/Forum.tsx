@@ -21,6 +21,7 @@ const Forum = () => {
   const mainStore = useMainStore();
   const { posts } = mainStore;
   const bodyRef = useRef<HTMLDivElement>(null);
+  const [timeFlag, setTimeFlag] = useState(false);
 
 
   const nav: TabsProps["items"] = [
@@ -39,14 +40,21 @@ const Forum = () => {
     console.log(posts)
   }, []);
 
-  // useEffect(() => {
-  //   if (bodyRef.current) {
-  //     if(bodyRef.current.scrollTop + bodyRef.current.clientHeight >= bodyRef.current.scrollHeight - 5){
-  //       mainStore.updateforumPosts();
-  //     }
-  //   }
-  //   console.log(posts)
-  // }, [posts]);
+  const handleScroll = () => {
+    if (bodyRef.current) {
+      if(bodyRef.current.scrollTop + bodyRef.current.clientHeight >= bodyRef.current.scrollHeight -20){
+        if(!timeFlag){
+          console.log(2)
+          setTimeFlag(true)
+          setTimeout(() => {
+            mainStore.updateforumPosts();
+            setTimeFlag(false)
+          },1000)
+        }
+
+      }
+    }
+  }
 
   return (
     <div className="forum-container">
@@ -77,7 +85,7 @@ const Forum = () => {
           </Row>
         </div> */}
 
-        <div className="posts" ref={bodyRef}>
+        <div className="posts" ref={bodyRef} onScroll={handleScroll}>
           {posts.map((post, index) => (
                 <Card className="Card" title={post.title} key={index} onClick={() => navigate(`/forum-detail?id=${post.id}`)}>
                   <div className="post-content">

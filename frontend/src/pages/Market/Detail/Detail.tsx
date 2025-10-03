@@ -41,7 +41,7 @@ interface Goods {
 const Detail = () => {
   const { goods, changeGoodsResponse, updateGoodsItem } =
     useMainStore();
-  const { currentUser, updateLikesComplaints,fetchUserProfile } = useUserStore();
+  const { currentUser, updateLikesComplaints,fetchUserProfile,updateFavorite } = useUserStore();
 
   const param = useParams();
   const navigate = useNavigate();
@@ -119,30 +119,6 @@ const Detail = () => {
     // }
 
   };
-
-  const handleStar = () => {
-    if (currentGoods && !isStared) {
-      addFavoriteGoods(currentGoods.id).then((status) => {
-        if (status === 201) {
-          message.success("已加入收藏");
-          setIsStared(true);
-        } else {
-          message.error("加入收藏失败");
-        }
-      });
-    }
-    else if(currentGoods && isStared){
-      removeFavoriteGoods(currentGoods.id).then((status) => {
-        if (status === 200) {
-          message.success("已取消收藏");
-          setIsStared(false);
-        } else {
-          message.error("取消收藏失败");
-        }
-      });
-    
-    }
-  }
 
   const fetchData = () => {
     const numericID = Number(ID);
@@ -269,6 +245,31 @@ const Detail = () => {
     }
   };
 
+  const handleStar = () => {
+    if (currentGoods && !isStared) {
+      addFavoriteGoods(currentGoods.id).then((status) => {
+        if (status === 201) {
+          message.success("已加入收藏");
+          setIsStared(true);
+          updateFavorite("goods",currentGoods.id,1);
+        } else {
+          message.error("加入收藏失败");
+        }
+      });
+    }
+    else if(currentGoods && isStared){
+      removeFavoriteGoods(currentGoods.id).then((status) => {
+        if (status === 200) {
+          message.success("已取消收藏");
+          setIsStared(false);
+          updateFavorite("goods",currentGoods.id,-1);
+        } else {
+          message.error("取消收藏失败");
+        }
+      });
+    }
+  }
+
   return (
     <div className="detail-container">
       <div className="detail-navbar">
@@ -276,7 +277,7 @@ const Detail = () => {
           className="navbar-icon"
           src={left}
           alt="返回"
-          onClick={() => window.location.href = "/market"}
+          onClick={() => navigate("/market")}
         />
         <img
           className="navbar-icon"

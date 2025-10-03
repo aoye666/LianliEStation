@@ -1,7 +1,7 @@
 import React, { useState, useEffect,useRef } from'react';
 import './ForumDetail.scss'
 import Navbar from '../../../components/Navbar/Navbar';
-import { useMainStore,useRecordStore } from '../../../store';
+import { useMainStore,useRecordStore,useUserStore } from '../../../store';
 import { useLocation } from 'react-router-dom';
 import { Image,Card,Avatar, Button, message} from 'antd';
 import { Carousel } from 'antd';
@@ -19,6 +19,7 @@ const ForumDetail = () => {
     const params = new URLSearchParams(location.search);
     const forumId = params.get('id');
     const updateForumInteract = useMainStore(state => state.updateForumInteract)
+    const { updateFavorite, currentUser,updateLikesComplaints } = useUserStore();
     const {Meta} = Card;
     const [openReplies, setOpenReplies] = useState<number | null>(null);
     const [showShare, setShowShare] = useState(false)
@@ -53,51 +54,108 @@ const ForumDetail = () => {
         }
     },[])
 
+    // useEffect(() => {
+    //     const fetchLikeStatus = async () => {
+    //         if (forumId){
+    //             const res =await updateForumInteract(parseInt(forumId), 'like',undefined,undefined,1)
+    //             if(res === 400){
+    //                 setLikeState(true)
+    //             }else{
+    //                 setLikeState(false)
+    //                 updateForumInteract(parseInt(forumId), 'like',undefined,undefined,-1)
+    //             }
+    //         }
+    //     }
+
+    //     const fetchStarStatus = async () => {
+    //         if (forumId){
+    //             const res = await recordStore.addFavoritePost(forumId?parseInt(forumId):0)
+    //             if(res === 400){
+    //                 setForumState(true)
+    //             }else{
+    //                 setForumState(false)
+    //                 recordStore.removeFavoritePost(forumId?parseInt(forumId):0)
+    //             }
+    //         }
+    //     }
+    //     fetchLikeStatus()
+    //     fetchStarStatus()
+    // }, [])
+
+    const handleIsRecorded = () => {
+        if (currentUser && forumId) {
+            if (
+                currentUser.likes.find((item) => {
+                return (
+                    item.targetId === parseInt(forumId) && item.targetType === "post"
+                );
+                })
+            ) {
+                setLikeState(true);
+                console.log("已点赞");
+            } else {
+                setLikeState(false);
+                console.log("未点赞");
+            }
+
+            //   if (
+            //     currentUser.complaints.find((item) => {
+            //       return (
+            //         item.targetId === parseInt(forumId) && item.targetType === "post"
+            //       );
+            //     })
+            //   ) {
+            //     setIsDisliked(true);
+            //     console.log("已举报");
+            //   } else {
+            //     setIsDisliked(false);
+            //     console.log("未举报");
+            //   }
+
+            if (
+                currentUser.favorites.posts.find((item) => {
+                return (
+                    item.id === parseInt(forumId)
+                );
+                })
+            ){
+                setForumState(true);
+                console.log("已收藏");
+            } else {
+                setForumState(false);
+                console.log("未收藏");
+            }
+        }
+    };
+
     useEffect(() => {
-        const fetchLikeStatus = async () => {
-            if (forumId){
-                const res =await updateForumInteract(parseInt(forumId), 'like',undefined,undefined,1)
-                if(res === 400){
-                    setLikeState(true)
-                }else{
-                    setLikeState(false)
-                    updateForumInteract(parseInt(forumId), 'like',undefined,undefined,-1)
-                }
-            }
-        }
-
-        const fetchStarStatus = async () => {
-            if (forumId){
-                const res = await recordStore.addFavoritePost(forumId?parseInt(forumId):0)
-                if(res === 400){
-                    setForumState(true)
-                }else{
-                    setForumState(false)
-                    recordStore.removeFavoritePost(forumId?parseInt(forumId):0)
-                }
-            }
-        }
-        fetchLikeStatus()
-        fetchStarStatus()
-    }, [])
-
+        handleIsRecorded();
+    }, [currentUser]);
 
     const like = () => {
         console.log('like')
         if (forumId){
             updateForumInteract(parseInt(forumId), 'like',undefined,undefined,likeState?-1:1)
+            updateLikesComplaints('post','like',parseInt(forumId),likeState?-1:1)
             setLikeState(!likeState)
         }
     }
 
     const star = () => {
         console.log('star')
-        setForumState(!forumState)
-        if (!forumState){
-            recordStore.addFavoritePost(forumId?parseInt(forumId):0)
-        }
-        else{
-            recordStore.removeFavoritePost(forumId?parseInt(forumId):0)
+        if(forumId){
+            if (!forumState){
+                recordStore.addFavoritePost(forumId?parseInt(forumId):0)
+                console.log('收藏成功')
+                updateFavorite("post",parseInt(forumId),1);
+                setForumState(true)
+            }
+            else{
+                recordStore.removeFavoritePost(forumId?parseInt(forumId):0)
+                console.log('取消收藏')
+                updateFavorite("post",parseInt(forumId),-1);
+                setForumState(false)
+            }
         }
     }
 
@@ -135,7 +193,6 @@ const ForumDetail = () => {
                         </Carousel>
                     </Image.PreviewGroup>
                 </div>
-
 
                 <div className="title">
                     {forum?.title}

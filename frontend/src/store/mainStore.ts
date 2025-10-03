@@ -225,12 +225,13 @@ const useMainStore = create<MainState>()(
               page: get().forumPage,
             },
           });
-          if (response?.status === 200 && response.data) {
+          if (response?.status === 200 && response.data.posts.length > 0) {
             const data = response.data.posts;
             set((state) => ({
               posts: [...data], // 更新 goods 状态
               forumPage: state.forumPage + 1,
             }));
+            console.log(get().forumPage);
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
             console.log("No goods available or unexpected response status");
