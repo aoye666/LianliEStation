@@ -1007,13 +1007,13 @@ router.get("/stats", async (req, res) => {
     `);
     recent7Days.ad_add = recent7DaysAdAdd[0].count || 0;
 
-    // 最近7天注册用户数 - 由于users表没有created_at字段，无法统计
-    // const [recent7DaysRegister] = await db.query(`
-    //   SELECT COUNT(*) as count
-    //   FROM users 
-    //   WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-    // `);
-    recent7Days.register = 0; // 暂时设为0，因为users表没有时间字段
+    // 最近7天注册用户数
+    const [recent7DaysRegister] = await db.query(`
+      SELECT COUNT(*) as count
+      FROM users 
+      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    `);
+    recent7Days.register = recent7DaysRegister[0].count || 0;
 
     // 最近7天发布商品数
     const [recent7DaysGoods] = await db.query(`
@@ -1069,8 +1069,16 @@ router.get("/stats", async (req, res) => {
       ORDER BY date ASC
     `);
 
-    // 获取每日注册、商品、帖子数据 - 注意users表没有created_at字段
+    // 获取每日注册、商品、帖子数据
     const [dailyUserGoods] = await db.query(`
+      SELECT 
+        DATE(created_at) as date,
+        'register' as type,
+        COUNT(*) as count
+      FROM users 
+      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+      GROUP BY DATE(created_at)
+      UNION ALL
       SELECT 
         DATE(created_at) as date,
         'goods' as type,

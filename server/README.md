@@ -54,6 +54,7 @@ CREATE TABLE `users` (
     `background_url` VARCHAR(255) NOT NULL DEFAULT '/uploads/default_background.png',
     `theme_id` INT NOT NULL DEFAULT 1,
     `user_type` ENUM('guest', 'user', 'admin') DEFAULT 'user' COMMENT '用户类型：guest-游客，user-普通用户，admin-管理员',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `email_unique` (`email`),
     UNIQUE KEY `username_unique` (`username`),
