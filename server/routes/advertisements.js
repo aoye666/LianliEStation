@@ -302,15 +302,15 @@ router.delete("/cleanup/expired", authToken, requireAdmin, async (req, res) => {
 });
 
 // 获取广告统计信息（仅管理员）
-router.get("/stats", authToken, requireAdmin, async (req, res) => {
-  try {
-    const [rows] = await db.query("SELECT id, title, clicks FROM advertisements ORDER BY clicks DESC");
-    res.status(200).json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "服务器错误" });
-  }
-});
+// router.get("/stats", authToken, requireAdmin, async (req, res) => {
+//   try {
+//     const [rows] = await db.query("SELECT id, title, clicks FROM advertisements ORDER BY clicks DESC");
+//     res.status(200).json(rows);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "服务器错误" });
+//   }
+// });
 
 // 广告点击API（新增）
 router.post("/click", async (req, res) => {

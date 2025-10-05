@@ -115,6 +115,8 @@ router.post("/goods/add", (req, res) => {
           return res.status(404).json({ message: "商品未找到或已被删除" });
         }
 
+        const goodsTag = rows[0].tag; // 获取商品的tag
+
         // 检查是否已经收藏过该商品
         db.query(
           "SELECT * FROM user_favorites WHERE user_id = ? AND goods_id = ? AND post_id IS NULL",
@@ -132,7 +134,7 @@ router.post("/goods/add", (req, res) => {
             )
               .then(() => {
                 // 记录收藏商品事件
-                db.query("INSERT INTO record_event (info, type) VALUES (?, 'favorite_goods_tag')", [goods_id.toString()])
+                db.query("INSERT INTO record_event (info, type) VALUES (?, 'favorite_goods_tag')", [goodsTag || '未分类'])
                   .catch((recordErr) => {
                     console.error("记录收藏商品事件失败:", recordErr);
                     // 不影响主要功能，继续执行

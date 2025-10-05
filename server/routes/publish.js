@@ -62,7 +62,7 @@ router.post("/goods", upload.array("images", 3), async (req, res) => {
 
     // 记录发布商品事件
     try {
-      await db.query("INSERT INTO record_event (info, type) VALUES (?, 'publish_goods_tag')", [goodsId.toString()]);
+      await db.query("INSERT INTO record_event (info, type) VALUES (?, 'publish_goods_tag')", [tag || '未分类']);
     } catch (recordErr) {
       console.error("记录商品发布事件失败:", recordErr);
       // 不影响主要功能，继续执行

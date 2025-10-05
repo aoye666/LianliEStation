@@ -703,37 +703,37 @@ router.get("/search-keywords", async (req, res) => {
 });
 
 // 获取AI调用统计（仅限管理员）
-router.get('/ai/stats', (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
+// router.get('/ai/stats', (req, res) => {
+//   const token = req.headers.authorization?.split(" ")[1];
 
-  if (!token) {
-    return res.status(401).json({ message: "未提供 Token" });
-  }
+//   if (!token) {
+//     return res.status(401).json({ message: "未提供 Token" });
+//   }
 
-  try {
-    const decoded = jwt.verify(token, SECRET_KEY);
+//   try {
+//     const decoded = jwt.verify(token, SECRET_KEY);
 
-    // 通过 isAdmin 字段判断是否为管理员
-    if (!decoded.isAdmin) {
-      return res.status(403).json({ message: "您没有权限执行此操作" });
-    }
+//     // 通过 isAdmin 字段判断是否为管理员
+//     if (!decoded.isAdmin) {
+//       return res.status(403).json({ message: "您没有权限执行此操作" });
+//     }
 
-    const stats = getAICallStats();
-    res.json({
-      todayCalls: stats.todayCalls,
-      totalCalls: stats.totalCalls
-    });
-  } catch (error) {
-    console.error('获取AI统计数据失败:', error);
-    if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({ message: "Token 格式无效" });
-    }
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({ message: "Token 已过期" });
-    }
-    res.status(500).json({ message: '获取统计数据失败' });
-  }
-});
+//     const stats = getAICallStats();
+//     res.json({
+//       todayCalls: stats.todayCalls,
+//       totalCalls: stats.totalCalls
+//     });
+//   } catch (error) {
+//     console.error('获取AI统计数据失败:', error);
+//     if (error.name === "JsonWebTokenError") {
+//       return res.status(401).json({ message: "Token 格式无效" });
+//     }
+//     if (error.name === "TokenExpiredError") {
+//       return res.status(401).json({ message: "Token 已过期" });
+//     }
+//     res.status(500).json({ message: '获取统计数据失败' });
+//   }
+// });
 
 // 封禁用户
 router.put("/ban", async (req, res) => {
@@ -845,7 +845,7 @@ router.put("/unban", async (req, res) => {
 });
 
 // 获取事件统计数据（仅限管理员）
-router.get("/event-stats", async (req, res) => {
+router.get("/stats", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1]; // 获取 token
 
   if (!token) {
@@ -860,123 +860,263 @@ router.get("/event-stats", async (req, res) => {
       return res.status(403).json({ message: "您没有权限执行此操作" });
     }
 
-    // 统计各种类型的事件数据
-    const stats = {};
+    const statsData = {};
 
-    // 1. 统计访问事件 - 活跃用户数（去重用户ID）
+    // 1. 访问次数统计
     const [visitStats] = await db.query(`
-      SELECT COUNT(DISTINCT info) as active_users
+      SELECT COUNT(*) as visit_count
       FROM record_event 
       WHERE type = 'visit'
     `);
-    stats.visit = {
-      active_users: visitStats[0].active_users || 0
-    };
+    statsData.visit = visitStats[0].visit_count || 0;
 
-    // 2. 统计发布商品事件 - 总发布次数
-    const [publishGoodsStats] = await db.query(`
-      SELECT COUNT(*) as total_count
+    // 2. 用户总数
+    const [userStats] = await db.query(`SELECT COUNT(*) as total_users FROM users`);
+    statsData.users = userStats[0].total_users || 0;
+
+    // 3. 帖子总数
+    const [postStats] = await db.query(`SELECT COUNT(*) as total_posts FROM posts WHERE status != 'deleted'`);
+    statsData.posts = postStats[0].total_posts || 0;
+
+    // 4. 商品总数
+    const [goodsStats] = await db.query(`SELECT COUNT(*) as total_goods FROM goods WHERE status != 'deleted'`);
+    statsData.goods = goodsStats[0].total_goods || 0;
+
+    // 5. 被封禁用户数
+    const [bannedStats] = await db.query(`
+      SELECT COUNT(DISTINCT user_id) as banned_count 
+      FROM user_bans 
+      WHERE status = 'active' AND (ban_until IS NULL OR ban_until > NOW())
+    `);
+    statsData.banned_users = bannedStats[0].banned_count || 0;
+
+    // 6. 违规次数（response表中response_type为"violation"的）
+    const [violationStats] = await db.query(`
+      SELECT COUNT(*) as violation_count 
+      FROM responses 
+      WHERE response_type = 'violation'
+    `);
+    statsData.violation = violationStats[0].violation_count || 0;
+
+    // 7. 发布商品标签统计
+    const [publishGoodsTagStats] = await db.query(`
+      SELECT info as tag, COUNT(*) as count
       FROM record_event 
       WHERE type = 'publish_goods_tag'
+      GROUP BY info
     `);
-    stats.publish_goods_tag = {
-      total_count: publishGoodsStats[0].total_count || 0
-    };
+    statsData.publish_goods_tag = {};
+    publishGoodsTagStats.forEach(row => {
+      statsData.publish_goods_tag[row.tag || 'others'] = row.count;
+    });
 
-    // 3. 统计发布帖子事件 - 总发布次数
-    const [publishPostsStats] = await db.query(`
-      SELECT COUNT(*) as total_count
-      FROM record_event 
-      WHERE type = 'publish_post_tag'
-    `);
-    stats.publish_post_tag = {
-      total_count: publishPostsStats[0].total_count || 0
-    };
-
-    // 4. 统计收藏商品事件 - 总收藏次数
-    const [favoriteGoodsStats] = await db.query(`
-      SELECT COUNT(*) as total_count
+    // 8. 收藏商品标签统计
+    const [favoriteGoodsTagStats] = await db.query(`
+      SELECT info as tag, COUNT(*) as count
       FROM record_event 
       WHERE type = 'favorite_goods_tag'
+      GROUP BY info
     `);
-    stats.favorite_goods_tag = {
-      total_count: favoriteGoodsStats[0].total_count || 0
-    };
+    statsData.favorite_goods_tag = {};
+    favoriteGoodsTagStats.forEach(row => {
+      statsData.favorite_goods_tag[row.tag || 'others'] = row.count;
+    });
 
-    // 5. 统计收藏帖子事件 - 总收藏次数
-    const [favoritePostsStats] = await db.query(`
-      SELECT COUNT(*) as total_count
-      FROM record_event 
-      WHERE type = 'favorite_post_tag'
-    `);
-    stats.favorite_post_tag = {
-      total_count: favoritePostsStats[0].total_count || 0
-    };
-
-    // 6. 统计完成交易事件 - 总交易次数
+    // 9. 完成交易总次数
     const [transactionStats] = await db.query(`
       SELECT COUNT(*) as total_count
       FROM record_event 
       WHERE type = 'completed_transaction'
     `);
-    stats.completed_transaction = {
-      total_count: transactionStats[0].total_count || 0
-    };
+    statsData.completed_transaction = transactionStats[0].total_count || 0;
 
-    // 7. 统计会员开通事件 - 总开通次数
+    // 10. 会员开通总次数
     const [membershipStats] = await db.query(`
       SELECT COUNT(*) as total_count
       FROM record_event 
       WHERE type = 'membership'
     `);
-    stats.membership = {
-      total_count: membershipStats[0].total_count || 0
-    };
+    statsData.membership = membershipStats[0].total_count || 0;
 
-    // 8. 统计广告点击事件 - 点击次数
+    // 11. 广告点击总次数
     const [adClickStats] = await db.query(`
       SELECT COUNT(*) as total_clicks
       FROM record_event 
       WHERE type = 'ad_click'
     `);
-    stats.ad_click = {
-      total_clicks: adClickStats[0].total_clicks || 0
-    };
+    statsData.ad_click = adClickStats[0].total_clicks || 0;
 
-    // 9. 统计广告添加事件 - 总添加次数
+    // 12. 广告添加总次数
     const [adAddStats] = await db.query(`
       SELECT COUNT(*) as total_count
       FROM record_event 
       WHERE type = 'ad_add'
     `);
-    stats.ad_add = {
-      total_count: adAddStats[0].total_count || 0
-    };
+    statsData.ad_add = adAddStats[0].total_count || 0;
 
-    // 10. 获取总体统计
-    const [totalStats] = await db.query(`
-      SELECT COUNT(*) as total_events
-      FROM record_event
+    // ======== 最近7天统计 ========
+    const recent7Days = {};
+
+    // 最近7天访问次数
+    const [recent7DaysVisit] = await db.query(`
+      SELECT COUNT(*) as visit_count
+      FROM record_event 
+      WHERE type = 'visit' AND recorded_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
     `);
-    stats.total = {
-      total_events: totalStats[0].total_events || 0
-    };
+    recent7Days.visit = recent7DaysVisit[0].visit_count || 0;
 
-    // 11. 获取最近7天的事件统计
-    const [recentStats] = await db.query(`
-      SELECT type, COUNT(*) as count
+    // 最近7天活跃用户数（访问次数多于7次的用户）
+    const [activeUsers] = await db.query(`
+      SELECT info as user_id, COUNT(*) as visit_count
+      FROM record_event 
+      WHERE type = 'visit' AND recorded_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+      GROUP BY info
+      HAVING COUNT(*) > 7
+    `);
+    recent7Days.active_users = activeUsers.length || 0;
+
+    // 最近7天完成交易次数
+    const [recent7DaysTransaction] = await db.query(`
+      SELECT COUNT(*) as count
+      FROM record_event 
+      WHERE type = 'completed_transaction' AND recorded_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    `);
+    recent7Days.completed_transaction = recent7DaysTransaction[0].count || 0;
+
+    // 最近7天会员开通次数
+    const [recent7DaysMembership] = await db.query(`
+      SELECT COUNT(*) as count
+      FROM record_event 
+      WHERE type = 'membership' AND recorded_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    `);
+    recent7Days.membership = recent7DaysMembership[0].count || 0;
+
+    // 最近7天广告点击次数
+    const [recent7DaysAdClick] = await db.query(`
+      SELECT COUNT(*) as count
+      FROM record_event 
+      WHERE type = 'ad_click' AND recorded_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    `);
+    recent7Days.ad_click = recent7DaysAdClick[0].count || 0;
+
+    // 最近7天广告添加次数
+    const [recent7DaysAdAdd] = await db.query(`
+      SELECT COUNT(*) as count
+      FROM record_event 
+      WHERE type = 'ad_add' AND recorded_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    `);
+    recent7Days.ad_add = recent7DaysAdAdd[0].count || 0;
+
+    // 最近7天注册用户数 - 由于users表没有created_at字段，无法统计
+    // const [recent7DaysRegister] = await db.query(`
+    //   SELECT COUNT(*) as count
+    //   FROM users 
+    //   WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    // `);
+    recent7Days.register = 0; // 暂时设为0，因为users表没有时间字段
+
+    // 最近7天发布商品数
+    const [recent7DaysGoods] = await db.query(`
+      SELECT COUNT(*) as count
+      FROM goods 
+      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND status != 'deleted'
+    `);
+    recent7Days.goods = recent7DaysGoods[0].count || 0;
+
+    // 最近7天发布帖子数
+    const [recent7DaysPosts] = await db.query(`
+      SELECT COUNT(*) as count
+      FROM posts 
+      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND status != 'deleted'
+    `);
+    recent7Days.posts = recent7DaysPosts[0].count || 0;
+
+    // 最近7天发布商品标签统计
+    const [recent7DaysPublishGoodsTag] = await db.query(`
+      SELECT info as tag, COUNT(*) as count
+      FROM record_event 
+      WHERE type = 'publish_goods_tag' AND recorded_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+      GROUP BY info
+    `);
+    recent7Days.publish_goods_tag = {};
+    recent7DaysPublishGoodsTag.forEach(row => {
+      recent7Days.publish_goods_tag[row.tag || 'others'] = row.count;
+    });
+
+    // 最近7天收藏商品标签统计
+    const [recent7DaysFavoriteGoodsTag] = await db.query(`
+      SELECT info as tag, COUNT(*) as count
+      FROM record_event 
+      WHERE type = 'favorite_goods_tag' AND recorded_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+      GROUP BY info
+    `);
+    recent7Days.favorite_goods_tag = {};
+    recent7DaysFavoriteGoodsTag.forEach(row => {
+      recent7Days.favorite_goods_tag[row.tag || 'others'] = row.count;
+    });
+
+    // 每日统计数据（用于绘制折线图）
+    const [dailyRecords] = await db.query(`
+      SELECT 
+        DATE(recorded_at) as date,
+        SUM(CASE WHEN type = 'visit' THEN 1 ELSE 0 END) as visit,
+        SUM(CASE WHEN type = 'ad_click' THEN 1 ELSE 0 END) as ad_click,
+        SUM(CASE WHEN type = 'completed_transaction' THEN 1 ELSE 0 END) as completed_transaction,
+        SUM(CASE WHEN type = 'membership' THEN 1 ELSE 0 END) as membership
       FROM record_event 
       WHERE recorded_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-      GROUP BY type
+      GROUP BY DATE(recorded_at)
+      ORDER BY date ASC
     `);
-    stats.recent_7_days = {};
-    recentStats.forEach(row => {
-      stats.recent_7_days[row.type] = row.count;
+
+    // 获取每日注册、商品、帖子数据 - 注意users表没有created_at字段
+    const [dailyUserGoods] = await db.query(`
+      SELECT 
+        DATE(created_at) as date,
+        'goods' as type,
+        COUNT(*) as count
+      FROM goods 
+      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND status != 'deleted'
+      GROUP BY DATE(created_at)
+      UNION ALL
+      SELECT 
+        DATE(created_at) as date,
+        'posts' as type,
+        COUNT(*) as count
+      FROM posts 
+      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND status != 'deleted'
+      GROUP BY DATE(created_at)
+      ORDER BY date ASC
+    `);
+
+    // 构建每日数据
+    const dailyData = {};
+    dailyUserGoods.forEach(row => {
+      const date = row.date.toISOString().split('T')[0];
+      if (!dailyData[date]) {
+        dailyData[date] = { date, visit: 0, ad_click: 0, completed_transaction: 0, register: 0, goods: 0, posts: 0, membership: 0 };
+      }
+      dailyData[date][row.type] = row.count;
     });
+
+    dailyRecords.forEach(row => {
+      const date = row.date.toISOString().split('T')[0];
+      if (!dailyData[date]) {
+        dailyData[date] = { date, visit: 0, ad_click: 0, completed_transaction: 0, register: 0, goods: 0, posts: 0, membership: 0 };
+      }
+      dailyData[date].visit = row.visit;
+      dailyData[date].ad_click = row.ad_click;
+      dailyData[date].completed_transaction = row.completed_transaction;
+      dailyData[date].membership = row.membership;
+    });
+
+    recent7Days.daily_records = Object.values(dailyData);
+
+    statsData.recent_7_days = recent7Days;
 
     res.status(200).json({
       message: "事件统计数据获取成功",
-      data: stats
+      data: statsData
     });
 
   } catch (err) {
