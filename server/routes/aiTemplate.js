@@ -17,6 +17,10 @@ let aiCallStats = {
   currentDate: new Date().toDateString(), // 当前日期
 };
 
+// 敏感词缓存
+let sensitiveWordsCache = [];
+let cacheTime = 0;
+
 // 检查并重置今日统计
 function checkAndResetDaily() {
   const today = new Date().toDateString();
@@ -35,6 +39,79 @@ export function getAICallStats() {
     currentDate: aiCallStats.currentDate,
   };
 }
+
+// 加载敏感词库
+async function loadSensitiveWords() {
+  const now = Date.now();
+  if (now - cacheTime < 300000 && sensitiveWordsCache.length > 0) {
+    return sensitiveWordsCache;
+  }
+  try {
+    const [rows] = await db.query("SELECT word FROM sensitive_words WHERE status = 'active'");
+    sensitiveWordsCache = rows.map((r) => r.word);
+    cacheTime = now;
+  } catch (err) {
+    console.error("加载敏感词失败:", err);
+  }
+  return sensitiveWordsCache;
+}
+
+// 敏感词检测(词库+AI)
+async function checkSensitive(text) {
+  //先用词库快速检测
+  const words = await loadSensitiveWords();
+  const foundWords = words.filter((word) => text.includes(word));
+  if (foundWords.length > 0) {
+    return { isSafe: false, reason: "包含敏感词", words: foundWords };
+  }
+
+  // 词库未检测到,使用AI深度检测
+  const ai = new OpenAI({
+    apiKey: API_KEY,
+    baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+  });
+
+  const completion = await ai.chat.completions.create({
+    model: "qwen-turbo",
+    messages: [
+      {
+        role: "system",
+        content: '你是内容审核助手。检测文本是否包含:政治敏感、色情低俗、暴力血腥、违法犯罪、欺诈信息等。回复JSON: {"isSafe": true/false, "reason": "原因"}',
+      },
+      { role: "user", content: text },
+    ],
+  });
+
+  return JSON.parse(completion.choices[0].message.content);
+}
+
+router.post("/check-sensitive", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    if (!decoded || !decoded.user_id) {
+      return res.status(401).json({ message: "无效的 Token" });
+    }
+
+    const { text } = req.body;
+    if (!text) {
+      return res.status(400).json({ message: "缺少检测文本" });
+    }
+
+    const result = await checkSensitiveContent(text);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("敏感词检测错误:", error);
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "无效的 Token" });
+    }
+    res.status(500).json({ message: "检测失败" });
+  }
+});
 
 router.post("/generate", async (req, res) => {
   // 验证 token

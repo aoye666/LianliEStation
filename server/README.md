@@ -277,6 +277,14 @@ CREATE TABLE `user_privileges` (
     `top_post_count` INT DEFAULT 0, -- 剩余置顶帖子次数
     `top_goods_count` INT DEFAULT 0, -- 剩余置顶商品次数
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `sensitive_words` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `word` VARCHAR(100) NOT NULL,
+    `status` ENUM('active', 'inactive') DEFAULT 'active',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_word` (`word`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
 ##
