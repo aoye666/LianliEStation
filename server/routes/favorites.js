@@ -41,6 +41,8 @@ router.post("/posts/add", (req, res) => {
           return res.status(404).json({ message: "帖子未找到或已被删除" });
         }
 
+        const postTag = rows[0].tag; // 获取帖子的tag
+
         // 检查是否已经收藏过该帖子
         db.query(
           "SELECT * FROM user_favorites WHERE user_id = ? AND post_id = ? AND goods_id IS NULL",
@@ -58,7 +60,7 @@ router.post("/posts/add", (req, res) => {
             )
               .then(() => {
                 // 记录收藏帖子事件
-                db.query("INSERT INTO record_event (info, type) VALUES (?, 'favorite_post_tag')", [post_id.toString()])
+                db.query("INSERT INTO record_event (info, type) VALUES (?, 'favorite_post_tag')", [postTag || '未分类'])
                   .catch((recordErr) => {
                     console.error("记录收藏帖子事件失败:", recordErr);
                     // 不影响主要功能，继续执行
@@ -298,10 +300,10 @@ router.get("/", (req, res) => {
 
     // 并行查询用户收藏的帖子和商品
     Promise.all([
-      // 查询收藏的帖子（posts表结构：id, title, content, author_id, campus_id, status, created_at, likes, complaints）
+      // 查询收藏的帖子（posts表结构：id, title, content, author_id, campus_id, tag, status, created_at, likes, complaints）
       db.query(
         `
-        SELECT p.id, p.title, p.content, p.author_id, p.created_at, p.status, p.campus_id, p.likes, p.complaints
+        SELECT p.id, p.title, p.content, p.author_id, p.created_at, p.status, p.campus_id, p.tag, p.likes, p.complaints
         FROM user_favorites uf
         INNER JOIN posts p ON uf.post_id = p.id
         WHERE uf.user_id = ? AND uf.post_id IS NOT NULL AND uf.goods_id IS NULL AND p.status != 'deleted'

@@ -922,7 +922,31 @@ router.get("/stats", async (req, res) => {
       statsData.favorite_goods_tag[row.tag || 'others'] = row.count;
     });
 
-    // 9. 完成交易总次数
+    // 9. 发布帖子标签统计
+    const [publishPostTagStats] = await db.query(`
+      SELECT info as tag, COUNT(*) as count
+      FROM record_event 
+      WHERE type = 'publish_post_tag'
+      GROUP BY info
+    `);
+    statsData.publish_post_tag = {};
+    publishPostTagStats.forEach(row => {
+      statsData.publish_post_tag[row.tag || 'others'] = row.count;
+    });
+
+    // 10. 收藏帖子标签统计
+    const [favoritePostTagStats] = await db.query(`
+      SELECT info as tag, COUNT(*) as count
+      FROM record_event 
+      WHERE type = 'favorite_post_tag'
+      GROUP BY info
+    `);
+    statsData.favorite_post_tag = {};
+    favoritePostTagStats.forEach(row => {
+      statsData.favorite_post_tag[row.tag || 'others'] = row.count;
+    });
+
+    // 11. 完成交易总次数
     const [transactionStats] = await db.query(`
       SELECT COUNT(*) as total_count
       FROM record_event 
@@ -930,7 +954,7 @@ router.get("/stats", async (req, res) => {
     `);
     statsData.completed_transaction = transactionStats[0].total_count || 0;
 
-    // 10. 会员开通总次数
+    // 12. 会员开通总次数
     const [membershipStats] = await db.query(`
       SELECT COUNT(*) as total_count
       FROM record_event 
@@ -938,7 +962,7 @@ router.get("/stats", async (req, res) => {
     `);
     statsData.membership = membershipStats[0].total_count || 0;
 
-    // 11. 广告点击总次数
+    // 13. 广告点击总次数
     const [adClickStats] = await db.query(`
       SELECT COUNT(*) as total_clicks
       FROM record_event 
@@ -946,7 +970,7 @@ router.get("/stats", async (req, res) => {
     `);
     statsData.ad_click = adClickStats[0].total_clicks || 0;
 
-    // 12. 广告添加总次数
+    // 14. 广告添加总次数
     const [adAddStats] = await db.query(`
       SELECT COUNT(*) as total_count
       FROM record_event 
@@ -965,11 +989,11 @@ router.get("/stats", async (req, res) => {
     `);
     recent7Days.visit = recent7DaysVisit[0].visit_count || 0;
 
-    // 最近7天活跃用户数（访问次数多于7次的用户）
+    // 最近7天活跃用户数（访问次数多于7次的用户，排除游客）
     const [activeUsers] = await db.query(`
       SELECT info as user_id, COUNT(*) as visit_count
       FROM record_event 
-      WHERE type = 'visit' AND recorded_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+      WHERE type = 'visit' AND recorded_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND info != 'guest'
       GROUP BY info
       HAVING COUNT(*) > 7
     `);
@@ -1053,6 +1077,30 @@ router.get("/stats", async (req, res) => {
     recent7Days.favorite_goods_tag = {};
     recent7DaysFavoriteGoodsTag.forEach(row => {
       recent7Days.favorite_goods_tag[row.tag || 'others'] = row.count;
+    });
+
+    // 最近7天发布帖子标签统计
+    const [recent7DaysPublishPostTag] = await db.query(`
+      SELECT info as tag, COUNT(*) as count
+      FROM record_event 
+      WHERE type = 'publish_post_tag' AND recorded_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+      GROUP BY info
+    `);
+    recent7Days.publish_post_tag = {};
+    recent7DaysPublishPostTag.forEach(row => {
+      recent7Days.publish_post_tag[row.tag || 'others'] = row.count;
+    });
+
+    // 最近7天收藏帖子标签统计
+    const [recent7DaysFavoritePostTag] = await db.query(`
+      SELECT info as tag, COUNT(*) as count
+      FROM record_event 
+      WHERE type = 'favorite_post_tag' AND recorded_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+      GROUP BY info
+    `);
+    recent7Days.favorite_post_tag = {};
+    recent7DaysFavoritePostTag.forEach(row => {
+      recent7Days.favorite_post_tag[row.tag || 'others'] = row.count;
     });
 
     // 每日统计数据（用于绘制折线图）

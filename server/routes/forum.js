@@ -232,6 +232,7 @@ router.get("/posts", async (req, res) => {
       campus_id,     // 校区ID
       author_id,     // 作者ID
       keyword,       // 关键词搜索(标题和内容)
+      tag,           // 帖子标签筛选
       status = 'active', // 默认只查询active状态
       page = 1,      // 页码
       limit = 10,    // 每页数量
@@ -278,6 +279,11 @@ router.get("/posts", async (req, res) => {
     if (keyword) {
       query += " AND (p.title LIKE ? OR p.content LIKE ?)";
       queryParams.push(`%${keyword}%`, `%${keyword}%`);
+    }
+
+    if (tag) {
+      query += " AND p.tag = ?";
+      queryParams.push(tag);
     }
 
 

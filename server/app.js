@@ -21,6 +21,7 @@ import historyRouter from "./routes/history.js";
 import messagesRouter from "./routes/messages.js";
 import publishRouter from "./routes/publish.js";
 import advertisementsRouter from "./routes/advertisements.js";
+import membershipRouter from "./routes/membership.js";
 
 let app = express();
 
@@ -50,6 +51,7 @@ app.use("/api/history", historyRouter);
 app.use("/api/messages", messagesRouter);
 app.use("/api/publish", publishRouter);
 app.use("/api/advertisements", advertisementsRouter);
+app.use("/api/membership", membershipRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

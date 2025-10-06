@@ -22,7 +22,7 @@ router.get("/goods", async (req, res) => {
     const [goodsRows] = await db.query("SELECT * FROM goods WHERE author_id = ? AND status != 'deleted' ORDER BY id DESC", [userId]);
 
     // 查询用户发布的帖子
-    const [postsRows] = await db.query("SELECT * FROM posts WHERE author_id = ? AND status != 'deleted' ORDER BY id DESC", [userId]);
+    const [postsRows] = await db.query("SELECT id, title, content, author_id, created_at, status, campus_id, tag, likes, complaints FROM posts WHERE author_id = ? AND status != 'deleted' ORDER BY id DESC", [userId]);
 
     // 处理商品图片
     let goodsWithImages = [];

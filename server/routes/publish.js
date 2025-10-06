@@ -162,7 +162,7 @@ router.post("/posts", upload.array("images", 5), async (req, res) => {
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
     const author_id = decoded.user_id;
-    const { title, content, campus_id } = req.body;
+    const { title, content, campus_id, tag } = req.body;
 
     // 检查必需参数
     if (!title || !content || !campus_id) {
@@ -175,7 +175,7 @@ router.post("/posts", upload.array("images", 5), async (req, res) => {
     }
 
     // 插入帖子
-    const [result] = await db.query("INSERT INTO posts (title, content, author_id, campus_id) VALUES (?, ?, ?, ?)", [title, content, author_id, campus_id]);
+    const [result] = await db.query("INSERT INTO posts (title, content, author_id, campus_id, tag) VALUES (?, ?, ?, ?, ?)", [title, content, author_id, campus_id, tag]);
 
     const postId = result.insertId;
     if (!postId) {
@@ -197,7 +197,7 @@ router.post("/posts", upload.array("images", 5), async (req, res) => {
 
     // 记录发布帖子事件
     try {
-      await db.query("INSERT INTO record_event (info, type) VALUES (?, 'publish_post_tag')", [postId.toString()]);
+      await db.query("INSERT INTO record_event (info, type) VALUES (?, 'publish_post_tag')", [tag || '未分类']);
     } catch (recordErr) {
       console.error("记录帖子发布事件失败:", recordErr);
       // 不影响主要功能，继续执行

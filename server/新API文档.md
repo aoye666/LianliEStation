@@ -1420,6 +1420,7 @@ Authorization: Bearer {token}
 | campus_id     | Number  | 否   | 校区 ID                                             |
 | author_id     | Number  | 否   | 作者 ID                                             |
 | keyword       | String  | 否   | 根据标题和内容进行关键词搜索                        |
+| tag           | String  | 否   | 帖子标签筛选，可选值：新闻通知、吐槽倾诉、学习资料、咨询答疑、交友组队、其他 |
 | status        | String  | 否   | 帖子状态，默认为 `active`，可选 `inactive` 或 `all` |
 | page          | Number  | 否   | 页码，默认为 `1`                                    |
 | limit         | Number  | 否   | 每页数量，默认为 `10`                               |
@@ -1435,6 +1436,12 @@ Authorization: Bearer {token}
 
 ```json
 http://localhost:5000/api/forum/posts?page=1&limit=5&with_comments=true
+
+// 按标签筛选示例
+http://localhost:5000/api/forum/posts?tag=学习资料&page=1&limit=10
+
+// 组合筛选示例
+http://localhost:5000/api/forum/posts?campus_id=1&tag=咨询答疑&keyword=考试&page=1&limit=5
 ```
 
 响应参数
@@ -1461,6 +1468,7 @@ http://localhost:5000/api/forum/posts?page=1&limit=5&with_comments=true
       "content": "好",
       "author_id": 1,
       "campus_id": 1,
+      "tag": "咨询答疑",
       "status": "active",
       "created_at": "2025-04-28T02:26:53.000Z",
       "likes": 0,
@@ -1476,6 +1484,7 @@ http://localhost:5000/api/forum/posts?page=1&limit=5&with_comments=true
       "content": "好",
       "author_id": 1,
       "campus_id": 1,
+      "tag": "学习资料",
       "status": "active",
       "created_at": "2025-04-28T02:26:33.000Z",
       "likes": 1,
@@ -1960,6 +1969,7 @@ Content-Type: application/json
 | title | String | 是 | 帖子标题 |
 | content | String | 是 | 帖子内容 |
 | campus_id | Number | 是 | 校区 ID |
+| tag | String | 否 | 帖子标签，可选值：新闻通知、吐槽倾诉、学习资料、咨询答疑、交友组队、其他 |
 | images | File[] | 否 | 帖子相关图片，最多 5 张 |
 
 请求头
@@ -1976,6 +1986,7 @@ FormData:
 title: "求推荐开发区美食"
 content: "最近搬到开发区，有什么好吃的餐厅推荐吗？"
 campus_id: 1
+tag: "咨询答疑"
 images: [图片1.jpg, 图片2.jpg]
 ```
 
@@ -2037,7 +2048,8 @@ images: [图片1.jpg, 图片2.jpg]
 - 发布成功后，响应中会包含上传图片的 URL 路径
 - 如果服务器处理过程中出现错误，已上传的图片会被自动删除
 - 帖子创建时默认状态为"active"
-- 标签选项包括：新闻通知、吐槽倾诉、学习资料、咨询答疑、交友组队或其他
+- tag 字段为可选，支持的标签包括：新闻通知、吐槽倾诉、学习资料、咨询答疑、交友组队、其他
+- 发布帖子时会记录帖子标签到 record_event 表中，用于统计分析
 
 ---
 
@@ -2321,9 +2333,12 @@ Authorization: Bearer {token}
         "title": "求推荐开发区美食",
         "content": "最近搬到开发区，有什么好吃的餐厅推荐吗？",
         "campus_id": 1,
+        "tag": "food",
         "author_id": 3,
         "status": "active",
         "created_at": "2025-04-14T20:42:47.000Z",
+        "likes": 5,
+        "complaints": 0,
         "images": ["/uploads/post1.jpg", "/uploads/post2.jpg"]
       }
     ]
@@ -2735,6 +2750,7 @@ Content-Type: application/json
           "created_at": "2025-07-15T13:09:07.000Z",
           "status": "active",
           "campus_id": 1,
+          "tag": "咨询答疑",
           "likes": 1,
           "complaints": 0
         }
@@ -4362,3 +4378,129 @@ duration: 7
 - `currentDate`: 当前统计日期
 - 统计包含成功和失败的所有调用
 - 可用于监控 AI 服务使用情况
+
+---
+
+## membershipRoutes
+
+### 购买会员
+
+基本信息
+
+- **路径**: `/api/membership/purchase`
+- **方法**: `POST`
+- **描述**: 用户购买会员服务，支持不同类型和时长的会员
+
+请求参数
+| 参数名 | 类型 | 必选 | 描述 |
+|-------|------|------|------|
+| type | String | 否 | 会员类型，可选值：basic/premium/vip，默认为 basic |
+| duration | Number | 否 | 购买时长（天数），范围 1-365 天，默认为 30 天 |
+
+请求头
+
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+请求体示例
+
+```json
+{
+  "type": "premium",
+  "duration": 90
+}
+```
+
+响应参数
+| 状态码 | 内容类型 | 描述 |
+|------|----------|------|
+| 201 | application/json | 购买成功 |
+| 400 | application/json | 参数错误 |
+| 401 | application/json | 未提供 Token 或 Token 无效 |
+| 404 | application/json | 用户不存在 |
+| 500 | application/json | 服务器错误 |
+
+响应示例
+
+- 成功响应 (状态码：201)
+
+  ```json
+  {
+    "message": "会员购买成功",
+    "membership": {
+      "id": 123,
+      "type": "premium",
+      "duration": 90,
+      "user_id": 456
+    }
+  }
+  ```
+
+- 参数错误 (状态码：400)
+
+  ```json
+  {
+    "message": "无效的会员类型"
+  }
+  ```
+
+  或
+
+  ```json
+  {
+    "message": "购买时长必须在1-365天之间"
+  }
+  ```
+
+- Token 未提供 (状态码：401)
+
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token 无效 (状态码：401)
+
+  ```json
+  {
+    "message": "无效的 Token"
+  }
+  ```
+
+  或
+
+  ```json
+  {
+    "message": "Token 已过期"
+  }
+  ```
+
+- 用户不存在 (状态码：404)
+
+  ```json
+  {
+    "message": "用户不存在"
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 用户必须登录才能购买会员
+- 支持的会员类型：basic（基础版）、premium（高级版）、vip（至尊版）
+- 购买时长范围为 1-365 天，超出范围将返回错误
+- 购买成功后会自动计算会员开始时间和结束时间
+- 系统会记录会员购买事件到 record_event 表，用于统计分析
+- 使用事务确保数据一致性，购买过程中如发生错误会自动回滚
+- 会员记录包含：用户ID、会员类型、有效期等信息
+- 响应中的 membership.id 为新创建的会员记录ID

@@ -210,11 +210,24 @@ const SECRET_KEY = process.env.SECRET_KEY;
 //   }
 // });
 
-// 获取用户个人信息(新)
-router.get("/profile", authToken, async (req, res) => {
+// 获取用户个人信息
+router.get("/profile", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  
+  // 如果没有token，记录游客访问并返回401
+  if (!token) {
+    try {
+      await db.query("INSERT INTO record_event (info, type) VALUES (?, 'visit')", ["guest"]);
+    } catch (recordErr) {
+      console.error("记录游客访问事件失败:", recordErr);
+    }
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
   try {
-    const userId = req.user.user_id;
-    const isAdmin = req.user.isAdmin || false;
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const userId = decoded.user_id;
+    const isAdmin = decoded.isAdmin || false;
 
     const [userRows] = await db.query("SELECT email, credit, theme_id, background_url, banner_url, avatar FROM users WHERE id = ?", [userId]);
 
@@ -253,7 +266,7 @@ router.get("/profile", authToken, async (req, res) => {
       ),
     ]);
 
-    // 记录访问事件
+    // 记录登录用户访问事件
     try {
       await db.query("INSERT INTO record_event (info, type) VALUES (?, 'visit')", [userId.toString()]);
     } catch (recordErr) {
@@ -263,10 +276,10 @@ router.get("/profile", authToken, async (req, res) => {
 
     // 返回用户的详细信息
     const userData = {
-      nickname: req.user.nickname,
-      username: req.user.username,
-      campus_id: req.user.campus_id,
-      qq: req.user.qq,
+      nickname: decoded.nickname,
+      username: decoded.username,
+      campus_id: decoded.campus_id,
+      qq: decoded.qq,
       email: userRows[0].email,
       credit: userRows[0].credit,
       theme_id: userRows[0].theme_id,
@@ -293,7 +306,13 @@ router.get("/profile", authToken, async (req, res) => {
     return res.status(200).json(userData);
   } catch (err) {
     console.error(err);
-     res.status(401).json({ message: "Token 无效" });
+    // 如果token无效，也记录一次游客访问
+    try {
+      await db.query("INSERT INTO record_event (info, type) VALUES (?, 'visit')", ["guest"]);
+    } catch (recordErr) {
+      console.error("记录游客访问事件失败:", recordErr);
+    }
+    return res.status(401).json({ message: "Token 无效" });
   }
 });
 
