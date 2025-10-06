@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Image, Button } from "antd";
+import { Image, Button, Empty } from "antd";
 import Navbar from "../../../components/Navbar/Navbar";
 import "./Messages.scss";
 import { useRecordStore, useUserStore } from "../../../store";
@@ -31,7 +31,7 @@ const Messages = () => {
     manage: false, // true/false
   });
 
-  const { appeals, responses, fetchResponses, searchAppeals, markResponse } =
+  const { fetchResponses, searchAppeals, markResponse } =
     useRecordStore();
 
   // 申诉/回复类型
@@ -220,7 +220,7 @@ const Messages = () => {
         <div className="messages-control">
           <div className="messages-control-item">
             <Dropdown menu={{ items }}>
-              <div onClick={(e) => e.preventDefault()}>
+              <div onClick={(e) => e.preventDefault()} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <ProductOutlined
                   style={{ width: "20px", height: "20px", marginRight: "5px" }}
                 />
@@ -247,10 +247,22 @@ const Messages = () => {
         </div>
 
         <div className="messages-list">
-          {messagesList.map((message) => (
-            <div key={message.key} className="messages-list-item">
-              {!message.response_type ? (
-                <div className="message-appeal">
+          {messagesList.length === 0 ? (
+            <div className="messages-empty">
+              <Empty
+                description={
+                  conditions.read === false
+                    ? "还没有未读消息"
+                    : "还没有已读消息"
+                }
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            </div>
+          ) : (
+            messagesList.map((message) => (
+              <div key={message.key} className="messages-list-item">
+                {!message.response_type ? (
+                  <div className="message-appeal">
                   <div className="appeal-row">
                     <div className="appeal-type" style={{ backgroundColor: `${message.status === "pending"
                         ? "rgb(233, 218, 8)"
@@ -386,7 +398,8 @@ const Messages = () => {
                 </div>
               )}
             </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>

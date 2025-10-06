@@ -1,60 +1,80 @@
 import Navbar from "../../../components/Navbar/Navbar"
-import React,{ useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useRecordStore } from "../../../store"
-import { Select,Card,Button } from "antd"
-import type { TabsProps } from "antd/lib/tabs"
-import takePlace from "../../../assets/takePlace.png"
-import background1 from "../../../assets/background1.jpg"
-import background2 from "../../../assets/background2.jpg"
+import { Card, Dropdown, Empty } from "antd";
+import { AppstoreOutlined, ShoppingOutlined, FileTextOutlined, SettingOutlined } from "@ant-design/icons";
+import type { MenuProps } from "antd";
 import NoticeLogin from "../../../components/NoticeLogin/NoticeLogin"
 import { useUserStore } from "../../../store"
 import "./Favorites.scss"
+import takePlace from "../../../assets/takePlace.png"
 
-type checkBox={[number:number]:boolean}
+type checkBox = { [number: number]: boolean }
 
 const Favorites: React.FC = () => {
-  const { favoritesGoods,favoritePosts, getFavorites, removeFavoriteGoods,removeFavoritePost } = useRecordStore()
+  const { favoritesGoods, favoritePosts, getFavorites, removeFavoriteGoods, removeFavoritePost } = useRecordStore()
   const { isAuthenticated } = useUserStore()
   const [checked, setChecked] = useState<checkBox>({})
   const [isVisible, setIsVisible] = useState(false)
   const [isPosts, setIsPosts] = useState(false)
+  const [currentType, setCurrentType] = useState("商品");
 
   useEffect(() => {
     getFavorites()
-    console.log(favoritesGoods,favoritePosts)
+    console.log(favoritesGoods, favoritePosts)
   }, [])
 
-  const items = [
+  const items: MenuProps["items"] = [
     {
-      value: 'goods',
-      label: '商品',
+      key: "1",
+      label: (
+        <div
+          onClick={() => {
+            setIsPosts(false);
+            setCurrentType("商品");
+          }}
+        >
+          商品
+        </div>
+      ),
+      icon: <ShoppingOutlined />,
     },
     {
-      value: 'posts',
-      label: '帖子',
+      key: "2",
+      label: (
+        <div
+          onClick={() => {
+            setIsPosts(true);
+            setCurrentType("帖子");
+          }}
+        >
+          帖子
+        </div>
+      ),
+      icon: <FileTextOutlined />,
     },
-  ]
+  ];
 
   const handleOnClick = () => {
     setIsVisible(!isVisible)
   }
 
-  const handleCheck = (id:number) => {
-    setChecked({...checked, [id]:!checked[id]})
+  const handleCheck = (id: number) => {
+    setChecked({ ...checked, [id]: !checked[id] })
   }
-const handleOnDelete = async () => {
-  const ids = Object.keys(checked)
-    .filter(id => checked[parseInt(id)])
-    .map(id => parseInt(id))
+  const handleOnDelete = async () => {
+    const ids = Object.keys(checked)
+      .filter(id => checked[parseInt(id)])
+      .map(id => parseInt(id))
 
-  if(isPosts){
-    await Promise.all(ids.map(id => removeFavoritePost(id)))
-  } else {
-    await Promise.all(ids.map(id => removeFavoriteGoods(id)))
+    if (isPosts) {
+      await Promise.all(ids.map(id => removeFavoritePost(id)))
+    } else {
+      await Promise.all(ids.map(id => removeFavoriteGoods(id)))
+    }
+
+    window.location.reload()
   }
-
-  window.location.reload()
-}
 
 
   return (
@@ -63,78 +83,131 @@ const handleOnDelete = async () => {
       <div className="header">
         <Navbar title="收藏" backActive={true} backPath="/user" />
       </div>
-      
+
       <div className="body">
         <div className="select-container">
-          <Select className="select" defaultValue={"goods"} options={items} onChange={(key) => {setIsPosts(key === "posts")}} />
-          <Button onClick={() => handleOnClick()} className="button">管理</Button>
+          <div className="select-item">
+            <Dropdown menu={{ items }}>
+              <div onClick={(e) => e.preventDefault()} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <AppstoreOutlined
+                  style={{ width: "20px", height: "20px", marginRight: "5px" }}
+                />
+                {currentType}
+              </div>
+            </Dropdown>
+          </div>
+          <div className="select-item" onClick={() => handleOnClick()}>
+            <div className="select-item-btn">
+              <SettingOutlined style={{ marginRight: "5px" }} />
+              管理
+            </div>
+          </div>
         </div>
-        
+
         <div className="content">
           {
-            !isPosts && (
-            favoritesGoods.map((post:any) => (
-              <div className='goods' key={post.id}>
+            !isPosts ? (
+              favoritesGoods.length === 0 ? (
+                <div className="favorites-empty">
+                  <Empty
+                    description="还没有收藏商品"
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  />
+                </div>
+              ) : (
+                favoritesGoods.map((goods: any) => (
+                  <div className='item' key={goods.id}>
 
-                {
-                  isVisible?<div className="goods-delete" key={post.id} onClick={() => handleCheck(post.id)} style={checked[post.id] ? {backgroundColor: "#3498db",border: "none"} : {backgroundColor: "white"}} />:null
-                }
+                    {
+                      isVisible ? <div className={`item-delete ${checked[goods.id] ? 'checked' : ''}`} key={goods.id} onClick={() => handleCheck(goods.id)} /> : null
+                    }
 
-                {/* <div className='goods-img'>
-                <img src={
-                  post.images[0]
-                  ? `${
-                      process.env.REACT_APP_API_URL ||
-                      "http://localhost:5000"
-                    }${post.images[0]}`
-                  : takePlace
-                } alt="" />
-                </div> */}
-                <Card className="goods-description" title={post.title} hoverable>
-                  <div className="goods-detail">
-                    {post.content}
+                    <Card className="item-description" title={goods.title} hoverable>
+                      <div className="item-content">
+                        <div className='item-img'>
+                          <img
+                            src={
+                              goods.images && goods.images[0]
+                                ? `${process.env.REACT_APP_API_URL || "http://localhost:5000"}${goods.images[0]}`
+                                : takePlace
+                            }
+                            alt=""
+                          />
+                        </div>
+                        <div className="item-info">
+                          <div className="item-detail">
+                            {goods.content}
+                          </div>
+                          <div className='item-bottom'>
+                            <div className='goods-price'>
+                              {goods.price}r
+                            </div>
+                            <div className='item-tag'>
+                              {goods.tag}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
                   </div>
-                  <div className='goods-bottom'>
-                    <div className='goods-price'>
-                      {post.price}r
-                    </div>
-                    <div className='goods-tag'>
-                      {post.tag}
-                    </div>
-                  </div> 
-                </Card>
-              </div>
-            )))
-          }
-          {
-            isPosts && (
-            favoritePosts.map((post:any, index:number) => (
-              <div className='goods' key={index}>
+                ))
+              )
+            ) : (
+              favoritePosts.length === 0 ? (
+                <div className="favorites-empty">
+                  <Empty
+                    description="还没有收藏帖子"
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  />
+                </div>
+              ) : (
+                favoritePosts.map((post: any, index: number) => (
+                  <div className='item' key={index}>
 
-                {
-                  isVisible?<div className="goods-delete" key={post.id} onClick={() => handleCheck(post.id)} style={checked[post.id] ? {backgroundColor: "#3498db",border: "none"} : {backgroundColor: "white"}} />:null
-                }
+                    {
+                      isVisible ? <div className={`item-delete ${checked[post.id] ? 'checked' : ''}`} key={post.id} onClick={() => handleCheck(post.id)} /> : null
+                    }
 
-                <Card className="goods-description" title={post.title} hoverable>
-                  <div className="goods-detail">
-                    {post.content}
+                    <Card className="item-description" title={post.title} hoverable>
+                      <div className="item-content">
+                        <div className='item-img'>
+                          <img
+                            src={
+                              post.images && post.images[0]
+                                ? `${process.env.REACT_APP_API_URL || "http://localhost:5000"}${post.images[0]}`
+                                : takePlace
+                            }
+                            alt=""
+                          />
+                        </div>
+                        <div className="item-info">
+                          <div className="item-detail">
+                            {post.content}
+                          </div>
+                          <div className="item-bottom">
+                            <div className="item-tag">{post.tag}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
                   </div>
-                </Card>
-              </div>
-            )))
+                ))
+              )
+            )
           }
 
         </div>
       </div>
 
+      {
+        isVisible ? (
+          <div className="footer">
+            <div className="delete-button">
+              <button onClick={() => handleOnDelete()}>删除</button>
+            </div>
+          </div>) : null
+      }
 
-      <div className="footer">
-        {isVisible ? (
-          <div className="delete-button">
-            <button onClick={() => handleOnDelete()}>删除</button>
-          </div>
-        ) : null}
-      </div>
     </div>
   )
 }

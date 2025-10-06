@@ -265,12 +265,28 @@ const ForumPublish = () => {
   };
 
   const handlePublish = async () => {
+    // 验证所有必填字段
+    if (!title.trim()) {
+      message.warning('请输入帖子标题');
+      return;
+    }
+    
+    if (tag === '帖子分类' || tag === '帖子标签') {
+      message.warning('请选择帖子标签');
+      return;
+    }
+    
+    if (campus_name === '校区选择') {
+      message.warning('请选择校区');
+      return;
+    }
+
     try {
       const success = await publishForumPost(
         title,
         content,
         campus_id,
-        // tag,
+        tag,
         images
       );
 

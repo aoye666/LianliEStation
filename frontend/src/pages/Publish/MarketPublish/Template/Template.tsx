@@ -302,13 +302,34 @@ const Template = () => {
   };
 
   const handlePublish = async () => {
+    // 验证所有必填字段
+    if (!title.trim()) {
+      message.warning('请输入商品标题');
+      return;
+    }
+    
+    if (tag === '商品类型') {
+      message.warning('请选择商品类型');
+      return;
+    }
+    
+    if (campus_name === '校区选择') {
+      message.warning('请选择校区');
+      return;
+    }
+    
+    if (price === null || price === undefined || price < 0) {
+      message.warning('请输入有效的商品价格');
+      return;
+    }
+
     try {
       const success = await publishMarketGoods(
         title,
         campus_id,
         post_type,
         content,
-        price ?? undefined,
+        price,
         tag,
         images
       );

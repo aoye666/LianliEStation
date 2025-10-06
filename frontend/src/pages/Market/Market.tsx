@@ -18,8 +18,8 @@ const Market = () => {
   const [showMore, setShowMore] = useState(false);
   const {
     goods,
-    filters,
-    setFilters,
+    goodsFilters: filters,
+    setGoodsFilters: setFilters,
     updateGoods,
     clearGoods,
     clear,
@@ -35,7 +35,7 @@ const Market = () => {
     const minItemWidth = 140; // 最小商品项宽度
     const maxItemWidth = 220; // 最大商品项宽度
     const gap = 6; // 商品项之间的间距
-    
+
     // 根据屏幕宽度设置响应式断点
     let columns;
     if (containerWidth < 400) {
@@ -51,23 +51,23 @@ const Market = () => {
       // 大屏幕：根据最小宽度动态计算
       columns = Math.floor((containerWidth + gap) / (minItemWidth + gap));
     }
-    
+
     columns = Math.max(2, Math.min(columns, 6)); // 限制在2-6列之间
-    
+
     // 验证计算的宽度是否合理
     const availableWidth = containerWidth - (columns - 1) * gap;
     const itemWidth = availableWidth / columns;
-    
+
     // 如果计算出的宽度太大，增加列数
     if (itemWidth > maxItemWidth && columns < 6) {
       columns = Math.min(6, Math.floor((containerWidth + gap) / (maxItemWidth + gap)));
     }
-    
+
     // 如果计算出的宽度太小，减少列数
     if (itemWidth < minItemWidth && columns > 2) {
       columns = Math.max(2, columns - 1);
     }
-    
+
     return columns;
   }, [windowSize.width]);
 
@@ -77,7 +77,7 @@ const Market = () => {
 
   useEffect(() => {
     fetchGoods();
-    
+
     // 监听窗口尺寸变化
     const handleResize = () => {
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
@@ -477,10 +477,9 @@ const Market = () => {
                 <Image
                   src={
                     item.images[0]
-                      ? `${
-                          process.env.REACT_APP_API_URL ||
-                          "http://localhost:5000"
-                        }${item.images[0]}`
+                      ? `${process.env.REACT_APP_API_URL ||
+                      "http://localhost:5000"
+                      }${item.images[0]}`
                       : takePlace
                   }
                   alt="商品图片"

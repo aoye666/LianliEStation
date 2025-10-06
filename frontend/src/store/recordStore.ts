@@ -54,12 +54,12 @@ interface FavoritePost {
   campus_id: number;
   likes: number;
   images: string[];
-  // 待具体开发时补充
 }
 
 interface HistoryPost {
   id: number;
   title: string;
+  tag: string | null;
   content: string | null;
   author_id: number;
   created_at: string;
@@ -67,7 +67,6 @@ interface HistoryPost {
   campus_id: number;
   likes: number;
   images: string[];
-  // 待具体实现时补充
 }
 
 interface HistoryGoods {
@@ -81,17 +80,6 @@ interface HistoryGoods {
   status: "active" | "inactive" | "deleted";
   price: number;
   campus_id: number;
-  images: string[];
-}
-
-interface ForumPost {
-  id: number;
-  title: string;
-  content: string;
-  author_id: number;
-  campus_id: number;
-  status: string;
-  created_at: string;
   images: string[];
 }
 
@@ -138,12 +126,6 @@ interface RecordState {
     content: string
   ) => Promise<void>; // 提交回复(管理员)
   markResponse: (messages: object) => Promise<void>; // 标记回复为已读
-
-  //forum相关的状态管理及方法
-  forumPosts: ForumPost[];
-  fetchForumPosts: () => Promise<void>; // 获取论坛帖子列表
-  favorateForum:(id: number,action: string) => Promise<void>; // 收藏帖子
-  
 }
 
 const useRecordStore = create<RecordState>()(
@@ -158,11 +140,9 @@ const useRecordStore = create<RecordState>()(
       responses: [],
       page: 1,
 
-
       reset: () => {
         set({
           historyGoods: [],
-          forumPosts: [],
           historyPosts: [],
           favoritesGoods: [],
           favoritePosts: [],
@@ -181,10 +161,6 @@ const useRecordStore = create<RecordState>()(
         set(() => ({
           historyGoods: [],
         })),
-
-      favorateForum: async (id: number, action: string) => {
-        
-      },
 
       initialHistoryGoods: async () => {
         try {
@@ -284,12 +260,8 @@ const useRecordStore = create<RecordState>()(
 
       removeFavoriteGoods: async (favoriteId: number) => {
         try{
-          const response = await api.delete("/api/favorites/goods/remove", {
-            data:{
-              goods_id: favoriteId,
-            }
-        });
-          return response.status
+          const response = await api.delete("/api/favorites/goods/remove", { goods_id: favoriteId });
+          return response.status;
         }
         catch(error){
           const err = error as AxiosError;
@@ -314,11 +286,7 @@ const useRecordStore = create<RecordState>()(
 
       removeFavoritePost: async (favoriteId: number) => {
         try{
-          const response = await api.delete("/api/favorites/posts/remove", {
-            data:{
-              post_id: favoriteId,
-            }
-        });
+          const response = await api.delete("/api/favorites/posts/remove", { post_id: favoriteId });
           return response.status
         }
         catch(error){
@@ -446,28 +414,6 @@ const useRecordStore = create<RecordState>()(
           await get().fetchResponses(); // 重新获取回复列表
         } catch (error) {
           throw error;
-        }
-      },
-
-      fetchForumPosts: async () => {
-        try {
-          const response = await api.get("/api/forum/posts");
-          if (response?.status === 200 && response.data) {
-            const data = response.data.posts;
-            set((state) => ({
-              forumPosts: [...data], // 更新 goods 状态
-            }));
-          } else {
-            // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
-            console.log("No posts available or unexpected response status");
-          }
-        } catch (error) {
-          // 捕获请求失败的错误（如 404 或网络问题）
-          if (error instanceof Error) {
-            console.error("Error fetching posts:", error.message);
-          } else {
-            console.error("Error fetching posts:", error);
-          }
         }
       },
     }),

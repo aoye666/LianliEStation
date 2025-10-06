@@ -25,7 +25,7 @@ interface Goods {
   author_credit: number;
 }
 
-interface Filters {
+interface GoodsFilters {
   searchTerm: string | null;
   priceRange: [number, number];
   tag: string | null;
@@ -58,6 +58,7 @@ interface Post {
   id: number;
   title: string;
   content: string;
+  // tag: string;
   author_id: number;
   campus_id: number;
   author_avatar: string;
@@ -75,9 +76,9 @@ interface MainState {
   forumPage: number;
   goods: Goods[];
   posts: Post[];
-  filters: Filters;
+  goodsFilters: GoodsFilters;
   
-  // ========== 新增：加载状态 ==========
+  // 加载状态
   isMarketLoading: boolean;
   isForumLoading: boolean;
   setMarketLoading: (loading: boolean) => void;
@@ -85,15 +86,15 @@ interface MainState {
   
   clear: () => void;
   fetchGoods: () => Promise<void>;
-  setFilters: (newFilters: Partial<Filters>) => void;
+  setGoodsFilters: (newFilters: Partial<GoodsFilters>) => void;
   updateGoods: () => Promise<void>;
   getForumPosts: () => Promise<void>;
-  updateforumPosts: () => Promise<void>;
+  updateForumPosts: () => Promise<void>;
   publishForumPost: (
     title: string,
     content: string,
     campus_id: number,
-    // tag: string,
+    tag?: string,
     images?: File[]
   ) => Promise<boolean>;
   publishMarketGoods: (
@@ -135,24 +136,8 @@ const useMainStore = create<MainState>()(
       marketPage: 1,
       forumPage: 1,
       goods: [],
-      forums: [
-        {
-          id: 1,
-          title: "test",
-          content: "test",
-          author_id: 1,
-          campus_id: 1,
-          status: "active",
-          author_avatar: "",
-          author_name: "",
-          created_at: " ",
-          likes: 0,
-          images: [],
-          comments: [],
-        },
-      ],
       posts: [],
-      filters: {
+      goodsFilters: {
         searchTerm: "",
         goods_type: null,
         tag: "",
@@ -160,11 +145,11 @@ const useMainStore = create<MainState>()(
         campus_id: null,
       },
       
-      // ========== 新增：加载状态初始值 ==========
+      // 加载状态初始值
       isMarketLoading: false,
       isForumLoading: false,
       
-      // ========== 新增：设置加载状态 ==========
+      // 设置加载状态
       setMarketLoading: (loading) => set({ isMarketLoading: loading }),
       setForumLoading: (loading) => set({ isForumLoading: loading }),
 
@@ -174,7 +159,7 @@ const useMainStore = create<MainState>()(
           forumPage: 1,
           goods: [],
           posts: [],
-          filters: {
+          goodsFilters: {
             searchTerm: "",
             goods_type: null,
             tag: "",
@@ -185,8 +170,7 @@ const useMainStore = create<MainState>()(
       },
 
       getForumPosts: async () => {
-        // ========== 新增：开始加载 ==========
-        set({ isForumLoading: true });
+        set({ isForumLoading: true }); // 开始加载
         
         try {
           const response = await api.get("/api/forum/posts", {
@@ -212,11 +196,11 @@ const useMainStore = create<MainState>()(
             console.error("Error fetching posts:", error);
           }
         } finally {
-          // ========== 新增：加载完成 ==========
-          set({ isForumLoading: false });
+          set({ isForumLoading: false }); // 加载完成
         }
       },
-      updateforumPosts: async () => {
+
+      updateForumPosts: async () => {
         try {
           const response = await api.get("/api/forum/posts", {
             params: {
@@ -244,13 +228,13 @@ const useMainStore = create<MainState>()(
             console.error("Error fetching posts:", error);
           }
         }
-
       },
+
       publishForumPost: async (
         title: string,
         content: string,
         campus_id: number,
-        // tag: string,
+        tag?: string,
         images?: File[]
       ) => {
         try {
@@ -258,7 +242,7 @@ const useMainStore = create<MainState>()(
           formData.append('title', title);
           formData.append('content', content);
           formData.append('campus_id', campus_id.toString());
-          // formData.append('tag', tag);
+          if(tag) formData.append('tag', tag);
           
           // 如果有图片，添加到formData
           if (images && images.length > 0) {
@@ -282,6 +266,7 @@ const useMainStore = create<MainState>()(
           return false;
         }
       },
+
       publishMarketGoods: async (
         title: string,
         campus_id: number,
@@ -334,6 +319,7 @@ const useMainStore = create<MainState>()(
           return false;
         }
       },
+
       updateForumInteract: async (
         id: number,
         action: string,
@@ -370,19 +356,18 @@ const useMainStore = create<MainState>()(
       },
 
       fetchGoods: async () => {
-        // ========== 新增：开始加载 ==========
-        set({ isMarketLoading: true });
+        set({ isMarketLoading: true }); // 开始加载
         
         try {
           const response = await api.get("/api/goods", {
             page: get().marketPage,
             limit: 12,
-            keyword: get().filters.searchTerm,
-            goods_type: get().filters.goods_type,
-            tag: get().filters.tag,
-            min_price: get().filters.priceRange[0],
-            max_price: get().filters.priceRange[1],
-            campus_id: get().filters.campus_id,
+            keyword: get().goodsFilters.searchTerm,
+            goods_type: get().goodsFilters.goods_type,
+            tag: get().goodsFilters.tag,
+            min_price: get().goodsFilters.priceRange[0],
+            max_price: get().goodsFilters.priceRange[1],
+            campus_id: get().goodsFilters.campus_id,
           });
 
           // console.log(response);
@@ -404,8 +389,7 @@ const useMainStore = create<MainState>()(
             console.error("Error fetching posts:", error);
           }
         } finally {
-          // ========== 新增：加载完成 ==========
-          set({ isMarketLoading: false });
+          set({ isMarketLoading: false }); // 加载完成
         }
       },
 
@@ -413,30 +397,30 @@ const useMainStore = create<MainState>()(
         set(() => ({
           goods: [],
           marketPage: 1,
-          filters: {
+          goodsFilters: {
             searchTerm: "",
             goods_type: null,
             tag: null,
             priceRange: [0, 1000000],
             campus_id: null,
           },
-        })), // 清空所有状态，包括 posts 等
+        })), // 清空所有状态
 
       clearGoods: () =>
         set(() => ({
           goods: [],
           marketPage: 1,
-        })), // 清空 posts 状态
+        })), // 清空 goods 状态
 
-      setFilters: async (newFilters) => {
+      setGoodsFilters: async (newFilters) => {
         set((state) => ({
-          filters: { ...state.filters, ...newFilters }, // 更新 filters 状态
+          goodsFilters: { ...state.goodsFilters, ...newFilters }, // 更新 filters 状态
         }));
       },
 
       clearFilters: () =>
         set(() => ({
-          filters: {
+          goodsFilters: {
             searchTerm: "",
             goods_type: null,
             tag: null,
@@ -451,12 +435,12 @@ const useMainStore = create<MainState>()(
             params: {
               page: get().marketPage,
               limit: 12,
-              keyword: get().filters.searchTerm,
-              goods_type: get().filters.goods_type,
-              tag: get().filters.tag,
-              min_price: get().filters.priceRange[0],
-              max_price: get().filters.priceRange[1],
-              campus_id: get().filters.campus_id,
+              keyword: get().goodsFilters.searchTerm,
+              goods_type: get().goodsFilters.goods_type,
+              tag: get().goodsFilters.tag,
+              min_price: get().goodsFilters.priceRange[0],
+              max_price: get().goodsFilters.priceRange[1],
+              campus_id: get().goodsFilters.campus_id,
             },
           });
 

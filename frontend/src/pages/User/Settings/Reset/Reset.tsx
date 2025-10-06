@@ -341,7 +341,7 @@ const Reset = () => {
                 onChange={(value) => setProfile(prev => ({ ...prev, theme_id: value }))}
                 size="large"
                 options={[
-                  { value: 1, label: '默认风格' },
+                  { value: 1, label: '连理蓝' },
                 ]}
               />
             </div>
