@@ -53,12 +53,11 @@ CREATE TABLE `users` (
     `banner_url` VARCHAR(255) NOT NULL DEFAULT '/uploads/default_banner.png',
     `background_url` VARCHAR(255) NOT NULL DEFAULT '/uploads/default_background.png',
     `theme_id` INT NOT NULL DEFAULT 1,
-    `user_type` ENUM('guest', 'user', 'admin') DEFAULT 'user' COMMENT '用户类型：guest-游客，user-普通用户，admin-管理员',
+    `is_admin` Boolean DEFAULT false,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `email_unique` (`email`),
     UNIQUE KEY `username_unique` (`username`),
-    INDEX `idx_user_type` (`user_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `goods` (
@@ -144,6 +143,7 @@ CREATE TABLE `posts` (
     `content` TEXT NOT NULL,
     `author_id` INT NOT NULL,
     `campus_id` INT NOT NULL,
+    `tag` VARCHAR(255),
     `status` ENUM('active', 'deleted') DEFAULT 'active',
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `likes` INT DEFAULT 0,
@@ -256,20 +256,27 @@ CREATE TABLE `record_event` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `info` VARCHAR(255), -- 额外记录信息，可为空，不同类型的记录灵活添加，如访问的记录可添加用户的id以记录活跃用户
     `type` ENUM(
-        'visit', 
-        'publish_goods_tag', 
-        'publish_post_tag', 
-        'favorite_goods_tag', 
-        'favorite_post_tag', 
-        'completed_transaction', 
-        'membership', 
-        'ad_click', 
+        'visit',
+        'publish_goods_tag',
+        'publish_post_tag',
+        'favorite_goods_tag',
+        'favorite_post_tag',
+        'completed_transaction',
+        'membership',
+        'ad_click',
         'ad_add'
     ) NOT NULL COMMENT '记录类型：visit-访问, publish_goods_tag-发布商品时记录标签, publish_post_tag-发布帖子时记录标签, favorite_goods_tag-收藏商品时记录标签, favorite_post_tag-收藏帖子时记录标签, completed_transaction-完成交易, membership-会员开通, ad_click-广告点击, ad_add-广告添加',
     `recorded_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     INDEX `idx_type` (`type`),
     INDEX `idx_recorded_at` (`recorded_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='事件记录表';
+
+CREATE TABLE `user_privileges` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `top_post_count` INT DEFAULT 0, -- 剩余置顶帖子次数
+    `top_goods_count` INT DEFAULT 0, -- 剩余置顶商品次数
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
 ##
@@ -908,7 +915,10 @@ GET /api/users/userInfo/123
         "campus_id": 1,
         "post_type": "sale",
         "tag": "书籍",
-        "images": ["/uploads/1738204953485-tios2b1p2dl.png", "/uploads/1738204953486-tios2b1p2dl.jpg"]
+        "images": [
+          "/uploads/1738204953485-tios2b1p2dl.png",
+          "/uploads/1738204953486-tios2b1p2dl.jpg"
+        ]
       }
     ]
     ```
@@ -942,7 +952,10 @@ GET /api/users/userInfo/123
     ```json
     {
       "message": "发布成功",
-      "image_urls": ["/uploads/1738204953485-filename1.jpg", "/uploads/1738204953490-filename2.jpg"]
+      "image_urls": [
+        "/uploads/1738204953485-filename1.jpg",
+        "/uploads/1738204953490-filename2.jpg"
+      ]
     }
     ```
     如果没有上传图片，则返回的 `image_urls` 数组为空。
@@ -1013,7 +1026,10 @@ Authorization: Bearer <your_token_here>
         "likes": 1,
         "complaints": 0
       },
-      "images": ["/uploads/1738204953485-tios2b1p2dl.png", "/uploads/1738204953486-tios2b1p2dl.jpg"]
+      "images": [
+        "/uploads/1738204953485-tios2b1p2dl.png",
+        "/uploads/1738204953486-tios2b1p2dl.jpg"
+      ]
     }
     ```
 - **错误响应:**
