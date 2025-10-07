@@ -18,11 +18,14 @@ const Favorites: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false)
   const [isPosts, setIsPosts] = useState(false)
   const [currentType, setCurrentType] = useState("商品");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
-    getFavorites()
-    console.log(favoritesGoods, favoritePosts)
-  }, [])
+    if (isAuthenticated) {
+      getFavorites()
+      console.log(favoritesGoods, favoritePosts)
+    }
+  }, [isAuthenticated, refreshTrigger])
 
   const items: MenuProps["items"] = [
     {
@@ -32,6 +35,7 @@ const Favorites: React.FC = () => {
           onClick={() => {
             setIsPosts(false);
             setCurrentType("商品");
+            setChecked({}); // 切换类型时清空选中状态
           }}
         >
           商品
@@ -46,6 +50,7 @@ const Favorites: React.FC = () => {
           onClick={() => {
             setIsPosts(true);
             setCurrentType("帖子");
+            setChecked({}); // 切换类型时清空选中状态
           }}
         >
           帖子
@@ -62,18 +67,30 @@ const Favorites: React.FC = () => {
   const handleCheck = (id: number) => {
     setChecked({ ...checked, [id]: !checked[id] })
   }
+  
   const handleOnDelete = async () => {
     const ids = Object.keys(checked)
       .filter(id => checked[parseInt(id)])
       .map(id => parseInt(id))
 
-    if (isPosts) {
-      await Promise.all(ids.map(id => removeFavoritePost(id)))
-    } else {
-      await Promise.all(ids.map(id => removeFavoriteGoods(id)))
+    if (ids.length === 0) {
+      return;
     }
 
-    window.location.reload()
+    try {
+      if (isPosts) {
+        await Promise.all(ids.map(id => removeFavoritePost(id)))
+      } else {
+        await Promise.all(ids.map(id => removeFavoriteGoods(id)))
+      }
+
+      // 清空选中状态
+      setChecked({});
+      // 触发重新获取收藏数据
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error('删除收藏失败:', error);
+    }
   }
 
 
@@ -184,9 +201,11 @@ const Favorites: React.FC = () => {
                           <div className="item-detail">
                             {post.content}
                           </div>
-                          <div className="item-bottom">
-                            <div className="item-tag">{post.tag}</div>
-                          </div>
+                          {post.tag && (
+                            <div className="item-bottom item-bottom-post">
+                              <div className="item-tag">{post.tag}</div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </Card>

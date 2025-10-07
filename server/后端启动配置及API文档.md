@@ -19,7 +19,7 @@ database: lianli,
 
 使用 `dotenv` 开发依赖进行环境变量管理，如以上环境有改动，请自行在 `server` 根目录下新建`.env`文件，用以下格式修改(SECRET_KEY 随你修改，也可以问 fanzdstar 设的是啥,最后两个也可以填入您自己的邮箱账户和邮箱授权码，也可以问 fanzdstar 设的是啥)
 
-``````
+```
 DB_HOST=
 DB_PORT=
 DB_USER=
@@ -30,7 +30,7 @@ SECRET_KEY=
 EMAIL_USER=
 EMAIL_PASS=
 API_KEY
-``````
+```
 
 ### 数据库环境
 
@@ -55,7 +55,7 @@ CREATE TABLE `users` (
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `email_unique` (`email`),
-    UNIQUE KEY `username_unique` (`username`),
+    UNIQUE KEY `username_unique` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `goods` (
@@ -273,7 +273,7 @@ CREATE TABLE `user_privileges` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `user_id` INT NOT NULL,
     `top_post_count` INT DEFAULT 0, -- 剩余置顶帖子次数
-    `top_goods_count` INT DEFAULT 0, -- 剩余置顶商品次数
+    `top_goods_count` INT DEFAULT 0 -- 剩余置顶商品次数
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `sensitive_words` (
@@ -676,7 +676,7 @@ Authorization: Bearer {token}
     "background_url": "/uploads/background.jpg",
     "banner_url": "/uploads/banner.jpg",
     "avatar": "/uploads/avatar.jpg",
-    "isAdmin": false, 
+    "isAdmin": false,
     "records": {
       "likes": [
         {
@@ -696,16 +696,16 @@ Authorization: Bearer {token}
       ]
     },
     "favorites": {
-    	"posts": [
-      	{
-      		"id": 1
+      "posts": [
+        {
+          "id": 1
         }
-       ],
-       "goods": [
-       	{
-        	"id": 1
+      ],
+      "goods": [
+        {
+          "id": 1
         }
-       ]
+      ]
     }
   }
   ```
@@ -727,6 +727,7 @@ Authorization: Bearer {token}
   ```
 
 - 用户不存在 (状态码：404)
+
   ```json
   {
     "message": "用户不存在"
@@ -828,6 +829,7 @@ Authorization: Bearer {token}
   ```
 
 - 用户不存在 (状态码：404)
+
   ```json
   {
     "message": "用户不存在"
@@ -935,6 +937,7 @@ PUT /api/users/profile/image?type=avatar
   ```
 
 - 用户不存在 (状态码：404)
+
   ```json
   {
     "message": "用户不存在"
@@ -984,11 +987,11 @@ GET /api/users/records
 ```
 
 **响应参数**
-| 状态码 | 内容类型         | 描述                       |
+| 状态码 | 内容类型 | 描述 |
 | ------ | ---------------- | -------------------------- |
-| 200    | application/json | 获取成功                   |
-| 401    | application/json | 未提供 Token 或 Token 无效 |
-| 500    | application/json | 服务器错误                 |
+| 200 | application/json | 获取成功 |
+| 401 | application/json | 未提供 Token 或 Token 无效 |
+| 500 | application/json | 服务器错误 |
 
 **响应示例**
 
@@ -1038,7 +1041,7 @@ GET /api/users/records
 
 - **路径**: `/api/goods/:goods_id`
 - **方法**: `DELETE`
-- **描述**: 用户软删除商品，将商品状态标记为已删除。可通过reason参数区分是完成交易还是普通删除
+- **描述**: 用户软删除商品，将商品状态标记为已删除。可通过 reason 参数区分是完成交易还是普通删除
 
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
@@ -1701,15 +1704,15 @@ Authorization: Bearer {token}
 
 请求参数
 
-| 参数名    | 类型   | 必选 | 描述                                   |
-| --------- | ------ | ---- | -------------------------------------- |
-| post_id   | Number | 是   | 帖子 ID (URL 参数)                     |
-| title     | String | 是   | 帖子标题                               |
-| content   | String | 是   | 帖子内容                               |
-| campus_id | Number | 是   | 校区 ID                                |
+| 参数名    | 类型   | 必选 | 描述                                                               |
+| --------- | ------ | ---- | ------------------------------------------------------------------ |
+| post_id   | Number | 是   | 帖子 ID (URL 参数)                                                 |
+| title     | String | 是   | 帖子标题                                                           |
+| content   | String | 是   | 帖子内容                                                           |
+| campus_id | Number | 是   | 校区 ID                                                            |
 | tag       | String | 否   | 帖子标签（新闻通知、吐槽倾诉、学习资料、咨询答疑、交友组队、其他） |
-| status    | String | 否   | 帖子状态，默认为 'active'              |
-| images    | File[] | 否   | 帖子图片文件，最多 9 张                |
+| status    | String | 否   | 帖子状态，默认为 'active'                                          |
+| images    | File[] | 否   | 帖子图片文件，最多 9 张                                            |
 
 请求头
 
@@ -1811,16 +1814,16 @@ images: [file1.jpg, file2.jpg, file3.jpg]
 
 请求参数
 
-| 参数名        | 类型    | 必选 | 描述                                                |
-| ------------- | ------- | ---- | --------------------------------------------------- |
-| campus_id     | Number  | 否   | 校区 ID                                             |
-| author_id     | Number  | 否   | 作者 ID                                             |
-| keyword       | String  | 否   | 根据标题和内容进行关键词搜索                        |
+| 参数名        | 类型    | 必选 | 描述                                                                         |
+| ------------- | ------- | ---- | ---------------------------------------------------------------------------- |
+| campus_id     | Number  | 否   | 校区 ID                                                                      |
+| author_id     | Number  | 否   | 作者 ID                                                                      |
+| keyword       | String  | 否   | 根据标题和内容进行关键词搜索                                                 |
 | tag           | String  | 否   | 帖子标签筛选，可选值：新闻通知、吐槽倾诉、学习资料、咨询答疑、交友组队、其他 |
-| status        | String  | 否   | 帖子状态，默认为 `active`，可选 `inactive` 或 `all` |
-| page          | Number  | 否   | 页码，默认为 `1`                                    |
-| limit         | Number  | 否   | 每页数量，默认为 `10`                               |
-| with_comments | Boolean | 否   | 是否包含评论，默认为 `false`，可以设置为 `true`     |
+| status        | String  | 否   | 帖子状态，默认为 `active`，可选 `inactive` 或 `all`                          |
+| page          | Number  | 否   | 页码，默认为 `1`                                                             |
+| limit         | Number  | 否   | 每页数量，默认为 `10`                                                        |
+| with_comments | Boolean | 否   | 是否包含评论，默认为 `false`，可以设置为 `true`                              |
 
 请求头
 
@@ -2082,7 +2085,10 @@ GET /api/appeals/search?status=pending
         "status": "pending",
         "read_status": "unread",
         "created_at": "2025-04-14T20:50:52.000Z",
-        "images": ["/uploads/1744692652944-mtflasewzvs.jpg", "/uploads/1744692652935-5e4lmlppy77.jpg"]
+        "images": [
+          "/uploads/1744692652944-mtflasewzvs.jpg",
+          "/uploads/1744692652935-5e4lmlppy77.jpg"
+        ]
       },
       {
         "id": 3,
@@ -2487,7 +2493,11 @@ images: [图片1.jpg, 图片2.jpg]
         "content": "您的帖子因包含广告内容被移除，这违反了我们的社区规则第3.2条。",
         "read_status": "read",
         "created_at": "2025-04-14T20:42:47.000Z",
-        "images": ["https://example.com/images/response/violation_content_1.jpg", "https://example.com/images/response/community_rules_2.jpg", "https://example.com/images/response/violation_evidence_1.jpg"],
+        "images": [
+          "https://example.com/images/response/violation_content_1.jpg",
+          "https://example.com/images/response/community_rules_2.jpg",
+          "https://example.com/images/response/violation_evidence_1.jpg"
+        ],
         "image_count": 3
       },
       {
@@ -2499,7 +2509,10 @@ images: [图片1.jpg, 图片2.jpg]
         "content": "我们已收到您的申诉，经审核后认为您的帖子不违反社区规定，已恢复显示。",
         "read_status": "unread",
         "created_at": "2025-04-14T20:42:47.000Z",
-        "images": ["https://example.com/images/response/appeal_success_2.jpg", "https://example.com/images/response/post_restored_2.jpg"],
+        "images": [
+          "https://example.com/images/response/appeal_success_2.jpg",
+          "https://example.com/images/response/post_restored_2.jpg"
+        ],
         "image_count": 2
       },
       {
@@ -2571,9 +2584,9 @@ images: [图片1.jpg, 图片2.jpg]
 | status | String | 是 | 状态值，"unread" 表示未读，"read" 表示已读 |
 
 请求头
-| 参数名        | 类型   | 必选 | 描述                       |
+| 参数名 | 类型 | 必选 | 描述 |
 | ------------- | ------ | ---- | -------------------------- |
-| Authorization | String | 是   | Bearer token（管理员权限） |
+| Authorization | String | 是 | Bearer token（管理员权限） |
 
 请求体示例
 
@@ -2608,8 +2621,18 @@ images: [图片1.jpg, 图片2.jpg]
     "error_count": 0,
     "results": [
       { "message_id": 1, "type": "appeal", "status": "read", "success": true },
-      { "message_id": 2, "type": "response", "status": "read", "success": true },
-      { "message_id": 3, "type": "appeal", "status": "unread", "success": true },
+      {
+        "message_id": 2,
+        "type": "response",
+        "status": "read",
+        "success": true
+      },
+      {
+        "message_id": 3,
+        "type": "appeal",
+        "status": "unread",
+        "success": true
+      },
       { "message_id": 4, "type": "response", "status": "read", "success": true }
     ]
   }
@@ -2680,7 +2703,7 @@ images: [图片1.jpg, 图片2.jpg]
 
 基本信息
 
-- **路径**: `/api/history/goods`
+- **路径**: `/api/history/`
 - **方法**: `GET`
 - **描述**: 查询用户发布的商品和帖子历史记录，包括关联的图片信息
 
@@ -2787,7 +2810,7 @@ Authorization: Bearer {token}
 | 参数名   | 类型   | 必选 | 描述                  |
 | -------- | ------ | ---- | --------------------- |
 | goods_id | Number | 是   | 商品 ID (URL 参数)    |
-| status  | String | 是   | 商品状态 (请求体参数) |
+| status   | String | 是   | 商品状态 (请求体参数) |
 
 请求头
 
@@ -2860,7 +2883,6 @@ Content-Type: application/json
 - 用户必须登录才能修改商品状态
 - 只能修改自己发布的商品
 - 常见状态值包括：active（活跃）、sold（已售出）、reserved（已预订）等
-
 
 ## favoritesRoute
 
@@ -3135,49 +3157,43 @@ Content-Type: application/json
 - 成功响应 (状态码：200)
   ```json
   {
-    "message": "获取收藏列表成功",
-    "data": {
-      "posts": [
-        {
-          "id": 1,
-          "title": "开发区美食",
-          "content": "美食推荐？",
-          "author_id": 1,
-          "created_at": "2025-07-15T13:09:07.000Z",
-          "status": "active",
-          "campus_id": 1,
-          "tag": "咨询答疑",
-          "likes": 1,
-          "complaints": 0
-        }
-      ],
-      "goods": [
-        {
-          "id": 2,
-          "title": "笔记本2",
-          "content": "出售",
-          "author_id": 1,
-          "created_at": "2025-07-18T16:05:55.000Z",
-          "status": "active",
-          "price": "3500.10",
-          "campus_id": 1,
-          "goods_type": "sell",
-          "tag": "computer"
-        },
-        {
-          "id": 1,
-          "title": "笔记本",
-          "content": "出售",
-          "author_id": 1,
-          "created_at": "2025-07-18T15:40:06.000Z",
-          "status": "active",
-          "price": "3500.00",
-          "campus_id": 1,
-          "goods_type": "sell",
-          "tag": "computer"
-        }
-      ]
-    }
+      "message": "获取收藏列表成功",
+      "data": {
+          "posts": [
+              {
+                  "id": 1,
+                  "title": "期末复习小组招募",
+                  "content": "正在找考研政治的复习小组，一起打卡学习，互相监督。",
+                  "author_id": 1,
+                  "created_at": "2025-01-15T00:30:00.000Z",
+                  "status": "active",
+                  "campus_id": 1,
+                  "tag": null,
+                  "likes": 0,
+                  "complaints": 0,
+                  "images": [
+                      "/uploads/wall/study_group.jpg"
+                  ]
+              }
+          ],
+          "goods": [
+              {
+                  "id": 1,
+                  "title": "二手数学分析教材",
+                  "content": "浙江大学版教材，无字迹破损，附习题解答",
+                  "author_id": 1,
+                  "created_at": "2025-01-01T02:00:00.000Z",
+                  "status": "active",
+                  "price": "35.50",
+                  "campus_id": 1,
+                  "goods_type": "sell",
+                  "tag": "教材",
+                  "images": [
+                      "/uploads/images/image1.jpg"
+                  ]
+              }
+          ]
+      }
   }
   ```
 
@@ -3538,10 +3554,7 @@ console.log("收藏的商品:", goods);
         "author_credit": 85,
         "target_title": "被申诉的帖子标题",
         "target_content": "被申诉的帖子内容...",
-        "images": [
-          "/uploads/appeal_image1.jpg",
-          "/uploads/appeal_image2.jpg"
-        ]
+        "images": ["/uploads/appeal_image1.jpg", "/uploads/appeal_image2.jpg"]
       }
     ]
   }
@@ -3653,8 +3666,8 @@ console.log("收藏的商品:", goods);
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
 | ------ | ------ | ---- | ---------- |
-| user_id | Number | 否 | 用户ID（user_id 和 qq_id 至少提供一个） |
-| qq_id | String | 否 | 用户QQ号（user_id 和 qq_id 至少提供一个） |
+| user_id | Number | 否 | 用户 ID（user_id 和 qq_id 至少提供一个） |
+| qq_id | String | 否 | 用户 QQ 号（user_id 和 qq_id 至少提供一个） |
 | type | String | 否 | 内容类型筛选：all（全部）、posts（仅帖子）、goods（仅商品），默认 all |
 | status | String | 否 | 状态筛选：all（全部）、active（活跃）、deleted（已删除），默认 all |
 | page | Number | 否 | 页码，默认为 1 |
@@ -3721,10 +3734,7 @@ console.log("收藏的商品:", goods);
         "likes": 25,
         "complaints": 1,
         "campus_id": 1,
-        "images": [
-          "/uploads/post1.jpg",
-          "/uploads/post2.jpg"
-        ]
+        "images": ["/uploads/post1.jpg", "/uploads/post2.jpg"]
       },
       {
         "type": "goods",
@@ -3736,9 +3746,7 @@ console.log("收藏的商品:", goods);
         "likes": 15,
         "complaints": 0,
         "campus_id": 1,
-        "images": [
-          "/uploads/goods1.jpg"
-        ]
+        "images": ["/uploads/goods1.jpg"]
       }
     ],
     "pagination": {
@@ -3777,7 +3785,7 @@ console.log("收藏的商品:", goods);
 **备注**
 
 - 该接口仅限管理员使用
-- 支持通过用户ID或QQ号查询，两者至少提供一个
+- 支持通过用户 ID 或 QQ 号查询，两者至少提供一个
 - 返回的数据按创建时间倒序排列
 - 包含完整的用户统计信息，便于管理员评估用户行为
 - 统计信息包括总发布量、活跃/删除状态分布、点赞投诉数据等
@@ -3875,7 +3883,6 @@ console.log("收藏的商品:", goods);
 
 ---
 
-
 ### 管理员封禁用户
 
 基本信息
@@ -3885,19 +3892,20 @@ console.log("收藏的商品:", goods);
 - 描述: 管理员封禁指定用户，可指定封禁时长或永久封禁
 
 请求参数
-| 参数名 | 类型   | 必选 | 描述                         |
+| 参数名 | 类型 | 必选 | 描述 |
 | ------ | ------ | ---- | ---------------------------- |
-| user_id | Number | 是   | 要封禁的用户ID               |
-| duration | Number | 是   | 封禁时长（单位由duration_type决定） |
-| duration_type | String | 否   | 封禁时长类型，支持`hours`、`days`、`permanent`，默认`days` |
-| reason | String | 是 | 封禁原因                     |
+| user_id | Number | 是 | 要封禁的用户 ID |
+| duration | Number | 是 | 封禁时长（单位由 duration_type 决定） |
+| duration_type | String | 否 | 封禁时长类型，支持`hours`、`days`、`permanent`，默认`days` |
+| reason | String | 是 | 封禁原因 |
 
 请求头部
-| 参数名        | 类型   | 必选 | 描述                       |
+| 参数名 | 类型 | 必选 | 描述 |
 | ------------- | ------ | ---- | -------------------------- |
-| Authorization | String | 是   | Bearer token（管理员权限） |
+| Authorization | String | 是 | Bearer token（管理员权限） |
 
 请求体示例
+
 ```json
 {
   "user_id": 123,
@@ -3908,17 +3916,19 @@ console.log("收藏的商品:", goods);
 ```
 
 响应参数
-| 状态码 | 内容类型         | 描述         |
+| 状态码 | 内容类型 | 描述 |
 | ------ | ---------------- | ------------ |
-| 200    | application/json | 封禁成功     |
-| 400    | application/json | 参数错误/已封禁 |
-| 401    | application/json | 未提供 Token |
-| 403    | application/json | 权限不足     |
-| 404    | application/json | 用户不存在   |
-| 500    | application/json | 服务器错误   |
+| 200 | application/json | 封禁成功 |
+| 400 | application/json | 参数错误/已封禁 |
+| 401 | application/json | 未提供 Token |
+| 403 | application/json | 权限不足 |
+| 404 | application/json | 用户不存在 |
+| 500 | application/json | 服务器错误 |
 
 响应示例
+
 - 成功响应 (状态码：200)
+
 ```json
 {
   "message": "用户封禁成功",
@@ -3931,7 +3941,9 @@ console.log("收藏的商品:", goods);
   "reason": "恶意刷屏"
 }
 ```
+
 - 已封禁 (状态码：400)
+
 ```json
 {
   "message": "用户已被封禁"
@@ -3939,9 +3951,10 @@ console.log("收藏的商品:", goods);
 ```
 
 **备注**
+
 - 该接口仅限管理员使用
 - 支持按小时、天或永久封禁
-- 封禁信息会被记录到user_bans表
+- 封禁信息会被记录到 user_bans 表
 
 ---
 
@@ -3954,16 +3967,17 @@ console.log("收藏的商品:", goods);
 - 描述: 管理员解除指定用户的封禁状态
 
 请求参数
-| 参数名 | 类型   | 必选 | 描述           |
+| 参数名 | 类型 | 必选 | 描述 |
 | ------ | ------ | ---- | -------------- |
-| user_id | Number | 是   | 要解封的用户ID |
+| user_id | Number | 是 | 要解封的用户 ID |
 
 请求头部
-| 参数名        | 类型   | 必选 | 描述                       |
+| 参数名 | 类型 | 必选 | 描述 |
 | ------------- | ------ | ---- | -------------------------- |
-| Authorization | String | 是   | Bearer token（管理员权限） |
+| Authorization | String | 是 | Bearer token（管理员权限） |
 
 请求体示例
+
 ```json
 {
   "user_id": 123
@@ -3971,17 +3985,19 @@ console.log("收藏的商品:", goods);
 ```
 
 响应参数
-| 状态码 | 内容类型         | 描述         |
+| 状态码 | 内容类型 | 描述 |
 | ------ | ---------------- | ------------ |
-| 200    | application/json | 解封成功     |
-| 400    | application/json | 用户未被封禁 |
-| 401    | application/json | 未提供 Token |
-| 403    | application/json | 权限不足     |
-| 404    | application/json | 用户不存在   |
-| 500    | application/json | 服务器错误   |
+| 200 | application/json | 解封成功 |
+| 400 | application/json | 用户未被封禁 |
+| 401 | application/json | 未提供 Token |
+| 403 | application/json | 权限不足 |
+| 404 | application/json | 用户不存在 |
+| 500 | application/json | 服务器错误 |
 
 响应示例
+
 - 成功响应 (状态码：200)
+
 ```json
 {
   "message": "用户解封成功",
@@ -3992,7 +4008,9 @@ console.log("收藏的商品:", goods);
   }
 }
 ```
+
 - 用户未被封禁 (状态码：400)
+
 ```json
 {
   "message": "用户未被封禁"
@@ -4000,8 +4018,9 @@ console.log("收藏的商品:", goods);
 ```
 
 **备注**
+
 - 该接口仅限管理员使用
-- 解封会将user_bans表中该用户的所有active记录状态设为lifted
+- 解封会将 user_bans 表中该用户的所有 active 记录状态设为 lifted
 
 ---
 
@@ -4011,20 +4030,20 @@ console.log("收藏的商品:", goods);
 
 - 路径: `/api/admin/stats`
 - 方法: `GET`
-- 描述: 获取record_event表中各类型事件的统计数据（仅限管理员）
+- 描述: 获取 record_event 表中各类型事件的统计数据（仅限管理员）
 
 请求头部
-| 参数名        | 类型   | 必选 | 描述                       |
+| 参数名 | 类型 | 必选 | 描述 |
 | ------------- | ------ | ---- | -------------------------- |
-| Authorization | String | 是   | Bearer token（管理员权限） |
+| Authorization | String | 是 | Bearer token（管理员权限） |
 
 响应参数
-| 状态码 | 内容类型         | 描述           |
+| 状态码 | 内容类型 | 描述 |
 | ------ | ---------------- | -------------- |
-| 200    | application/json | 获取统计数据成功 |
-| 401    | application/json | 未提供 Token 或 Token 无效 |
-| 403    | application/json | 权限不足       |
-| 500    | application/json | 服务器错误     |
+| 200 | application/json | 获取统计数据成功 |
+| 401 | application/json | 未提供 Token 或 Token 无效 |
+| 403 | application/json | 权限不足 |
+| 500 | application/json | 服务器错误 |
 
 响应示例
 
@@ -4075,7 +4094,8 @@ console.log("收藏的商品:", goods);
 ```
 
 **数据说明**
-- `visit`: 活跃用户数（基于info字段去重统计不同用户）
+
+- `visit`: 活跃用户数（基于 info 字段去重统计不同用户）
 - `publish_goods_tag`: 商品发布总次数
 - `publish_post_tag`: 帖子发布总次数
 - `favorite_goods_tag`: 商品收藏总次数
@@ -4085,12 +4105,13 @@ console.log("收藏的商品:", goods);
 - `ad_click`: 广告点击总次数
 - `ad_add`: 广告添加总次数
 - `total`: 所有事件总数
-- `recent_7_days`: 最近7天各类型事件数量
+- `recent_7_days`: 最近 7 天各类型事件数量
 
 **备注**
+
 - 该接口仅限管理员使用
 - 提供平台整体活动数据分析
-- visit类型统计去重用户数，其他类型统计事件总次数
+- visit 类型统计去重用户数，其他类型统计事件总次数
 
 ---
 
@@ -4106,10 +4127,10 @@ console.log("收藏的商品:", goods);
 
 响应参数
 
-| 状态码 | 内容类型         | 描述                        |
-| ------ | ---------------- | --------------------------- |
-| 200    | application/json | 获取成功                    |
-| 500    | application/json | 服务器错误                  |
+| 状态码 | 内容类型         | 描述       |
+| ------ | ---------------- | ---------- |
+| 200    | application/json | 获取成功   |
+| 500    | application/json | 服务器错误 |
 
 响应示例
 
@@ -4136,6 +4157,7 @@ console.log("收藏的商品:", goods);
   ```
 
 **备注**
+
 - 该接口为公开接口，无需身份验证
 - 广告按创建时间倒序排列
 
@@ -4147,20 +4169,20 @@ console.log("收藏的商品:", goods);
 
 - 路径: `/api/advertisements/detail/:id`
 - 方法: `GET`
-- 描述: 根据ID获取单个广告详情
+- 描述: 根据 ID 获取单个广告详情
 
 路径参数
 | 参数名 | 类型 | 必选 | 描述 |
 | ----------- | ------ | ---- | ------------------------ |
-| id | Number | 是 | 广告ID |
+| id | Number | 是 | 广告 ID |
 
 响应参数
 
-| 状态码 | 内容类型         | 描述                        |
-| ------ | ---------------- | --------------------------- |
-| 200    | application/json | 获取成功                    |
-| 404    | application/json | 广告不存在                  |
-| 500    | application/json | 服务器错误                  |
+| 状态码 | 内容类型         | 描述       |
+| ------ | ---------------- | ---------- |
+| 200    | application/json | 获取成功   |
+| 404    | application/json | 广告不存在 |
+| 500    | application/json | 服务器错误 |
 
 响应示例
 
@@ -4185,11 +4207,12 @@ console.log("收藏的商品:", goods);
   ```
 
 **备注**
+
 - 该接口为公开接口，无需身份验证
 
 ---
 
-### 记录广告点击（对应广告表里的clicks）
+### 记录广告点击（对应广告表里的 clicks）
 
 基本信息
 
@@ -4200,15 +4223,15 @@ console.log("收藏的商品:", goods);
 路径参数
 | 参数名 | 类型 | 必选 | 描述 |
 | ----------- | ------ | ---- | ------------------------ |
-| id | Number | 是 | 广告ID |
+| id | Number | 是 | 广告 ID |
 
 响应参数
 
-| 状态码 | 内容类型         | 描述                        |
-| ------ | ---------------- | --------------------------- |
-| 200    | application/json | 点击记录成功                |
-| 404    | application/json | 广告不存在或已失效          |
-| 500    | application/json | 服务器错误                  |
+| 状态码 | 内容类型         | 描述               |
+| ------ | ---------------- | ------------------ |
+| 200    | application/json | 点击记录成功       |
+| 404    | application/json | 广告不存在或已失效 |
+| 500    | application/json | 服务器错误         |
 
 响应示例
 
@@ -4221,12 +4244,13 @@ console.log("收藏的商品:", goods);
   ```
 
 **备注**
+
 - 该接口为公开接口，无需身份验证
-- 只有状态为active的广告才能记录点击
+- 只有状态为 active 的广告才能记录点击
 
 ---
 
-### 广告点击API
+### 广告点击 API
 
 基本信息
 
@@ -4237,9 +4261,10 @@ console.log("收藏的商品:", goods);
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
 | ----------- | ------ | ---- | ------------------------ |
-| ad_id | Number | 是 | 广告ID |
+| ad_id | Number | 是 | 广告 ID |
 
 请求体示例
+
 ```json
 {
   "ad_id": 1
@@ -4248,12 +4273,12 @@ console.log("收藏的商品:", goods);
 
 响应参数
 
-| 状态码 | 内容类型         | 描述                        |
-| ------ | ---------------- | --------------------------- |
-| 200    | application/json | 广告点击记录成功            |
-| 400    | application/json | 缺少广告ID参数              |
-| 404    | application/json | 广告不存在或已失效          |
-| 500    | application/json | 服务器错误                  |
+| 状态码 | 内容类型         | 描述               |
+| ------ | ---------------- | ------------------ |
+| 200    | application/json | 广告点击记录成功   |
+| 400    | application/json | 缺少广告 ID 参数   |
+| 404    | application/json | 广告不存在或已失效 |
+| 500    | application/json | 服务器错误         |
 
 响应示例
 
@@ -4266,13 +4291,14 @@ console.log("收藏的商品:", goods);
   ```
 
 **备注**
+
 - 该接口为公开接口，无需身份验证
-- 只有状态为active的广告才能记录点击
-- 会自动记录ad_click类型的事件到record_event表
+- 只有状态为 active 的广告才能记录点击
+- 会自动记录 ad_click 类型的事件到 record_event 表
 
 ---
 
-### 广告添加API
+### 广告添加 API
 
 基本信息
 
@@ -4281,10 +4307,10 @@ console.log("收藏的商品:", goods);
 - 描述: 添加新广告并记录添加事件（仅限管理员）
 
 请求头部
-| 参数名        | 类型   | 必选 | 描述                       |
+| 参数名 | 类型 | 必选 | 描述 |
 | ------------- | ------ | ---- | -------------------------- |
-| Authorization | String | 是   | Bearer token（管理员权限） |
-| Content-Type  | String | 是   | multipart/form-data        |
+| Authorization | String | 是 | Bearer token（管理员权限） |
+| Content-Type | String | 是 | multipart/form-data |
 
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
@@ -4294,9 +4320,10 @@ console.log("收藏的商品:", goods);
 | image | File | 否 | 广告图片文件 |
 | target_url | String | 否 | 点击跳转链接 |
 | position | String | 是 | 广告位置，可选值：banner/market/forum |
-| duration | Number | 否 | 广告展示天数，默认7天 |
+| duration | Number | 否 | 广告展示天数，默认 7 天 |
 
 请求体示例 (multipart/form-data)
+
 ```
 title: "春季促销活动"
 content: "全场商品8折优惠"
@@ -4308,13 +4335,13 @@ duration: 7
 
 响应参数
 
-| 状态码 | 内容类型         | 描述                        |
-| ------ | ---------------- | --------------------------- |
-| 201    | application/json | 广告添加成功                |
-| 400    | application/json | 参数错误                    |
-| 401    | application/json | 未提供 Token                |
-| 403    | application/json | 权限不足                    |
-| 500    | application/json | 服务器错误                  |
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 201    | application/json | 广告添加成功 |
+| 400    | application/json | 参数错误     |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 500    | application/json | 服务器错误   |
 
 响应示例
 
@@ -4328,10 +4355,11 @@ duration: 7
   ```
 
 **备注**
+
 - 该接口仅限管理员使用
 - 支持图片上传，图片会保存到 /uploads/ 目录
-- position参数必须是 banner、market 或 forum 之一
-- 会自动记录ad_add类型的事件到record_event表
+- position 参数必须是 banner、market 或 forum 之一
+- 会自动记录 ad_add 类型的事件到 record_event 表
 
 ---
 
@@ -4344,10 +4372,10 @@ duration: 7
 - 描述: 添加新广告（仅限管理员）
 
 请求头部
-| 参数名        | 类型   | 必选 | 描述                       |
+| 参数名 | 类型 | 必选 | 描述 |
 | ------------- | ------ | ---- | -------------------------- |
-| Authorization | String | 是   | Bearer token（管理员权限） |
-| Content-Type  | String | 是   | multipart/form-data        |
+| Authorization | String | 是 | Bearer token（管理员权限） |
+| Content-Type | String | 是 | multipart/form-data |
 
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
@@ -4357,9 +4385,10 @@ duration: 7
 | image | File | 否 | 广告图片文件 |
 | target_url | String | 否 | 点击跳转链接 |
 | position | String | 是 | 广告位置，可选值：banner/market/forum |
-| duration | Number | 否 | 广告展示天数，默认7天 |
+| duration | Number | 否 | 广告展示天数，默认 7 天 |
 
 请求体示例 (multipart/form-data)
+
 ```
 title: "春季促销活动"
 content: "全场商品8折优惠"
@@ -4371,13 +4400,13 @@ duration: 7
 
 响应参数
 
-| 状态码 | 内容类型         | 描述                        |
-| ------ | ---------------- | --------------------------- |
-| 201    | application/json | 广告创建成功                |
-| 400    | application/json | 参数错误                    |
-| 401    | application/json | 未提供 Token                |
-| 403    | application/json | 权限不足                    |
-| 500    | application/json | 服务器错误                  |
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 201    | application/json | 广告创建成功 |
+| 400    | application/json | 参数错误     |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 500    | application/json | 服务器错误   |
 
 响应示例
 
@@ -4391,9 +4420,10 @@ duration: 7
   ```
 
 **备注**
+
 - 该接口仅限管理员使用
 - 支持图片上传，图片会保存到 /uploads/ 目录
-- position参数必须是 banner、market 或 forum 之一
+- position 参数必须是 banner、market 或 forum 之一
 
 ---
 
@@ -4406,15 +4436,15 @@ duration: 7
 - 描述: 修改指定广告（仅限管理员）
 
 请求头部
-| 参数名        | 类型   | 必选 | 描述                       |
+| 参数名 | 类型 | 必选 | 描述 |
 | ------------- | ------ | ---- | -------------------------- |
-| Authorization | String | 是   | Bearer token（管理员权限） |
-| Content-Type  | String | 是   | multipart/form-data        |
+| Authorization | String | 是 | Bearer token（管理员权限） |
+| Content-Type | String | 是 | multipart/form-data |
 
 路径参数
 | 参数名 | 类型 | 必选 | 描述 |
 | ----------- | ------ | ---- | ------------------------ |
-| id | Number | 是 | 广告ID |
+| id | Number | 是 | 广告 ID |
 
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
@@ -4429,14 +4459,14 @@ duration: 7
 
 响应参数
 
-| 状态码 | 内容类型         | 描述                        |
-| ------ | ---------------- | --------------------------- |
-| 200    | application/json | 广告更新成功                |
-| 400    | application/json | 参数错误                    |
-| 401    | application/json | 未提供 Token                |
-| 403    | application/json | 权限不足                    |
-| 404    | application/json | 广告不存在                  |
-| 500    | application/json | 服务器错误                  |
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 200    | application/json | 广告更新成功 |
+| 400    | application/json | 参数错误     |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 404    | application/json | 广告不存在   |
+| 500    | application/json | 服务器错误   |
 
 响应示例
 
@@ -4449,6 +4479,7 @@ duration: 7
   ```
 
 **备注**
+
 - 该接口仅限管理员使用
 - 所有参数都是可选的，只更新提供的字段
 - 如果上传新图片，会自动删除旧图片文件
@@ -4464,24 +4495,24 @@ duration: 7
 - 描述: 删除指定广告（仅限管理员）
 
 请求头部
-| 参数名        | 类型   | 必选 | 描述                       |
+| 参数名 | 类型 | 必选 | 描述 |
 | ------------- | ------ | ---- | -------------------------- |
-| Authorization | String | 是   | Bearer token（管理员权限） |
+| Authorization | String | 是 | Bearer token（管理员权限） |
 
 路径参数
 | 参数名 | 类型 | 必选 | 描述 |
 | ----------- | ------ | ---- | ------------------------ |
-| id | Number | 是 | 广告ID |
+| id | Number | 是 | 广告 ID |
 
 响应参数
 
-| 状态码 | 内容类型         | 描述                        |
-| ------ | ---------------- | --------------------------- |
-| 200    | application/json | 广告删除成功                |
-| 401    | application/json | 未提供 Token                |
-| 403    | application/json | 权限不足                    |
-| 404    | application/json | 广告不存在                  |
-| 500    | application/json | 服务器错误                  |
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 200    | application/json | 广告删除成功 |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 404    | application/json | 广告不存在   |
+| 500    | application/json | 服务器错误   |
 
 响应示例
 
@@ -4494,6 +4525,7 @@ duration: 7
   ```
 
 **备注**
+
 - 该接口仅限管理员使用
 - 删除广告时会同时删除相关的图片文件
 
@@ -4508,18 +4540,18 @@ duration: 7
 - 描述: 批量清理过期广告（仅限管理员）
 
 请求头部
-| 参数名        | 类型   | 必选 | 描述                       |
+| 参数名 | 类型 | 必选 | 描述 |
 | ------------- | ------ | ---- | -------------------------- |
-| Authorization | String | 是   | Bearer token（管理员权限） |
+| Authorization | String | 是 | Bearer token（管理员权限） |
 
 响应参数
 
-| 状态码 | 内容类型         | 描述                        |
-| ------ | ---------------- | --------------------------- |
-| 200    | application/json | 清理完成                    |
-| 401    | application/json | 未提供 Token                |
-| 403    | application/json | 权限不足                    |
-| 500    | application/json | 服务器错误                  |
+| 状态码 | 内容类型         | 描述         |
+| ------ | ---------------- | ------------ |
+| 200    | application/json | 清理完成     |
+| 401    | application/json | 未提供 Token |
+| 403    | application/json | 权限不足     |
+| 500    | application/json | 服务器错误   |
 
 响应示例
 
@@ -4533,6 +4565,7 @@ duration: 7
   ```
 
 **备注**
+
 - 该接口仅限管理员使用
 - 会删除所有过期状态的广告和相关图片文件
 - 返回删除的广告数量
@@ -4550,15 +4583,15 @@ duration: 7
 - 描述: 使用 AI 根据用户输入生成商品信息模板,支持敏感词检测
 
 请求参数
-| 参数名 | 类型   | 必选 | 描述               |
+| 参数名 | 类型 | 必选 | 描述 |
 | ------ | ------ | ---- | ------------------ |
-| text   | String | 是   | 用户输入的文本描述 |
+| text | String | 是 | 用户输入的文本描述 |
 
 请求头
-| 参数名        | 类型   | 必选 | 描述                                 |
+| 参数名 | 类型 | 必选 | 描述 |
 | ------------- | ------ | ---- | ------------------------------------ |
-| Authorization | String | 是   | 身份验证令牌,格式为 `Bearer {token}` |
-| Content-Type  | String | 是   | application/json                     |
+| Authorization | String | 是 | 身份验证令牌,格式为 `Bearer {token}` |
+| Content-Type | String | 是 | application/json |
 
 请求体示例
 
@@ -4645,15 +4678,15 @@ duration: 7
 - 描述: 使用敏感词库和 AI 检测文本内容是否包含敏感信息
 
 请求参数
-| 参数名 | 类型   | 必选 | 描述             |
+| 参数名 | 类型 | 必选 | 描述 |
 | ------ | ------ | ---- | ---------------- |
-| text   | String | 是   | 要检测的文本内容 |
+| text | String | 是 | 要检测的文本内容 |
 
 请求头
-| 参数名        | 类型   | 必选 | 描述                                 |
+| 参数名 | 类型 | 必选 | 描述 |
 | ------------- | ------ | ---- | ------------------------------------ |
-| Authorization | String | 是   | 身份验证令牌,格式为 `Bearer {token}` |
-| Content-Type  | String | 是   | application/json                     |
+| Authorization | String | 是 | 身份验证令牌,格式为 `Bearer {token}` |
+| Content-Type | String | 是 | application/json |
 
 请求体示例
 
@@ -4898,5 +4931,5 @@ Content-Type: application/json
 - 购买成功后会自动计算会员开始时间和结束时间
 - 系统会记录会员购买事件到 record_event 表，用于统计分析
 - 使用事务确保数据一致性，购买过程中如发生错误会自动回滚
-- 会员记录包含：用户ID、会员类型、有效期等信息
-- 响应中的 membership.id 为新创建的会员记录ID
+- 会员记录包含：用户 ID、会员类型、有效期等信息
+- 响应中的 membership.id 为新创建的会员记录 ID
