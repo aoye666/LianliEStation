@@ -2,6 +2,292 @@
 
 [toc]
 
+## 配置说明
+
+### 环境变量
+
+该后端程序默认启动在 `localhost:5000` 端口
+数据库连接默认为
+
+```js
+host: "localhost",
+port: 3306,
+user: root,
+password: root,
+database: lianli,
+```
+
+使用 `dotenv` 开发依赖进行环境变量管理，如以上环境有改动，请自行在 `server` 根目录下新建`.env`文件，用以下格式修改(SECRET_KEY 随你修改，也可以问 fanzdstar 设的是啥,最后两个也可以填入您自己的邮箱账户和邮箱授权码，也可以问 fanzdstar 设的是啥)
+
+``````
+DB_HOST=
+DB_PORT=
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
+PORT=
+SECRET_KEY=
+EMAIL_USER=
+EMAIL_PASS=
+API_KEY
+``````
+
+### 数据库环境
+
+代码中并没有新建数据库的命令，请确保本地数据库中存在`lianli`库，仅供测试
+
+```sql
+use lianli;
+CREATE TABLE `users` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `nickname` VARCHAR(50) NOT NULL DEFAULT 'DUTers',
+    `username` VARCHAR(100) NOT NULL,
+    `email` VARCHAR(100),
+    `password` VARCHAR(255) NOT NULL,
+    `qq_id` VARCHAR(100) NOT NULL,
+    `campus_id` INT NOT NULL,
+    `credit` INT NOT NULL DEFAULT 100,
+    `avatar` VARCHAR(255) NOT NULL DEFAULT '/uploads/default.png',
+    `banner_url` VARCHAR(255) NOT NULL DEFAULT '/uploads/default_banner.png',
+    `background_url` VARCHAR(255) NOT NULL DEFAULT '/uploads/default_background.png',
+    `theme_id` INT NOT NULL DEFAULT 1,
+    `is_admin` Boolean DEFAULT false,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `email_unique` (`email`),
+    UNIQUE KEY `username_unique` (`username`),
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `goods` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `title` VARCHAR(255) NOT NULL,
+    `content` TEXT,
+    `goods_type` ENUM('receive', 'sell') NOT NULL,
+    `tag` VARCHAR(255),
+    `author_id` INT NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `status` ENUM('active', 'inactive', 'deleted') DEFAULT 'active',
+    `price` DECIMAL(10, 2) DEFAULT 0.00,
+    `campus_id` INT NOT NULL,
+    `likes` INT DEFAULT 0,
+    `complaints` INT DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `appeals` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `title` VARCHAR(30) NOT NULL,
+    `author_id` INT NOT NULL,
+    `post_id` INT NOT NULL,
+    `content` TEXT NOT NULL,
+    `type` ENUM('post', 'goods') DEFAULT 'goods',
+    `status` ENUM('pending', 'resolved', 'deleted') DEFAULT 'pending',
+    `read_status` ENUM('unread', 'read') NOT NULL DEFAULT 'unread',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `goods_images` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `goods_id` INT NOT NULL,
+    `image_url` VARCHAR(255) NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `user_favorites` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `post_id` INT NULL,
+    `goods_id` INT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_user_post` (`user_id`, `post_id`),
+    UNIQUE KEY `unique_user_goods` (`user_id`, `goods_id`),
+    CHECK ((`post_id` IS NOT NULL AND `goods_id` IS NULL) OR (`post_id` IS NULL AND `goods_id` IS NOT NULL))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `appeal_images` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `appeal_id` INT NOT NULL,
+    `image_url` VARCHAR(255) NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `response_images` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `responsel_id` INT NOT NULL,
+    `image_url` VARCHAR(255) NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `responses` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,           -- 自增主键
+    `title` VARCHAR(30) NOT NULL,
+    `user_id` INT NOT NULL,                        -- 接收回复的用户ID
+    `response_type` ENUM('appeal', 'violation') NOT NULL, -- 回复类型：申诉回复或违规通告回复
+    `related_id` INT NOT NULL,                     -- 关联的申诉或违规通告记录ID
+    `content` TEXT NOT NULL,                       -- 管理员的回复内容
+    `read_status` ENUM('unread', 'read') NOT NULL DEFAULT 'unread', -- 回复状态，默认为未读
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP -- 创建时间，默认当前时间
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `admins` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,  -- 管理员 ID
+  `username` VARCHAR(100) NOT NULL,     -- 管理员用户名
+  `password` VARCHAR(255) NOT NULL,     -- 加密后的密码
+  `email` VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE `posts` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `title` VARCHAR(255) NOT NULL,
+    `content` TEXT NOT NULL,
+    `author_id` INT NOT NULL,
+    `campus_id` INT NOT NULL,
+    `tag` VARCHAR(255),
+    `status` ENUM('active', 'deleted') DEFAULT 'active',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `likes` INT DEFAULT 0,
+    `complaints` INT DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+CREATE TABLE `post_image` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `post_id` INT NOT NULL,
+    `image_url` VARCHAR(255) NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE `post_comments` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `post_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  `content` TEXT NOT NULL,
+  `parent_id` INT DEFAULT NULL,
+  `status` ENUM('active', 'deleted') DEFAULT 'active',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `likes` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `target_id` INT NOT NULL,
+    `target_type` ENUM('post', 'goods') NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_user_like` (`user_id`, `target_id`, `target_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `complaints` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `target_id` INT NOT NULL,
+    `target_type` ENUM('post', 'goods') NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_user_complaint` (`user_id`, `target_id`, `target_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 搜索关键词统计表
+CREATE TABLE `search_keywords` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `keyword` VARCHAR(255) NOT NULL,
+    `search_count` INT NOT NULL DEFAULT 1,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_keyword` (`keyword`),
+    INDEX `idx_search_count` (`search_count`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 广告表
+CREATE TABLE `advertisements` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `title` VARCHAR(255) NOT NULL,
+    `content` TEXT,
+    `image_url` VARCHAR(255),
+    `target_url` VARCHAR(255),
+    `position` ENUM('banner', 'market', 'forum') NOT NULL COMMENT '广告位置：横幅/商城/论坛',
+    `duration` INT NOT NULL DEFAULT 7 COMMENT '广告展示天数',
+    `clicks` INT NOT NULL DEFAULT 0 COMMENT '点击次数',
+    `status` ENUM('active', 'inactive', 'expired') DEFAULT 'active',
+    `start_date` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `end_date` DATETIME GENERATED ALWAYS AS (DATE_ADD(`start_date`, INTERVAL `duration` DAY)) STORED,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_position` (`position`),
+    INDEX `idx_status` (`status`),
+    INDEX `idx_end_date` (`end_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 会员表
+CREATE TABLE `memberships` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `uid` INT NOT NULL COMMENT '用户ID，关联users表',
+    `type` VARCHAR(50) NOT NULL DEFAULT 'basic' COMMENT '会员类型：basic/premium/vip',
+    `duration` INT NOT NULL DEFAULT 30 COMMENT '会员有效期天数',
+    `start_date` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `end_date` DATETIME GENERATED ALWAYS AS (DATE_ADD(`start_date`, INTERVAL `duration` DAY)) STORED,
+    `status` ENUM('active', 'expired', 'cancelled') DEFAULT 'active',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`uid`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    INDEX `idx_uid` (`uid`),
+    INDEX `idx_type` (`type`),
+    INDEX `idx_status` (`status`),
+    INDEX `idx_end_date` (`end_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `user_bans` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL,
+  `admin_id` INT NOT NULL,
+  `reason` TEXT NOT NULL,
+  `ban_until` DATETIME NULL, -- NULL为永久封禁
+  `status` ENUM('active','lifted','expired') DEFAULT 'active',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `lifted_at` DATETIME NULL,
+  `lifted_by` INT NULL,
+  INDEX (`user_id`, `status`),
+  INDEX (`ban_until`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE `record_event` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `info` VARCHAR(255), -- 额外记录信息，可为空，不同类型的记录灵活添加，如访问的记录可添加用户的id以记录活跃用户
+    `type` ENUM(
+        'visit',
+        'publish_goods_tag',
+        'publish_post_tag',
+        'favorite_goods_tag',
+        'favorite_post_tag',
+        'completed_transaction',
+        'membership',
+        'ad_click',
+        'ad_add'
+    ) NOT NULL COMMENT '记录类型：visit-访问, publish_goods_tag-发布商品时记录标签, publish_post_tag-发布帖子时记录标签, favorite_goods_tag-收藏商品时记录标签, favorite_post_tag-收藏帖子时记录标签, completed_transaction-完成交易, membership-会员开通, ad_click-广告点击, ad_add-广告添加',
+    `recorded_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_type` (`type`),
+    INDEX `idx_recorded_at` (`recorded_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='事件记录表';
+
+CREATE TABLE `user_privileges` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `top_post_count` INT DEFAULT 0, -- 剩余置顶帖子次数
+    `top_goods_count` INT DEFAULT 0, -- 剩余置顶商品次数
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `sensitive_words` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `word` VARCHAR(100) NOT NULL,
+    `status` ENUM('active', 'inactive') DEFAULT 'active',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_word` (`word`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
+
+使用`node app.js` 或者 `npm start`启动后端
+**推荐使用 nodemon app.js**启动
+
 ## authRoutes
 
 ### 用户注册
@@ -1404,6 +1690,116 @@ Authorization: Bearer {token}
 - 取消点赞/投诉时，如果用户之前没有执行过对应操作，会返回相应错误信息
 - 评论支持多级回复功能
 - 所有操作都使用数据库事务确保数据一致性
+
+### 修改帖子
+
+基本信息
+
+- **路径**: `/api/forum/posts/:post_id`
+- **方法**: `PUT`
+- **描述**: 修改指定帖子的信息，包括标题、内容、校区、标签、状态和图片
+
+请求参数
+
+| 参数名    | 类型   | 必选 | 描述                                   |
+| --------- | ------ | ---- | -------------------------------------- |
+| post_id   | Number | 是   | 帖子 ID (URL 参数)                     |
+| title     | String | 是   | 帖子标题                               |
+| content   | String | 是   | 帖子内容                               |
+| campus_id | Number | 是   | 校区 ID                                |
+| tag       | String | 否   | 帖子标签（新闻通知、吐槽倾诉、学习资料、咨询答疑、交友组队、其他） |
+| status    | String | 否   | 帖子状态，默认为 'active'              |
+| images    | File[] | 否   | 帖子图片文件，最多 9 张                |
+
+请求头
+
+```
+Authorization: Bearer {token}
+Content-Type: multipart/form-data
+```
+
+请求体示例
+
+```
+PUT /api/forum/posts/123
+Content-Type: multipart/form-data
+
+title: "更新后的帖子标题"
+content: "更新后的帖子内容"
+campus_id: 1
+tag: "学习资料"
+status: "active"
+images: [file1.jpg, file2.jpg, file3.jpg]
+```
+
+响应参数
+
+| 状态码 | 内容类型         | 描述                       |
+| ------ | ---------------- | -------------------------- |
+| 200    | application/json | 帖子更新成功               |
+| 400    | application/json | 缺少必要参数               |
+| 401    | application/json | 未提供 Token 或 Token 无效 |
+| 404    | application/json | 帖子未找到或用户无权修改   |
+| 500    | application/json | 服务器错误                 |
+
+响应示例
+
+- 成功响应 (状态码：200)
+
+  ```json
+  {
+    "message": "帖子更新成功"
+  }
+  ```
+
+- 缺少参数 (状态码：400)
+
+  ```json
+  {
+    "message": "缺少必要参数"
+  }
+  ```
+
+- Token 未提供 (状态码：401)
+
+  ```json
+  {
+    "message": "未提供 Token"
+  }
+  ```
+
+- Token 无效 (状态码：401)
+
+  ```json
+  {
+    "message": "无效的 Token"
+  }
+  ```
+
+- 权限不足 (状态码：404)
+
+  ```json
+  {
+    "message": "帖子未找到或用户无权修改"
+  }
+  ```
+
+- 服务器错误 (状态码：500)
+
+  ```json
+  {
+    "message": "服务器错误"
+  }
+  ```
+
+**备注**
+
+- 只有帖子作者或管理员可以修改帖子
+- 如果上传新图片，会自动删除原有图片并替换
+- 如果不上传图片，原有图片将保持不变
+- 不能修改状态为 'deleted' 的帖子
+- 所有必需字段都必须提供：title, content, campus_id
+- 图片上传支持常见格式，单个文件大小限制请参考服务器配置
 
 ### 条件查询帖子
 

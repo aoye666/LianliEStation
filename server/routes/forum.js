@@ -3,6 +3,7 @@ import db from "../db.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import fs from "fs";
+import upload from "../middlewares/uploadImg.js"; // 引入图片上传中间件
 
 let router = Router();
 dotenv.config();
@@ -384,6 +385,97 @@ router.get("/posts", async (req, res) => {
   }
 });
 
+// 修改帖子
+router.put("/posts/:post_id", upload.array("images", 9), async (req, res) => {
+  const { post_id } = req.params;
+  const { title, content, campus_id, tag, status } = req.body;
+  const files = req.files;
+
+  // 获取 token
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    if (files && files.length) {
+      for (const file of files) {
+        await fs.promises.unlink(file.path).catch(() => {});
+      }
+    }
+    return res.status(401).json({ message: "未提供 Token" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const author_id = decoded.user_id;
+    const isAdmin = decoded.isAdmin || false;
+
+    // 确保必需的字段存在
+    if (!title || !content || !campus_id) {
+      if (req.files && req.files.length) {
+        for (const file of req.files) {
+          await fs.promises.unlink(file.path).catch(() => {});
+        }
+      }
+      return res.status(400).json({ message: "缺少必要参数" });
+    }
+
+    let query, queryParams;
+
+    if (isAdmin) {
+      query = "SELECT * FROM posts WHERE id = ? AND status != 'deleted'";
+      queryParams = [post_id];
+    } else {
+      query = "SELECT * FROM posts WHERE id = ? AND author_id = ? AND status != 'deleted'";
+      queryParams = [post_id, author_id];
+    }
+
+    const [rows] = await db.query(query, queryParams);
+
+    if (rows.length === 0) {
+      if (req.files && req.files.length) {
+        for (const file of req.files) {
+          await fs.promises.unlink(file.path).catch(() => {});
+        }
+      }
+      return res.status(404).json({ message: "帖子未找到或用户无权修改" });
+    }
+
+    // 只在有新图片上传时才处理图片
+    if (files && files.length > 0) {
+      // 删除旧图片
+      const [oldImages] = await db.query("SELECT image_url FROM post_image WHERE post_id = ?", [post_id]);
+      for (const img of oldImages) {
+        const oldFilePath = "public" + img.image_url;
+        await fs.promises.unlink(oldFilePath).catch(() => {});
+      }
+      await db.query("DELETE FROM post_image WHERE post_id = ?", [post_id]);
+
+      // 插入新图片
+      const imageUrls = files.map((file) => `/uploads/${file.filename}`);
+      const imagePromises = imageUrls.map((url) => db.query("INSERT INTO post_image (post_id, image_url) VALUES (?, ?)", [post_id, url]));
+      await Promise.all(imagePromises);
+    }
+
+    // 更新帖子
+    const updateQuery = `
+      UPDATE posts
+      SET title = ?, content = ?, campus_id = ?, tag = ?, status = ? WHERE id = ?`;
+
+    await db.query(updateQuery, [title, content, campus_id, tag, status || 'active', post_id]);
+
+    // 返回成功信息
+    res.status(200).json({ message: "帖子更新成功" });
+  } catch (err) {
+    console.error(err);
+    if (req.files && req.files.length) {
+      for (const file of req.files) {
+        await fs.promises.unlink(file.path).catch(() => {});
+      }
+    }
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "无效的 Token" });
+    }
+    res.status(500).json({ message: "服务器错误" });
+  }
+});
 
 
 export default router;
