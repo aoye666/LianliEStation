@@ -344,7 +344,7 @@ const Users: React.FC = () => {
               {selectedUser.avatar && (
                 <div style={{ marginTop: 16 }}>
                   <h4>头像</h4>
-                  <Image width={100} src={`http://localhost:5000${selectedUser.avatar}`} />
+                  <Image width={100} src={`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${selectedUser.avatar}`} />
                 </div>
               )}
             </TabPane>

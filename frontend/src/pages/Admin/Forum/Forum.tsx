@@ -407,7 +407,7 @@ const Forum: React.FC = () => {
                     <Image
                       key={index}
                       width={100}
-                      src={`http://localhost:5000${img}`}
+                      src={`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${img}`}
                       placeholder="加载中..."
                     />
                   ))}
