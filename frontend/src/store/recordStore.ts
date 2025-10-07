@@ -164,7 +164,7 @@ const useRecordStore = create<RecordState>()(
 
       initialHistoryGoods: async () => {
         try {
-          const response = await api.get("/api/history/goods");
+          const response = await api.get("/api/history");
 
           // 检查返回数据是否有效
           if (response?.status === 200 && response.data) {
@@ -188,7 +188,7 @@ const useRecordStore = create<RecordState>()(
 
       getHistory: async () => {
         try {
-          const response = await api.get("/api/history/goods");
+          const response = await api.get("/api/history");
 
           // 检查返回数据是否有效
           if (response?.status === 200 && response.data) {

@@ -33,6 +33,12 @@ interface GoodsFilters {
   campus_id: number | null;
 }
 
+interface PostFilters {
+  searchTerm: string | null;
+  tag: string | null;
+  campus_id: number | null;
+}
+
 interface User {
   id: number;
   nickname: string;
@@ -72,11 +78,18 @@ interface Post {
 
 interface MainState {
   reset: () => void; // 退出账号时重置状态
+  
+  // 分页状态
   marketPage: number;
   forumPage: number;
+  
+  // 数据列表
   goods: Goods[];
   posts: Post[];
+  
+  // 筛选器
   goodsFilters: GoodsFilters;
+  postFilters: PostFilters;
   
   // 加载状态
   isMarketLoading: boolean;
@@ -84,19 +97,15 @@ interface MainState {
   setMarketLoading: (loading: boolean) => void;
   setForumLoading: (loading: boolean) => void;
   
+  // 通用清理方法
   clear: () => void;
+  
+  // 商品相关方法
   fetchGoods: () => Promise<void>;
-  setGoodsFilters: (newFilters: Partial<GoodsFilters>) => void;
   updateGoods: () => Promise<void>;
-  getForumPosts: () => Promise<void>;
-  updateForumPosts: () => Promise<void>;
-  publishForumPost: (
-    title: string,
-    content: string,
-    campus_id: number,
-    tag?: string,
-    images?: File[]
-  ) => Promise<boolean>;
+  clearGoods: () => void;
+  setGoodsFilters: (newFilters: Partial<GoodsFilters>) => void;
+  clearGoodsFilters: () => void;
   publishMarketGoods: (
     title: string,
     campus_id: number,
@@ -117,6 +126,26 @@ interface MainState {
     tag?: string,
     images?: File[]
   ) => Promise<boolean>;
+  changeGoodsResponse: (
+    action: string,
+    post_id: string | undefined,
+    value: number
+  ) => Promise<string | any>;
+  updateGoodsItem: (action: string, goods_id: number, value: number) => void;
+  
+  // 帖子相关方法
+  fetchPosts: () => Promise<void>;
+  updatePosts: () => Promise<void>;
+  clearPosts: () => void;
+  setPostFilters: (newFilters: Partial<PostFilters>) => void;
+  clearPostFilters: () => void;
+  publishForumPost: (
+    title: string,
+    content: string,
+    campus_id: number,
+    tag?: string,
+    images?: File[]
+  ) => Promise<boolean>;
   updateForumPost: (
     post_id: number,
     title: string,
@@ -133,13 +162,8 @@ interface MainState {
     parent_id?: number,
     value?: number
   ) => Promise<number | undefined>;
-  clearGoods: () => void;
-  clearFilters: () => void;
-  changeGoodsResponse: (
-    action: string,
-    post_id: string | undefined,
-    value: number
-  ) => Promise<string | any>;
+  
+  // 申诉相关
   publishAppeal: (
     title: string,
     id: number,
@@ -147,21 +171,30 @@ interface MainState {
     type: string,
     images: File[]
   ) => Promise<boolean>;
-  updateGoodsItem: (action: string, goods_id: number, value: number) => void;
 }
 
 const useMainStore = create<MainState>()(
   persist(
     (set, get) => ({
+      // 分页状态
       marketPage: 1,
       forumPage: 1,
+      
+      // 数据列表
       goods: [],
       posts: [],
+      
+      // 筛选器
       goodsFilters: {
-        searchTerm: "",
+        searchTerm: null,
         goods_type: null,
-        tag: "",
+        tag: null,
         priceRange: [0, 1000000],
+        campus_id: null,
+      },
+      postFilters: {
+        searchTerm: null,
+        tag: null,
         campus_id: null,
       },
       
@@ -173,6 +206,7 @@ const useMainStore = create<MainState>()(
       setMarketLoading: (loading) => set({ isMarketLoading: loading }),
       setForumLoading: (loading) => set({ isForumLoading: loading }),
 
+      // 重置所有状态
       reset: () => {
         set({
           marketPage: 1,
@@ -180,16 +214,45 @@ const useMainStore = create<MainState>()(
           goods: [],
           posts: [],
           goodsFilters: {
-            searchTerm: "",
+            searchTerm: null,
             goods_type: null,
-            tag: "",
+            tag: null,
             priceRange: [0, 1000000],
+            campus_id: null,
+          },
+          postFilters: {
+            searchTerm: null,
+            tag: null,
             campus_id: null,
           },
         });
       },
 
-      getForumPosts: async () => {
+      // 通用清理方法
+      clear: () =>
+        set(() => ({
+          goods: [],
+          posts: [],
+          marketPage: 1,
+          forumPage: 1,
+          goodsFilters: {
+            searchTerm: null,
+            goods_type: null,
+            tag: null,
+            priceRange: [0, 1000000],
+            campus_id: null,
+          },
+          postFilters: {
+            searchTerm: null,
+            tag: null,
+            campus_id: null,
+          },
+        })),
+
+      // ==================== 帖子相关方法 ====================
+
+      // 获取帖子列表（首次加载）
+      fetchPosts: async () => {
         set({ isForumLoading: true }); // 开始加载
         
         try {
@@ -197,19 +260,20 @@ const useMainStore = create<MainState>()(
             params: {
               with_comments: true,
               limit: 16,
+              keyword: get().postFilters.searchTerm,
+              tag: get().postFilters.tag,
+              campus_id: get().postFilters.campus_id,
             },
           });
           if (response?.status === 200 && response.data) {
             const data = response.data.posts;
-            set((state) => ({
-              posts: [...data], // 更新 goods 状态
+            set(() => ({
+              posts: [...data],
             }));
           } else {
-            // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
-            console.log("No goods available or unexpected response status");
+            console.log("No posts available or unexpected response status");
           }
         } catch (error) {
-          // 捕获请求失败的错误（如 404 或网络问题）
           if (error instanceof Error) {
             console.error("Error fetching posts:", error.message);
           } else {
@@ -220,28 +284,29 @@ const useMainStore = create<MainState>()(
         }
       },
 
-      updateForumPosts: async () => {
+      // 更新帖子列表（滚动加载更多）
+      updatePosts: async () => {
         try {
           const response = await api.get("/api/forum/posts", {
             params: {
               with_comments: true,
               limit: 16,
               page: get().forumPage,
+              keyword: get().postFilters.searchTerm,
+              tag: get().postFilters.tag,
+              campus_id: get().postFilters.campus_id,
             },
           });
           if (response?.status === 200 && response.data.posts.length > 0) {
             const data = response.data.posts;
             set((state) => ({
-              posts: [...data], // 更新 goods 状态
+              posts: [...state.posts, ...data],
               forumPage: state.forumPage + 1,
             }));
-            console.log(get().forumPage);
           } else {
-            // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
-            console.log("No goods available or unexpected response status");
+            console.log("No more posts available");
           }
         } catch (error) {
-          // 捕获请求失败的错误（如 404 或网络问题）
           if (error instanceof Error) {
             console.error("Error fetching posts:", error.message);
           } else {
@@ -250,6 +315,31 @@ const useMainStore = create<MainState>()(
         }
       },
 
+      // 清空帖子列表
+      clearPosts: () =>
+        set(() => ({
+          posts: [],
+          forumPage: 1,
+        })),
+
+      // 设置帖子筛选器
+      setPostFilters: async (newFilters) => {
+        set((state) => ({
+          postFilters: { ...state.postFilters, ...newFilters },
+        }));
+      },
+
+      // 清空帖子筛选器
+      clearPostFilters: () =>
+        set(() => ({
+          postFilters: {
+            searchTerm: null,
+            tag: null,
+            campus_id: null,
+          },
+        })),
+
+      // 发布帖子
       publishForumPost: async (
         title: string,
         content: string,
@@ -477,19 +567,23 @@ const useMainStore = create<MainState>()(
         }
       },
 
+      // ==================== 商品相关方法 ====================
+
+      // 获取商品列表（首次加载）
       fetchGoods: async () => {
         set({ isMarketLoading: true }); // 开始加载
         
         try {
           const response = await api.get("/api/goods", {
-            page: get().marketPage,
-            limit: 12,
-            keyword: get().goodsFilters.searchTerm,
-            goods_type: get().goodsFilters.goods_type,
-            tag: get().goodsFilters.tag,
-            min_price: get().goodsFilters.priceRange[0],
-            max_price: get().goodsFilters.priceRange[1],
-            campus_id: get().goodsFilters.campus_id,
+            params: {
+              limit: 12,
+              keyword: get().goodsFilters.searchTerm,
+              goods_type: get().goodsFilters.goods_type,
+              tag: get().goodsFilters.tag,
+              min_price: get().goodsFilters.priceRange[0],
+              max_price: get().goodsFilters.priceRange[1],
+              campus_id: get().goodsFilters.campus_id,
+            },
           });
 
           // console.log(response);
@@ -515,35 +609,25 @@ const useMainStore = create<MainState>()(
         }
       },
 
-      clear: () =>
-        set(() => ({
-          goods: [],
-          marketPage: 1,
-          goodsFilters: {
-            searchTerm: "",
-            goods_type: null,
-            tag: null,
-            priceRange: [0, 1000000],
-            campus_id: null,
-          },
-        })), // 清空所有状态
-
+      // 清空商品列表
       clearGoods: () =>
         set(() => ({
           goods: [],
           marketPage: 1,
-        })), // 清空 goods 状态
+        })),
 
+      // 设置商品筛选器
       setGoodsFilters: async (newFilters) => {
         set((state) => ({
           goodsFilters: { ...state.goodsFilters, ...newFilters }, // 更新 filters 状态
         }));
       },
 
-      clearFilters: () =>
+      // 清空商品筛选器
+      clearGoodsFilters: () =>
         set(() => ({
           goodsFilters: {
-            searchTerm: "",
+            searchTerm: null,
             goods_type: null,
             tag: null,
             priceRange: [0, 1000000],
@@ -551,6 +635,7 @@ const useMainStore = create<MainState>()(
           },
         })),
 
+      // 更新商品列表（滚动加载更多）
       updateGoods: async () => {
         try {
           const response = await api.get("/api/goods", {
@@ -575,14 +660,14 @@ const useMainStore = create<MainState>()(
             }));
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
-            console.log("No posts available or unexpected response status");
+            console.log("No goods available or unexpected response status");
           }
         } catch (error) {
           // 捕获请求失败的错误（如 404 或网络问题）
           if (error instanceof Error) {
-            console.error("Error fetching posts:", error.message);
+            console.error("Error fetching goods:", error.message);
           } else {
-            console.error("Error fetching posts:", error);
+            console.error("Error fetching goods:", error);
           }
         }
       },

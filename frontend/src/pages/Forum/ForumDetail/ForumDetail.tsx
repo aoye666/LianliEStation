@@ -34,10 +34,10 @@ const ForumDetail = () => {
     const recordStore = useRecordStore()
 
     useEffect(() => {
-        mainStore.getForumPosts();
+        mainStore.fetchPosts();
       }, [refreshTrigger]);
 
-    const forum = mainStore.posts.find((forum)=> forum.id == (forumId?parseInt(forumId):null))
+    const forum = mainStore.posts.find((forum)=> forum.id === (forumId?parseInt(forumId):null))
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
