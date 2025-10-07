@@ -9,9 +9,10 @@ import { useMainStore } from "../../store";
 type Props = {
   id: number;
   parent_id?: number;
+  onCommentSuccess?: () => void; // 评论成功后的回调
 }
 
-const ChatInput: React.FC<Props> = ({id, parent_id}) => {
+const ChatInput: React.FC<Props> = ({id, parent_id, onCommentSuccess}) => {
   const [inputText, setText] = useState("");
   const [inputImages, setImages] = useState<string[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
@@ -41,9 +42,26 @@ const ChatInput: React.FC<Props> = ({id, parent_id}) => {
     setText((prev) => prev + emojiData.emoji); // 把表情加到文本后面
   };
 
-  const sendMessage = () => {
-    parentId? updateForumInteract(id, "comment",inputText,parentId,undefined) : updateForumInteract(id, "comment",inputText,undefined,undefined)
-    window.location.reload();
+  const sendMessage = async () => {
+    if (!inputText.trim()) {
+      return;
+    }
+
+    try {
+      await (parentId 
+        ? updateForumInteract(id, "comment", inputText, parentId, undefined) 
+        : updateForumInteract(id, "comment", inputText, undefined, undefined)
+      );
+      
+      setText(""); // 清空输入框
+      
+      // 调用回调通知父组件刷新评论列表
+      if (onCommentSuccess) {
+        onCommentSuccess();
+      }
+    } catch (error) {
+      console.error('发送评论失败:', error);
+    }
   }
 
   return (

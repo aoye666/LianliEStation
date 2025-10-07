@@ -27,6 +27,7 @@ const ForumDetail = () => {
     const [showComment, setShowComment] = useState(false)
     const [likeState, setLikeState] = useState(false)
     const [parent_id,setParentId] = useState<number | undefined>(undefined)
+    const [refreshTrigger, setRefreshTrigger] = useState(0)
     const commentRef = useRef<HTMLDivElement>(null)
     const shareRef = useRef<HTMLDivElement>(null)
     const mainStore = useMainStore()
@@ -34,7 +35,7 @@ const ForumDetail = () => {
 
     useEffect(() => {
         mainStore.getForumPosts();
-      }, []);
+      }, [refreshTrigger]);
 
     const forum = mainStore.posts.find((forum)=> forum.id == (forumId?parseInt(forumId):null))
 
@@ -276,7 +277,11 @@ const ForumDetail = () => {
             <div className='commentBar' ref={commentRef}>
                 {
                     showComment && (
-                    <ChatInput id={forumId?parseInt(forumId):1} parent_id={parent_id}></ChatInput>
+                    <ChatInput 
+                      id={forumId?parseInt(forumId):1} 
+                      parent_id={parent_id}
+                      onCommentSuccess={() => setRefreshTrigger(prev => prev + 1)}
+                    />
                     )
                 }
             </div>

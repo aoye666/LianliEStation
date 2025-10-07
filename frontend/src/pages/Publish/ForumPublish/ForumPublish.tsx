@@ -20,10 +20,13 @@ const initialState = {
   tag: '帖子分类',
   images: [] as File[],
   previewImages: [] as string[],
+  existingImages: [] as string[],
   error: null as string | null,
   campus_name: '校区选择',
   likes: 0,
   complaints: 0,
+  isEdit: false,
+  post_id: null as number | null,
 }
 
 type Action =
@@ -33,12 +36,16 @@ type Action =
   | { type: 'SET_TITLE', payload: string }
   | { type: 'SET_IMAGES', payload: File[] }
   | { type: 'SET_PREVIEW_IMAGES', payload: string[] }
+  | { type: 'SET_EXISTING_IMAGES', payload: string[] }
   | { type: 'SET_ERROR', payload: string | null }
   | { type: 'SET_CAMPUS_ID', payload: number }
   | { type: 'SET_CAMPUS_NAME', payload: string }
   | { type: 'SET_AUTHOR_ID', payload: number | null }
   | { type: 'SET_CREATE_AT', payload: string }
   | { type: 'SET_ID', payload: number }
+  | { type: 'SET_STATUS', payload: string }
+  | { type: 'SET_IS_EDIT', payload: boolean }
+  | { type: 'SET_POST_ID', payload: number | null }
 
 const reducer = (state: typeof initialState, action: Action) => {
   switch (action.type) {
@@ -77,6 +84,11 @@ const reducer = (state: typeof initialState, action: Action) => {
         ...state,
         previewImages: action.payload,
       }
+    case 'SET_EXISTING_IMAGES':
+      return {
+        ...state,
+        existingImages: action.payload,
+      }
     case 'SET_ERROR':
       return {
         ...state,
@@ -102,6 +114,21 @@ const reducer = (state: typeof initialState, action: Action) => {
         ...state,
         create_at: action.payload,
       }
+    case 'SET_STATUS':
+      return {
+        ...state,
+        status: action.payload,
+      }
+    case 'SET_IS_EDIT':
+      return {
+        ...state,
+        isEdit: action.payload,
+      }
+    case 'SET_POST_ID':
+      return {
+        ...state,
+        post_id: action.payload,
+      }
     default:
       return state
   }
@@ -113,9 +140,6 @@ const ForumPublish = () => {
   const templateData = location.state as any
   const [state, dispatch] = useReducer(reducer, initialState)
 
-  const initialPostType = (value: string) => {
-    dispatch({ type: 'SET_POST_TYPE', payload: value })
-  }
   const initialTag = (value: string) => {
     dispatch({ type: 'SET_TAG', payload: value })
   }
@@ -143,18 +167,54 @@ const ForumPublish = () => {
     dispatch({ type: 'SET_CREATE_AT', payload: value })
   }
 
+  // 根据 campus_id 获取校区名称
+  const getCampusName = (campusId: number): string => {
+    const campusMap: { [key: number]: string } = {
+      1: '凌水校区',
+      2: '开发区校区',
+      3: '盘锦校区'
+    }
+    return campusMap[campusId] || '校区选择'
+  }
+
   const currentUser = useUserStore(state => state.currentUser)
   const publishForumPost = useMainStore(state => state.publishForumPost)
+  const updateForumPost = useMainStore(state => state.updateForumPost)
   const navigate = useNavigate()
 
   useEffect(() => {
     setCreateAt(new Date().toISOString())
-    setCampusId(currentUser?.campus_id || 1)
-    initialPostType(templateData?.post_type || 'receive')
-    initialTag(templateData?.tag || '帖子标签')
-    initialContent(templateData?.details || '')
-    initialTitle(templateData?.title || '')
-  }, [currentUser?.campus_id, templateData?.post_type, templateData?.tag, templateData?.details, templateData?.title])
+    
+    // 如果是编辑模式，加载已有数据
+    if (templateData?.isEdit) {
+      dispatch({ type: 'SET_IS_EDIT', payload: true })
+      dispatch({ type: 'SET_POST_ID', payload: templateData.post_id })
+      dispatch({ type: 'SET_STATUS', payload: templateData.status || 'active' })
+      initialTag(templateData?.tag || '帖子分类')
+      initialContent(templateData?.content || '')
+      initialTitle(templateData?.title || '')
+      
+      // 设置校区ID和名称
+      const campusId = templateData?.campus_id || currentUser?.campus_id || 1
+      dispatch({ type: 'SET_CAMPUS_ID', payload: campusId })
+      dispatch({ type: 'SET_CAMPUS_NAME', payload: getCampusName(campusId) })
+      
+      // 将已有图片转换为预览URL格式
+      if (templateData?.existingImages && templateData.existingImages.length > 0) {
+        const serverImageUrls = templateData.existingImages.map(
+          (url: string) => `${process.env.REACT_APP_API_URL || "http://localhost:5000"}${url}`
+        )
+        dispatch({ type: 'SET_PREVIEW_IMAGES', payload: serverImageUrls })
+        dispatch({ type: 'SET_EXISTING_IMAGES', payload: templateData.existingImages })
+      }
+    } else {
+      // 新建模式
+      setCampusId(currentUser?.campus_id || 1)
+      initialTag(templateData?.tag || '帖子标签')
+      initialContent(templateData?.details || '')
+      initialTitle(templateData?.title || '')
+    }
+  }, [currentUser?.campus_id, templateData])
 
   // 帖子标签下拉菜单配置
   const tagItems: MenuProps['items'] = [
@@ -224,8 +284,12 @@ const ForumPublish = () => {
     tag,
     images,
     previewImages,
+    existingImages,
     campus_id,
     campus_name,
+    status,
+    isEdit,
+    post_id,
   } = state
 
   // 原生文件上传处理
@@ -233,7 +297,9 @@ const ForumPublish = () => {
     const files = Array.from(event.target.files || []);
 
     // 限制最多3张图片
-    const validFiles = files.slice(0, 3 - images.length).filter(file => {
+    const remainingSlots = 3 - previewImages.length;
+    
+    const validFiles = files.slice(0, remainingSlots).filter(file => {
       if (file.type.startsWith('image/')) {
         return true;
       } else {
@@ -253,15 +319,26 @@ const ForumPublish = () => {
     }
   };
 
-  // 删除图片
+  // 删除图片（统一处理新上传和已有图片）
   const removeImage = (index: number) => {
-    const newImages = images.filter((_, i) => i !== index);
-    dispatch({ type: 'SET_IMAGES', payload: newImages });
-
-    // 清理预览URL
-    URL.revokeObjectURL(previewImages[index]);
+    // 删除预览图片
     const newPreviewUrls = previewImages.filter((_, i) => i !== index);
     dispatch({ type: 'SET_PREVIEW_IMAGES', payload: newPreviewUrls });
+    
+    // 判断删除的是新上传的图片还是已有图片
+    if (previewImages[index].startsWith('blob:')) {
+      // 新上传的图片：清理blob URL并从images数组中删除
+      URL.revokeObjectURL(previewImages[index]);
+      // 计算在images数组中的实际索引
+      const blobCount = previewImages.slice(0, index).filter(url => url.startsWith('blob:')).length;
+      const newImages = images.filter((_, i) => i !== blobCount);
+      dispatch({ type: 'SET_IMAGES', payload: newImages });
+    } else {
+      // 已有图片（服务器URL）：从existingImages中删除
+      const serverUrlCount = previewImages.slice(0, index).filter(url => !url.startsWith('blob:')).length;
+      const newExistingImages = existingImages.filter((_, i) => i !== serverUrlCount);
+      dispatch({ type: 'SET_EXISTING_IMAGES', payload: newExistingImages });
+    }
   };
 
   const handlePublish = async () => {
@@ -282,20 +359,43 @@ const ForumPublish = () => {
     }
 
     try {
-      const success = await publishForumPost(
-        title,
-        content,
-        campus_id,
-        tag,
-        images
-      );
+      let success = false;
+      
+      if (isEdit && post_id) {
+        // 编辑模式：判断是否需要上传图片
+        const shouldUploadImages = images.length > 0 || previewImages.length !== existingImages.length;
+        
+        success = await updateForumPost(
+          post_id,
+          title,
+          content,
+          campus_id,
+          status, // 保持原有状态
+          tag,
+          shouldUploadImages ? images : undefined
+        );
+        
+        if (success) {
+          message.success('修改成功');
+          navigate('/forum');
+        }
+      } else {
+        // 发布模式
+        success = await publishForumPost(
+          title,
+          content,
+          campus_id,
+          tag,
+          images
+        );
 
-      if (success) {
-        console.log('发布成功');
-        navigate('/forum');
+        if (success) {
+          console.log('发布成功');
+          navigate('/forum');
+        }
       }
     } catch (error) {
-      console.error('发布失败:', error);
+      console.error(isEdit ? '修改失败:' : '发布失败:', error);
     }
   }
 
@@ -346,8 +446,8 @@ const ForumPublish = () => {
           <div className='img-upload-label'>
             上传图片（最多3张）
           </div>
-          <div className={`template-upload ${images.length >= 3 ? 'upload-max-reached' : ''}`}>
-            {/* 已上传图片预览 */}
+          <div className={`template-upload ${previewImages.length >= 3 ? 'upload-max-reached' : ''}`}>
+            {/* 已上传图片预览（统一显示新上传和已有图片） */}
             {previewImages.map((url, index) => (
               <div key={index} className="upload-item uploaded">
                 <img src={url} alt={`preview-${index}`} />
@@ -363,7 +463,7 @@ const ForumPublish = () => {
             ))}
 
             {/* 上传按钮 */}
-            {images.length < 3 && (
+            {previewImages.length < 3 && (
               <div className="upload-item upload-button">
                 <label htmlFor="file-input" className="upload-label">
                   <div className="upload-content">
@@ -405,7 +505,9 @@ const ForumPublish = () => {
       </div>
 
       <div className='submit'>
-        <button onClick={() => handlePublish()}>发布</button>
+        <button onClick={() => handlePublish()}>
+          {isEdit ? '保存修改' : '发布'}
+        </button>
       </div>
     </div>
   )

@@ -30,6 +30,8 @@ const Messages = () => {
     read: false, // true/false
     manage: false, // true/false
   });
+  // 当前显示的类型文本
+  const [currentType, setCurrentType] = useState("全部");
 
   const { fetchResponses, searchAppeals, markResponse } =
     useRecordStore();
@@ -73,6 +75,7 @@ const Messages = () => {
         <div
           onClick={() => {
             setConditions({ ...conditions, type: "all" });
+            setCurrentType("全部");
           }}
         >
           全部
@@ -86,6 +89,7 @@ const Messages = () => {
         <div
           onClick={() => {
             setConditions({ ...conditions, type: "appeal" });
+            setCurrentType("申诉");
           }}
         >
           申诉
@@ -99,6 +103,7 @@ const Messages = () => {
         <div
           onClick={() => {
             setConditions({ ...conditions, type: "response" });
+            setCurrentType("回复");
           }}
         >
           回复
@@ -224,7 +229,7 @@ const Messages = () => {
                 <ProductOutlined
                   style={{ width: "20px", height: "20px", marginRight: "5px" }}
                 />
-                全部
+                {currentType}
               </div>
             </Dropdown>
           </div>

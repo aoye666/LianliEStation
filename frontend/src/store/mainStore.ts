@@ -106,6 +106,26 @@ interface MainState {
     tag?: string,
     images?: File[]
   ) => Promise<boolean>;
+  updateMarketGoods: (
+    goods_id: number,
+    title: string,
+    campus_id: number,
+    goods_type: string,
+    status: string,
+    content?: string,
+    price?: number,
+    tag?: string,
+    images?: File[]
+  ) => Promise<boolean>;
+  updateForumPost: (
+    post_id: number,
+    title: string,
+    content: string,
+    campus_id: number,
+    status: string,
+    tag?: string,
+    images?: File[]
+  ) => Promise<boolean>;
   updateForumInteract: (
     id: number,
     action: string,
@@ -316,6 +336,108 @@ const useMainStore = create<MainState>()(
         } catch (error) {
           console.error('发布失败:', error);
           message.error('发布失败，请稍后重试');
+          return false;
+        }
+      },
+
+      updateMarketGoods: async (
+        goods_id: number,
+        title: string,
+        campus_id: number,
+        goods_type: string,
+        status: string,
+        content?: string,
+        price?: number,
+        tag?: string,
+        images?: File[]
+      ) => {
+        try {
+          const formData = new FormData();
+          
+          // 必需参数
+          formData.append('title', title);
+          formData.append('campus_id', campus_id.toString());
+          formData.append('goods_type', goods_type);
+          formData.append('status', status);
+          
+          // 可选参数
+          if (content && content.trim() !== '') {
+            formData.append('content', content);
+          }
+          
+          if (price !== undefined && price !== null) {
+            formData.append('price', price.toString());
+          }
+          
+          if (tag && tag !== '商品类型') {
+            formData.append('tag', tag);
+          }
+          
+          // 图片上传（最多3张）
+          if (images && images.length > 0) {
+            images.forEach((image) => {
+              formData.append('images', image);
+            });
+          }
+
+          const response = await api.put(`/api/goods/${goods_id}`, formData);
+
+          if (response.status === 200) {
+            message.success('修改成功');
+            return true;
+          } else {
+            message.error('修改失败，请稍后重试');
+            return false;
+          }
+        } catch (error) {
+          console.error('修改失败:', error);
+          message.error('修改失败，请稍后重试');
+          return false;
+        }
+      },
+
+      updateForumPost: async (
+        post_id: number,
+        title: string,
+        content: string,
+        campus_id: number,
+        status: string,
+        tag?: string,
+        images?: File[]
+      ) => {
+        try {
+          const formData = new FormData();
+          
+          // 必需参数
+          formData.append('title', title);
+          formData.append('content', content);
+          formData.append('campus_id', campus_id.toString());
+          formData.append('status', status);
+          
+          // 可选参数
+          if (tag && tag !== '帖子标签') {
+            formData.append('tag', tag);
+          }
+          
+          // 图片上传（最多9张）
+          if (images && images.length > 0) {
+            images.forEach((image) => {
+              formData.append('images', image);
+            });
+          }
+
+          const response = await api.put(`/api/forum/posts/${post_id}`, formData);
+
+          if (response.status === 200) {
+            message.success('修改成功');
+            return true;
+          } else {
+            message.error('修改失败，请稍后重试');
+            return false;
+          }
+        } catch (error) {
+          console.error('修改失败:', error);
+          message.error('修改失败，请稍后重试');
           return false;
         }
       },
