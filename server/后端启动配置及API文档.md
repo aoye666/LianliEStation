@@ -2703,7 +2703,7 @@ images: [图片1.jpg, 图片2.jpg]
 
 基本信息
 
-- **路径**: `/api/history/goods`
+- **路径**: `/api/history/`
 - **方法**: `GET`
 - **描述**: 查询用户发布的商品和帖子历史记录，包括关联的图片信息
 
@@ -3157,49 +3157,43 @@ Content-Type: application/json
 - 成功响应 (状态码：200)
   ```json
   {
-    "message": "获取收藏列表成功",
-    "data": {
-      "posts": [
-        {
-          "id": 1,
-          "title": "开发区美食",
-          "content": "美食推荐？",
-          "author_id": 1,
-          "created_at": "2025-07-15T13:09:07.000Z",
-          "status": "active",
-          "campus_id": 1,
-          "tag": "咨询答疑",
-          "likes": 1,
-          "complaints": 0
-        }
-      ],
-      "goods": [
-        {
-          "id": 2,
-          "title": "笔记本2",
-          "content": "出售",
-          "author_id": 1,
-          "created_at": "2025-07-18T16:05:55.000Z",
-          "status": "active",
-          "price": "3500.10",
-          "campus_id": 1,
-          "goods_type": "sell",
-          "tag": "computer"
-        },
-        {
-          "id": 1,
-          "title": "笔记本",
-          "content": "出售",
-          "author_id": 1,
-          "created_at": "2025-07-18T15:40:06.000Z",
-          "status": "active",
-          "price": "3500.00",
-          "campus_id": 1,
-          "goods_type": "sell",
-          "tag": "computer"
-        }
-      ]
-    }
+      "message": "获取收藏列表成功",
+      "data": {
+          "posts": [
+              {
+                  "id": 1,
+                  "title": "期末复习小组招募",
+                  "content": "正在找考研政治的复习小组，一起打卡学习，互相监督。",
+                  "author_id": 1,
+                  "created_at": "2025-01-15T00:30:00.000Z",
+                  "status": "active",
+                  "campus_id": 1,
+                  "tag": null,
+                  "likes": 0,
+                  "complaints": 0,
+                  "images": [
+                      "/uploads/wall/study_group.jpg"
+                  ]
+              }
+          ],
+          "goods": [
+              {
+                  "id": 1,
+                  "title": "二手数学分析教材",
+                  "content": "浙江大学版教材，无字迹破损，附习题解答",
+                  "author_id": 1,
+                  "created_at": "2025-01-01T02:00:00.000Z",
+                  "status": "active",
+                  "price": "35.50",
+                  "campus_id": 1,
+                  "goods_type": "sell",
+                  "tag": "教材",
+                  "images": [
+                      "/uploads/images/image1.jpg"
+                  ]
+              }
+          ]
+      }
   }
   ```
 
