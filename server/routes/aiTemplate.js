@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import express from "express";
 import jwt from "jsonwebtoken"; // 用于生成 JWT
 import OpenAI from "openai";
+import db from "../db.js";
 const { Router, text } = express;
 
 dotenv.config();
@@ -102,7 +103,7 @@ router.post("/check-sensitive", async (req, res) => {
       return res.status(400).json({ message: "缺少检测文本" });
     }
 
-    const result = await checkSensitiveContent(text);
+    const result = await checkSensitive(text);
     return res.status(200).json(result);
   } catch (error) {
     console.error("敏感词检测错误:", error);
