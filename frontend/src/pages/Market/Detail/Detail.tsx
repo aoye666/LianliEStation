@@ -1,17 +1,17 @@
 import { useMainStore, useUserStore,useRecordStore } from "../../../store";
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom"; // 使用 useParams 从路由获取参数
 import { timeFormat } from "../../../utils/formatters";
 import { getCampusName } from "../../../utils/formatters";
-import { message } from "antd";
+import { message, Image, Carousel } from "antd";
 import "./Detail.scss";
 import copy from "../../../assets/copy-black.svg";
-import stars from "../../../assets/favorites-black.svg";
+import star from "../../../assets/favorites-black.svg";
 import like_true from "../../../assets/like-true.svg";
 import like_false from "../../../assets/like-false.svg";
 import dislike_true from "../../../assets/dislike-true.svg";
 import dislike_false from "../../../assets/dislike-false.svg";
-import star from "../../../assets/star.svg";
+//import star from "../../../assets/star.svg";
 import stared from "../../../assets/stared.svg";
 import drop from "../../../assets/drop-black.svg";
 import share from "../../../assets/share-black.svg";
@@ -48,13 +48,10 @@ const Detail = () => {
   const ID = param.goodsId; // 通过路由参数获取商品id
 
   const [currentGoods, setCurrentGoods] = useState<Goods>(); // 当前详情商品
-  const [currentIndex, setCurrentIndex] = useState(0); // 当前图片索引
   const [isMine, setIsMine] = useState("user"); // 当前互动类型 user/manage
   const [isLiked, setIsLiked] = useState(false); // 当前商品是否已点赞
   const [isDisliked, setIsDisliked] = useState(false); // 当前商品是否已踩
   const [isStared, setIsStared] = useState(false); // 当前商品是否已收藏
-  const touchStartX = useRef(0); // 记录触摸起始位置
-  const touchEndX = useRef(0); // 记录触摸结束位置
   const { addFavoriteGoods,removeFavoriteGoods } = useRecordStore();
 
   const handleIsRecorded = () => {
@@ -130,37 +127,6 @@ const Detail = () => {
     handleIsRecorded();
     console.log(currentUser);
   }, [currentUser, currentGoods, isLiked, isDisliked,goods]);
-
-  // 处理滑动事件
-  const handleTouchStart = (e: any) => {
-    touchStartX.current = e.touches[0].clientX; // 记录触摸起始位置
-  };
-  const handleTouchMove = (e: any) => {
-    touchEndX.current = e.touches[0].clientX; // 记录触摸结束位置
-  };
-  const handleTouchEnd = () => {
-    const distance = touchStartX.current - touchEndX.current; // 计算滑动距离
-    if (distance > 50) {
-      nextImage(); // 向左滑动，切换到下一张
-    } else if (distance < -50) {
-      prevImage(); // 向右滑动，切换到上一张
-    }
-  };
-
-  const nextImage = () => {
-    if (currentGoods?.images.length)
-      setCurrentIndex(
-        (prevIndex) => (prevIndex + 1) % currentGoods?.images.length
-      );
-  };
-  const prevImage = () => {
-    if (currentGoods?.images.length)
-      setCurrentIndex(
-        (prevIndex) =>
-          (prevIndex - 1 + currentGoods?.images.length) %
-          currentGoods?.images.length
-      );
-  };
 
   // 点击复制按钮，复制发布者QQ号到剪贴板
   const handleCopy = () => {
@@ -286,36 +252,30 @@ const Detail = () => {
           onClick={handleShare}
         />
       </div>
-      <div
-        className="detail-slider"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        <div className="slider-container">
-          <img
-            className="slider-item"
-            src={
-              currentGoods?.images?.[currentIndex]
-                ? `${process.env.REACT_APP_API_URL || "http://localhost:5000"}${
-                    currentGoods.images[currentIndex]
-                  }`
-                : takePlace
-            }
-            alt={`${currentIndex + 1}`}
-          />
-          <div className="slider-index">
-            {currentGoods?.images.map((_, index) => (
-              <div
-                key={index}
-                className="index-item"
-                style={{
-                  backgroundColor: currentIndex === index ? "white" : "black",
-                }}
-              ></div>
-            ))}
-          </div>
-        </div>
+      <div className="detail-slider">
+        <Image.PreviewGroup>
+          <Carousel>
+            {currentGoods?.images && currentGoods.images.length > 0 ? (
+              currentGoods.images.map((img, index) => (
+                <div key={index} className="carousel-item">
+                  <Image
+                    className="slider-item"
+                    src={`${process.env.REACT_APP_API_URL || "http://localhost:5000"}${img}`}
+                    alt={`image-${index}`}
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="carousel-item">
+                <img
+                  className="slider-item"
+                  src={takePlace}
+                  alt="placeholder"
+                />
+              </div>
+            )}
+          </Carousel>
+        </Image.PreviewGroup>
       </div>
       <div className="detail-title">{currentGoods?.title}</div>
       <div className="detail-profile">

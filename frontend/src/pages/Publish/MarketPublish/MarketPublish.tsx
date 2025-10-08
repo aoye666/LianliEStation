@@ -17,6 +17,7 @@ export interface PublishProps {
   tag: string;
   post_type: string;
   details: string;
+  fromAI?: boolean; // 标记是否从AI发布页跳转
 }
 
 const dbPromise = openDB("userImagesDB", 1, {
@@ -219,6 +220,8 @@ const Publish: React.FC = () => {
   const handleGenerateTemplate = (content: string) => {
     try {
       const templateData: PublishProps = JSON.parse(content);
+      // 添加 fromAI 标志，表示从AI页面跳转
+      templateData.fromAI = true;
       // 跳转至模板页，并传递模板参数
       navigate("/publish/market-publish-basic", { state: templateData });
     } catch (error) {

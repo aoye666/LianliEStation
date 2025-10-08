@@ -1,20 +1,21 @@
 // src/components/ChatInput.tsx
 import React, { useRef, useState,useEffect } from "react";
-import { Input, Button, Upload, Space, Image } from "antd";
-import { SmileOutlined, UploadOutlined, SendOutlined } from "@ant-design/icons";
+import { Input, Button, Space, message, Modal } from "antd";
+import { SmileOutlined, SendOutlined } from "@ant-design/icons";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react"; 
 import "./ChatInput.scss";
 import { useMainStore } from "../../store";
+import { aiAPI } from "../../api";
 
 type Props = {
   id: number;
   parent_id?: number;
+  replyToName?: string; // 被回复人的昵称
   onCommentSuccess?: () => void; // 评论成功后的回调
 }
 
-const ChatInput: React.FC<Props> = ({id, parent_id, onCommentSuccess}) => {
+const ChatInput: React.FC<Props> = ({id, parent_id, replyToName, onCommentSuccess}) => {
   const [inputText, setText] = useState("");
-  const [inputImages, setImages] = useState<string[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
   const [parentId, setParentId] = useState<number | null>(null);
   const updateForumInteract = useMainStore((state)=>state.updateForumInteract);
@@ -47,6 +48,34 @@ const ChatInput: React.FC<Props> = ({id, parent_id, onCommentSuccess}) => {
       return;
     }
 
+    // 敏感词检测
+    try {
+      message.loading({ content: '正在检测内容...', key: 'commentCheck' });
+      
+      const checkResult = await aiAPI.checkSensitive(inputText.trim());
+      
+      message.destroy('commentCheck');
+      
+      if (!checkResult.isSafe) {
+        // 检测到敏感内容
+        const warningMessage = checkResult.words && checkResult.words.length > 0
+          ? `评论包含敏感词：${checkResult.words.join('、')}`
+          : checkResult.reason;
+        
+        Modal.warning({
+          title: '评论审核未通过',
+          content: warningMessage,
+          okText: '知道了',
+        });
+        return;
+      }
+    } catch (error: any) {
+      message.destroy('commentCheck');
+      console.error('敏感词检测失败:', error);
+      // 评论检测失败时静默继续，不打断用户体验
+    }
+
+    // 发送评论
     try {
       await (parentId 
         ? updateForumInteract(id, "comment", inputText, parentId, undefined) 
@@ -72,7 +101,7 @@ const ChatInput: React.FC<Props> = ({id, parent_id, onCommentSuccess}) => {
           value={inputText}
           onChange={(e) => setText(e.target.value)}
           rows={3}
-          placeholder="输入文字..."
+          placeholder={replyToName ? `@${replyToName}...` : "发表您的高见..."}
           autoFocus
         />
 

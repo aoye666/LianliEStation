@@ -7,8 +7,9 @@ import useMainStore from '../../../../store/mainStore'
 import { useLocation } from 'react-router-dom'
 import { useNavigate } from "react-router-dom";
 import Navbar from '../../../../components/Navbar/Navbar'
-import { Dropdown, Button, message } from 'antd'
+import { Dropdown, Button, message, Modal } from 'antd'
 import type { MenuProps } from 'antd'
+import { aiAPI } from '../../../../api'
 
 const initialState = {
   id: 1,
@@ -30,6 +31,7 @@ const initialState = {
   complaints: 0,
   isEdit: false,
   goods_id: null as number | null,
+  fromAI: false, // 标记是否从AI发布页跳转
 }
 
 type Action =
@@ -50,6 +52,7 @@ type Action =
   | { type: 'SET_STATUS', payload: string }
   | { type: 'SET_IS_EDIT', payload: boolean }
   | { type: 'SET_GOODS_ID', payload: number | null }
+  | { type: 'SET_FROM_AI', payload: boolean }
 
 const reducer = (state: typeof initialState, action: Action) => {
   switch (action.type) {
@@ -137,6 +140,11 @@ const reducer = (state: typeof initialState, action: Action) => {
       return {
         ...state,
         goods_id: action.payload,
+      }
+    case 'SET_FROM_AI':
+      return {
+        ...state,
+        fromAI: action.payload,
       }
     default:
       return state
@@ -235,6 +243,11 @@ const Template = () => {
       initialContent(templateData?.details || '')
       initialTitle(templateData?.title || '')
       initialPrice(templateData?.price || 0)
+      
+      // 检查是否从AI页面跳转
+      if (templateData?.fromAI) {
+        dispatch({ type: 'SET_FROM_AI', payload: true })
+      }
     }
   }, [currentUser?.campus_id, templateData])
 
@@ -333,6 +346,7 @@ const Template = () => {
     status,
     isEdit,
     goods_id,
+    fromAI,
   } = state
 
   // 文件上传处理
@@ -407,6 +421,55 @@ const Template = () => {
       return;
     }
 
+    // 敏感词检测
+    try {
+      const textToCheck = `${title} ${content}`.trim();
+      
+      if (textToCheck) {
+        message.loading({ content: '正在检测内容安全性...', key: 'sensitiveCheck' });
+        
+        const checkResult = await aiAPI.checkSensitive(textToCheck);
+        
+        message.destroy('sensitiveCheck');
+        
+        if (!checkResult.isSafe) {
+          // 检测到敏感内容
+          const warningMessage = checkResult.words && checkResult.words.length > 0
+            ? `内容包含敏感词：${checkResult.words.join('、')}，请修改后再发布`
+            : `${checkResult.reason}，请修改后再发布`;
+          
+          Modal.warning({
+            title: '内容审核未通过',
+            content: warningMessage,
+            okText: '知道了',
+          });
+          return;
+        }
+        
+        message.success({ content: '内容安全检测通过', duration: 1 });
+      }
+    } catch (error: any) {
+      message.destroy('sensitiveCheck');
+      console.error('敏感词检测失败:', error);
+      
+      // 检测失败时询问用户是否继续
+      const confirmed = await new Promise<boolean>((resolve) => {
+        Modal.confirm({
+          title: '敏感词检测失败',
+          content: '无法完成内容安全检测，是否仍要继续发布？',
+          okText: '继续发布',
+          cancelText: '取消',
+          onOk: () => resolve(true),
+          onCancel: () => resolve(false),
+        });
+      });
+      
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    // 发布或更新商品
     try {
       let success = false;
       
@@ -453,7 +516,17 @@ const Template = () => {
   return (
     <div className='template-container'>
       <div className='navbar'>
-        <Navbar backActive={true} backPath='/publish/market-publish-choice' title='商品发布模板' />
+        <Navbar 
+          backActive={true} 
+          backPath={
+            isEdit 
+              ? '/user/history' 
+              : fromAI 
+                ? '/publish/market-publish-ai' 
+                : '/publish/market-publish-choice'
+          } 
+          title='商品发布模板' 
+        />
       </div>
 
       <div className='content'>

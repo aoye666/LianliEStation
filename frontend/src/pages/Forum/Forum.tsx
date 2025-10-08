@@ -421,7 +421,11 @@ const Forum = () => {
                   </div>
                   <div className="stat-item">
                     <span>💬</span>
-                    <span>{post.comments?.length || 0}</span>
+                    <span>
+                      {post.comments?.reduce((total, comment) => {
+                        return total + 1 + (comment.replies?.length || 0);
+                      }, 0) || 0}
+                    </span>
                   </div>
                 </div>
               </div>

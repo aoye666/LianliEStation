@@ -1,39 +1,56 @@
+// 颜色变量（参考商城页面风格）
+$wechat-bg: #ededed;        // 微信对话背景灰
+$panel-bg: #f9f9f9;          // 面板背景（来自Market.scss）
+$list-bg: rgb(228, 228, 228); // 列表背景（来自Market.scss）
+$card-bg: #fff;              // 卡片背景（来自Market.scss）
+$border-color: #d9d9d9;      // 边框颜色
+$user-msg-bg: #95ec69;       // 用户消息背景（微信绿）
+$ai-msg-bg: #ffffff;         // AI消息背景（白色）
+$ai-msg-border: #e0e0e0;     // AI消息边框
+
 .publish-container {
     width: 100vw;
     max-width: 100vw;
     height: calc(100vh - 50px);
     max-height: calc(100vh - 50px);
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: hidden;
     margin-top: 50px;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    background: $wechat-bg; // 微信对话背景
+    
     .dialog-container {
-        overflow: scroll;
+        overflow-y: auto;
+        overflow-x: hidden;
         display: flex;
         flex-direction: column;
         width: 100%;
-        height: 500px;
+        flex: 1;
+        padding: 10px 0 15px 0;
+        box-sizing: border-box;
+        background: $wechat-bg; // 对话区域背景
+        
+        // 移除背景图片
         .dialog-bg {
-            width: 100%;
-            height: calc(100vh - 95px);
-            position: absolute;
-            z-index: -1;
-            opacity: 0.8;
-            object-fit: cover;
+            display: none;
         }
         .dialog-user {
             display: flex;
             flex-direction: row-reverse;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             width: 240px;
             height: auto;
             margin-top: 10px;
             margin-bottom: 10px;
-            margin-left: 110px;
+            margin-left: auto;
+            margin-right: 15px; // 距右边15px
             .dialog-face {
                 width: 32px;
                 height: 32px;
+                margin-left: 10px; // 头像和内容间距
                 img {
                     width: 100%;
                     height: 100%;
@@ -41,25 +58,25 @@
                 }
             }
             .dialog-content {
-                padding: 3px;
+                padding: 10px 12px; // 增加内边距
                 width: 200px;
                 white-space: pre-wrap;
-                background: #43c94a;
-                color: white;
-                border-radius: 3px;
-                margin-right: 10px;
+                background: $user-msg-bg; // 微信绿
+                color: #000000; // 黑色文字
+                border-radius: 8px;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             }
         }
         .dialog-ai {
             display: flex;
             flex-direction: row;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             width: 260px;
             height: auto;
             margin-top: 10px;
             margin-bottom: 10px;
-            margin-left: 10px;
+            margin-left: 15px; // 距左边15px
             .dialog-face {
                 width: 32px;
                 height: 32px;
@@ -71,45 +88,106 @@
             }
             .dialog-content {
                 margin-left: 10px;
-                padding: 5px;
+                padding: 10px 12px; // 增加内边距
                 width: 220px;
                 white-space: pre-wrap;
-                background: #46adc7;
-                color: white;
-                border-radius: 3px;
-                .dialog-item {
-
-                }
+                border-radius: 8px;
+                border: 1px solid $ai-msg-border; // 浅灰边框
+                background: $ai-msg-bg; // 白色背景
+                color: #000000; // 黑色文字
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
             }
+            
             .dialog-control {
-                margin-top: 10px;
-                margin-bottom: 5px;
+                margin-top: 12px;
+                margin-bottom: 8px;
                 display: flex;
                 flex-direction: row;
                 align-items: center;
                 justify-content: space-between;
+                gap: 8px;
+                
                 .dialog-btn {
-                    width: 100px;
+                    flex: 1;
+                    min-width: 93px;
+                    height: 36px;
                     display: flex;
                     flex-direction: row;
                     align-items: center;
                     justify-content: center;
-                    border-radius: 3px;
-                    background: #43c94a;
+                    border-radius: 6px;
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    background: linear-gradient(135deg, #52c97f 0%, #43c94a 100%);
+                    color: white;
+                    font-size: 13px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    
+                    &:active {
+                        transform: translateY(1px);
+                        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                    }
+                    
                     .btn-icon {
-                        width: 20px;
-                        height: 20px;
+                        width: 18px;
+                        height: 18px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        
                         img {
                             height: 100%;
                             width: 100%;
+                            filter: brightness(0) invert(1); // 图标变白色
                         }
                     }
+                    
+                    // 为"生成模板"按钮创建特殊图标样式
+                    &:first-child .btn-icon {
+                        position: relative;
+                        
+                        img {
+                            display: none; // 隐藏原图标
+                        }
+                        
+                        // 白色圆圈
+                        &::before {
+                            content: '';
+                            position: absolute;
+                            width: 18px;
+                            height: 18px;
+                            background: white;
+                            border-radius: 50%;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                        }
+                        
+                        // 绿色对勾
+                        &::after {
+                            content: '✓';
+                            position: absolute;
+                            color: #43c94a;
+                            font-size: 14px;
+                            font-weight: bold;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            z-index: 1;
+                        }
+                    }
+                    
                     .btn-text {
-                        margin-left: 5px;
+                        margin-left: 6px;
+                        letter-spacing: 0.5px;
                     }
                 }
+                
                 .dialog-btn:nth-child(2) {
-                    background: #c57676;
+                    background: linear-gradient(135deg, #ff8a65 0%, #f4511e 100%);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
                 }
             }
         }
@@ -117,44 +195,61 @@
     .input-container {
         width: 100%;
         height: auto;
-        min-height: 40px;
-        position: fixed;
+        min-height: 70px; // 增加最小高度
+        position: relative; // 改为相对定位，作为底部固定元素
         bottom: 0;
-        background-color: #f2f2f2;
+        background-color: #f0f0f0; // 稍深灰色，区分对话区域
+        border-top: 1px solid #d0d0d0; // 边框颜色
         display: flex;
         flex-direction: row;
-        gap: 7px;
-        align-items: center;
+        gap: 12px; // 间距
+        align-items: flex-end; // 底部对齐
         justify-content: center;
+        padding: 15px; // 统一内边距
+        box-sizing: border-box;
+        flex-shrink: 0; // 不允许收缩
+        
         .input-text { 
-            font-size: 18px;
+            font-size: 15px;
             box-sizing: border-box;
             white-space: pre-wrap;
-            width: 78vw;
-            height: auto;
-            min-height: 17px;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            padding: 3px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            width: calc(100% - 72px); // 自适应宽度
+            max-width: 250px;
+            height: 40px; // 固定初始高度
+            min-height: 40px;
+            max-height: 120px; // 限制最大高度
+            padding: 10px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
             background-color: white;
-            resize : none;
-            overflow: hidden;
+            resize: none;
+            overflow-y: auto; // 内容超出时可滚动
+            line-height: 1.4;
+            
             &:focus {
                 outline: none;
                 border: 1px solid #43c94a;
+                box-shadow: 0 0 0 2px rgba(67, 201, 74, 0.1);
             }
         }
+        
         .input-btn {
             width: 60px;
-            height: 30px;
+            height: 40px; // 与输入框初始高度一致
             font-size: 15px;
-            align-self: center;
+            font-weight: 500;
+            flex-shrink: 0; // 不允许收缩
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             background: #43c94a;
             color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            
+            &:active {
+                transform: scale(0.95);
+                background: #3ab841;
+            }
         }
     }
 }
