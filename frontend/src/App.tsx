@@ -175,7 +175,7 @@ const App: React.FC = () => {
         if (isAuthError) {
           message.error("登录已过期，请重新登录");
           Cookies.remove("auth-token");
-          // 可选：重定向到登录页
+          // 重定向到登录页（App组件在Router外部，使用window.location是合理的）
           setTimeout(() => {
             window.location.href = '/auth/login';
           }, 2000);

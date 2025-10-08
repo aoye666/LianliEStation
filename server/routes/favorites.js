@@ -285,7 +285,7 @@ router.delete("/goods/remove", (req, res) => {
 // });
 
 // 查询用户的所有收藏（新接口）
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
   
   // 确保 token 存在
@@ -299,8 +299,8 @@ router.get("/", (req, res) => {
     const user_id = decoded.user_id;
 
     // 并行查询用户收藏的帖子和商品
-    Promise.all([
-      // 查询收藏的帖子（posts表结构：id, title, content, author_id, campus_id, tag, status, created_at, likes, complaints）
+    const [[posts], [goods]] = await Promise.all([
+      // 查询收藏的帖子
       db.query(
         `
         SELECT p.id, p.title, p.content, p.author_id, p.created_at, p.status, p.campus_id, p.tag, p.likes, p.complaints
@@ -311,7 +311,7 @@ router.get("/", (req, res) => {
       `,
         [user_id]
       ),
-      // 查询收藏的商品（goods表结构：id, title, content, author_id, created_at, status, price, campus_id, goods_type, tag）
+      // 查询收藏的商品
       db.query(
         `
         SELECT g.id, g.title, g.content, g.author_id, g.created_at, g.status, g.price, g.campus_id, g.goods_type, g.tag
@@ -322,26 +322,70 @@ router.get("/", (req, res) => {
       `,
         [user_id]
       )
-    ])
-      .then(([postsResult, goodsResult]) => {
-        const [posts] = postsResult;
-        const [goods] = goodsResult;
-        
-        res.status(200).json({
-          message: "获取收藏列表成功",
-          data: {
-            posts: posts,
-            goods: goods
-          }
-        });
-      })
-      .catch((err) => {
-        console.error(err);
-        res.status(500).json({ message: "服务器错误" });
+    ]);
+
+    // 处理商品图片
+    let goodsWithImages = [];
+    if (goods.length > 0) {
+      const goodsIds = goods.map((g) => g.id);
+      const [goodsImagesRows] = await db.query(
+        "SELECT goods_id, image_url FROM goods_images WHERE goods_id IN (?)",
+        [goodsIds.length > 1 ? goodsIds : [goodsIds[0]]]
+      );
+
+      const goodsImagesMap = goodsImagesRows.reduce((map, row) => {
+        if (!map[row.goods_id]) {
+          map[row.goods_id] = [];
+        }
+        map[row.goods_id].push(row.image_url);
+        return map;
+      }, {});
+
+      // 组装商品和图片
+      goodsWithImages = goods.map((goodsItem) => {
+        goodsItem.images = goodsImagesMap[goodsItem.id] || [];
+        return goodsItem;
       });
+    }
+
+    // 处理帖子图片
+    let postsWithImages = [];
+    if (posts.length > 0) {
+      const postIds = posts.map((p) => p.id);
+      const [postImagesRows] = await db.query(
+        "SELECT post_id, image_url FROM post_image WHERE post_id IN (?)",
+        [postIds.length > 1 ? postIds : [postIds[0]]]
+      );
+
+      const postImagesMap = postImagesRows.reduce((map, row) => {
+        if (!map[row.post_id]) {
+          map[row.post_id] = [];
+        }
+        map[row.post_id].push(row.image_url);
+        return map;
+      }, {});
+
+      // 组装帖子和图片
+      postsWithImages = posts.map((post) => {
+        post.images = postImagesMap[post.id] || [];
+        return post;
+      });
+    }
+
+    res.status(200).json({
+      message: "获取收藏列表成功",
+      data: {
+        posts: postsWithImages,
+        goods: goodsWithImages
+      }
+    });
 
   } catch (err) {
-    return res.status(401).json({ message: "无效的 token" });
+    console.error(err);
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "无效的 token" });
+    }
+    res.status(500).json({ message: "服务器错误" });
   }
 });
 

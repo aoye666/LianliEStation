@@ -8,7 +8,7 @@ dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY;
 
 // 查询发布的商品和帖子历史
-router.get("/goods", async (req, res) => {
+router.get("/", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
     return res.status(401).json({ message: "未提供 Token" });

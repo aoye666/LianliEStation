@@ -5,6 +5,14 @@ $text-color: #333;
 $border-radius: 8px;
 $shadow-color: rgba(0, 0, 0, 0.1);
 
+// 新增常用颜色变量
+$button-bg: #dbd9d9;
+$button-active-bg: #dbeaf5;
+$navbar-bg: #0674c1;
+$panel-bg: #f9f9f9;
+$list-bg: rgb(228, 228, 228);
+$card-bg: #fff;
+
 .button-basic {
   border-radius: 8px; /* 增加圆角 */
   border: none;
@@ -16,7 +24,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
   transition: all 0.2s; /* 按钮的过渡效果 */
   padding-left: 4px;
   padding-right: 4px;
-  background: #dbd9d9;
+  background: $button-bg;
 
   // &:hover {
   //     background-color: #0056b3; /* 悬停时变为深蓝色 */
@@ -34,12 +42,9 @@ $shadow-color: rgba(0, 0, 0, 0.1);
   background-color: var(--bg-color);
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 55px); // 只减去底部 Tabbar (55px)，不需要顶部 margin
-  max-height: calc(100vh - 55px);
+  height: calc(100vh - 55px);
   width: 100vw;
-  max-width: 100vw;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   box-sizing: border-box;
 
   .active-button {
@@ -49,7 +54,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
       //background-color: #4080bf;
       color: #0674c1;
       border: 1px solid #0674c1;
-      background: #dbeaf5;
+      background: $button-active-bg;
     }
   }
 
@@ -62,10 +67,11 @@ $shadow-color: rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #0674c1;
+    background: $navbar-bg;
     transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0.5s;
     width: 100vw;
     height: 50px;
+    flex-shrink: 0;
     .logo {
       display: flex;
       width: 35px;
@@ -102,21 +108,30 @@ $shadow-color: rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     position: relative;
+    flex: 1;
+    overflow: hidden;
 
     .un-content {
       display: flex;
       flex-direction: column;
-      //background: #0674C1;
-      padding-bottom: 10px;
-      //box-shadow: #bfbfbf 0px 3px 5px;
+      flex-shrink: 0;
+      padding-bottom: 2px;
       border-bottom: 1px solid #bfbfbf;
 
-      .carousel {
-        .carousel-item {
-          width: 100vw;
-          aspect-ratio: 3.3;
+      .carousel-wrapper {
+        width: 100vw;
+        overflow: hidden;
+        transition: height 0.15s ease-out;
+        
+        .carousel {
+          height: 100%;
+          
+          .carousel-item {
+            width: 100vw;
+            aspect-ratio: 3.3;
+            object-fit: cover;
+          }
         }
-        margin-bottom: 3px;
       }
 
       .tag {
@@ -124,12 +139,14 @@ $shadow-color: rgba(0, 0, 0, 0.1);
         justify-content: center;
         align-items: center;
         gap: 10px;
-        height: 25px;
+        padding: 6px 0;
+        min-height: 32px;
 
         .tag-item {
           display: flex;
           justify-content: center;
           align-items: center;
+          
           .market-type {
             display: flex;
             justify-content: center;
@@ -141,21 +158,18 @@ $shadow-color: rgba(0, 0, 0, 0.1);
 
             .sell {
               button {
-                //background-color: #e46161e7;
                 @extend.button-basic;
               }
             }
 
             .receive {
               button {
-                //background-color: #99d889;
                 @extend.button-basic;
               }
             }
 
             .null {
               button {
-                //background-color: #95c6e8;
                 @extend.button-basic;
               }
             }
@@ -182,7 +196,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
                   @extend.button-basic;
                   color: #0674c1;
                   border: 1px solid #0674c1;
-                  background: #dbeaf5;
+                  background: $button-active-bg;
                 }
               }
             }
@@ -191,8 +205,12 @@ $shadow-color: rgba(0, 0, 0, 0.1);
 
         .more {
           display: flex;
+          flex-shrink: 0;
+          cursor: pointer;
+          
           img {
             width: 25px;
+            height: 25px;
           }
         }
       }
@@ -201,14 +219,12 @@ $shadow-color: rgba(0, 0, 0, 0.1);
     .market-more {
       display: flex;
       position: absolute;
-      z-index: 100;
+      z-index: 10000;
       left: 0;
       bottom: 0;
       width: 100vw;
       flex-direction: column;
-      //box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      background-color: #f9f9f9;
-      position: absolute;
+      background-color: $panel-bg;
       height: calc(100vh - 105px - 31.25vw );
 
       input {
@@ -385,13 +401,14 @@ $shadow-color: rgba(0, 0, 0, 0.1);
       justify-content: flex-start;
       align-items: flex-start;
       padding: 6px;
-      height: calc(100vh - 105px - 31.25vw - 39px);
+      flex: 1;
       width: 100vw;
       box-sizing: border-box;
+      background-color: $list-bg;
       .commodity-item {
         display: flex;
         flex-direction: column;
-        background: #fff;
+        background: $card-bg;
         min-height: fit-content;
         border-radius: 5px;
         padding: 8px;

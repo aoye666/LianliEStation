@@ -7,8 +7,9 @@ import useMainStore from '../../../../store/mainStore'
 import { useLocation } from 'react-router-dom'
 import { useNavigate } from "react-router-dom";
 import Navbar from '../../../../components/Navbar/Navbar'
-import { Dropdown, Button, message } from 'antd'
+import { Dropdown, Button, message, Modal } from 'antd'
 import type { MenuProps } from 'antd'
+import { aiAPI } from '../../../../api'
 
 const initialState = {
   id: 1,
@@ -23,10 +24,14 @@ const initialState = {
   tag: '商品类型',
   images: [] as File[],
   previewImages: [] as string[],
+  existingImages: [] as string[],
   error: null as string | null,
   campus_name: '校区选择',
   likes: 0,
   complaints: 0,
+  isEdit: false,
+  goods_id: null as number | null,
+  fromAI: false, // 标记是否从AI发布页跳转
 }
 
 type Action =
@@ -36,6 +41,7 @@ type Action =
   | { type: 'SET_TITLE', payload: string }
   | { type: 'SET_IMAGES', payload: File[] }
   | { type: 'SET_PREVIEW_IMAGES', payload: string[] }
+  | { type: 'SET_EXISTING_IMAGES', payload: string[] }
   | { type: 'SET_ERROR', payload: string | null }
   | { type: 'SET_CAMPUS_ID', payload: number }
   | { type: 'SET_CAMPUS_NAME', payload: string }
@@ -43,6 +49,10 @@ type Action =
   | { type: 'SET_CREATE_AT', payload: string }
   | { type: 'SET_PRICE', payload: number | null }
   | { type: 'SET_ID', payload: number }
+  | { type: 'SET_STATUS', payload: string }
+  | { type: 'SET_IS_EDIT', payload: boolean }
+  | { type: 'SET_GOODS_ID', payload: number | null }
+  | { type: 'SET_FROM_AI', payload: boolean }
 
 const reducer = (state: typeof initialState, action: Action) => {
   switch (action.type) {
@@ -86,6 +96,11 @@ const reducer = (state: typeof initialState, action: Action) => {
         ...state,
         previewImages: action.payload,
       }
+    case 'SET_EXISTING_IMAGES':
+      return {
+        ...state,
+        existingImages: action.payload,
+      }
     case 'SET_ERROR':
       return {
         ...state,
@@ -110,6 +125,26 @@ const reducer = (state: typeof initialState, action: Action) => {
       return {
         ...state,
         create_at: action.payload,
+      }
+    case 'SET_STATUS':
+      return {
+        ...state,
+        status: action.payload,
+      }
+    case 'SET_IS_EDIT':
+      return {
+        ...state,
+        isEdit: action.payload,
+      }
+    case 'SET_GOODS_ID':
+      return {
+        ...state,
+        goods_id: action.payload,
+      }
+    case 'SET_FROM_AI':
+      return {
+        ...state,
+        fromAI: action.payload,
       }
     default:
       return state
@@ -158,19 +193,63 @@ const Template = () => {
     dispatch({ type: 'SET_CREATE_AT', payload: value })
   }
 
+  // 根据 campus_id 获取校区名称
+  const getCampusName = (campusId: number): string => {
+    const campusMap: { [key: number]: string } = {
+      1: '凌水校区',
+      2: '开发区校区',
+      3: '盘锦校区'
+    }
+    return campusMap[campusId] || '校区选择'
+  }
+
   const currentUser = useUserStore(state => state.currentUser)
   const publishMarketGoods = useMainStore(state => state.publishMarketGoods)
+  const updateMarketGoods = useMainStore(state => state.updateMarketGoods)
   const navigate = useNavigate()
 
   useEffect(() => {
     setCreateAt(new Date().toISOString())
-    setCampusId(currentUser?.campus_id || 1)
-    initialPostType(templateData?.post_type || 'receive')
-    initialTag(templateData?.tag || '商品标签')
-    initialContent(templateData?.details || '')
-    initialTitle(templateData?.title || '')
-    initialPrice(templateData?.price || 0)
-  }, [currentUser?.campus_id, templateData?.post_type, templateData?.tag, templateData?.details, templateData?.title, templateData?.price])
+    
+    // 如果是编辑模式，加载已有数据
+    if (templateData?.isEdit) {
+      dispatch({ type: 'SET_IS_EDIT', payload: true })
+      dispatch({ type: 'SET_GOODS_ID', payload: templateData.goods_id })
+      dispatch({ type: 'SET_STATUS', payload: templateData.status || 'active' })
+      initialPostType(templateData?.post_type || 'receive')
+      initialTag(templateData?.tag || '商品标签')
+      initialContent(templateData?.content || '')
+      initialTitle(templateData?.title || '')
+      initialPrice(templateData?.price || 0)
+      
+      // 设置校区ID和名称
+      const campusId = templateData?.campus_id || currentUser?.campus_id || 1
+      dispatch({ type: 'SET_CAMPUS_ID', payload: campusId })
+      dispatch({ type: 'SET_CAMPUS_NAME', payload: getCampusName(campusId) })
+      
+      // 将已有图片转换为预览URL格式（直接显示为服务器图片）
+      if (templateData?.existingImages && templateData.existingImages.length > 0) {
+        const serverImageUrls = templateData.existingImages.map(
+          (url: string) => `${process.env.REACT_APP_API_URL || "http://localhost:5000"}${url}`
+        )
+        dispatch({ type: 'SET_PREVIEW_IMAGES', payload: serverImageUrls })
+        dispatch({ type: 'SET_EXISTING_IMAGES', payload: templateData.existingImages })
+      }
+    } else {
+      // 新建模式，使用 AI 模板数据
+      setCampusId(currentUser?.campus_id || 1)
+      initialPostType(templateData?.post_type || 'receive')
+      initialTag(templateData?.tag || '商品标签')
+      initialContent(templateData?.details || '')
+      initialTitle(templateData?.title || '')
+      initialPrice(templateData?.price || 0)
+      
+      // 检查是否从AI页面跳转
+      if (templateData?.fromAI) {
+        dispatch({ type: 'SET_FROM_AI', payload: true })
+      }
+    }
+  }, [currentUser?.campus_id, templateData])
 
   // 商品类型下拉菜单配置
   const postTypeItems: MenuProps['items'] = [
@@ -260,17 +339,25 @@ const Template = () => {
     title,
     images,
     previewImages,
+    existingImages,
     campus_id,
     campus_name,
     price,
+    status,
+    isEdit,
+    goods_id,
+    fromAI,
   } = state
 
   // 文件上传处理
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     
-    // 限制最多3张图片
-    const validFiles = files.slice(0, 3 - images.length).filter(file => {
+    // 限制最多3张图片（基于当前显示的图片数量）
+    const remainingSlots = 3 - previewImages.length;
+    
+    // 筛选有效图片文件
+    const validFiles = files.slice(0, remainingSlots).filter(file => {
       if (file.type.startsWith('image/')) {
         return true;
       } else {
@@ -290,15 +377,26 @@ const Template = () => {
     }
   };
 
-  // 删除图片
+  // 删除图片（统一处理新上传和已有图片）
   const removeImage = (index: number) => {
-    const newImages = images.filter((_, i) => i !== index);
-    dispatch({ type: 'SET_IMAGES', payload: newImages });
-    
-    // 清理预览URL
-    URL.revokeObjectURL(previewImages[index]);
+    // 删除预览图片
     const newPreviewUrls = previewImages.filter((_, i) => i !== index);
     dispatch({ type: 'SET_PREVIEW_IMAGES', payload: newPreviewUrls });
+    
+    // 判断删除的是新上传的图片还是已有图片
+    if (previewImages[index].startsWith('blob:')) {
+      // 新上传的图片：清理blob URL并从images数组中删除
+      URL.revokeObjectURL(previewImages[index]);
+      // 计算在images数组中的实际索引
+      const blobCount = previewImages.slice(0, index).filter(url => url.startsWith('blob:')).length;
+      const newImages = images.filter((_, i) => i !== blobCount);
+      dispatch({ type: 'SET_IMAGES', payload: newImages });
+    } else {
+      // 已有图片（服务器URL）：从existingImages中删除
+      const serverUrlCount = previewImages.slice(0, index).filter(url => !url.startsWith('blob:')).length;
+      const newExistingImages = existingImages.filter((_, i) => i !== serverUrlCount);
+      dispatch({ type: 'SET_EXISTING_IMAGES', payload: newExistingImages });
+    }
   };
 
   const handlePublish = async () => {
@@ -323,30 +421,112 @@ const Template = () => {
       return;
     }
 
+    // 敏感词检测
     try {
-      const success = await publishMarketGoods(
-        title,
-        campus_id,
-        post_type,
-        content,
-        price,
-        tag,
-        images
-      );
+      const textToCheck = `${title} ${content}`.trim();
+      
+      if (textToCheck) {
+        message.loading({ content: '正在检测内容安全性...', key: 'sensitiveCheck' });
+        
+        const checkResult = await aiAPI.checkSensitive(textToCheck);
+        
+        message.destroy('sensitiveCheck');
+        
+        if (!checkResult.isSafe) {
+          // 检测到敏感内容
+          const warningMessage = checkResult.words && checkResult.words.length > 0
+            ? `内容包含敏感词：${checkResult.words.join('、')}，请修改后再发布`
+            : `${checkResult.reason}，请修改后再发布`;
+          
+          Modal.warning({
+            title: '内容审核未通过',
+            content: warningMessage,
+            okText: '知道了',
+          });
+          return;
+        }
+        
+        message.success({ content: '内容安全检测通过', duration: 1 });
+      }
+    } catch (error: any) {
+      message.destroy('sensitiveCheck');
+      console.error('敏感词检测失败:', error);
+      
+      // 检测失败时询问用户是否继续
+      const confirmed = await new Promise<boolean>((resolve) => {
+        Modal.confirm({
+          title: '敏感词检测失败',
+          content: '无法完成内容安全检测，是否仍要继续发布？',
+          okText: '继续发布',
+          cancelText: '取消',
+          onOk: () => resolve(true),
+          onCancel: () => resolve(false),
+        });
+      });
+      
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    // 发布或更新商品
+    try {
+      let success = false;
+      
+      if (isEdit && goods_id) {
+        // 编辑模式：调用修改API
+        // 判断是否需要上传图片：
+        // 1. 如果有新上传的File对象（images数组不为空），则上传新图片
+        // 2. 如果没有新上传，但用户删除了旧图片（previewImages长度 < existingImages长度），也需要上传来更新
+        const shouldUploadImages = images.length > 0 || previewImages.length !== existingImages.length;
+        
+        success = await updateMarketGoods(
+          goods_id,
+          title,
+          campus_id,
+          post_type,
+          status,
+          content,
+          price,
+          tag,
+          shouldUploadImages ? images : undefined  // 有修改才传递图片
+        );
+      } else {
+        // 新建模式：调用发布API
+        success = await publishMarketGoods(
+          title,
+          campus_id,
+          post_type,
+          content,
+          price,
+          tag,
+          images
+        );
+      }
       
       if (success) {
-        console.log('发布成功');
+        console.log(isEdit ? '修改成功' : '发布成功');
         navigate('/market');
       }
     } catch (error) {
-      console.error('发布失败:', error);
+      console.error(isEdit ? '修改失败:' : '发布失败:', error);
     }
   }
 
   return (
     <div className='template-container'>
       <div className='navbar'>
-        <Navbar backActive={true} backPath='/publish/market-publish-choice' title='商品发布模板' />
+        <Navbar 
+          backActive={true} 
+          backPath={
+            isEdit 
+              ? '/user/history' 
+              : fromAI 
+                ? '/publish/market-publish-ai' 
+                : '/publish/market-publish-choice'
+          } 
+          title='商品发布模板' 
+        />
       </div>
 
       <div className='content'>
@@ -408,8 +588,8 @@ const Template = () => {
           <div className='img-upload-label'>
             上传图片（最多3张）
           </div>
-          <div className={`template-upload ${images.length >= 3 ? 'upload-max-reached' : ''}`}>
-            {/* 已上传图片预览 */}
+          <div className={`template-upload ${previewImages.length >= 3 ? 'upload-max-reached' : ''}`}>
+            {/* 统一显示所有图片预览（新上传的和已有的） */}
             {previewImages.map((url, index) => (
               <div key={index} className="upload-item uploaded">
                 <img src={url} alt={`preview-${index}`} />
@@ -426,7 +606,7 @@ const Template = () => {
             ))}
             
             {/* 上传按钮 */}
-            {images.length < 3 && (
+            {previewImages.length < 3 && (
               <div className="upload-item upload-button">
                 <input
                   type="file"
@@ -469,7 +649,7 @@ const Template = () => {
       </div>
 
       <div className='submit'>
-        <button onClick={() => handlePublish()}>发布</button>
+        <button onClick={() => handlePublish()}>{isEdit ? '保存修改' : '发布'}</button>
       </div>
     </div>
   )

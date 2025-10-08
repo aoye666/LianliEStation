@@ -473,7 +473,7 @@ const Market: React.FC = () => {
                         width={120}
                         height={120}
                         style={{ objectFit: 'cover' }}
-                        src={`http://localhost:5000${img}`}
+                        src={`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${img}`}
                         placeholder="加载中..."
                       />
                     ))}

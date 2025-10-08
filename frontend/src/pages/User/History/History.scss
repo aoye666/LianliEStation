@@ -19,6 +19,8 @@ $border: #d0d0d0;
         display: flex;
         width: 100%;
         flex-direction: column;
+        flex: 1;
+        overflow: hidden;
 
         .select-container{
             display: flex;
@@ -57,9 +59,9 @@ $border: #d0d0d0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 10px;
-            height: calc(100vh - 85px - 10px);
+            flex: 1;
             overflow-y: auto;
+            padding: 10px 0;
 
             .history-empty {
                 display: flex;
@@ -72,16 +74,19 @@ $border: #d0d0d0;
 
             .item{
                 display: flex;
-                width: 95vw;
+                width: 100%;
+                max-width: 95vw;
                 height: auto;
                 min-height: 120px;
-                align-items: center;
+                align-items: stretch;
                 margin-bottom: 10px;
+                flex-shrink: 0;
 
                 .item-delete{
                     display: flex;
                     justify-content: center;
                     align-items: center;
+                    align-self: center;
                     border: 2px solid #d0d0d0;
                     border-radius: 50%;
                     width: 22px;
@@ -91,6 +96,7 @@ $border: #d0d0d0;
                     cursor: pointer;
                     position: relative;
                     margin-right: 5px;
+                    flex-shrink: 0;
                     
                     &:hover {
                         border-color: #3498db;
@@ -116,14 +122,15 @@ $border: #d0d0d0;
                 }
 
                 .item-description{
-                    display: flex;
-                    flex-direction: column;
                     flex: 1;
-                    background-color: white;
-                    border: 1px solid #e0e0e0;
-                    border-radius: 8px;
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-                    overflow: hidden;
+                    min-width: 0;
+                    
+                    &.ant-card {
+                        background-color: white;
+                        border: 1px solid #e0e0e0;
+                        border-radius: 8px;
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+                    }
                     
                     .ant-card-head {
                         min-height: 40px;
@@ -186,6 +193,10 @@ $border: #d0d0d0;
                                 align-items: center;
                                 justify-content: space-between;
                                 margin-top: auto;
+                                
+                                &.item-bottom-post {
+                                    justify-content: flex-end;
+                                }
                                 
                                 .goods-price{
                                     font-size: 18px;

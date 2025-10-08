@@ -89,8 +89,8 @@ interface RecordState {
   historyGoods: HistoryGoods[];
   historyPosts: HistoryPost[];
   getHistory: () => Promise<void>;
-  removeHistoryGoods: (id: number) => void;
-  removeHistoryPost: (id: number) => void;
+  removeHistoryGoods: (id: number, reason?: string) => Promise<number | undefined>;
+  removeHistoryPost: (id: number) => Promise<number | undefined>;
   setPage: () => void;
   page: number;
   clear: () => void;
@@ -164,7 +164,7 @@ const useRecordStore = create<RecordState>()(
 
       initialHistoryGoods: async () => {
         try {
-          const response = await api.get("/api/history/goods");
+          const response = await api.get("/api/history");
 
           // 检查返回数据是否有效
           if (response?.status === 200 && response.data) {
@@ -188,7 +188,7 @@ const useRecordStore = create<RecordState>()(
 
       getHistory: async () => {
         try {
-          const response = await api.get("/api/history/goods");
+          const response = await api.get("/api/history");
 
           // 检查返回数据是否有效
           if (response?.status === 200 && response.data) {
@@ -211,20 +211,35 @@ const useRecordStore = create<RecordState>()(
         }
       },
 
-      removeHistoryGoods: (id) => {
-        api.delete(`/api/goods/${id}`,{
-          data:{
-            post_id: id,
+      removeHistoryGoods: async (id, reason) => {
+        try {
+          const config = reason 
+            ? { params: { reason } }
+            : {};
+          const response = await api.delete(`/api/goods/${id}`, config);
+          return response.status;
+        } catch (error) {
+          const err = error as AxiosError;
+          console.error('删除历史商品失败:', err);
+          if (err.response) {
+            return err.response.status;
           }
-        });
+          throw error;
+        }
       },
 
-      removeHistoryPost: (id) => {
-        api.delete(`/api/forum/posts/${id}`,{
-          data:{
-            post_id: id,
+      removeHistoryPost: async (id) => {
+        try {
+          const response = await api.delete(`/api/forum/posts/${id}`);
+          return response.status;
+        } catch (error) {
+          const err = error as AxiosError;
+          console.error('删除历史帖子失败:', err);
+          if (err.response) {
+            return err.response.status;
           }
-        });
+          throw error;
+        }
       },
 
       getFavorites: async () => {
@@ -260,7 +275,9 @@ const useRecordStore = create<RecordState>()(
 
       removeFavoriteGoods: async (favoriteId: number) => {
         try{
-          const response = await api.delete("/api/favorites/goods/remove", { goods_id: favoriteId });
+          const response = await api.delete("/api/favorites/goods/remove", { 
+            data: { goods_id: favoriteId }
+          });
           return response.status;
         }
         catch(error){
@@ -286,7 +303,9 @@ const useRecordStore = create<RecordState>()(
 
       removeFavoritePost: async (favoriteId: number) => {
         try{
-          const response = await api.delete("/api/favorites/posts/remove", { post_id: favoriteId });
+          const response = await api.delete("/api/favorites/posts/remove", { 
+            data: { post_id: favoriteId }
+          });
           return response.status
         }
         catch(error){

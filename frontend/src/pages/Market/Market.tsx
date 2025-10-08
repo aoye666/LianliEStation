@@ -22,7 +22,6 @@ const Market = () => {
     setGoodsFilters: setFilters,
     updateGoods,
     clearGoods,
-    clear,
     fetchGoods,
   } = useMainStore();
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -70,10 +69,6 @@ const Market = () => {
 
     return columns;
   }, [windowSize.width]);
-
-  window.addEventListener("beforeunload", () => {
-    clear();
-  });
 
   useEffect(() => {
     fetchGoods();
@@ -157,20 +152,22 @@ const Market = () => {
 
       <div className="market-body">
         <div className="un-content">
-          <Carousel autoplay className="carousel" >
-            <img
-              className="carousel-item"
-              src={MarketBanner}
-              alt="schoolLogo"
-              onLoad={() => window.dispatchEvent(new Event('resize'))}
-            />
-            <img
-              className="carousel-item"
-              src={ADInviting}
-              alt="广告位招商"
-              onLoad={() => window.dispatchEvent(new Event('resize'))}
-            />
-          </Carousel>
+          <div className="carousel-wrapper">
+            <Carousel autoplay className="carousel">
+              <img
+                className="carousel-item"
+                src={MarketBanner}
+                alt="schoolLogo"
+                onLoad={() => window.dispatchEvent(new Event('resize'))}
+              />
+              <img
+                className="carousel-item"
+                src={ADInviting}
+                alt="广告位招商"
+                onLoad={() => window.dispatchEvent(new Event('resize'))}
+              />
+            </Carousel>
+          </div>
           <div className="region"></div>
 
           <div className="tag">
