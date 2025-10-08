@@ -4011,7 +4011,7 @@ console.log("收藏的商品:", goods);
 
 - 路径: `/api/admin/stats`
 - 方法: `GET`
-- 描述: 获取record_event表中各类型事件的统计数据（仅限管理员）
+- 描述: 获取平台各类统计数据，包括总体数据和近7天数据（仅限管理员）
 
 请求头部
 | 参数名        | 类型   | 必选 | 描述                       |
@@ -4034,63 +4034,133 @@ console.log("收藏的商品:", goods);
 {
   "message": "事件统计数据获取成功",
   "data": {
-    "visit": {
-      "active_users": 150
-    },
+    "visit": 1250,
+    "users": 156,
+    "posts": 89,
+    "goods": 234,
+    "banned_users": 3,
+    "violation": 12,
     "publish_goods_tag": {
-      "total_count": 45
-    },
-    "publish_post_tag": {
-      "total_count": 32
+      "electronics": 45,
+      "books": 23,
+      "others": 15
     },
     "favorite_goods_tag": {
-      "total_count": 89
+      "electronics": 89,
+      "books": 34,
+      "others": 22
+    },
+    "publish_post_tag": {
+      "study": 32,
+      "news": 18,
+      "others": 12
     },
     "favorite_post_tag": {
-      "total_count": 67
+      "study": 67,
+      "news": 28,
+      "others": 19
     },
-    "completed_transaction": {
-      "total_count": 23
-    },
-    "membership": {
-      "total_count": 12
-    },
-    "ad_click": {
-      "total_clicks": 234
-    },
-    "ad_add": {
-      "total_count": 5
-    },
-    "total": {
-      "total_events": 657
-    },
+    "completed_transaction": 23,
+    "membership": 12,
+    "ad_click": 234,
+    "ad_add": 5,
     "recent_7_days": {
-      "visit": 45,
-      "publish_goods_tag": 8,
-      "favorite_goods_tag": 15,
-      "ad_click": 23
+      "visit": 345,
+      "active_users": 48,
+      "completed_transaction": 8,
+      "membership": 3,
+      "ad_click": 67,
+      "ad_add": 2,
+      "register": 12,
+      "goods": 28,
+      "posts": 15,
+      "publish_goods_tag": {
+        "electronics": 8,
+        "books": 5,
+        "others": 3
+      },
+      "favorite_goods_tag": {
+        "electronics": 15,
+        "books": 7,
+        "others": 4
+      },
+      "publish_post_tag": {
+        "study": 6,
+        "news": 4,
+        "others": 2
+      },
+      "favorite_post_tag": {
+        "study": 12,
+        "news": 6,
+        "others": 3
+      },
+      "daily_records": [
+        {
+          "date": "2025-04-01",
+          "visit": 45,
+          "ad_click": 8,
+          "completed_transaction": 2,
+          "register": 3,
+          "goods": 5,
+          "posts": 2,
+          "membership": 1
+        },
+        {
+          "date": "2025-04-02",
+          "visit": 52,
+          "ad_click": 12,
+          "completed_transaction": 1,
+          "register": 2,
+          "goods": 4,
+          "posts": 3,
+          "membership": 0
+        }
+      ]
     }
   }
 }
 ```
 
 **数据说明**
-- `visit`: 活跃用户数（基于info字段去重统计不同用户）
-- `publish_goods_tag`: 商品发布总次数
-- `publish_post_tag`: 帖子发布总次数
-- `favorite_goods_tag`: 商品收藏总次数
-- `favorite_post_tag`: 帖子收藏总次数
+
+**总体统计数据：**
+- `visit`: 总访问次数（包含游客和登录用户）
+- `users`: 注册用户总数
+- `posts`: 活跃帖子总数（不包含已删除）
+- `goods`: 活跃商品总数（不包含已删除）
+- `banned_users`: 当前被封禁用户数
+- `violation`: 违规次数总计
+- `publish_goods_tag`: 发布商品标签统计（按标签分组）
+- `favorite_goods_tag`: 收藏商品标签统计（按标签分组）
+- `publish_post_tag`: 发布帖子标签统计（按标签分组）
+- `favorite_post_tag`: 收藏帖子标签统计（按标签分组）
 - `completed_transaction`: 完成交易总次数
 - `membership`: 会员开通总次数
 - `ad_click`: 广告点击总次数
 - `ad_add`: 广告添加总次数
-- `total`: 所有事件总数
-- `recent_7_days`: 最近7天各类型事件数量
+
+**近7天统计数据（recent_7_days）：**
+- `visit`: 近7天访问次数
+- `active_users`: 近7天活跃用户数（访问超过7次的真实用户，排除游客）
+- `completed_transaction`: 近7天完成交易次数
+- `membership`: 近7天会员开通次数
+- `ad_click`: 近7天广告点击次数
+- `ad_add`: 近7天广告添加次数
+- `register`: 近7天注册用户数
+- `goods`: 近7天发布商品数
+- `posts`: 近7天发布帖子数
+- `publish_goods_tag`: 近7天发布商品标签统计
+- `favorite_goods_tag`: 近7天收藏商品标签统计
+- `publish_post_tag`: 近7天发布帖子标签统计
+- `favorite_post_tag`: 近7天收藏帖子标签统计
+- `daily_records`: 近7天每日统计数据数组，用于绘制趋势图表
 
 **备注**
 - 该接口仅限管理员使用
-- 提供平台整体活动数据分析
-- visit类型统计去重用户数，其他类型统计事件总次数
+- 提供完整的平台数据分析功能
+- 活跃用户统计排除游客访问，只统计真实用户
+- 标签统计按实际标签内容分组，便于分析用户偏好
+- daily_records数据可用于绘制各类数据的时间趋势图
 
 ---
 
