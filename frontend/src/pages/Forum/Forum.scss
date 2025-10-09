@@ -1,3 +1,5 @@
+@import '../../styles/mixins.scss';
+
 $primary-color: #3498db;
 $hover-color: rgb(0, 86, 179);
 $background-color: #ffffff;
@@ -14,15 +16,15 @@ $list-bg: rgb(228, 228, 228);
 $card-bg: #fff;
 
 .button-basic {
-  border-radius: 8px;
+  @include border-radius(8);
   border: none;
   color: #7b7777;
-  font-size: 16px;
+  @include font-size(16);
   font-weight: 380;
   cursor: pointer;
   transition: all 0.2s;
-  padding-left: 4px;
-  padding-right: 4px;
+  padding-left: px2rem(4);
+  padding-right: px2rem(4);
   background: $button-bg;
 
   &:active {
@@ -35,7 +37,7 @@ $card-bg: #fff;
     position: relative;
     flex-direction: column;
     background-color: var(--bg-color);
-    height: calc(100vh - 55px);
+    height: calc(100vh - #{px2rem(55)});
     width: 100vw;
     overflow: hidden;
     box-sizing: border-box;
@@ -61,14 +63,13 @@ $card-bg: #fff;
         background: $navbar-bg;
         transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0.5s;
         width: 100vw;
-        height: 50px;
+        height: px2rem(50);
         flex-shrink: 0;
         
         .logo {
             display: flex;
-            width: 35px;
-            height: 35px;
-            margin-right: 15px;
+            @include size(35);
+            margin-right: px2rem(15);
             background: white;
             border-radius: 50%;
         }
@@ -76,11 +77,11 @@ $card-bg: #fff;
         input {
             border: 1px solid #ccc;
             width: 60vw;
-            height: 20px;
-            border-radius: 10px;
+            height: px2rem(20);
+            @include border-radius(10);
             outline: none;
-            padding: 3px;
-            padding-left: 10px;
+            @include padding(3);
+            padding-left: px2rem(10);
         }
 
         input:focus {
@@ -90,9 +91,8 @@ $card-bg: #fff;
 
         .icon {
             display: flex;
-            width: 30px;
-            height: 30px;
-            margin-left: 10px;
+            @include size(30);
+            margin-left: px2rem(10);
         }
     }
 
@@ -130,9 +130,9 @@ $card-bg: #fff;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                gap: 10px;
-                padding: 6px 0;
-                min-height: 32px;
+                gap: px2rem(10);
+                @include padding(6, 0);
+                min-height: px2rem(32);
                 flex-shrink: 0;
 
                 .tag-item {
@@ -144,14 +144,14 @@ $card-bg: #fff;
                         display: flex;
                         justify-content: center;
                         align-items: center;
-                        gap: 10px;
+                        gap: px2rem(10);
                         width: 100%;
 
                         .detail {
                             display: flex;
                             justify-content: center;
                             align-items: center;
-                            gap: 10px;
+                            gap: px2rem(10);
                             flex-wrap: wrap;
 
                             button {
@@ -178,8 +178,7 @@ $card-bg: #fff;
                     cursor: pointer;
                     
                     img {
-                        width: 25px;
-                        height: 25px;
+                        @include size(25);
                     }
                 }
             }
@@ -194,21 +193,21 @@ $card-bg: #fff;
             width: 100vw;
             flex-direction: column;
             background-color: $panel-bg;
-            max-height: calc(100vh - 55px - 50px);
+            max-height: calc(100vh - #{px2rem(55)} - #{px2rem(50)});
             overflow-y: auto;
 
             .location {
                 display: flex;
                 flex-direction: column;
-                margin-bottom: 10px;
-                margin-top: 10px;
+                margin-bottom: px2rem(10);
+                margin-top: px2rem(10);
                 width: 100vw;
-                padding: 0 15px;
+                @include padding(0, 15);
 
                 .location-title {
-                    font-size: 18px;
+                    @include font-size(18);
                     font-weight: bold;
-                    margin-bottom: 10px;
+                    margin-bottom: px2rem(10);
                     color: #333;
                 }
 
@@ -216,20 +215,20 @@ $card-bg: #fff;
                     display: flex;
                     justify-content: center;
                     flex-wrap: wrap;
-                    gap: 15px;
-                    padding: 0 10px;
+                    gap: px2rem(15);
+                    @include padding(0, 10);
 
                     .item {
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        font-size: 16px;
+                        @include font-size(16);
                         cursor: pointer;
                         transition: all 0.2s ease;
-                        width: 80px;
-                        border-radius: 10px;
+                        width: px2rem(80);
+                        @include border-radius(10);
                         color: #7b7777;
-                        padding: 8px 0;
+                        @include padding(8, 0);
 
                         &:active {
                             transform: scale(0.9);
@@ -240,15 +239,15 @@ $card-bg: #fff;
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        font-size: 16px;
+                        @include font-size(16);
                         cursor: pointer;
                         transition: all 0.2s ease;
-                        width: 80px;
-                        border-radius: 10px;
+                        width: px2rem(80);
+                        @include border-radius(10);
                         color: #0674c1;
                         text-decoration: underline;
                         text-decoration-color: #0674c1;
-                        padding: 8px 0;
+                        @include padding(8, 0);
                     }
                 }
             }
@@ -257,13 +256,13 @@ $card-bg: #fff;
                 display: flex;
                 flex-direction: column;
                 width: 100vw;
-                padding: 0 15px;
-                margin-bottom: 10px;
+                @include padding(0, 15);
+                margin-bottom: px2rem(10);
 
                 .sort-title {
-                    font-size: 18px;
+                    @include font-size(18);
                     font-weight: bold;
-                    margin-bottom: 15px;
+                    margin-bottom: px2rem(15);
                     color: #333;
                 }
 
@@ -272,20 +271,20 @@ $card-bg: #fff;
                     justify-content: center;
                     width: 100%;
                     flex-wrap: wrap;
-                    gap: 15px;
-                    padding: 0 10px;
+                    gap: px2rem(15);
+                    @include padding(0, 10);
 
                     .item {
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        font-size: 16px;
+                        @include font-size(16);
                         cursor: pointer;
                         transition: all 0.2s ease;
-                        width: 80px;
-                        border-radius: 10px;
+                        width: px2rem(80);
+                        @include border-radius(10);
                         color: #7b7777;
-                        padding: 8px 0;
+                        @include padding(8, 0);
 
                         &:active {
                             transform: scale(0.9);
@@ -296,15 +295,15 @@ $card-bg: #fff;
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        font-size: 16px;
+                        @include font-size(16);
                         cursor: pointer;
                         transition: all 0.2s ease;
-                        width: 80px;
-                        border-radius: 10px;
+                        width: px2rem(80);
+                        @include border-radius(10);
                         color: #0674c1;
                         text-decoration: underline;
                         text-decoration-color: #0674c1;
-                        padding: 8px 0;
+                        @include padding(8, 0);
                     }
                 }
             }
@@ -313,17 +312,17 @@ $card-bg: #fff;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                padding: 20px 0;
+                @include padding(20, 0);
 
                 button {
                     color: white;
-                    width: 130px;
-                    height: 35px;
-                    font-size: 16px;
+                    width: px2rem(130);
+                    height: px2rem(35);
+                    @include font-size(16);
                     cursor: pointer;
                     background-color: $primary-color;
                     border: none;
-                    border-radius: 15px;
+                    @include border-radius(15);
                     transition: all 0.2s ease;
 
                     &:active {
@@ -337,8 +336,8 @@ $card-bg: #fff;
             display: flex;
             flex-direction: column;
             background-color: $list-bg;
-            gap: 10px;
-            padding: 10px;
+            gap: px2rem(10);
+            @include padding(10);
             flex: 1;
             overflow-y: auto;
             width: 100vw;
@@ -346,8 +345,8 @@ $card-bg: #fff;
 
             .post-card {
                 background: $card-bg;
-                border-radius: 6px;
-                padding: 10px;
+                @include border-radius(6);
+                @include padding(10);
                 cursor: pointer;
                 transition: all 0.2s ease;
                 display: flex;
@@ -362,54 +361,53 @@ $card-bg: #fff;
 
                 // 无图帖子：头部(26px) + 标题(28px) + 两行正文(42px) + 底部(20px) + padding(20px) ≈ 136px
                 &.no-images {
-                    min-height: 100px;
-                    max-height: 160px;
+                    min-height: px2rem(100);
+                    max-height: px2rem(160);
                 }
 
                 // 有图帖子：无图部分(136px) + 图片间隙(8px) + 图片高度(约120-150px) ≈ 264-294px
                 // 增加余量以确保图片完全显示
                 &.has-images {
-                    min-height: 180px;
-                    max-height: 320px;
+                    min-height: px2rem(180);
+                    max-height: px2rem(320);
                 }
 
                 .post-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    margin-bottom: 4px;
-                    padding-bottom: 2px;
+                    margin-bottom: px2rem(4);
+                    padding-bottom: px2rem(2);
 
                     .author-info {
                         display: flex;
                         align-items: center;
-                        gap: 4px;
+                        gap: px2rem(4);
 
                         .author-avatar {
-                            width: 20px;
-                            height: 20px;
+                            @include size(20);
                             border-radius: 50%;
                             object-fit: cover;
                         }
 
                         .author-name {
-                            font-size: 11px;
+                            @include font-size(11);
                             font-weight: 500;
                             color: #333;
                         }
                     }
 
                     .post-time {
-                        font-size: 10px;
+                        @include font-size(10);
                         color: #999;
                     }
                 }
 
                 .post-title {
-                    font-size: 16px;
+                    @include font-size(16);
                     font-weight: 600;
                     color: #333;
-                    margin-bottom: 4px;
+                    margin-bottom: px2rem(4);
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
@@ -418,33 +416,28 @@ $card-bg: #fff;
                 .post-body {
                     display: flex;
                     flex-direction: column;
-                    gap: 8px;
+                    gap: px2rem(8);
                     flex: 1;
                     overflow: hidden;
-                    margin-bottom: 4px;
+                    margin-bottom: px2rem(4);
 
                     .post-content {
-                        font-size: 14px;
+                        @include font-size(14);
                         color: #666;
                         line-height: 1.5;
-                        overflow: hidden;
-                        display: -webkit-box;
-                        -webkit-line-clamp: 2;
-                        line-clamp: 2;
-                        -webkit-box-orient: vertical;
-                        text-overflow: ellipsis;
+                        @include ellipsis(2);
                         word-break: break-word;
                     }
 
                     .post-images {
                         display: flex;
-                        gap: 4px;
+                        gap: px2rem(4);
                         flex-shrink: 0;
 
                         img {
-                            width: calc((100% - 8px) / 3);
+                            width: calc((100% - #{px2rem(8)}) / 3);
                             aspect-ratio: 4 / 3;
-                            border-radius: 4px;
+                            @include border-radius(4);
                             object-fit: contain;
                         }
                     }
@@ -453,24 +446,23 @@ $card-bg: #fff;
                 .post-footer {
                     display: flex;
                     align-items: center;
-                    gap: 16px;
-                    padding-top: 2px;
+                    gap: px2rem(16);
+                    padding-top: px2rem(2);
                     border-top: 1px solid #f0f0f0;
 
                     .stat-item {
                         display: flex;
                         align-items: center;
-                        gap: 3px;
-                        font-size: 11px;
+                        gap: px2rem(3);
+                        @include font-size(11);
                         color: #999;
 
                         img {
-                            width: 13px;
-                            height: 13px;
+                            @include size(13);
                         }
 
                         span:first-child {
-                            font-size: 14px;
+                            @include font-size(14);
                         }
                     }
                 }

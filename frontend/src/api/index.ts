@@ -42,7 +42,7 @@ export const aiAPI = {
   // AI敏感词检测
   checkSensitive: async (text: string) => {
     try {
-      const response = await api.post('/api/ai/check-sensitive', { text });
+      const response = await api.post('/api/aiTemplate/check-sensitive', { text });
       return response.data;
     } catch (error: any) {
       if (error.response) {
@@ -55,7 +55,7 @@ export const aiAPI = {
   // AI生成商品模板
   generateTemplate: async (text: string) => {
     try {
-      const response = await api.post('/api/ai/generate', { text });
+      const response = await api.post('/api/aiTemplate/generate', { text });
       return response.data;
     } catch (error: any) {
       if (error.response) {
@@ -68,7 +68,7 @@ export const aiAPI = {
   // 获取AI调用统计
   getStats: async () => {
     try {
-      const response = await api.get('/api/ai/stats');
+      const response = await api.get('/api/aiTemplate/stats');
       return response.data;
     } catch (error: any) {
       if (error.response) {

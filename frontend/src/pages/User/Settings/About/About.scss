@@ -1,8 +1,10 @@
+@import '../../../../styles/mixins.scss';
+
 .about-container {
-    margin-top: 70px;
-    margin-bottom: 20px;
+    margin-top: px2rem(70);
+    margin-bottom: px2rem(20);
     width: 90vw;
-    font-size: 19px;
+    @include font-size(19);
     display: flex;
     flex-direction: column;
     justify-self: center;

@@ -1,3 +1,5 @@
+@import '../../../styles/mixins.scss';
+
 $primary-color: #3498db;
 $hover-color: rgb(0, 86, 179);
 $background-color: #ffffff;
@@ -10,8 +12,8 @@ $border: #d0d0d0;
     display: flex;
     flex-direction: column;
     width: 100vw;
-    height: calc(100vh - 50px);
-    margin-top: 50px;
+    height: calc(100vh - #{px2rem(50)});
+    margin-top: px2rem(50);
     box-sizing: border-box;
     background-color: var(--bg-color);
 
@@ -24,7 +26,7 @@ $border: #d0d0d0;
 
         .select-container{
             display: flex;
-            height: 35px;
+            height: px2rem(35);
             width: 100%;
             align-items: center;
             justify-content: center;
@@ -38,7 +40,7 @@ $border: #d0d0d0;
                 justify-content: center;
                 border-bottom: 1px solid $border;
                 background-color: white;
-                font-size: 13px;
+                @include font-size(13);
                 
                 &:first-child {
                     border-right: 1px solid $border;
@@ -61,7 +63,7 @@ $border: #d0d0d0;
             align-items: center;
             flex: 1;
             overflow-y: auto;
-            padding: 10px 0;
+            @include padding(10, 0);
 
             .history-empty {
                 display: flex;
@@ -69,7 +71,7 @@ $border: #d0d0d0;
                 justify-content: center;
                 width: 100%;
                 height: 100%;
-                min-height: 300px;
+                min-height: px2rem(300);
             }
 
             .item{
@@ -77,9 +79,9 @@ $border: #d0d0d0;
                 width: 100%;
                 max-width: 95vw;
                 height: auto;
-                min-height: 120px;
+                min-height: px2rem(120);
                 align-items: stretch;
-                margin-bottom: 10px;
+                margin-bottom: px2rem(10);
                 flex-shrink: 0;
 
                 .item-delete{
@@ -89,13 +91,12 @@ $border: #d0d0d0;
                     align-self: center;
                     border: 2px solid #d0d0d0;
                     border-radius: 50%;
-                    width: 22px;
-                    height: 22px;
-                    min-width: 22px;
+                    @include size(22);
+                    min-width: px2rem(22);
                     transition: all 0.2s ease;
                     cursor: pointer;
                     position: relative;
-                    margin-right: 5px;
+                    margin-right: px2rem(5);
                     flex-shrink: 0;
                     
                     &:hover {
@@ -111,7 +112,7 @@ $border: #d0d0d0;
                         &::after {
                             content: '✓';
                             color: #ffffff;
-                            font-size: 14px;
+                            @include font-size(14);
                             font-weight: bold;
                             position: absolute;
                             top: 50%;
@@ -128,39 +129,38 @@ $border: #d0d0d0;
                     &.ant-card {
                         background-color: white;
                         border: 1px solid #e0e0e0;
-                        border-radius: 8px;
+                        @include border-radius(8);
                         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
                     }
                     
                     .ant-card-head {
-                        min-height: 40px;
-                        padding: 10px 15px;
+                        min-height: px2rem(40);
+                        @include padding(10, 15);
                         background-color: #fafafa;
                         border-bottom: 1px solid #e8e8e8;
                         
                         .ant-card-head-title {
-                            font-size: 15px;
+                            @include font-size(15);
                             font-weight: 500;
                             padding: 0;
                         }
                     }
                     
                     .ant-card-body {
-                        padding: 12px 15px;
+                        @include padding(12, 15);
                     }
 
                     .item-content{
                         display: flex;
-                        gap: 12px;
+                        gap: px2rem(12);
                         
                         .item-img{
                             display: flex;
                             justify-content: center;
                             align-items: center;
-                            width: 80px;
-                            height: 80px;
-                            min-width: 80px;
-                            border-radius: 6px;
+                            @include size(80);
+                            min-width: px2rem(80);
+                            @include border-radius(6);
                             overflow: hidden;
                             background-color: #f5f5f5;
                 
@@ -175,17 +175,13 @@ $border: #d0d0d0;
                             display: flex;
                             flex-direction: column;
                             flex: 1;
-                            gap: 8px;
+                            gap: px2rem(8);
 
                             .item-detail{
-                                font-size: 13px;
+                                @include font-size(13);
                                 color: #666;
                                 line-height: 1.5;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
-                                display: -webkit-box;
-                                -webkit-line-clamp: 2;
-                                -webkit-box-orient: vertical;
+                                @include ellipsis(2);
                             }
             
                             .item-bottom{
@@ -199,16 +195,16 @@ $border: #d0d0d0;
                                 }
                                 
                                 .goods-price{
-                                    font-size: 18px;
+                                    @include font-size(18);
                                     font-weight: 600;
                                     color: #ff6b6b;
                                 }
 
                                 .item-tag{
                                     border: 1px solid #d0d0d0;
-                                    border-radius: 4px;
-                                    padding: 2px 10px;
-                                    font-size: 12px;
+                                    @include border-radius(4);
+                                    @include padding(2, 10);
+                                    @include font-size(12);
                                     color: #666;
                                     background-color: #f9f9f9;
                                 }
@@ -228,23 +224,23 @@ $border: #d0d0d0;
         bottom: 0;
         left: 0;
         right: 0;
-        padding: 10px 16px;
+        @include padding(10, 16);
         background-color: #fafafa;
         border-top: 1px solid #e0e0e0;
         z-index: 100;
 
         .footer-buttons{
             display: flex;
-            gap: 10px;
+            gap: px2rem(10);
             width: 100%;
-            max-width: 600px;
+            max-width: px2rem(600);
 
             button{
                 flex: 1;
                 border: none;
-                border-radius: 4px;
-                height: 38px;
-                font-size: 13px;
+                @include border-radius(4);
+                height: px2rem(38);
+                @include font-size(13);
                 font-weight: 500;
                 transition: all 0.15s ease;
                 cursor: pointer;

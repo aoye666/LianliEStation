@@ -1,10 +1,13 @@
+@import '../../styles/mixins.scss';
+
 $dark: black;
 $light: white;
 $blue: #0674C1;
+
 .tabbar-container {
-  border-radius: 10px 10px 0 0;
+  border-radius: px2rem(10) px2rem(10) 0 0;
   width: 100%;
-  height: 55px;
+  height: px2rem(55);
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -16,30 +19,31 @@ $blue: #0674C1;
   
   .tabbar-item {
     width: 100%;
-    height: 45px;
+    height: px2rem(45);
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    margin-top: 5px;
+    margin-top: px2rem(5);
 
     .tabbar-icon {
-      width: 32px;
-      height: 32px;
+      @include size(32);
+      
       img {
         width: 100%;
         height: 100%;
         object-fit: cover;
       }
     }
+    
     span {
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 12px;
-      width: 60px;
-      height: 12px;
-      margin-bottom: 10px;
+      @include font-size(12);
+      width: px2rem(60);
+      height: px2rem(12);
+      margin-bottom: px2rem(10);
       color: $light;
     }
   }

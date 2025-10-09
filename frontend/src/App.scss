@@ -1,3 +1,6 @@
+// 引入rem混合宏
+@import './styles/mixins.scss';
+
 // 全局 CSS 变量定义
 :root {
     --bg-color: #EDEDED;
@@ -7,7 +10,7 @@
     padding: 0;
     margin: 0;
     scrollbar-width: none;
-    box-sizing: border-box; // 确保所有元素使用 border-box 模型
+    box-sizing: border-box;
 }
 
 // 全局视口约束
@@ -20,6 +23,35 @@ html, body {
     margin: 0;
     padding: 0;
 }
+
+// 重置body和所有元素的字体大小为浏览器默认
+body {
+    font-size: 16px !important; // 强制设置body字体为16px
+    line-height: 1.5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+// 重要：重置所有元素的字体大小，防止继承html的font-size
+#root {
+    font-size: 16px; // 确保React根元素的字体大小正常
+}
+
+// 重置所有常用文本元素的字体大小
+div, p, span, a, button, input, textarea, select, label, li, td, th {
+    font-size: inherit; // 继承父元素（body的16px）
+}
+
+// 标题元素保持相对大小
+h1 { font-size: 2em; }
+h2 { font-size: 1.5em; }
+h3 { font-size: 1.17em; }
+h4 { font-size: 1em; }
+h5 { font-size: 0.83em; }
+h6 { font-size: 0.67em; }
 
 #root {
     width: 100vw;

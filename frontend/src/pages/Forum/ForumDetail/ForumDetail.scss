@@ -1,3 +1,5 @@
+@import '../../../styles/mixins.scss';
+
 .body{
     border: 0;
 }
@@ -5,8 +7,8 @@
 .forum-detail {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 50px);
-    margin-top: 50px;
+    height: calc(100vh - #{px2rem(50)});
+    margin-top: px2rem(50);
     word-wrap: break-word;
     overflow-wrap: break-word;
     white-space: pre-wrap;
@@ -18,20 +20,19 @@
         top: 0;
         left: 50%;
         transform: translateX(-50%);
-        margin-top: 5px;
+        margin-top: px2rem(5);
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
         width: 100vw;
-        height: 40px;
+        height: px2rem(40);
         z-index: 10;
-        padding-left: 15px;
-        padding-right: 25px;
+        padding-left: px2rem(15);
+        padding-right: px2rem(25);
 
         .navbar-icon {
-            width: 32px;
-            height: 32px;
+            @include size(32);
             cursor: pointer;
         }
     }
@@ -41,24 +42,24 @@
         flex-direction: column;
         border-bottom: 1px solid #ccc;
         width: 100%;
-        margin-bottom: 50px;
-        padding: 0 10px;
+        margin-bottom: px2rem(50);
+        @include padding(0, 10);
 
         .img-container{
-            margin-bottom: 10px;
-            margin-left: -10px;
-            margin-right: -10px;
-            width: calc(100% + 20px);
+            margin-bottom: px2rem(10);
+            margin-left: px2rem(-10);
+            margin-right: px2rem(-10);
+            width: calc(100% + #{px2rem(20)});
             background: #f8f8f8;
 
             .carousel-item{
-                height: 220px;
+                height: px2rem(220);
                 background: #f8f8f8;
                 
 
                 .img{
                     width: 100vw;
-                    height: 220px;
+                    height: px2rem(220);
                     object-fit: contain;
                     background: #f8f8f8;
                     display: block;
@@ -69,17 +70,17 @@
         }
 
         .title{
-            font-size: 18px;
+            @include font-size(18);
             font-weight: bold;
-            margin-bottom: 8px;
-            margin-top: 12px;
+            margin-bottom: px2rem(8);
+            margin-top: px2rem(12);
             width: 100%;
             line-height: 1.4;
         }
 
         .text{
-            font-size: 14px;
-            margin-bottom: 12px;
+            @include font-size(14);
+            margin-bottom: px2rem(12);
             line-height: 1.6;
             color: #333;
         }
@@ -87,13 +88,12 @@
         .author_info{
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            margin-bottom: 15px;
+            gap: px2rem(8);
+            @include font-size(12);
+            margin-bottom: px2rem(15);
 
             .author_avatar{
-                width: 24px;
-                height: 24px;
+                @include size(24);
                 border-radius: 50%;
                 object-fit: cover;
             }
@@ -104,10 +104,10 @@
             }
 
             .date{
-                font-size: 11px;
+                @include font-size(11);
                 color: #999;
                 margin-left: auto;
-                margin-right: 5px;
+                margin-right: px2rem(5);
             }
         }
      
@@ -115,20 +115,20 @@
         .comment{
             display: flex;
             flex-direction: column;
-            margin-top: 5px;
+            margin-top: px2rem(5);
 
             .counter{
                 display: flex;
-                font-size: 16px;
-                margin-bottom: 10px;
-                padding-bottom: 10px;
+                @include font-size(16);
+                margin-bottom: px2rem(10);
+                padding-bottom: px2rem(10);
                 font-weight: bold;
                 border-bottom: 1px solid #f0f0f0;
             }
 
             .comment-list{
                 .comment-item{
-                    margin-bottom: 8px;
+                    margin-bottom: px2rem(8);
 
                     .ant-card{
                         border: none;
@@ -138,7 +138,7 @@
                     }
 
                     .ant-card-body{
-                        padding: 6px 0;
+                        padding: px2rem(6) 0;
                         min-height: auto;
                     }
 
@@ -149,13 +149,12 @@
                     }
 
                     .ant-card-meta-avatar{
-                        margin-right: 8px;
+                        margin-right: px2rem(8);
                         padding-right: 0;
                     }
 
                     .ant-card-meta-avatar .ant-avatar{
-                        width: 24px;
-                        height: 24px;
+                        @include size(24);
                     }
 
                     .ant-card-meta-detail{
@@ -164,10 +163,10 @@
                     }
 
                     .ant-card-meta-title{
-                        font-size: 12px;
+                        @include font-size(12);
                         font-weight: 500;
                         color: #333;
-                        line-height: 24px;
+                        line-height: px2rem(24);
                         margin-bottom: 0;
                         display: flex;
                         align-items: center;
@@ -184,35 +183,35 @@
                         justify-content: center;
                         background: #1890ff;
                         color: white;
-                        font-size: 10px;
-                        height: 24px;
-                        width: 32px;
-                        border-radius: 5px;
+                        @include font-size(10);
+                        height: px2rem(24);
+                        width: px2rem(32);
+                        @include border-radius(5);
                         font-weight: normal;
-                        margin-left: 8px;
+                        margin-left: px2rem(8);
                     }
 
                     .ant-card-meta-description{
-                        font-size: 14px;
+                        @include font-size(14);
                         color: #333;
-                        margin-top: 4px;
+                        margin-top: px2rem(4);
                         line-height: 1.6;
                     }
 
                     .ant-btn-link{
-                        padding: 4px 0;
-                        margin-left: 32px;
+                        padding: px2rem(4) 0;
+                        margin-left: px2rem(32);
                         height: auto;
-                        font-size: 12px;
+                        @include font-size(12);
                     }
                 }
 
                 .replies{
-                    margin-top: 8px;
-                    padding-left: 32px;
+                    margin-top: px2rem(8);
+                    padding-left: px2rem(32);
 
                     .reply-item{
-                        margin-bottom: 6px;
+                        margin-bottom: px2rem(6);
 
                         .ant-card{
                             border: none;
@@ -222,7 +221,7 @@
                         }
 
                         .ant-card-body{
-                            padding: 4px 0;
+                            padding: px2rem(4) 0;
                             min-height: auto;
                         }
 
@@ -233,13 +232,12 @@
                         }
 
                         .ant-card-meta-avatar{
-                            margin-right: 8px;
+                            margin-right: px2rem(8);
                             padding-right: 0;
                         }
 
                         .ant-card-meta-avatar .ant-avatar{
-                            width: 24px;
-                            height: 24px;
+                            @include size(24);
                         }
 
                         .ant-card-meta-detail{
@@ -248,10 +246,10 @@
                         }
 
                         .ant-card-meta-title{
-                            font-size: 12px;
+                            @include font-size(12);
                             font-weight: 500;
                             color: #333;
-                            line-height: 24px;
+                            line-height: px2rem(24);
                             margin-bottom: 0;
                             display: flex;
                             align-items: center;
@@ -268,18 +266,18 @@
                             justify-content: center;
                             background: #1890ff;
                             color: white;
-                            font-size: 10px;
-                            height: 24px;
-                            width: 32px;
-                            border-radius: 5px;
+                            @include font-size(10);
+                            height: px2rem(24);
+                            width: px2rem(32);
+                            @include border-radius(5);
                             font-weight: normal;
-                            margin-left: 8px;
+                            margin-left: px2rem(8);
                         }
 
                         .ant-card-meta-description{
-                            font-size: 13px;
+                            @include font-size(13);
                             color: #333;
-                            margin-top: 4px;
+                            margin-top: px2rem(4);
                             line-height: 1.6;
                         }
                     }
@@ -292,50 +290,50 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        margin-top: 10px;
-        padding-left: 5px;
+        margin-top: px2rem(10);
+        padding-left: px2rem(5);
         position: fixed;
         bottom: 0;
         width: 100%;
         border-top: #ccc 1px solid;
-        height: 50px;
+        height: px2rem(50);
         background-color: #fff;
 
         .comment{
             display: flex;
-            width: 150px;
+            width: px2rem(150);
             background-color: #eae4e4;
-            border-radius: 20px;
-            padding-left: 15px;
-            margin: 10px;
-            font-size: 14px;
+            @include border-radius(20);
+            padding-left: px2rem(15);
+            @include margin(10);
+            @include font-size(14);
             align-items: center;
         }
         
         .like{
-            padding: 10px;
+            @include padding(10);
             .icon{
                 img{
-                    width: 30px;
+                    width: px2rem(30);
                 }
             }
         }
 
         .star{
-            padding: 10px;
+            @include padding(10);
 
             .icon{
                 img{
-                    width: 30px;
+                    width: px2rem(30);
                 }
             }
         }
 
         .share{
-            padding: 10px;
+            @include padding(10);
             .icon{
                 img{
-                    width: 30px;
+                    width: px2rem(30);
                 }
             }
         }

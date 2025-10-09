@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>REM测试页面</title>
+    <script src="rem.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-size: 16px; /* 正常文字大小 */
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        
+        .info {
+            background: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .test-box {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        
+        /* 使用px的元素 - 应该保持原大小 */
+        .px-text {
+            font-size: 16px;
+            color: #333;
+        }
+        
+        /* 使用rem的元素 - 会根据屏幕宽度缩放 */
+        .rem-text {
+            font-size: 0.427rem; /* 16px / 37.5 = 0.427rem */
+            color: #0674c1;
+        }
+        
+        .rem-box {
+            width: 2.667rem; /* 100px / 37.5 */
+            height: 2.667rem;
+            background: #0674c1;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.133rem; /* 5px / 37.5 */
+        }
+    </style>
+</head>
+<body>
+    <h1 style="font-size: 24px; margin-bottom: 20px;">REM适配测试页面</h1>
+    
+    <div class="info">
+        <p><strong>当前屏幕宽度：</strong><span id="width"></span>px</p>
+        <p><strong>html font-size：</strong><span id="html-font-size"></span></p>
+        <p><strong>body font-size：</strong><span id="body-font-size"></span></p>
+        <p><strong>1rem实际值：</strong><span id="rem-value"></span></p>
+    </div>
+    
+    <div class="test-box">
+        <h2 style="font-size: 18px; margin-bottom: 10px;">使用px的文字（不会缩放）</h2>
+        <p class="px-text">这是16px的文字，在任何屏幕下都是16px，不会缩放。</p>
+    </div>
+    
+    <div class="test-box">
+        <h2 style="font-size: 18px; margin-bottom: 10px;">使用rem的文字（会缩放）</h2>
+        <p class="rem-text">这是0.427rem的文字，在375px屏幕下约等于16px，会随屏幕宽度缩放。</p>
+    </div>
+    
+    <div class="test-box">
+        <h2 style="font-size: 18px; margin-bottom: 10px;">使用rem的盒子（会缩放）</h2>
+        <div class="rem-box">100px盒子</div>
+        <p style="margin-top: 10px; color: #666;">这个盒子在375px屏幕下是100x100px，会随屏幕宽度缩放</p>
+    </div>
+    
+    <script>
+        function updateInfo() {
+            const width = document.documentElement.clientWidth;
+            const htmlFontSize = window.getComputedStyle(document.documentElement).fontSize;
+            const bodyFontSize = window.getComputedStyle(document.body).fontSize;
+            const remValue = parseFloat(htmlFontSize);
+            
+            document.getElementById('width').textContent = width;
+            document.getElementById('html-font-size').textContent = htmlFontSize;
+            document.getElementById('body-font-size').textContent = bodyFontSize;
+            document.getElementById('rem-value').textContent = remValue.toFixed(2) + 'px';
+        }
+        
+        updateInfo();
+        window.addEventListener('resize', updateInfo);
+    </script>
+</body>
+</html>
