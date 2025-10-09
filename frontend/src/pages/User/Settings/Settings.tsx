@@ -33,7 +33,7 @@ const Settings = () => {
           <div className="item-text">邮箱</div>
           <div className="item-value">{currentUser?.email}</div>
         </div>
-        <div className="settings-item" style={{ marginTop: "3px" }} onClick={() => navigate('/user/settings/reset/nickname')}>
+        <div className="settings-item spacing-top" onClick={() => navigate('/user/settings/reset/nickname')}>
           <div className="item-text">昵称</div><img src={right} alt="详情" className="right-icon"></img>
         </div>
         <div className="settings-item" onClick={() => navigate('/user/settings/reset/campus_id')}>
@@ -42,10 +42,10 @@ const Settings = () => {
         <div className="settings-item" onClick={() => navigate('/user/settings/reset/qq_id')}>
           <div className="item-text">绑定QQ</div><img src={right} alt="详情" className="right-icon"></img>
         </div>
-        <div className="settings-item" style={{ marginTop: "3px" }} onClick={() => navigate('/user/settings/reset/password')}>
+        <div className="settings-item spacing-top" onClick={() => navigate('/user/settings/reset/password')}>
           <div className="item-text">密码</div><img src={right} alt="详情" className="right-icon"></img>
         </div>
-        <div className="settings-item" style={{ marginTop: "3px" }} onClick={() => navigate('/user/settings/reset/avatar')}>
+        <div className="settings-item spacing-top" onClick={() => navigate('/user/settings/reset/avatar')}>
           <div className="item-text">头像</div><img src={right} alt="详情" className="right-icon"></img>
         </div>
         <div className="settings-item" onClick={() => navigate('/user/settings/reset/background')}>
@@ -57,7 +57,7 @@ const Settings = () => {
         <div className="settings-item" onClick={() => navigate('/user/settings/reset/theme_id')}>
           <div className="item-text">主题风格</div><img src={right} alt="详情" className="right-icon"></img>
         </div>
-        <div className="settings-item" style={{ marginTop: "3px" }} onClick={() => navigate('/user/settings/about')}>
+        <div className="settings-item spacing-top" onClick={() => navigate('/user/settings/about')}>
           <div className="item-text">关于连理e站</div><img src={about} alt="详情" className="right-icon"></img>
         </div>
       {isAuthenticated ? (

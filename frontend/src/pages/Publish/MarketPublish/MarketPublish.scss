@@ -13,11 +13,11 @@ $ai-msg-border: #e0e0e0;     // AI消息边框
 .publish-container {
     width: 100vw;
     max-width: 100vw;
-    height: calc(100vh - #{px2rem(50)});
-    max-height: calc(100vh - #{px2rem(50)});
+    height: calc(100vh - #{px2rem(55)});
+    max-height: calc(100vh - #{px2rem(55)});
     overflow-x: hidden;
     overflow-y: hidden;
-    margin-top: px2rem(50);
+    margin-top: px2rem(55);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;

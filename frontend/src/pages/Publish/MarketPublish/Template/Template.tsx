@@ -10,6 +10,7 @@ import Navbar from '../../../../components/Navbar/Navbar'
 import { Dropdown, Button, message, Modal } from 'antd'
 import type { MenuProps } from 'antd'
 import { aiAPI } from '../../../../api'
+import { px2rem } from '../../../../utils/rem'
 
 const initialState = {
   id: 1,
@@ -641,7 +642,7 @@ const Template = () => {
                 maxLength={500}
                 rows={4}
                 className="native-textarea"
-                style={{ height: '130px' }}
+                style={{ height: px2rem(130) }}
               />
             </div>
           </div>

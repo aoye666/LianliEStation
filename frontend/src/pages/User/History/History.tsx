@@ -7,6 +7,7 @@ import { AppstoreOutlined, ShoppingOutlined, FileTextOutlined, SettingOutlined }
 import type { MenuProps } from "antd";
 import NoticeLogin from "../../../components/NoticeLogin/NoticeLogin";
 import { useNavigate } from "react-router-dom";
+import { px2rem } from "../../../utils/rem";
 import "./History.scss";
 
 type checkBox = { [number: number]: boolean };
@@ -219,7 +220,7 @@ const History = () => {
             <Dropdown menu={{ items }}>
               <div onClick={(e) => e.preventDefault()} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <AppstoreOutlined
-                  style={{ width: "20px", height: "20px", marginRight: "5px" }}
+                  style={{ width: px2rem(20), height: px2rem(20), marginRight: px2rem(5) }}
                 />
                 {currentType}
               </div>
@@ -227,7 +228,7 @@ const History = () => {
           </div>
           <div className="select-item" onClick={() => handleOnClick()}>
             <div className="select-item-btn">
-              <SettingOutlined style={{ marginRight: "5px" }} />
+              <SettingOutlined style={{ marginRight: px2rem(5) }} />
               管理
             </div>
           </div>

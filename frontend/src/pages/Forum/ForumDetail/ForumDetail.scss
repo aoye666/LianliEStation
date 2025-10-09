@@ -7,8 +7,8 @@
 .forum-detail {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - #{px2rem(50)});
-    margin-top: px2rem(50);
+    height: calc(100vh - #{px2rem(55)});
+    margin-top: px2rem(55);
     word-wrap: break-word;
     overflow-wrap: break-word;
     white-space: pre-wrap;
@@ -26,7 +26,7 @@
         align-items: center;
         justify-content: space-between;
         width: 100vw;
-        height: px2rem(40);
+        height: px2rem(55);
         z-index: 10;
         padding-left: px2rem(15);
         padding-right: px2rem(25);
@@ -290,18 +290,16 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        margin-top: px2rem(10);
-        padding-left: px2rem(5);
         position: fixed;
         bottom: 0;
         width: 100%;
         border-top: #ccc 1px solid;
-        height: px2rem(50);
+        height: px2rem(60);
         background-color: #fff;
 
         .comment{
             display: flex;
-            width: px2rem(150);
+            width: px2rem(200);
             background-color: #eae4e4;
             @include border-radius(20);
             padding-left: px2rem(15);
@@ -314,7 +312,7 @@
             @include padding(10);
             .icon{
                 img{
-                    width: px2rem(30);
+                    width: px2rem(32);
                 }
             }
         }
@@ -324,7 +322,7 @@
 
             .icon{
                 img{
-                    width: px2rem(30);
+                    width: px2rem(32);
                 }
             }
         }
@@ -333,7 +331,7 @@
             @include padding(10);
             .icon{
                 img{
-                    width: px2rem(30);
+                    width: px2rem(32);
                 }
             }
         }

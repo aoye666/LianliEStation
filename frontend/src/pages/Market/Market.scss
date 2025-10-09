@@ -4,7 +4,7 @@ $primary-color: #3498db;
 $hover-color: rgb(0, 86, 179);
 $background-color: #ffffff;
 $text-color: #333;
-$border-radius: 8px;
+$border-radius: px2rem(8);
 $shadow-color: rgba(0, 0, 0, 0.1);
 
 // 新增常用颜色变量
@@ -44,9 +44,9 @@ $card-bg: #fff;
   background-color: var(--bg-color);
   display: flex;
   flex-direction: column;
-  height: calc(100vh - #{px2rem(55)});
+  height: calc(100vh - #{px2rem(60)});
   width: 100vw;
-  overflow: hidden;
+  overflow: hidden; // 保持，防止横向滚动
   box-sizing: border-box;
 
   .active-button {
@@ -72,7 +72,7 @@ $card-bg: #fff;
     background: $navbar-bg;
     transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0.5s;
     width: 100vw;
-    height: px2rem(50);
+    height: px2rem(60);
     flex-shrink: 0;
     .logo {
       display: flex;
@@ -85,7 +85,7 @@ $card-bg: #fff;
     input {
       border: 1px solid #ccc;
       width: 60vw;
-      height: px2rem(20);
+      height: px2rem(30);
       @include border-radius(10);
       outline: none;
       @include padding(3);
@@ -109,30 +109,36 @@ $card-bg: #fff;
     flex-direction: column;
     position: relative;
     flex: 1;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+
+    // 轮播图容器 - 会被滚动隐藏
+    .carousel-wrapper {
+      width: 100vw;
+      flex-shrink: 0;
+      
+      .carousel {
+        width: 100%;
+        background: #fff;
+
+        .carousel-item {
+          width: 100vw;
+          aspect-ratio: 3.3;
+          object-fit: cover;
+        }
+      }
+    }
 
     .un-content {
+      position: sticky;
+      top: 0;
+      z-index: 100;
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
-      padding-bottom: 2px;
+      background-color: $background-color;
       border-bottom: 1px solid #bfbfbf;
-
-      .carousel-wrapper {
-        width: 100vw;
-        overflow: hidden;
-        transition: height 0.15s ease-out;
-        
-        .carousel {
-          height: 100%;
-          
-          .carousel-item {
-            width: 100vw;
-            aspect-ratio: 3.3;
-            object-fit: cover;
-          }
-        }
-      }
 
       .tag {
         display: flex;
@@ -217,14 +223,15 @@ $card-bg: #fff;
 
     .market-more {
       display: flex;
-      position: absolute;
+      position: fixed;
       z-index: 10000;
       left: 0;
-      bottom: 0;
+      top: px2rem(60);
       width: 100vw;
+      height: calc(100vh - #{px2rem(60)} - #{px2rem(60)});
       flex-direction: column;
       background-color: $panel-bg;
-      height: calc(100vh - 105px - 31.25vw );
+      overflow-y: auto;
 
       input {
         outline: none;
@@ -396,14 +403,14 @@ $card-bg: #fff;
       flex-direction: row;
       gap: px2rem(6);
       flex-wrap: wrap;
-      overflow-y: auto;
       justify-content: flex-start;
       align-items: flex-start;
       @include padding(6);
-      flex: 1;
+      padding-bottom: px2rem(20); // 添加底部padding
       width: 100vw;
       box-sizing: border-box;
       background-color: $list-bg;
+      flex-shrink: 0;
       .commodity-item {
         display: flex;
         flex-direction: column;

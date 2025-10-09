@@ -5,7 +5,7 @@ $primary-color: #3498db;
 $hover-color: rgb(0, 86, 179);
 $background-color: #ffffff;
 $text-color: #333;
-$border-radius: 8px;
+$border-radius: px2rem(8);
 $shadow-color: rgba(0, 0, 0, 0.1);
 
 // 三种不同的浅色系下拉按钮颜色
@@ -102,7 +102,7 @@ $dropdown-orange-hover: #ffe0b2;
         justify-content: center;
         align-items: center;
         height: calc(100vh - #{px2rem(140)});
-        margin-top: px2rem(50);
+        margin-top: px2rem(55);
         // background: #5f5454;
 
         label{

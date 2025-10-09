@@ -15,6 +15,7 @@ import logo from "../../assets/logo.png";
 import search from "../../assets/search-white.svg";
 import ForumBanner from "../../assets/banner2.png";
 import ADInviting from "../../assets/ad3.3-logo.png";
+import { px2rem } from "../../utils/rem";
 
 const Forum = () => {
   const navigate = useNavigate();
@@ -29,7 +30,6 @@ const Forum = () => {
   const [searchInputs, setSearchInputs] = useState("");
   const [showMore, setShowMore] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
-  const [timeFlag, setTimeFlag] = useState(false);
 
   useEffect(() => {
     fetchPosts();
@@ -42,29 +42,26 @@ const Forum = () => {
   const handleSearch = async () => {
     setFilters({ searchTerm: searchInputs });
     clearPosts();
-    await fetchPosts();
+    await fetchPosts(); // 使用fetchPosts重新获取第一页
   };
 
   const handleOnConfirm = async () => {
     clearPosts();
     setShowMore(false);
-    await fetchPosts();
+    await fetchPosts(); // 使用fetchPosts重新获取第一页
   };
 
   const handleScroll = () => {
+    // forum-body滚动到底部时加载更多
     if (bodyRef.current) {
-      // 判断是否滚动到底部
-      if (bodyRef.current.scrollTop + bodyRef.current.clientHeight >= bodyRef.current.scrollHeight - 20) {
-        if (!timeFlag) {
-          setTimeFlag(true)
-          setTimeout(() => {
-            updatePosts();
-            setTimeFlag(false)
-          }, 1000)
-        }
+      const { scrollHeight, scrollTop, clientHeight } = bodyRef.current;
+
+      // 判断是否滚动到底部（提前100px触发，确保更早加载）
+      if (scrollTop + clientHeight >= scrollHeight - 100) {
+        updatePosts();
       }
     }
-  }
+  };
 
   return (
     <div className="forum-container">
@@ -83,25 +80,27 @@ const Forum = () => {
         </div>
       </div>
 
-      <div className="forum-body">
-        <div className="un-content">
-          <div className="carousel-wrapper">
-            <Carousel autoplay className="carousel">
-              <img
-                className="carousel-item"
-                src={ForumBanner}
-                alt="forumBanner"
-                onLoad={() => window.dispatchEvent(new Event('resize'))}
-              />
-              <img
-                className="carousel-item"
-                src={ADInviting}
-                alt="广告位招商"
-                onLoad={() => window.dispatchEvent(new Event('resize'))}
-              />
-            </Carousel>
-          </div>
+      <div className="forum-body" ref={bodyRef} onScroll={handleScroll}>
+        {/* 轮播图 - 会被滚动隐藏 */}
+        <div className="carousel-wrapper">
+          <Carousel autoplay className="carousel">
+            <img
+              className="carousel-item"
+              src={ForumBanner}
+              alt="forumBanner"
+              onLoad={() => window.dispatchEvent(new Event('resize'))}
+            />
+            <img
+              className="carousel-item"
+              src={ADInviting}
+              alt="广告位招商"
+              onLoad={() => window.dispatchEvent(new Event('resize'))}
+            />
+          </Carousel>
+        </div>
 
+        {/* 筛选栏 - 吸顶显示 */}
+        <div className="un-content">
           <div className="tag">
             <div className="tag-item">
               <div className="post-type">
@@ -211,6 +210,7 @@ const Forum = () => {
           </div>
         </div>
 
+        {/* 更多筛选弹窗 */}
         {showMore && (
           <div className="forum-more">
             <div className="location">
@@ -337,11 +337,8 @@ const Forum = () => {
           </div>
         )}
 
-        <div 
-          className="content"
-          ref={bodyRef}
-          onScroll={handleScroll}
-        >
+        {/* 帖子列表 */}
+        <div className="content">
           {posts.map((post, index) => {
             // 格式化时间
             const formatTime = (dateString: string) => {
@@ -438,8 +435,8 @@ const Forum = () => {
         <div className="float-button">
           <FloatButton
             style={{
-              marginBottom: "20px",
-              right: "20px",
+              marginBottom: px2rem(20),
+              right: px2rem(20),
               boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
             }}
             icon={<PlusOutlined />}

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { message, Select } from "antd";
 import { useUserStore } from "../../../store";
+import { px2rem } from "../../../utils/rem";
 import "./Register.scss";
 import logo_title from "../../../assets/logo-title.png";
 import background from "../../../assets/background2.jpg";
@@ -144,7 +145,7 @@ const Register: React.FC = () => {
             />
           </div>
           <div className="form-item">
-            <label htmlFor="username" style={{ height: "40px" }}>
+            <label htmlFor="username" style={{ height: px2rem(40) }}>
               用户名（用于登录，3~16位字母、数字或下划线）
             </label>
             <input
@@ -166,7 +167,7 @@ const Register: React.FC = () => {
             />
           </div>
           <div className="form-item">
-            <label htmlFor="password" style={{ height: "40px" }}>
+            <label htmlFor="password" style={{ height: px2rem(40) }}>
               密码（至少含1个大写字母、1个数字，长度至少为8位）
             </label>
             <input

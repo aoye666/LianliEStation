@@ -12,6 +12,7 @@ import search from "../../assets/search-white.svg";
 import takePlace from "../../assets/takePlace.png";
 import { useMainStore } from "../../store";
 import { useNavigate } from "react-router-dom";
+import { px2rem } from "../../utils/rem";
 
 const Market = () => {
   const [searchInputs, setSearchInputs] = useState("");
@@ -26,40 +27,63 @@ const Market = () => {
   } = useMainStore();
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const bodyRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
+
+  // 获取当前的根字体大小（rem 基准值）
+  const getRemBase = () => {
+    const fontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    return fontSize || 37.5; // 默认 37.5px (对应 375px 屏幕宽度)
+  };
+
+  // 计算商品项宽度（CSS calc 表达式）
+  const getItemWidth = (columns: number) => {
+    // padding: 6px on each side = 12px total = 0.32rem
+    // gap: 6px between items = 0.16rem
+    const paddingRem = (6 / 37.5) * 2; // 0.32rem
+    const gapRem = 6 / 37.5; // 0.16rem
+    
+    return `calc((100vw - ${paddingRem}rem - ${columns - 1} * ${gapRem}rem) / ${columns})`;
+  };
 
   // 使用 useMemo 优化列数计算
   const elementsPerRow = useMemo(() => {
-    const containerWidth = windowSize.width - 12; // 减去左右padding 6px + 6px
-    const minItemWidth = 140; // 最小商品项宽度
-    const maxItemWidth = 220; // 最大商品项宽度
-    const gap = 6; // 商品项之间的间距
+    // 直接在这里调用 getRemBase，避免 lint 警告
+    const remBase = getRemBase();
+    
+    // 将 rem 单位转换为实际 px
+    const paddingPx = (6 / 37.5) * remBase * 2; // 左右 padding 各 6px
+    const gapPx = (6 / 37.5) * remBase; // gap 6px
+    
+    const containerWidth = windowSize.width - paddingPx;
+    const minItemWidth = (140 / 37.5) * remBase; // 最小商品项宽度 140px
+    const maxItemWidth = (220 / 37.5) * remBase; // 最大商品项宽度 220px
 
     // 根据屏幕宽度设置响应式断点
     let columns;
-    if (containerWidth < 400) {
+    if (containerWidth < (400 / 37.5) * remBase) {
       // 小屏幕：2列
       columns = 2;
-    } else if (containerWidth < 600) {
+    } else if (containerWidth < (600 / 37.5) * remBase) {
       // 中小屏幕：3列
       columns = 3;
-    } else if (containerWidth < 800) {
+    } else if (containerWidth < (800 / 37.5) * remBase) {
       // 中等屏幕：4列
       columns = 4;
     } else {
       // 大屏幕：根据最小宽度动态计算
-      columns = Math.floor((containerWidth + gap) / (minItemWidth + gap));
+      columns = Math.floor((containerWidth + gapPx) / (minItemWidth + gapPx));
     }
 
     columns = Math.max(2, Math.min(columns, 6)); // 限制在2-6列之间
 
     // 验证计算的宽度是否合理
-    const availableWidth = containerWidth - (columns - 1) * gap;
+    const availableWidth = containerWidth - (columns - 1) * gapPx;
     const itemWidth = availableWidth / columns;
 
     // 如果计算出的宽度太大，增加列数
     if (itemWidth > maxItemWidth && columns < 6) {
-      columns = Math.min(6, Math.floor((containerWidth + gap) / (maxItemWidth + gap)));
+      columns = Math.min(6, Math.floor((containerWidth + gapPx) / (maxItemWidth + gapPx)));
     }
 
     // 如果计算出的宽度太小，减少列数
@@ -100,11 +124,12 @@ const Market = () => {
   // }, []);
 
   const handleScroll = () => {
-    if (scrollRef.current) {
-      const { scrollHeight, scrollTop, clientHeight } = scrollRef.current;
+    // market-body滚动到底部时加载更多
+    if (bodyRef.current) {
+      const { scrollHeight, scrollTop, clientHeight } = bodyRef.current;
 
-      // 判断该部件是否滚动到底部
-      if (scrollTop + clientHeight >= scrollHeight) {
+      // 判断是否滚动到底部（提前100px触发，确保更早加载）
+      if (scrollTop + clientHeight >= scrollHeight - 100) {
         updateGoods();
       }
     }
@@ -119,18 +144,16 @@ const Market = () => {
       filters.searchTerm = searchInputs;
       await setFilters(filters);
       clearGoods();
-      updateGoods();
+      fetchGoods(); // 使用fetchGoods重新获取第一页
     } catch (error) {
       console.log(error);
     }
-    console.log(filters);
   };
 
   const handleOnConfirm = async () => {
     clearGoods();
     setShowMore(false);
-    updateGoods();
-    console.log(filters);
+    fetchGoods(); // 使用fetchGoods重新获取第一页
   };
 
   return (
@@ -150,26 +173,27 @@ const Market = () => {
         </div>
       </div>
 
-      <div className="market-body">
-        <div className="un-content">
-          <div className="carousel-wrapper">
-            <Carousel autoplay className="carousel">
-              <img
-                className="carousel-item"
-                src={MarketBanner}
-                alt="schoolLogo"
-                onLoad={() => window.dispatchEvent(new Event('resize'))}
-              />
-              <img
-                className="carousel-item"
-                src={ADInviting}
-                alt="广告位招商"
-                onLoad={() => window.dispatchEvent(new Event('resize'))}
-              />
-            </Carousel>
-          </div>
-          <div className="region"></div>
+      <div className="market-body" ref={bodyRef} onScroll={handleScroll}>
+        {/* 轮播图 - 会被滚动隐藏 */}
+        <div className="carousel-wrapper">
+          <Carousel autoplay className="carousel">
+            <img
+              className="carousel-item"
+              src={MarketBanner}
+              alt="schoolLogo"
+              onLoad={() => window.dispatchEvent(new Event('resize'))}
+            />
+            <img
+              className="carousel-item"
+              src={ADInviting}
+              alt="广告位招商"
+              onLoad={() => window.dispatchEvent(new Event('resize'))}
+            />
+          </Carousel>
+        </div>
 
+        {/* 筛选栏 - 吸顶显示 */}
+        <div className="un-content">
           <div className="tag">
             <div className="tag-item">
               <div className="market-type">
@@ -450,10 +474,9 @@ const Market = () => {
           </div>
         )}
 
-        <div
-          className="content"
-          ref={scrollRef}
-          onScroll={handleScroll}
+          <div
+            className="content"
+            ref={scrollRef}
           style={
             { "--elements-per-row": elementsPerRow } as React.CSSProperties
           }
@@ -466,7 +489,7 @@ const Market = () => {
                 navigate(`/market/${item.id}`);
               }}
               style={{
-                width: `calc((100vw - 12px - ${elementsPerRow - 1} * 6px) / ${elementsPerRow})`,
+                width: getItemWidth(elementsPerRow),
                 minHeight: 'fit-content',
               }}
             >
@@ -504,8 +527,8 @@ const Market = () => {
         <div className="float-button">
           <FloatButton
             style={{
-              marginBottom: "20px",
-              right: "20px",
+              marginBottom: px2rem(20),
+              right: px2rem(20),
               boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
             }}
             icon={<PlusOutlined />}

@@ -93,7 +93,9 @@ interface MainState {
   
   // 加载状态
   isMarketLoading: boolean;
+  isMarketLoadingMore: boolean; // 添加加载更多的标志
   isForumLoading: boolean;
+  isForumLoadingMore: boolean; // 添加帖子加载更多的标志
   setMarketLoading: (loading: boolean) => void;
   setForumLoading: (loading: boolean) => void;
   
@@ -198,9 +200,11 @@ const useMainStore = create<MainState>()(
         campus_id: null,
       },
       
-      // 加载状态初始值
+      // 加载状态
       isMarketLoading: false,
+      isMarketLoadingMore: false, // 初始化加载更多状态
       isForumLoading: false,
+      isForumLoadingMore: false, // 初始化帖子加载更多状态
       
       // 设置加载状态
       setMarketLoading: (loading) => set({ isMarketLoading: loading }),
@@ -253,12 +257,13 @@ const useMainStore = create<MainState>()(
 
       // 获取帖子列表（首次加载）
       fetchPosts: async () => {
-        set({ isForumLoading: true }); // 开始加载
+        set({ isForumLoading: true, forumPage: 1 }); // 重置页码并开始加载
         
         try {
           const response = await api.get("/api/forum/posts", {
             params: {
               with_comments: true,
+              page: 1, // 首次加载从第1页开始
               limit: 16,
               keyword: get().postFilters.searchTerm,
               tag: get().postFilters.tag,
@@ -268,7 +273,8 @@ const useMainStore = create<MainState>()(
           if (response?.status === 200 && response.data) {
             const data = response.data.posts;
             set(() => ({
-              posts: [...data],
+              posts: [...data], // 替换为新数据
+              forumPage: 2, // 下次加载第2页
             }));
           } else {
             console.log("No posts available or unexpected response status");
@@ -286,6 +292,14 @@ const useMainStore = create<MainState>()(
 
       // 更新帖子列表（滚动加载更多）
       updatePosts: async () => {
+        // 如果正在加载更多，直接返回
+        if (get().isForumLoadingMore) {
+          console.log('正在加载帖子中，跳过重复请求');
+          return;
+        }
+        
+        set({ isForumLoadingMore: true }); // 标记开始加载
+        
         try {
           const response = await api.get("/api/forum/posts", {
             params: {
@@ -299,9 +313,12 @@ const useMainStore = create<MainState>()(
           });
           if (response?.status === 200 && response.data.posts.length > 0) {
             const data = response.data.posts;
+            
+            console.log(`成功加载第${get().forumPage}页，获取${data.length}个帖子`);
+            
             set((state) => ({
-              posts: [...state.posts, ...data],
-              forumPage: state.forumPage + 1,
+              posts: [...state.posts, ...data], // 追加新数据
+              forumPage: state.forumPage + 1, // 页码+1
             }));
           } else {
             console.log("No more posts available");
@@ -312,6 +329,8 @@ const useMainStore = create<MainState>()(
           } else {
             console.error("Error fetching posts:", error);
           }
+        } finally {
+          set({ isForumLoadingMore: false }); // 加载完成
         }
       },
 
@@ -571,11 +590,12 @@ const useMainStore = create<MainState>()(
 
       // 获取商品列表（首次加载）
       fetchGoods: async () => {
-        set({ isMarketLoading: true }); // 开始加载
+        set({ isMarketLoading: true, marketPage: 1 }); // 重置页码并开始加载
         
         try {
           const response = await api.get("/api/goods", {
             params: {
+              page: 1, // 首次加载从第1页开始
               limit: 12,
               keyword: get().goodsFilters.searchTerm,
               goods_type: get().goodsFilters.goods_type,
@@ -591,7 +611,8 @@ const useMainStore = create<MainState>()(
           if (response?.status === 200 && response.data) {
             const data = response.data.goods;
             set((state) => ({
-              goods: [...data], // 更新 goods 状态
+              goods: [...data], // 替换为新数据
+              marketPage: 2, // 下次加载第2页
             }));
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
@@ -637,6 +658,14 @@ const useMainStore = create<MainState>()(
 
       // 更新商品列表（滚动加载更多）
       updateGoods: async () => {
+        // 如果正在加载更多，直接返回
+        if (get().isMarketLoadingMore) {
+          console.log('正在加载中，跳过重复请求');
+          return;
+        }
+        
+        set({ isMarketLoadingMore: true }); // 标记开始加载
+        
         try {
           const response = await api.get("/api/goods", {
             params: {
@@ -654,13 +683,16 @@ const useMainStore = create<MainState>()(
           // 检查返回数据是否有效
           if (response?.status === 200 && response.data.goods.length > 0) {
             const data = response.data.goods;
+            
+            console.log(`成功加载第${get().marketPage}页，获取${data.length}个商品`);
+            
             set((state) => ({
-              goods: [...state.goods, ...data], // 更新 posts 状态
-              marketPage: state.marketPage + 1,
+              goods: [...state.goods, ...data], // 追加新数据
+              marketPage: state.marketPage + 1, // 页码+1
             }));
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
-            console.log("No goods available or unexpected response status");
+            console.log("No more goods available or unexpected response status");
           }
         } catch (error) {
           // 捕获请求失败的错误（如 404 或网络问题）
@@ -669,6 +701,8 @@ const useMainStore = create<MainState>()(
           } else {
             console.error("Error fetching goods:", error);
           }
+        } finally {
+          set({ isMarketLoadingMore: false }); // 加载完成
         }
       },
 

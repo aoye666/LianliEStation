@@ -9,6 +9,7 @@ import Navbar from '../../../components/Navbar/Navbar'
 import { Dropdown, Button, message, Modal } from 'antd'
 import type { MenuProps } from 'antd'
 import { aiAPI } from '../../../api'
+import { px2rem } from '../../../utils/rem'
 
 const initialState = {
   id: 1,
@@ -551,7 +552,7 @@ const ForumPublish = () => {
                 onChange={setContent}
                 maxLength={500}
                 className="native-textarea"
-                style={{ height: '180px' }}
+                style={{ height: px2rem(180) }}
               />
             </div>
           </div>

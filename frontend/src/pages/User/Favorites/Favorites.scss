@@ -4,7 +4,7 @@ $primary-color: #3498db;
 $hover-color: rgb(0, 86, 179);
 $background-color: #ffffff;
 $text-color: #333;
-$border-radius: 8px;
+$border-radius: px2rem(8);
 $shadow-color: rgba(0, 0, 0, 0.1);
 $border: #d0d0d0;
 
@@ -12,8 +12,8 @@ $border: #d0d0d0;
   display: flex;
   flex-direction: column;
   width: 100vw;
-  height: calc(100vh - #{px2rem(50)});
-  margin-top: px2rem(50);
+  height: calc(100vh - #{px2rem(55)});
+  margin-top: px2rem(55);
   box-sizing: border-box;
   background-color: var(--bg-color);
   overflow-y: hidden;
@@ -27,7 +27,7 @@ $border: #d0d0d0;
 
     .select-container {
       display: flex;
-      height: px2rem(35);
+      height: px2rem(50);
       width: 100%;
       align-items: center;
       justify-content: center;

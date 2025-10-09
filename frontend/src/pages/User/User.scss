@@ -5,8 +5,8 @@ $bg: #ededed;
 .user-container {
   width: 100vw;
   max-width: 100vw;
-  height: calc(100vh - #{px2rem(55)}); // 只减去底部 Tabbar
-  max-height: calc(100vh - #{px2rem(55)});
+  height: calc(100vh - #{px2rem(60)}); // 只减去底部 Tabbar
+  max-height: calc(100vh - #{px2rem(60)});
   overflow-x: hidden;
   overflow-y: auto;
   display: flex;
@@ -44,7 +44,7 @@ $bg: #ededed;
         width: 100%;
         height: 100%;
         border-radius: 50%;
-        border: px2rem(1) solid $bg;
+        border: px2rem(2) solid $bg;
         object-fit: cover;
       }
     }
@@ -78,16 +78,16 @@ $bg: #ededed;
     height: auto;
     display: flex;
     flex-direction: column;
-    border-top: px2rem(3) solid $bg;
+    border-top: px2rem(7) solid $bg;
 
     .user-item {
       display: flex;
       flex-direction: row;
       align-items: center;
       width: 100%;
-      height: px2rem(45);
+      height: px2rem(55);
       background: white;
-      border-top: px2rem(1) solid $bg;
+      border-top: px2rem(2) solid $bg;
       
       .item-icon {
         @include size(24);

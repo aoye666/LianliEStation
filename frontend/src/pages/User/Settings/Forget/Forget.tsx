@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { message } from "antd";
 import { useUserStore } from "../../../../store";
+import { px2rem } from "../../../../utils/rem";
 import "./Forget.scss";
 import logo_title from "../../../../assets/logo-title.png";
 import background from "../../../../assets/background3.jpg";
@@ -133,7 +134,7 @@ const Forget: React.FC = () => {
             </div>
           </div>
           <div className="form-item">
-            <label htmlFor="password" style={{ height: "40px" }}>
+            <label htmlFor="password" style={{ height: px2rem(40) }}>
               新密码（至少含1个大写字母、1个数字，长度至少为8位）:
             </label>
             <input

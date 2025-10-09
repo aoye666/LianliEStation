@@ -5,6 +5,7 @@ import { useUserStore } from "../../../store";
 import { message } from "antd";
 import Cookies from "js-cookie";
 import api from "../../../api";
+import { px2rem } from "../../../utils/rem";
 import "./MarketPublish.scss";
 import Navbar from "../../../components/Navbar/Navbar";
 import logo from "../../../assets/logo.png";
@@ -151,7 +152,7 @@ const Publish: React.FC = () => {
       message.error({
         content: "请输入商品信息",
         style: {
-          marginTop: "50px",
+          marginTop: px2rem(50),
         },
       });
       return;
@@ -174,7 +175,7 @@ const Publish: React.FC = () => {
         message.error({
           content: "生成失败，请重试",
           style: {
-            marginTop: "50px",
+            marginTop: px2rem(50),
           },
         });
       }
@@ -186,7 +187,7 @@ const Publish: React.FC = () => {
         message.error({
           content: "未授权，请检查你的登录状态",
           style: {
-            marginTop: "50px",
+            marginTop: px2rem(50),
           },
         });
       } else if (error.response && error.response.status === 500) {
@@ -197,7 +198,7 @@ const Publish: React.FC = () => {
       message.error({
         content: "生成失败，请重试",
         style: {
-          marginTop: "50px",
+          marginTop: px2rem(50),
         },
       });
     }

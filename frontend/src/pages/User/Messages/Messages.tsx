@@ -12,6 +12,7 @@ import {
 import type { MenuProps } from "antd";
 import { Dropdown } from "antd";
 import { timeFormat } from "../../../utils/formatters";
+import { px2rem } from "../../../utils/rem";
 import messages_read from "../../../assets/messages-read.svg";
 import messages_unread from "../../../assets/messages-unread.svg";
 import takePlace from "../../../assets/takePlace.png";
@@ -227,7 +228,7 @@ const Messages = () => {
             <Dropdown menu={{ items }}>
               <div onClick={(e) => e.preventDefault()} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <ProductOutlined
-                  style={{ width: "20px", height: "20px", marginRight: "5px" }}
+                  style={{ width: px2rem(20), height: px2rem(20), marginRight: px2rem(5) }}
                 />
                 {currentType}
               </div>
