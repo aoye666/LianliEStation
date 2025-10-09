@@ -1,3 +1,5 @@
+@import '../../../../styles/mixins.scss';
+
 .reset-container {
     display: flex;
     flex-direction: column;
@@ -14,8 +16,8 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        padding: 32px 24px;
-        padding-top: 82px; // 为 Reset 页面的 Navbar 留出空间 (50px navbar + 32px 原始 padding)
+        @include padding(32, 24);
+        padding-top: px2rem(82); // 为 Reset 页面的 Navbar 留出空间 (50px navbar + 32px 原始 padding)
         justify-content: flex-start;
         align-items: center;
         width: 100%;
@@ -24,26 +26,26 @@
         
         .input-group {
             width: 100%;
-            margin-bottom: 40px;
+            margin-bottom: px2rem(40);
             display: flex;
             flex-direction: column;
             align-items: center;
             
             .reset-content .modern-input {
                 width: 100%;
-                max-width: 280px;
-                border-radius: 12px;
+                max-width: px2rem(280);
+                @include border-radius(12);
                 border: 2px solid #e1e8ed;
-                padding: 16px 20px;
-                font-size: 16px;
+                @include padding(16, 20);
+                @include font-size(16);
                 background-color: #ffffff;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+                @include box-shadow(0, 2, 8, 0, rgba(0, 0, 0, 0.06));
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 
                 &:focus {
                     border-color: #3498db;
-                    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1);
-                    transform: translateY(-1px);
+                    box-shadow: 0 0 0 #{px2rem(3)} rgba(52, 152, 219, 0.1), 0 #{px2rem(4)} #{px2rem(12)} rgba(0, 0, 0, 0.1);
+                    transform: translateY(#{px2rem(-1)});
                     outline: none;
                 }
                 
@@ -55,29 +57,29 @@
             
             .reset-content .modern-select {
                 width: 100%;
-                max-width: 280px;
+                max-width: px2rem(280);
                 
                 .ant-select-selector {
-                    border-radius: 12px;
+                    @include border-radius(12);
                     border: 2px solid #e1e8ed;
-                    padding: 8px 16px;
+                    @include padding(8, 16);
                     height: auto;
-                    min-height: 52px;
-                    font-size: 16px;
+                    min-height: px2rem(52);
+                    @include font-size(16);
                     background-color: #ffffff;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+                    @include box-shadow(0, 2, 8, 0, rgba(0, 0, 0, 0.06));
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
                 
                 &:hover .ant-select-selector {
                     border-color: #3498db;
-                    transform: translateY(-1px);
+                    transform: translateY(#{px2rem(-1)});
                 }
                 
                 &.ant-select-focused .ant-select-selector {
                     border-color: #3498db;
-                    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1);
-                    transform: translateY(-1px);
+                    box-shadow: 0 0 0 #{px2rem(3)} rgba(52, 152, 219, 0.1), 0 #{px2rem(4)} #{px2rem(12)} rgba(0, 0, 0, 0.1);
+                    transform: translateY(#{px2rem(-1)});
                 }
                 
                 .ant-select-selection-placeholder {
@@ -95,20 +97,20 @@
         
         .upload-group {
             width: 100%;
-            margin-bottom: 40px;
+            margin-bottom: px2rem(40);
             display: flex;
             flex-direction: column;
             align-items: center;
             
             // 为头像上传增加额外的边距，为删除按钮留出空间
             &.avatar-upload {
-                padding: 20px;
+                @include padding(20);
             }
             
             // 为其他上传类型也添加少量padding，确保删除按钮可见
             &.background-upload,
             &.banner-upload {
-                padding: 10px;
+                @include padding(10);
             }
             
             // 原生上传组件样式 - 移动端app风格
@@ -121,24 +123,23 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+                @include box-shadow(0, 2, 12, 0, rgba(0, 0, 0, 0.06));
                 
                 &:hover {
                     border-color: #3498db;
                     background: #fbfcfd;
-                    transform: translateY(-1px);
-                    box-shadow: 0 4px 20px rgba(52, 152, 219, 0.12);
+                    transform: translateY(#{px2rem(-1)});
+                    box-shadow: 0 #{px2rem(4)} #{px2rem(20)} rgba(52, 152, 219, 0.12);
                 }
                 
                 &:active {
                     transform: translateY(0);
-                    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.08);
+                    box-shadow: 0 #{px2rem(2)} #{px2rem(8)} rgba(52, 152, 219, 0.08);
                 }
                 
                 // 头像 - 圆形 (160px, 更大更易操作)
                 &.avatar-shape {
-                    width: 160px;
-                    height: 160px;
+                    @include size(160);
                     border-radius: 50%;
                     
                     .preview-image {
@@ -151,29 +152,29 @@
                 
                 // 背景图 - 竖屏比例 (9:16, 优化尺寸)
                 &.background-shape {
-                    width: 160px;
-                    height: 284px;
-                    border-radius: 20px;
+                    width: px2rem(160);
+                    height: px2rem(284);
+                    @include border-radius(20);
                     
                     .preview-image {
                         width: 100%;
                         height: 100%;
                         object-fit: cover;
-                        border-radius: 20px;
+                        @include border-radius(20);
                     }
                 }
                 
                 // Banner图 - 横屏比例 (16:9, 优化尺寸)
                 &.banner-shape {
-                    width: 280px;
-                    height: 157px;
-                    border-radius: 20px;
+                    width: px2rem(280);
+                    height: px2rem(157);
+                    @include border-radius(20);
                     
                     .preview-image {
                         width: 100%;
                         height: 100%;
                         object-fit: cover;
-                        border-radius: 20px;
+                        @include border-radius(20);
                     }
                 }
                 
@@ -187,17 +188,17 @@
                     width: 100%;
                     color: #6c7b7f;
                     cursor: pointer;
-                    padding: 20px;
+                    @include padding(20);
                     
                     .upload-icon {
-                        font-size: 32px;
-                        margin-bottom: 12px;
+                        @include font-size(32);
+                        margin-bottom: px2rem(12);
                         color: #9ca3af;
                         transition: all 0.2s ease;
                     }
                     
                     div {
-                        font-size: 15px;
+                        @include font-size(15);
                         font-weight: 500;
                         color: #6b7280;
                         text-align: center;
@@ -223,18 +224,17 @@
                     // 删除按钮 - 移动端优化
                     .delete-button {
                         position: absolute;
-                        top: 8px;
-                        right: 8px;
+                        top: px2rem(8);
+                        right: px2rem(8);
                         background: rgba(255, 255, 255, 0.95);
                         border: none;
                         border-radius: 50%;
-                        width: 28px;
-                        height: 28px;
+                        @include size(28);
                         color: #ff4757;
-                        font-size: 14px;
+                        @include font-size(14);
                         font-weight: 600;
                         cursor: pointer;
-                        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+                        box-shadow: 0 #{px2rem(2)} #{px2rem(12)} rgba(0, 0, 0, 0.15);
                         transition: all 0.2s ease;
                         z-index: 50;
                         display: flex;
@@ -246,7 +246,7 @@
                             background: rgba(255, 255, 255, 1);
                             color: #ff3742;
                             transform: scale(1.1);
-                            box-shadow: 0 4px 16px rgba(255, 71, 87, 0.25);
+                            box-shadow: 0 #{px2rem(4)} #{px2rem(16)} rgba(255, 71, 87, 0.25);
                         }
                         
                         &:active {
@@ -259,21 +259,20 @@
             // 头像特殊样式 - 删除按钮在上方，提高优先级
             &.avatar-shape {
                 .native-upload .preview-container .delete-button {
-                    top: -10px;
-                    right: -10px;
+                    top: px2rem(-10);
+                    right: px2rem(-10);
                     background: #ff4757;
                     color: white;
                     border: 3px solid white;
-                    box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4);
+                    box-shadow: 0 #{px2rem(4)} #{px2rem(12)} rgba(255, 71, 87, 0.4);
                     z-index: 999;
-                    width: 32px;
-                    height: 32px;
+                    @include size(32);
                     
                     &:hover {
                         background: #ff3742;
                         color: white;
                         transform: scale(1.1);
-                        box-shadow: 0 6px 16px rgba(255, 71, 87, 0.5);
+                        box-shadow: 0 #{px2rem(6)} #{px2rem(16)} rgba(255, 71, 87, 0.5);
                     }
                 }
             }
@@ -281,29 +280,29 @@
         
         .reset-content .submit-button.ant-btn {
             width: 100%;
-            max-width: 280px;
+            max-width: px2rem(280);
             margin-top: auto;
-            margin-bottom: 40px;
-            height: 52px;
-            border-radius: 26px;
-            font-size: 16px;
+            margin-bottom: px2rem(40);
+            height: px2rem(52);
+            @include border-radius(26);
+            @include font-size(16);
             font-weight: 600;
             background: linear-gradient(135deg, #3498db, #2980b9);
             border: none;
-            box-shadow: 0 4px 16px rgba(52, 152, 219, 0.3);
+            box-shadow: 0 #{px2rem(4)} #{px2rem(16)} rgba(52, 152, 219, 0.3);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             color: white;
             cursor: pointer;
             
             &:hover:not(:disabled) {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 24px rgba(52, 152, 219, 0.4);
+                transform: translateY(#{px2rem(-2)});
+                box-shadow: 0 #{px2rem(8)} #{px2rem(24)} rgba(52, 152, 219, 0.4);
                 background: linear-gradient(135deg, #2980b9, #3498db);
             }
             
             &:active:not(:disabled) {
                 transform: translateY(0);
-                box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+                box-shadow: 0 #{px2rem(2)} #{px2rem(8)} rgba(52, 152, 219, 0.3);
             }
             
             &:disabled,
@@ -312,14 +311,14 @@
                 color: #7f8c8d;
                 opacity: 1;
                 transform: none;
-                box-shadow: 0 2px 8px rgba(189, 195, 199, 0.3);
+                box-shadow: 0 #{px2rem(2)} #{px2rem(8)} rgba(189, 195, 199, 0.3);
                 cursor: not-allowed;
                 font-weight: 600;
                 border: none;
                 
                 &:hover {
                     transform: none;
-                    box-shadow: 0 2px 8px rgba(189, 195, 199, 0.3);
+                    box-shadow: 0 #{px2rem(2)} #{px2rem(8)} rgba(189, 195, 199, 0.3);
                     background: #bdc3c7;
                     color: #7f8c8d;
                 }
@@ -333,7 +332,7 @@
     .ant-input:focus,
     .ant-input-focused {
         border-color: #3498db;
-        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        box-shadow: 0 0 0 #{px2rem(2)} rgba(52, 152, 219, 0.2);
     }
 
     .ant-btn-primary:not(:disabled) {
@@ -353,16 +352,16 @@
 
 // 全局下拉菜单样式
 .reset-container .ant-select-dropdown {
-    border-radius: 12px;
+    @include border-radius(12);
     border: 2px solid #e1e8ed;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-    padding: 8px;
+    box-shadow: 0 #{px2rem(8)} #{px2rem(32)} rgba(0, 0, 0, 0.12);
+    @include padding(8);
     
     .ant-select-item {
-        border-radius: 8px;
-        margin: 2px 0;
-        padding: 12px 16px;
-        font-size: 16px;
+        @include border-radius(8);
+        @include margin(2, 0);
+        @include padding(12, 16);
+        @include font-size(16);
         font-weight: 500;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         

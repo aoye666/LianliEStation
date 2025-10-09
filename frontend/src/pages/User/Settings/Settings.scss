@@ -1,39 +1,40 @@
+@import '../../../styles/mixins.scss';
+
 $bg:#EDEDED;
 .settings-container {
     width: 100vw;
     max-width: 100vw;
-    height: calc(100vh - 50px);
-    max-height: calc(100vh - 50px);
+    height: calc(100vh - #{px2rem(50)});
+    max-height: calc(100vh - #{px2rem(50)});
     overflow-x: hidden;
     overflow-y: auto;
     background: var(--bg-color);
-    margin-top: 50px;
+    margin-top: px2rem(50);
     box-sizing: border-box;
     .settings-item {
         display: flex;
         flex-direction: row;
         align-items: center;
         width: 100%;
-        height: 45px;
+        height: px2rem(45);
         background: white;
-        border-top: 1px solid $bg;
+        border-top: px2rem(1) solid $bg;
         .item-text {
-            margin-left: 20px;
+            margin-left: px2rem(20);
         }
         .item-value {
             position: absolute;
-            right: 15px;
+            right: px2rem(15);
             color: #898484;
         }
         .item-icon {
-            margin-left: 5px;
-            margin-right: 5px;
+            margin-left: px2rem(5);
+            margin-right: px2rem(5);
         }
         .right-icon {
-            width: 24px;
-            height: 24px;
+            @include size(24);
             position: absolute;
-            right: 10px;
+            right: px2rem(10);
         }
     }
     .logout-container {
@@ -44,7 +45,7 @@ $bg:#EDEDED;
         align-items: center;
         justify-content: center;
         width: 100%;
-        height: 50px;
+        height: px2rem(50);
         background: rgb(202, 82, 82);
         cursor: pointer;
         transition: opacity 0.2s;
@@ -54,8 +55,7 @@ $bg:#EDEDED;
         }
         
         .logout-icon {
-            width: 24px;
-            height: 24px;
+            @include size(24);
             img {
                 width: 100%;
                 height: 100%;
@@ -63,9 +63,9 @@ $bg:#EDEDED;
             }
         }
         .logout-text {
-            margin-left: 5px;
-            width: 100px;
-            height: 38px;
+            margin-left: px2rem(5);
+            width: px2rem(100);
+            height: px2rem(38);
             align-content: center;
             color: white;
         }
@@ -78,7 +78,7 @@ $bg:#EDEDED;
         align-items: center;
         justify-content: center;
         width: 100%;
-        height: 50px;
+        height: px2rem(50);
         background: #389e0d;
         cursor: pointer;
         transition: opacity 0.2s;
@@ -88,7 +88,7 @@ $bg:#EDEDED;
         }
         
         .login-text {
-            font-size: 16px;
+            @include font-size(16);
             font-weight: 500;
             color: white;
         }

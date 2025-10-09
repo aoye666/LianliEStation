@@ -1,3 +1,5 @@
+@import '../../../../styles/mixins.scss';
+
 .market-publish-choice-container {
   width: 100vw;
   height: 100vh;
@@ -8,24 +10,24 @@
 
   .choice-content {
     flex: 1;
-    padding: 16px;
+    @include padding(16);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 24px;
+    gap: px2rem(24);
     position: relative;
 
     .title-section {
       text-align: center;
       z-index: 1;
-      margin-bottom: 8px;
+      margin-bottom: px2rem(8);
 
       .main-title {
-        font-size: 24px;
+        @include font-size(24);
         font-weight: 700;
         color: #2c3e50;
-        margin: 0 0 8px 0;
+        margin: 0 0 px2rem(8) 0;
         background: linear-gradient(135deg, #667eea, #764ba2);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -33,7 +35,7 @@
       }
 
       .subtitle {
-        font-size: 14px;
+        @include font-size(14);
         color: #7f8c8d;
         margin: 0;
         font-weight: 400;
@@ -44,24 +46,24 @@
       display: flex;
       flex-direction: column;
       width: 100%;
-      max-width: 350px;
+      max-width: px2rem(350);
       z-index: 1;
     }
 
     .choice-card {
-      border-radius: 16px;
-      padding: 20px;
+      @include border-radius(16);
+      @include padding(20);
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: px2rem(16);
       cursor: pointer;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 #{px2rem(4)} #{px2rem(20)} rgba(0, 0, 0, 0.08);
       border: 2px solid transparent;
       position: relative;
       overflow: hidden;
-      min-width: 280px;
-      max-width: 290px;
+      min-width: px2rem(280);
+      max-width: px2rem(290);
       width: 100%;
       margin: 0 auto;
 
@@ -72,25 +74,25 @@
         top: 0;
         left: 0;
         right: 0;
-        height: 3px;
+        height: px2rem(3);
         transition: all 0.3s ease;
       }
 
       &:hover {
-        transform: translateY(-4px) scale(1.02);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        transform: translateY(#{px2rem(-4)}) scale(1.02);
+        box-shadow: 0 #{px2rem(12)} #{px2rem(40)} rgba(0, 0, 0, 0.15);
         
         .card-icon {
           transform: scale(1.1) rotate(5deg);
         }
 
         .card-arrow {
-          transform: translateX(8px);
+          transform: translateX(#{px2rem(8)});
         }
       }
 
       &:active {
-        transform: translateY(-2px) scale(1.01);
+        transform: translateY(#{px2rem(-2)}) scale(1.01);
       }
 
       &.basic-card {
@@ -168,9 +170,8 @@
       }
 
       .card-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
+        @include size(48);
+        @include border-radius(12);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -178,8 +179,7 @@
         flex-shrink: 0;
 
         svg {
-          width: 24px;
-          height: 24px;
+          @include size(24);
         }
       }
 
@@ -187,15 +187,15 @@
         flex: 1;
         
         .card-title {
-          font-size: 18px;
+          @include font-size(18);
           font-weight: 600;
-          margin: 0 0 6px 0;
+          margin: 0 0 px2rem(6) 0;
           transition: color 0.3s ease;
         }
 
         .card-description {
-          font-size: 14px;
-          margin: 0 0 12px 0;
+          @include font-size(14);
+          margin: 0 0 px2rem(12) 0;
           line-height: 1.4;
           transition: color 0.3s ease;
         }
@@ -203,10 +203,10 @@
         .card-features {
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: px2rem(4);
 
           .feature {
-            font-size: 12px;
+            @include font-size(12);
             font-weight: 500;
             transition: color 0.3s ease;
           }
@@ -214,8 +214,7 @@
       }
 
       .card-arrow {
-        width: 24px;
-        height: 24px;
+        @include size(24);
         transition: all 0.3s ease;
         flex-shrink: 0;
 
@@ -229,26 +228,26 @@
     .tips-section {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: px2rem(12);
       z-index: 1;
-      margin-top: 8px;
+      margin-top: px2rem(8);
 
       .tip-item {
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
+        gap: px2rem(12);
+        @include padding(12, 16);
         background: rgba(108, 117, 125, 0.05);
-        border-radius: 12px;
+        @include border-radius(12);
         border-left: 3px solid #3498db;
 
         .tip-icon {
-          font-size: 16px;
+          @include font-size(16);
           flex-shrink: 0;
         }
 
         .tip-text {
-          font-size: 13px;
+          @include font-size(13);
           color: #6c757d;
           line-height: 1.4;
           font-weight: 500;
@@ -260,67 +259,65 @@
   // 响应式设计
   @media (max-width: 480px) {
     .choice-content {
-      padding: 12px;
-      gap: 20px;
+      @include padding(12);
+      gap: px2rem(20);
 
       .title-section {
         .main-title {
-          font-size: 22px;
+          @include font-size(22);
         }
 
         .subtitle {
-          font-size: 13px;
+          @include font-size(13);
         }
       }
 
       .cards-container {
         max-width: 100%;
-        gap: 14px;
+        gap: px2rem(14);
       }
 
       .choice-card {
-        padding: 18px;
-        gap: 14px;
+        @include padding(18);
+        gap: px2rem(14);
 
         .card-icon {
-          width: 44px;
-          height: 44px;
+          @include size(44);
 
           svg {
-            width: 22px;
-            height: 22px;
+            @include size(22);
           }
         }
 
         .card-content {
           .card-title {
-            font-size: 17px;
+            @include font-size(17);
           }
 
           .card-description {
-            font-size: 13px;
-            margin-bottom: 10px;
+            @include font-size(13);
+            margin-bottom: px2rem(10);
           }
 
           .card-features .feature {
-            font-size: 11px;
+            @include font-size(11);
           }
         }
       }
 
       .tips-section {
-        gap: 10px;
-        margin-top: 6px;
+        gap: px2rem(10);
+        margin-top: px2rem(6);
 
         .tip-item {
-          padding: 10px 14px;
+          @include padding(10, 14);
 
           .tip-icon {
-            font-size: 15px;
+            @include font-size(15);
           }
 
           .tip-text {
-            font-size: 12px;
+            @include font-size(12);
           }
         }
       }
@@ -329,36 +326,34 @@
 
   @media (max-width: 360px) {
     .choice-content {
-      padding: 10px;
-      gap: 18px;
+      @include padding(10);
+      gap: px2rem(18);
 
       .title-section {
         .main-title {
-          font-size: 20px;
+          @include font-size(20);
         }
       }
 
       .choice-card {
-        padding: 16px;
-        gap: 12px;
+        @include padding(16);
+        gap: px2rem(12);
 
         .card-icon {
-          width: 40px;
-          height: 40px;
+          @include size(40);
 
           svg {
-            width: 20px;
-            height: 20px;
+            @include size(20);
           }
         }
 
         .card-content {
           .card-title {
-            font-size: 16px;
+            @include font-size(16);
           }
 
           .card-description {
-            font-size: 12px;
+            @include font-size(12);
           }
         }
       }

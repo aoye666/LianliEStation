@@ -1,3 +1,5 @@
+@import '../../../styles/mixins.scss';
+
 .login-container {
   width: 100vw;
   height: 100vh;
@@ -14,9 +16,9 @@
   }
   .login-box {
     position: relative;
-    top: -60px;
-    width: 270px;
-    height: 330px;
+    top: px2rem(-60);
+    width: px2rem(270);
+    height: px2rem(330);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -24,21 +26,21 @@
     z-index: 1;
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(13px);
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    @include box-shadow(0, 0, 10, 0, rgba(0, 0, 0, 0.5));
     border: 1px solid white;
-    border-radius: 10px;
+    @include border-radius(10);
     .login-logo-title {
-      width: 200px;
+      width: px2rem(200);
       object-fit: contain;
     }
     .login-form {
       width: 100%;
-      height: 190px;
+      height: px2rem(190);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 2px;
+      gap: px2rem(2);
       // border: 1px solid white;//测试定位用
       .form-item {
         display: flex;
@@ -49,45 +51,45 @@
           display: flex;
           align-items: start;
           justify-content: start;
-          width: 100px;
-          height: 20px;
-          font-size: 13px;
+          width: px2rem(100);
+          height: px2rem(20);
+          @include font-size(13);
           color: white;
-          margin-top: 5px;
+          margin-top: px2rem(5);
         }
         input {
           border: 1px solid white;
           outline: none;
-          border-radius: 5px;
-          width: 180px;
-          height: 24px;
+          @include border-radius(5);
+          width: px2rem(180);
+          height: px2rem(24);
           background: transparent;
-          padding: 5px;
+          @include padding(5);
           color: white;
-          margin-top: 3px;
+          margin-top: px2rem(3);
         }
       }
       button {
-        margin-top: 15px;
-        width: 180px;
-        height: 30px;
-        border-radius: 5px;
+        margin-top: px2rem(15);
+        width: px2rem(180);
+        height: px2rem(30);
+        @include border-radius(5);
         background-color: #3498db;
         border: 1px solid #2980b9;
         color: white;
-        border-radius: 16px;
+        @include border-radius(16);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
       }
       .login-links {
-        margin-top: 10px;
-        width: 210px;
+        margin-top: px2rem(10);
+        width: px2rem(210);
         display: flex;
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
         .link {
-          font-size: 14px;
+          @include font-size(14);
           text-decoration: underline;
           color: #222831;
           font-weight: 500;

@@ -1,3 +1,5 @@
+@import '../../../../styles/mixins.scss';
+
 .forget-container {
   width: 100vw;
   height: 100vh;
@@ -14,8 +16,8 @@
   }
   .forget-box {
     position: relative;
-    width: 270px;
-    height: 460px;
+    width: px2rem(270);
+    height: px2rem(460);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -23,21 +25,21 @@
     z-index: 1;
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(13px);
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    @include box-shadow(0, 0, 10, 0, rgba(0, 0, 0, 0.5));
     border: 1px solid white;
-    border-radius: 10px;
+    @include border-radius(10);
     .forget-logo-title {
-      width: 200px;
+      width: px2rem(200);
       object-fit: contain;
     }
     .forget-form {
       width: 100%;
-      height: 340px;
+      height: px2rem(340);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 2px;
+      gap: px2rem(2);
       // border: 1px solid white;//测试定位用
       .form-item {
         display: flex;
@@ -48,61 +50,61 @@
           display: flex;
           align-items: start;
           justify-content: start;
-          width: 190px;
-          height: 20px;
-          font-size: 13px;
+          width: px2rem(190);
+          height: px2rem(20);
+          @include font-size(13);
           color: white;
-          margin-top: 5px;
+          margin-top: px2rem(5);
         }
         input {
           border: 1px solid white;
           outline: none;
-          border-radius: 5px;
-          width: 180px;
-          height: 24px;
+          @include border-radius(5);
+          width: px2rem(180);
+          height: px2rem(24);
           background: transparent;
-          padding: 5px;
+          @include padding(5);
           color: white;
-          margin-top: 3px;
+          margin-top: px2rem(3);
         }
       }
       .verification-container {
         input {
-            width: 85px;
-            margin-right: 5px;
+            width: px2rem(85);
+            margin-right: px2rem(5);
         }
         .verification-btn {
-          width: 90px;
-          height: 27px;
-          border-radius: 5px;
+          width: px2rem(90);
+          height: px2rem(27);
+          @include border-radius(5);
           background-color: #0077cc;
           border: none;
           color: white;
         }
         .verification-disabled-btn {
-          width: 90px;
-          height: 27px;
-          border-radius: 5px;
+          width: px2rem(90);
+          height: px2rem(27);
+          @include border-radius(5);
           background-color: #355266;
           border: none;
           color: white;
         }
       }
       .reset-btn {
-        margin-top: 15px;
-        width: 180px;
-        height: 30px;
-        border-radius: 5px;
+        margin-top: px2rem(15);
+        width: px2rem(180);
+        height: px2rem(30);
+        @include border-radius(5);
         background-color: #e74c3c;
         border: 1px solid #c0392b;
         color: white;
-        border-radius: 16px;
+        @include border-radius(16);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
       }
       .forget-link {
-        margin-top: 10px;
-        width: 160px;
+        margin-top: px2rem(10);
+        width: px2rem(160);
         display: flex;
         flex-direction: row;
         justify-content: center;
@@ -111,17 +113,17 @@
           text-decoration: none;
           color: #3498db;
           font-weight: 500;
-          font-size: 14px;
+          @include font-size(14);
         }
       }
       
       .error-message {
         color: #ff6b6b;
-        font-size: 13px;
-        margin-top: 8px;
-        padding: 8px 12px;
+        @include font-size(13);
+        margin-top: px2rem(8);
+        @include padding(8, 12);
         background-color: rgba(255, 107, 107, 0.1);
-        border-radius: 6px;
+        @include border-radius(6);
         border: 1px solid rgba(255, 107, 107, 0.3);
         text-align: center;
       }

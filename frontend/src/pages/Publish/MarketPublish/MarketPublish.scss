@@ -1,3 +1,5 @@
+@import '../../../styles/mixins.scss';
+
 // 颜色变量（参考商城页面风格）
 $wechat-bg: #ededed;        // 微信对话背景灰
 $panel-bg: #f9f9f9;          // 面板背景（来自Market.scss）
@@ -11,11 +13,11 @@ $ai-msg-border: #e0e0e0;     // AI消息边框
 .publish-container {
     width: 100vw;
     max-width: 100vw;
-    height: calc(100vh - 50px);
-    max-height: calc(100vh - 50px);
+    height: calc(100vh - #{px2rem(50)});
+    max-height: calc(100vh - #{px2rem(50)});
     overflow-x: hidden;
     overflow-y: hidden;
-    margin-top: 50px;
+    margin-top: px2rem(50);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -28,7 +30,7 @@ $ai-msg-border: #e0e0e0;     // AI消息边框
         flex-direction: column;
         width: 100%;
         flex: 1;
-        padding: 10px 0 15px 0;
+        @include padding(10, 0, 15, 0);
         box-sizing: border-box;
         background: $wechat-bg; // 对话区域背景
         
@@ -41,16 +43,15 @@ $ai-msg-border: #e0e0e0;     // AI消息边框
             flex-direction: row-reverse;
             align-items: center;
             justify-content: flex-start;
-            width: 240px;
+            width: px2rem(240);
             height: auto;
-            margin-top: 10px;
-            margin-bottom: 10px;
+            margin-top: px2rem(10);
+            margin-bottom: px2rem(10);
             margin-left: auto;
-            margin-right: 15px; // 距右边15px
+            margin-right: px2rem(15); // 距右边15px
             .dialog-face {
-                width: 32px;
-                height: 32px;
-                margin-left: 10px; // 头像和内容间距
+                @include size(32);
+                margin-left: px2rem(10); // 头像和内容间距
                 img {
                     width: 100%;
                     height: 100%;
@@ -58,12 +59,12 @@ $ai-msg-border: #e0e0e0;     // AI消息边框
                 }
             }
             .dialog-content {
-                padding: 10px 12px; // 增加内边距
-                width: 200px;
+                @include padding(10, 12); // 增加内边距
+                width: px2rem(200);
                 white-space: pre-wrap;
                 background: $user-msg-bg; // 微信绿
                 color: #000000; // 黑色文字
-                border-radius: 8px;
+                @include border-radius(8);
                 box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             }
         }
@@ -72,14 +73,13 @@ $ai-msg-border: #e0e0e0;     // AI消息边框
             flex-direction: row;
             align-items: center;
             justify-content: flex-start;
-            width: 260px;
+            width: px2rem(260);
             height: auto;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            margin-left: 15px; // 距左边15px
+            margin-top: px2rem(10);
+            margin-bottom: px2rem(10);
+            margin-left: px2rem(15); // 距左边15px
             .dialog-face {
-                width: 32px;
-                height: 32px;
+                @include size(32);
                 img {
                     width: 100%;
                     height: 100%;
@@ -87,11 +87,11 @@ $ai-msg-border: #e0e0e0;     // AI消息边框
                 }
             }
             .dialog-content {
-                margin-left: 10px;
-                padding: 10px 12px; // 增加内边距
-                width: 220px;
+                margin-left: px2rem(10);
+                @include padding(10, 12); // 增加内边距
+                width: px2rem(220);
                 white-space: pre-wrap;
-                border-radius: 8px;
+                @include border-radius(8);
                 border: 1px solid $ai-msg-border; // 浅灰边框
                 background: $ai-msg-bg; // 白色背景
                 color: #000000; // 黑色文字
@@ -99,27 +99,27 @@ $ai-msg-border: #e0e0e0;     // AI消息边框
             }
             
             .dialog-control {
-                margin-top: 12px;
-                margin-bottom: 8px;
+                margin-top: px2rem(12);
+                margin-bottom: px2rem(8);
                 display: flex;
                 flex-direction: row;
                 align-items: center;
                 justify-content: space-between;
-                gap: 8px;
+                gap: px2rem(8);
                 
                 .dialog-btn {
                     flex: 1;
-                    min-width: 93px;
-                    height: 36px;
+                    min-width: px2rem(93);
+                    height: px2rem(36);
                     display: flex;
                     flex-direction: row;
                     align-items: center;
                     justify-content: center;
-                    border-radius: 6px;
+                    @include border-radius(6);
                     border: 1px solid rgba(255, 255, 255, 0.3);
                     background: linear-gradient(135deg, #52c97f 0%, #43c94a 100%);
                     color: white;
-                    font-size: 13px;
+                    @include font-size(13);
                     font-weight: 500;
                     cursor: pointer;
                     transition: all 0.2s;
@@ -131,8 +131,7 @@ $ai-msg-border: #e0e0e0;     // AI消息边框
                     }
                     
                     .btn-icon {
-                        width: 18px;
-                        height: 18px;
+                        @include size(18);
                         display: flex;
                         align-items: center;
                         justify-content: center;
@@ -156,8 +155,7 @@ $ai-msg-border: #e0e0e0;     // AI消息边框
                         &::before {
                             content: '';
                             position: absolute;
-                            width: 18px;
-                            height: 18px;
+                            @include size(18);
                             background: white;
                             border-radius: 50%;
                             top: 50%;
@@ -170,7 +168,7 @@ $ai-msg-border: #e0e0e0;     // AI消息边框
                             content: '✓';
                             position: absolute;
                             color: #43c94a;
-                            font-size: 14px;
+                            @include font-size(14);
                             font-weight: bold;
                             top: 50%;
                             left: 50%;
@@ -180,7 +178,7 @@ $ai-msg-border: #e0e0e0;     // AI消息边框
                     }
                     
                     .btn-text {
-                        margin-left: 6px;
+                        margin-left: px2rem(6);
                         letter-spacing: 0.5px;
                     }
                 }
@@ -195,32 +193,32 @@ $ai-msg-border: #e0e0e0;     // AI消息边框
     .input-container {
         width: 100%;
         height: auto;
-        min-height: 70px; // 增加最小高度
+        min-height: px2rem(70); // 增加最小高度
         position: relative; // 改为相对定位，作为底部固定元素
         bottom: 0;
         background-color: #f0f0f0; // 稍深灰色，区分对话区域
         border-top: 1px solid #d0d0d0; // 边框颜色
         display: flex;
         flex-direction: row;
-        gap: 12px; // 间距
+        gap: px2rem(12); // 间距
         align-items: flex-end; // 底部对齐
         justify-content: center;
-        padding: 15px; // 统一内边距
+        @include padding(15); // 统一内边距
         box-sizing: border-box;
         flex-shrink: 0; // 不允许收缩
         
         .input-text { 
-            font-size: 15px;
+            @include font-size(15);
             box-sizing: border-box;
             white-space: pre-wrap;
-            width: calc(100% - 72px); // 自适应宽度
-            max-width: 250px;
-            height: 40px; // 固定初始高度
-            min-height: 40px;
-            max-height: 120px; // 限制最大高度
-            padding: 10px 12px;
+            width: calc(100% - #{px2rem(72)}); // 自适应宽度
+            max-width: px2rem(250);
+            height: px2rem(40); // 固定初始高度
+            min-height: px2rem(40);
+            max-height: px2rem(120); // 限制最大高度
+            @include padding(10, 12);
             border: 1px solid #d0d0d0;
-            border-radius: 8px;
+            @include border-radius(8);
             background-color: white;
             resize: none;
             overflow-y: auto; // 内容超出时可滚动
@@ -234,13 +232,13 @@ $ai-msg-border: #e0e0e0;     // AI消息边框
         }
         
         .input-btn {
-            width: 60px;
-            height: 40px; // 与输入框初始高度一致
-            font-size: 15px;
+            width: px2rem(60);
+            height: px2rem(40); // 与输入框初始高度一致
+            @include font-size(15);
             font-weight: 500;
             flex-shrink: 0; // 不允许收缩
             border: none;
-            border-radius: 8px;
+            @include border-radius(8);
             background: #43c94a;
             color: white;
             cursor: pointer;

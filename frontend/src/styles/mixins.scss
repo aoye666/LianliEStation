@@ -1,0 +1,166 @@
+/**
+ * rem响应式布局混合宏
+ * 设计稿宽度：375px
+ * 基准字体：37.5px
+ * 转换公式：rem = px / 37.5
+ */
+
+// 设计稿基准宽度
+$design-width: 375;
+$design-base-font: 37.5;
+
+// px转rem函数
+@function px2rem($px) {
+  @if (unitless($px)) {
+    @return ($px / $design-base-font) * 1rem;
+  } @else {
+    @return ($px / $design-base-font) * 1rem;
+  }
+}
+
+// 宽高混合宏
+@mixin size($width, $height: $width) {
+  width: px2rem($width);
+  height: px2rem($height);
+}
+
+// 字体大小
+@mixin font-size($size) {
+  font-size: px2rem($size);
+}
+
+// 行高
+@mixin line-height($height) {
+  line-height: px2rem($height);
+}
+
+// 外边距
+@mixin margin($top, $right: $top, $bottom: $top, $left: $right) {
+  margin: px2rem($top) px2rem($right) px2rem($bottom) px2rem($left);
+}
+
+// 单边外边距
+@mixin margin-top($value) {
+  margin-top: px2rem($value);
+}
+
+@mixin margin-right($value) {
+  margin-right: px2rem($value);
+}
+
+@mixin margin-bottom($value) {
+  margin-bottom: px2rem($value);
+}
+
+@mixin margin-left($value) {
+  margin-left: px2rem($value);
+}
+
+// 内边距
+@mixin padding($top, $right: $top, $bottom: $top, $left: $right) {
+  padding: px2rem($top) px2rem($right) px2rem($bottom) px2rem($left);
+}
+
+// 单边内边距
+@mixin padding-top($value) {
+  padding-top: px2rem($value);
+}
+
+@mixin padding-right($value) {
+  padding-right: px2rem($value);
+}
+
+@mixin padding-bottom($value) {
+  padding-bottom: px2rem($value);
+}
+
+@mixin padding-left($value) {
+  padding-left: px2rem($value);
+}
+
+// 定位
+@mixin position($position, $top: null, $right: null, $bottom: null, $left: null) {
+  position: $position;
+  @if $top != null {
+    top: px2rem($top);
+  }
+  @if $right != null {
+    right: px2rem($right);
+  }
+  @if $bottom != null {
+    bottom: px2rem($bottom);
+  }
+  @if $left != null {
+    left: px2rem($left);
+  }
+}
+
+// 边框圆角
+@mixin border-radius($radius) {
+  border-radius: px2rem($radius);
+}
+
+// 边框
+@mixin border($width, $style: solid, $color: #000) {
+  border: px2rem($width) $style $color;
+}
+
+// 阴影
+@mixin box-shadow($h, $v, $blur, $spread: 0, $color: rgba(0, 0, 0, 0.1)) {
+  box-shadow: px2rem($h) px2rem($v) px2rem($blur) px2rem($spread) $color;
+}
+
+// 文字阴影
+@mixin text-shadow($h, $v, $blur, $color: rgba(0, 0, 0, 0.1)) {
+  text-shadow: px2rem($h) px2rem($v) px2rem($blur) $color;
+}
+
+// flex布局
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+// 文本溢出省略
+@mixin ellipsis($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+  }
+}
+
+// 清除浮动
+@mixin clearfix {
+  &::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
+
+// 绝对定位居中
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
