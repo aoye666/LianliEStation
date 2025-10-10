@@ -124,6 +124,7 @@ const ChatInput: React.FC<Props> = ({id, parent_id, replyToName, onCommentSucces
             <div className="chat-input__emoji-picker" ref={emojiRef}>
               <EmojiPicker
                 onEmojiClick={handleEmojiClick}
+                autoFocusSearch={false} 
               />
             </div>
           )}
