@@ -4,7 +4,7 @@ import { useRecordStore } from "../../../store"
 import { Card, Dropdown, Empty } from "antd";
 import { AppstoreOutlined, ShoppingOutlined, FileTextOutlined, SettingOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import NoticeLogin from "../../../components/NoticeLogin/NoticeLogin"
+import NoticeModal from "../../../components/NoticeModal/NoticeModal"
 import { useUserStore } from "../../../store"
 import { px2rem } from "../../../utils/rem"
 import "./Favorites.scss"
@@ -97,7 +97,7 @@ const Favorites: React.FC = () => {
 
   return (
     <div className="favorites-container">
-      {!isAuthenticated && <NoticeLogin />}
+      {!isAuthenticated && <NoticeModal type="login"/>}
       <div className="header">
         <Navbar title="收藏" backActive={true} backPath="/user" />
       </div>

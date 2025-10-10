@@ -8,14 +8,7 @@ $text-color: #333;
 $border-radius: px2rem(8);
 $shadow-color: rgba(0, 0, 0, 0.1);
 
-// 三种不同的浅色系下拉按钮颜色
-// 浅蓝色系 - 买/卖选择
-$dropdown-blue-bg: #e3f2fd;
-$dropdown-blue-text: #1565c0;
-$dropdown-blue-border: #bbdefb;
-$dropdown-blue-hover: #c1e8ff;
-
-// 浅绿色系 - 商品分类
+// 浅绿色系 - 帖子标签
 $dropdown-green-bg: #e8f5e8;
 $dropdown-green-text: #2e7d32;
 $dropdown-green-border: #c8e6c9;
@@ -47,7 +40,7 @@ $dropdown-orange-hover: #ffe0b2;
     
     // 下拉按钮样式 - 合并自独立的 .antd-dropdown-container
     .antd-dropdown-container {
-        // 帖子分类 - 浅绿色  
+        // 帖子标签 - 浅绿色  
         .ant-btn.dropdown-category {
             background-color: $dropdown-green-bg;
             color: $dropdown-green-text;

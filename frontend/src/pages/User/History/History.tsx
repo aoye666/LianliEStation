@@ -5,7 +5,7 @@ import takePlace from "../../../assets/takePlace.png";
 import { Card, Dropdown, Empty, message } from "antd";
 import { AppstoreOutlined, ShoppingOutlined, FileTextOutlined, SettingOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import NoticeLogin from "../../../components/NoticeLogin/NoticeLogin";
+import NoticeModal from "../../../components/NoticeModal/NoticeModal";
 import { useNavigate } from "react-router-dom";
 import { px2rem } from "../../../utils/rem";
 import "./History.scss";
@@ -209,7 +209,7 @@ const History = () => {
 
   return (
     <div className="history-container">
-      {!isAuthenticated && <NoticeLogin />}
+      {!isAuthenticated && <NoticeModal type="login"/>}
       <div className="header">
         <Navbar title="历史" backActive={true} backPath="/user" />
       </div>

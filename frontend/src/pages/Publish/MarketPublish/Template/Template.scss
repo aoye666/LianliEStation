@@ -15,7 +15,7 @@ $dropdown-blue-text: #1565c0;
 $dropdown-blue-border: #bbdefb;
 $dropdown-blue-hover: #c1e8ff;
 
-// 浅绿色系 - 商品分类
+// 浅绿色系 - 商品标签
 $dropdown-green-bg: #e8f5e8;
 $dropdown-green-text: #2e7d32;
 $dropdown-green-border: #c8e6c9;
@@ -68,7 +68,7 @@ $dropdown-orange-hover: #ffe0b2;
             }
         }
         
-        // 商品分类 - 浅绿色  
+        // 商品标签 - 浅绿色  
         .ant-btn.dropdown-category {
             background-color: $dropdown-green-bg;
             color: $dropdown-green-text;

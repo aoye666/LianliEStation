@@ -3,7 +3,7 @@ import { Image, Button, Empty } from "antd";
 import Navbar from "../../../components/Navbar/Navbar";
 import "./Messages.scss";
 import { useRecordStore, useUserStore } from "../../../store";
-import NoticeLogin from "../../../components/NoticeLogin/NoticeLogin";
+import NoticeModal from "../../../components/NoticeModal/NoticeModal";
 import {
   ProductOutlined,
   MessageOutlined,
@@ -220,7 +220,7 @@ const Messages = () => {
 
   return (
     <div>
-      {!isAuthenticated && <NoticeLogin />}
+      {!isAuthenticated && <NoticeModal type="login"/>}
       <Navbar title="信箱" backActive={true} backPath="/user" />
       <div className="messages-container">
         <div className="messages-control">

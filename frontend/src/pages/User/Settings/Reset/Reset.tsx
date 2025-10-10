@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import Forget from "../Forget/Forget";
 import { Button, Input, Select } from "antd";
 import { UploadOutlined, CameraOutlined } from "@ant-design/icons";
-import NoticeLogin from "../../../../components/NoticeLogin/NoticeLogin";
+import NoticeModal from "../../../../components/NoticeModal/NoticeModal";
 
 // 引入 idb
 import { openDB } from "idb";
@@ -197,7 +197,7 @@ const Reset = () => {
     case "nickname":
       return (
         <div className="reset-container">
-          {!isAuthenticated && <NoticeLogin />}
+          {!isAuthenticated && <NoticeModal type="login"/>}
           <Navbar title="重置昵称" backActive={true} backPath="/user/settings" />
           <div className="reset-content">
             <div className="input-group">
@@ -224,7 +224,7 @@ const Reset = () => {
     case "campus_id":
       return (
         <div className="reset-container">
-          {!isAuthenticated && <NoticeLogin />}
+          {!isAuthenticated && <NoticeModal type="login"/>}
           <Navbar title="重置默认校区" backActive={true} backPath="/user/settings" />
           <div className="reset-content">
             <div className="input-group">
@@ -256,7 +256,7 @@ const Reset = () => {
     case "qq_id":
       return (
         <div className="reset-container">
-          {!isAuthenticated && <NoticeLogin />}
+          {!isAuthenticated && <NoticeModal type="login"/>}
           <Navbar title="重置绑定QQ" backActive={true} backPath="/user/settings" />
           <div className="reset-content">
             <div className="input-group">
@@ -283,7 +283,7 @@ const Reset = () => {
     case "avatar":
       return (
         <div className="reset-container">
-          {!isAuthenticated && <NoticeLogin />}
+          {!isAuthenticated && <NoticeModal type="login"/>}
           <Navbar title="重置头像" backActive={true} backPath="/user/settings" />
           <div className="reset-content">
             <div className="upload-group avatar-upload">
@@ -330,7 +330,7 @@ const Reset = () => {
     case "theme_id":
       return (
         <div className="reset-container">
-          {!isAuthenticated && <NoticeLogin />}
+          {!isAuthenticated && <NoticeModal type="login"/>}
           <Navbar title="重置主题风格" backActive={true} backPath="/user/settings" />
           <div className="reset-content">
             <div className="input-group">
@@ -360,7 +360,7 @@ const Reset = () => {
     case "background":
       return (
         <div className="reset-container">
-          {!isAuthenticated && <NoticeLogin />}
+          {!isAuthenticated && <NoticeModal type="login"/>}
           <Navbar title="重置发布页背景" backActive={true} backPath="/user/settings" />
           <div className="reset-content">
             <div className="upload-group background-upload">
@@ -407,7 +407,7 @@ const Reset = () => {
     case "banner":
       return (
         <div className="reset-container">
-          {!isAuthenticated && <NoticeLogin />}
+          {!isAuthenticated && <NoticeModal type="login"/>}
           <Navbar title="重置资料卡背景" backActive={true} backPath="/user/settings" />
           <div className="reset-content">
             <div className="upload-group banner-upload">

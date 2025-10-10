@@ -101,7 +101,7 @@ const ChatInput: React.FC<Props> = ({id, parent_id, replyToName, onCommentSucces
           value={inputText}
           onChange={(e) => setText(e.target.value)}
           rows={3}
-          placeholder={replyToName ? `@${replyToName}...` : "发表您的高见..."}
+          placeholder={replyToName ? `@${replyToName}...` : "发表您的意见..."}
           autoFocus
         />
 

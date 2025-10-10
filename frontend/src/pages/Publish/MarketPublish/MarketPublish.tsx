@@ -307,7 +307,7 @@ const Publish: React.FC = () => {
                       : "收"}
                   </div>
                   <div className="dialog-item">
-                    分类：{JSON.parse(dialog.content).tag}
+                    标签：{JSON.parse(dialog.content).tag}
                   </div>
                   <div className="dialog-item">
                     价格：￥{JSON.parse(dialog.content).price}

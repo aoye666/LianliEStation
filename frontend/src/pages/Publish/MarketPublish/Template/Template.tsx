@@ -407,8 +407,8 @@ const Template = () => {
       return;
     }
     
-    if (tag === '商品类型') {
-      message.warning('请选择商品类型');
+    if (tag === '商品标签') {
+      message.warning('请选择商品标签');
       return;
     }
     
@@ -549,7 +549,7 @@ const Template = () => {
         </div>
 
         <div className='sort'>
-          <label htmlFor="sort-input">分类（请选择合适的分类）</label>
+          <label htmlFor="sort-input">标签（请选择合适的标签）</label>
           <div className='sort-input'>
             <div className="antd-dropdown-container">
               <Dropdown menu={{ items: postTypeItems }} placement="bottomLeft">

@@ -10,6 +10,7 @@ import { Dropdown, Button, message, Modal } from 'antd'
 import type { MenuProps } from 'antd'
 import { aiAPI } from '../../../api'
 import { px2rem } from '../../../utils/rem'
+import NoticeModal from '../../../components/NoticeModal/NoticeModal'
 
 const initialState = {
   id: 1,
@@ -19,7 +20,7 @@ const initialState = {
   create_at: '',
   status: "active",
   campus_id: 1,
-  tag: '帖子分类',
+  tag: '帖子标签',
   images: [] as File[],
   previewImages: [] as string[],
   existingImages: [] as string[],
@@ -179,9 +180,8 @@ const ForumPublish = () => {
     return campusMap[campusId] || '校区选择'
   }
 
-  const currentUser = useUserStore(state => state.currentUser)
-  const publishForumPost = useMainStore(state => state.publishForumPost)
-  const updateForumPost = useMainStore(state => state.updateForumPost)
+  const { isAuthenticated, currentUser } = useUserStore()
+  const { publishForumPost, updateForumPost } = useMainStore()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -192,7 +192,7 @@ const ForumPublish = () => {
       dispatch({ type: 'SET_IS_EDIT', payload: true })
       dispatch({ type: 'SET_POST_ID', payload: templateData.post_id })
       dispatch({ type: 'SET_STATUS', payload: templateData.status || 'active' })
-      initialTag(templateData?.tag || '帖子分类')
+      initialTag(templateData?.tag || '帖子标签')
       initialContent(templateData?.content || '')
       initialTitle(templateData?.title || '')
       
@@ -350,13 +350,18 @@ const ForumPublish = () => {
       return;
     }
     
-    if (tag === '帖子分类' || tag === '帖子标签') {
+    if (tag === '帖子标签' || tag === '帖子标签') {
       message.warning('请选择帖子标签');
       return;
     }
     
     if (campus_name === '校区选择') {
       message.warning('请选择校区');
+      return;
+    }
+
+    if (!content.trim()) {
+      message.warning('请输入帖子内容');
       return;
     }
 
@@ -452,6 +457,7 @@ const ForumPublish = () => {
 
   return (
     <div className='template-container'>
+      {!isAuthenticated && <NoticeModal type='login'/>}
       <div className='navbar'>
         <Navbar 
           backActive={true} 
@@ -479,7 +485,7 @@ const ForumPublish = () => {
         </div>
 
         <div className='sort'>
-          <label htmlFor="sort-input">分类（请选择合适的分类）</label>
+          <label htmlFor="sort-input">标签（请选择合适的标签）</label>
           <div className='sort-input'>
             <div className="antd-dropdown-container">
               <Dropdown menu={{ items: tagItems }} placement="bottom" arrow>
