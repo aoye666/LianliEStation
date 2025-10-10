@@ -2,36 +2,27 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { message } from "antd";
 import { useUserStore } from "../../../store";
+import Navbar from "../../../components/Navbar/Navbar";
 import "./Login.scss";
-import logo_title from "../../../assets/logo-title.png";
-import background from "../../../assets/background1.jpg";
-
-type LoginInputs = {
-  identifier: string;
-  password: string;
-};
 
 const Login: React.FC = () => {
-  // 输入的用户信息
-  const [inputs, setInputs] = useState<LoginInputs>({
+  const [inputs, setInputs] = useState({
     identifier: "",
     password: "",
   });
 
   const navigate = useNavigate();
-  const { login, token, isAuthenticated } = useUserStore();
+  const { login, isAuthenticated } = useUserStore();
 
-  // 设置用户信息
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setInputs((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 提交表单
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await login(inputs.identifier, inputs.password); // 调用 login 方法
+      await login(inputs.identifier, inputs.password);
       message.success("登录成功！");
     } catch (err: any) {
       if (err.response) {
@@ -46,16 +37,17 @@ const Login: React.FC = () => {
     if (isAuthenticated) {
       navigate("/market");
     }
-  }, [isAuthenticated, token, navigate]);
+  }, [isAuthenticated]);
+
+  const isFormComplete = Object.values(inputs).every((value) => value.trim() !== "");
 
   return (
     <div className="login-container">
-      <img className="login-background" src={background} alt="background"></img>
-      <div className="login-box">
-        <img className="login-logo-title" src={logo_title} alt="logo-title"></img>
+      <Navbar title="登录" backActive={true} backPath="/user" />
+      <div className="login-content">
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-item">
-            <label htmlFor="identifier">用户名或邮箱:</label>
+            <label htmlFor="identifier">用户名或邮箱</label>
             <input
               required
               type="text"
@@ -63,10 +55,11 @@ const Login: React.FC = () => {
               id="identifier"
               value={inputs.identifier}
               onChange={handleChange}
+              className="modern-input"
             />
           </div>
           <div className="form-item">
-            <label htmlFor="password">密码:</label>
+            <label htmlFor="password">密码</label>
             <input
               required
               type="password"
@@ -74,15 +67,13 @@ const Login: React.FC = () => {
               id="password"
               value={inputs.password}
               onChange={handleChange}
+              className="modern-input"
             />
           </div>
-          <button type="submit">登录</button>
+          <button type="submit" className="submit-btn" disabled={!isFormComplete}>登录</button>
           <div className="login-links">
             <Link className="link" to="/auth/register">
               立即注册
-            </Link>
-            <Link className="link" to="/market">
-              游客登录
             </Link>
             <Link className="link" to="/user/settings/reset/password">
               忘记密码

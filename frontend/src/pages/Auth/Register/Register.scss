@@ -5,132 +5,123 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  background: var(--bg-color);
+}
 
-  .register-background {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    z-index: -1;
-    object-fit: cover;
-  }
-  .register-box {
-    position: relative;
-    width: px2rem(270);
-    height: px2rem(560);
+.register-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: px2rem(82);
+  overflow-y: auto;
+}
+
+.register-form {
+  width: 90%;
+  max-width: px2rem(300);
+  display: flex;
+  flex-direction: column;
+  gap: px2rem(16);
+
+  .form-item {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 1;
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(13px);
-    @include box-shadow(0, 0, 10, 0, rgba(0, 0, 0, 0.5));
-    border: 1px solid white;
-    @include border-radius(10);
 
-    .register-logo-title {
-      width: px2rem(180);
-      object-fit: contain;
+    label {
+      margin-bottom: px2rem(4);
+      margin-left: px2rem(2);
+      @include font-size(14);
+      color: #333333;
+      font-weight: 500;
     }
 
-    .register-form {
+    .modern-input {
       width: 100%;
-      height: px2rem(500);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: px2rem(5);
-      // border: 1px solid white;//供测试定位使用
-      .form-item {
-        display: flex;
-        flex-direction: column;
-        align-items: start;
-        justify-content: center;
-        label {
-          display: flex;
-          align-items: center;
-          justify-content: start;
-          width: px2rem(180);
-          @include font-size(13);
-          height: px2rem(20);
-          color: white;
-        }
-        input {
-          border: 1px solid white;
-          outline: none;
-          @include border-radius(5);
-          width: px2rem(180);
-          height: px2rem(26);
-          background: transparent;
-          @include padding(3);
-          color: white;
-          margin-top: px2rem(1);
-        }
-        .ant-select {
-          width: px2rem(180);
-          .ant-select-selector {
-            border: 1px solid #ffffff;
-            outline: none;
-            @include border-radius(5);
-            background: transparent;
-            @include padding(3);
-            color: #ffffff;
-            margin-top: px2rem(1);
-            height: px2rem(26);
-          }
-          .ant-select-arrow {
-            color: #ffffff;
-          }
-        }
+      height: px2rem(40);
+      @include padding(12, 16);
+      @include font-size(14);
+      background: #ffffff;
+      border: 2px solid #e1e8ed;
+      @include border-radius(8);
+      outline: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+
+      &:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        transform: translateY(-1px);
       }
-      button {
-        margin-top: px2rem(10);
-        width: px2rem(180);
-        height: px2rem(30);
-        @include border-radius(5);
-        background-color: #ff9800;
-        border: 1px solid #d97f35;
-        color: white;
-        @include border-radius(16);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
-      }
-      .register-link {
-        margin-top: px2rem(10);
-        width: px2rem(160);
-        display: flex;
-        justify-content: center;
-        flex-direction: row;
-        align-items: center;
-        .link {
-          @include font-size(14);
-          text-decoration: underline;
-          color: #222831;
-          font-weight: 500;
-        }
-      }
-      .error-message {
-        color: #ff6b6b;
-        @include font-size(13);
-        margin-top: px2rem(8);
-        @include padding(8, 12);
-        background-color: rgba(255, 107, 107, 0.1);
-        @include border-radius(6);
-        border: 1px solid rgba(255, 107, 107, 0.3);
-      }
-      
-      .success-message {
-        color: #51cf66;
-        @include font-size(13);
-        margin-top: px2rem(8);
-        @include padding(8, 12);
-        background-color: rgba(81, 207, 102, 0.1);
-        @include border-radius(6);
-        border: 1px solid rgba(81, 207, 102, 0.3);
+
+      &::placeholder {
+        color: #8899a6;
       }
     }
+  }
+
+  .submit-btn {
+    width: 100%;
+    height: px2rem(52);
+    @include margin(8, 0, 0, 0);
+    @include border-radius(26);
+    @include font-size(16);
+    font-weight: 600;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    box-shadow: 0 #{px2rem(4)} #{px2rem(16)} rgba(52, 152, 219, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      transform: translateY(#{px2rem(-2)});
+      box-shadow: 0 #{px2rem(8)} #{px2rem(24)} rgba(52, 152, 219, 0.4);
+      background: linear-gradient(135deg, #2980b9, #3498db);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 #{px2rem(2)} #{px2rem(8)} rgba(52, 152, 219, 0.3);
+    }
+
+    &:disabled,
+    &[disabled] {
+      background: #bdc3c7;
+      color: #7f8c8d;
+      opacity: 1;
+      transform: none;
+      box-shadow: 0 #{px2rem(2)} #{px2rem(8)} rgba(189, 195, 199, 0.3);
+      cursor: not-allowed;
+      font-weight: 600;
+      border: none;
+
+      &:hover {
+        transform: none;
+        box-shadow: 0 #{px2rem(2)} #{px2rem(8)} rgba(189, 195, 199, 0.3);
+        background: #bdc3c7;
+        color: #7f8c8d;
+      }
+    }
+  }
+
+  .error-message {
+    color: #ff6b6b;
+    @include font-size(13);
+    @include margin(8, 0, 0, 0);
+    @include padding(8, 12);
+    background-color: rgba(255, 107, 107, 0.1);
+    @include border-radius(6);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+  }
+  
+  .success-message {
+    color: #51cf66;
+    @include font-size(13);
+    @include margin(8, 0, 0, 0);
+    @include padding(8, 12);
+    background-color: rgba(81, 207, 102, 0.1);
+    @include border-radius(6);
+    border: 1px solid rgba(81, 207, 102, 0.3);
   }
 }

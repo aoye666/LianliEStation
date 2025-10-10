@@ -40,8 +40,8 @@ interface AllUsers {
   id: number;
   nickname: string;
   username: string;
-  campus_id: number;
-  qq: string;
+  campus_id: number | undefined;
+  qq: string | undefined;
   email: string;
   credit: number;
   theme_id: number;
@@ -55,7 +55,6 @@ interface UserState {
   currentUser?: User | null; // 当前用户
   // searchedUser: QQSearchedUser | null; // 管理员通过QQ号搜索到的用户
   isAuthenticated: boolean;
-  token: string | null;
   isAdmin: boolean;
   
   // ========== 新增：加载状态 ==========
@@ -74,12 +73,9 @@ interface UserState {
   // updateCredit: (qq_id: string, credit: number) => Promise<void>;
   login: (identifier: string, password: string) => Promise<void>;
   register: (userData: {
-    nickname: string;
     email: string;
     password: string;
-    qq_id: string;
     username: string;
-    campus_id: number;
   }) => Promise<void>;
   logout: () => void;
   deleteUser: (username: string) => Promise<void>;
@@ -122,14 +118,14 @@ const useUserStore = create<UserState>()(
           });
 
           const token = res?.data.token;
-          console.log("当前获取的token: ", token);
           if (!token) {
             message.error("未获取到token，请重试");
             return;
           }
+
           const isAdmin = res?.data.isAdmin;
           Cookies.set("auth-token", token, { expires: 7 });
-          set({ isAuthenticated: true, token, isAdmin });
+          set({ isAuthenticated: true, isAdmin });
 
           await get().fetchUserProfile(); // 获取当前用户信息
         } catch (error: any) {
@@ -138,12 +134,9 @@ const useUserStore = create<UserState>()(
       },
 
       register: async (userData: {
-        nickname: string;
         email: string;
         password: string;
-        qq_id: string;
         username: string;
-        campus_id: number;
       }) => {
         try {
           const res = await api.post("/api/auth/register",  userData );
@@ -157,7 +150,6 @@ const useUserStore = create<UserState>()(
         // 清理当前 Store
         set({
           isAuthenticated: false,
-          token: null,
           isAdmin: false,
           users: [],
           currentUser: null,
@@ -191,7 +183,7 @@ const useUserStore = create<UserState>()(
           });
           console.log(res?.data.message); // 账户已删除
           Cookies.remove("auth-token"); // 删除用户时移除 cookie
-          set({ isAuthenticated: false, token: null });
+          set({ isAuthenticated: false });
         } catch (error: any) {
           throw error;
         }

@@ -2,31 +2,21 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { message } from "antd";
 import { useUserStore } from "../../../../store";
-import { px2rem } from "../../../../utils/rem";
+import Navbar from "../../../../components/Navbar/Navbar";
 import "./Forget.scss";
-import logo_title from "../../../../assets/logo-title.png";
-import background from "../../../../assets/background3.jpg";
-
-type VerificationInputs = {
-  email: string;
-  verification: string;
-  password: string;
-  confirmPassword: string; // 增加确认密码字段
-};
 
 const Forget: React.FC = () => {
-  const [inputs, setInputs] = useState<VerificationInputs>({
+  const [inputs, setInputs] = useState({
     email: "",
     verification: "",
     password: "",
-    confirmPassword: "", // 初始化确认密码字段
+    confirmPassword: "",
   });
 
   const [countdown, setCountdown] = useState<number>(0);
 
   const navigate = useNavigate();
-  const { requestVerification, changePassword, isAuthenticated } =
-    useUserStore();
+  const { requestVerification, changePassword, isAuthenticated } = useUserStore();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -34,19 +24,19 @@ const Forget: React.FC = () => {
   };
 
   const handleRequest = async () => {
-    if (countdown > 0) return; // 倒计时中则不发送请求
+    if (countdown > 0) return;
 
     try {
       await requestVerification(inputs.email);
       message.success("验证码已发送，请查收邮件");
-      setCountdown(300); // 设置5分钟倒计时
+      setCountdown(60);
       const interval = setInterval(() => {
         setCountdown((prev) => prev - 1);
       }, 1000);
 
       setTimeout(() => {
         clearInterval(interval);
-      }, 300000); // 5分钟后清除倒计时
+      }, 300000);
     } catch (err: any) {
       if (err.response) {
         message.error(err.response.data.message || "发送验证码失败");
@@ -67,13 +57,11 @@ const Forget: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // 检查密码是否一致
     if (!validatePasswords()) {
       message.error("两次输入的密码不一致");
       return;
     }
 
-    // 检查密码是否符合要求
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}/.test(inputs.password)) {
       message.error("密码不符合要求");
       return;
@@ -94,14 +82,15 @@ const Forget: React.FC = () => {
     }
   };
 
+  const isFormComplete = Object.values(inputs).every((value) => value.trim() !== "");
+
   return (
     <div className="forget-container">
-      <img className="forget-background" src={background} alt="background" />
-      <div className="forget-box">
-        <img className="forget-logo-title" src={logo_title} alt="logo-title" />
+      <Navbar title="忘记密码" backActive={true} backPath={isAuthenticated ? "/user/settings" : "/auth/login"} />
+      <div className="forget-content">
         <form className="forget-form" onSubmit={handleSubmit}>
           <div className="form-item">
-            <label htmlFor="email">账户邮箱:</label>
+            <label htmlFor="email">账户邮箱</label>
             <input
               required
               type="text"
@@ -109,11 +98,12 @@ const Forget: React.FC = () => {
               id="email"
               value={inputs.email}
               onChange={handleChange}
+              className="modern-input"
             />
           </div>
           <div className="form-item">
-            <label htmlFor="verification">验证码:</label>
-            <div className="verification-container">
+            <label htmlFor="verification">验证码</label>
+            <div className="verification-group">
               <input
                 required
                 type="text"
@@ -121,22 +111,21 @@ const Forget: React.FC = () => {
                 id="verification"
                 value={inputs.verification}
                 onChange={handleChange}
+                className="modern-input verification-input"
               />
               {countdown > 0 ? (
-                <button className="verification-disabled-btn" disabled>
-                  {Math.ceil(countdown)}秒后再试
+                <button type="button" className="verification-btn disabled" disabled>
+                  {Math.ceil(countdown)}秒
                 </button>
               ) : (
-                <button className="verification-btn" onClick={handleRequest}>
+                <button type="button" className="verification-btn" onClick={handleRequest}>
                   获取验证码
                 </button>
               )}
             </div>
           </div>
           <div className="form-item">
-            <label htmlFor="password" style={{ height: px2rem(40) }}>
-              新密码（至少含1个大写字母、1个数字，长度至少为8位）:
-            </label>
+            <label htmlFor="password">新密码 (至少含1个大写字母、1个数字，长度≥8)</label>
             <input
               required
               type="password"
@@ -144,10 +133,11 @@ const Forget: React.FC = () => {
               id="password"
               value={inputs.password}
               onChange={handleChange}
+              className="modern-input"
             />
           </div>
           <div className="form-item">
-            <label htmlFor="confirmPassword">确认密码:</label>
+            <label htmlFor="confirmPassword">确认密码</label>
             <input
               required
               type="password"
@@ -155,22 +145,12 @@ const Forget: React.FC = () => {
               id="confirmPassword"
               value={inputs.confirmPassword}
               onChange={handleChange}
+              className="modern-input"
             />
           </div>
-          <button type="submit" className="reset-btn">
+          <button type="submit" className="submit-btn" disabled={!isFormComplete}>
             重置密码
           </button>
-          <div className="forget-link">
-            {isAuthenticated ? (
-              <Link className="link" to="/user/settings">
-                返回设置
-              </Link>
-            ) : (
-              <Link className="link" to="/auth/login">
-                返回登录
-              </Link>
-            )}
-          </div>
         </form>
       </div>
     </div>
