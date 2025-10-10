@@ -164,8 +164,8 @@ router.post("/posts", upload.array("images", 5), async (req, res) => {
     const author_id = decoded.user_id;
     const { title, content, campus_id, tag } = req.body;
 
-    // 检查必需参数
-    if (!title || !content || !campus_id) {
+    // 检查必需参数（content改为非必选）
+    if (!title || !campus_id) {
       if (files && files.length) {
         for (const file of files) {
           await fs.promises.unlink(file.path).catch(() => {});
@@ -174,8 +174,8 @@ router.post("/posts", upload.array("images", 5), async (req, res) => {
       return res.status(400).json({ message: "缺少必要参数" });
     }
 
-    // 插入帖子
-    const [result] = await db.query("INSERT INTO posts (title, content, author_id, campus_id, tag) VALUES (?, ?, ?, ?, ?)", [title, content, author_id, campus_id, tag]);
+    // 插入帖子（content可为空字符串）
+    const [result] = await db.query("INSERT INTO posts (title, content, author_id, campus_id, tag) VALUES (?, ?, ?, ?, ?)", [title, content || '', author_id, campus_id, tag]);
 
     const postId = result.insertId;
     if (!postId) {

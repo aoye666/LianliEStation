@@ -40,12 +40,13 @@ API_KEY
 use lianli;
 CREATE TABLE `users` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `nickname` VARCHAR(50) NOT NULL DEFAULT 'DUTers',
+    `nickname` VARCHAR(50) NOT NULL DEFAULT '连理1000',
     `username` VARCHAR(100) NOT NULL,
     `email` VARCHAR(100),
     `password` VARCHAR(255) NOT NULL,
-    `qq_id` VARCHAR(100) NOT NULL,
-    `campus_id` INT NOT NULL,
+    `qq_id` VARCHAR(100),
+    `campus_id` INT,
+    `phone_id` VARCHAR(20),
     `credit` INT NOT NULL DEFAULT 100,
     `avatar` VARCHAR(255) NOT NULL DEFAULT '/uploads/default.png',
     `banner_url` VARCHAR(255) NOT NULL DEFAULT '/uploads/default_banner.png',
@@ -301,23 +302,25 @@ CREATE TABLE `sensitive_words` (
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
 | ----------- | ------ | ---- | ------------------------ |
-| nickname | String | 否 | 用户昵称，如不提供则默认为 "DUTers" |
+| nickname | String | 否 | 用户昵称，如不提供则默认为 "连理+四位随机数字" |
 | email | String | 是 | 用户邮箱，必须唯一 |
 | password | String | 是 | 用户密码 |
-| qq_id | String | 是 | QQ 号码 |
+| qq_id | String | 否 | QQ 号码 |
 | username | String | 是 | 用户名，必须唯一 |
-| campus_id | Number | 是 | 校区 ID |
+| campus_id | Number | 否 | 校区 ID |
+| phone_id | String | 否 | 手机号码，预留扩展字段 |
 
 请求体示例
 
 ```json
 {
-  "nickname": "DUTers",
+  "nickname": "连理1234",
   "email": "user@example.com",
   "password": "password123",
   "qq_id": "12345678",
   "username": "user123",
-  "campus_id": 1
+  "campus_id": 1,
+  "phone_id": "13800138000"
 }
 ```
 
@@ -2369,7 +2372,7 @@ Content-Type: application/json
 | 参数名 | 类型 | 必选 | 描述 |
 |-------|------|------|------|
 | title | String | 是 | 帖子标题 |
-| content | String | 是 | 帖子内容 |
+| content | String | 否 | 帖子内容，可为空 |
 | campus_id | Number | 是 | 校区 ID |
 | tag | String | 否 | 帖子标签，可选值：新闻通知、吐槽倾诉、学习资料、咨询答疑、交友组队、其他 |
 | images | File[] | 否 | 帖子相关图片，最多 5 张 |

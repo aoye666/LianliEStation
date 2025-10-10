@@ -24,10 +24,16 @@ let currentVerificationEmail = "";
 
 // 用户注册
 router.post("/register", registerLimiter, logIP, async (req, res) => {
-  let { nickname, email, password, qq_id, username, campus_id } = req.body;
+  let { nickname, email, password, qq_id, username, campus_id, phone_id } = req.body;
   // console.log("收到的请求体:", req.body);
-  if (!nickname) nickname = "DUTers"; // 默认昵称
-  if (!email || !password || !qq_id || !username || !campus_id) {
+  
+  // 生成默认昵称："连理+四位随机数字"
+  if (!nickname) {
+    const randomNum = Math.floor(1000 + Math.random() * 9000); // 生成1000-9999的随机数
+    nickname = `连理${randomNum}`;
+  }
+  
+  if (!email || !password || !username) {
     return res.status(400).json({ message: "缺少必要参数" });
   }
 
@@ -54,10 +60,10 @@ router.post("/register", registerLimiter, logIP, async (req, res) => {
     // 加密密码
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 存入数据库
+    // 存入数据库，qq_id、campus_id、phone_id为可选参数
     await db.query(
-      "INSERT INTO users (nickname, email, password, qq_id, username, campus_id ) VALUES (?, ?, ?, ?, ?, ?)",
-      [nickname, email, hashedPassword, qq_id, username, campus_id]
+      "INSERT INTO users (nickname, email, password, qq_id, username, campus_id, phone_id ) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [nickname, email, hashedPassword, qq_id || null, username, campus_id || null, phone_id || null]
     );
 
     res.status(201).json({ message: "注册成功" });
