@@ -297,30 +297,22 @@ CREATE TABLE `sensitive_words` (
 
 - 路径: `/api/auth/register`
 - 方法: `POST`
-- 描述: 注册新用户
+- 描述: 注册新用户，系统自动生成"连理+四位随机数字"格式的昵称
 
 请求参数
 | 参数名 | 类型 | 必选 | 描述 |
 | ----------- | ------ | ---- | ------------------------ |
-| nickname | String | 否 | 用户昵称，如不提供则默认为 "连理+四位随机数字" |
 | email | String | 是 | 用户邮箱，必须唯一 |
 | password | String | 是 | 用户密码 |
-| qq_id | String | 否 | QQ 号码 |
 | username | String | 是 | 用户名，必须唯一 |
-| campus_id | Number | 否 | 校区 ID |
-| phone_id | String | 否 | 手机号码，预留扩展字段 |
 
 请求体示例
 
 ```json
 {
-  "nickname": "连理1234",
   "email": "user@example.com",
   "password": "password123",
-  "qq_id": "12345678",
-  "username": "user123",
-  "campus_id": 1,
-  "phone_id": "13800138000"
+  "username": "user123"
 }
 ```
 
@@ -385,6 +377,8 @@ CREATE TABLE `sensitive_words` (
 
 - 该接口使用了请求频率限制 (rate limit)
 - 注册操作会记录用户 IP 地址
+- 用户昵称由系统自动生成，格式为"连理+四位随机数字"（如：连理1234、连理8976）
+- 其他用户信息（QQ号、校区ID、手机号等）使用数据库默认值，后续可通过用户设置页面完善
 
 ---
 
