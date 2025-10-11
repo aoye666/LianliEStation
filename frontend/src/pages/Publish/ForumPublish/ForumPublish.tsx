@@ -458,108 +458,107 @@ const ForumPublish = () => {
   return (
     <div className='template-container'>
       {!isAuthenticated && <NoticeModal type='login'/>}
-      <div className='navbar'>
-        <Navbar 
-          backActive={true} 
-          backPath={isEdit ? '/user/history' : '/forum'} 
-          title='帖子发布' 
-        />
-      </div>
+      <Navbar 
+        backActive={true} 
+        backPath={isEdit ? '/user/history' : '/forum'} 
+        title='帖子发布' 
+      />
 
       <div className='content'>
-        <div className='title'>
-          <label htmlFor="title-input">标题</label>
-          <div className='title-input'>
-            <div className="input-wrapper">
-              <input
-                id="title-input"
-                type="text"
-                placeholder='请输入帖子标题'
-                value={title}
-                onChange={setTitle}
-                maxLength={50}
-                className="native-input"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className='sort'>
-          <label htmlFor="sort-input">标签（请选择合适的标签）</label>
-          <div className='sort-input'>
-            <div className="antd-dropdown-container">
-              <Dropdown menu={{ items: tagItems }} placement="bottom" arrow>
-                <Button className="ant-btn dropdown-button dropdown-category">
-                  {tag}
-                </Button>
-              </Dropdown>
-              <Dropdown menu={{ items: campusItems }} placement="bottom" arrow>
-                <Button className="ant-btn dropdown-button dropdown-campus">
-                  {campus_name}
-                </Button>
-              </Dropdown>
-            </div>
-          </div>
-        </div>
-
-
-        <div className='img-upload'>
-          <div className='img-upload-label'>
-            上传图片（最多3张）
-          </div>
-          <div className={`template-upload ${previewImages.length >= 3 ? 'upload-max-reached' : ''}`}>
-            {/* 已上传图片预览（统一显示新上传和已有图片） */}
-            {previewImages.map((url, index) => (
-              <div key={index} className="upload-item uploaded">
-                <img src={url} alt={`preview-${index}`} />
-                <div className="upload-actions">
-                  <button
-                    className="remove-btn"
-                    onClick={() => removeImage(index)}
-                  >
-                    ×
-                  </button>
-                </div>
-              </div>
-            ))}
-
-            {/* 上传按钮 */}
-            {previewImages.length < 3 && (
-              <div className="upload-item upload-button">
-                <label htmlFor="file-input" className="upload-label">
-                  <div className="upload-content">
-                    <span className="plus-icon">+</span>
-                    <span className="upload-text">上传</span>
-                  </div>
-                </label>
+        <div className='form-wrapper'>
+          <div className='title'>
+            <label htmlFor="title-input">标题</label>
+            <div className='title-input'>
+              <div className="input-wrapper">
                 <input
-                  id="file-input"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleFileChange}
-                  style={{ display: 'none' }}
+                  id="title-input"
+                  type="text"
+                  placeholder='请输入帖子标题'
+                  value={title}
+                  onChange={setTitle}
+                  maxLength={50}
+                  className="native-input"
                 />
               </div>
-            )}
+            </div>
           </div>
-        </div>
 
-        <div className='detail'>
-          <label htmlFor="detail-input">
-            内容详情
-          </label>
-          <div className='detail-input'>
-            <div className="textarea-wrapper">
-              <textarea
-                id="detail-input"
-                placeholder="请输入帖子详情"
-                value={content}
-                onChange={setContent}
-                maxLength={500}
-                className="native-textarea"
-                style={{ height: px2rem(180) }}
-              />
+          <div className='sort'>
+            <label htmlFor="sort-input">标签（请选择合适的标签）</label>
+            <div className='sort-input'>
+              <div className="antd-dropdown-container">
+                <Dropdown menu={{ items: tagItems }} placement="bottom" arrow>
+                  <Button className="ant-btn dropdown-button dropdown-category">
+                    {tag}
+                  </Button>
+                </Dropdown>
+                <Dropdown menu={{ items: campusItems }} placement="bottom" arrow>
+                  <Button className="ant-btn dropdown-button dropdown-campus">
+                    {campus_name}
+                  </Button>
+                </Dropdown>
+              </div>
+            </div>
+          </div>
+
+          <div className='img-upload'>
+            <div className='img-upload-label'>
+              上传图片（最多3张）
+            </div>
+            <div className={`template-upload ${previewImages.length >= 3 ? 'upload-max-reached' : ''}`}>
+              {/* 已上传图片预览（统一显示新上传和已有图片） */}
+              {previewImages.map((url, index) => (
+                <div key={index} className="upload-item uploaded">
+                  <img src={url} alt={`preview-${index}`} />
+                  <div className="upload-actions">
+                    <button
+                      className="remove-btn"
+                      onClick={() => removeImage(index)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {/* 上传按钮 */}
+              {previewImages.length < 3 && (
+                <div className="upload-item upload-button">
+                  <label htmlFor="file-input" className="upload-label">
+                    <div className="upload-content">
+                      <span className="plus-icon">+</span>
+                      <span className="upload-text">上传</span>
+                    </div>
+                  </label>
+                  <input
+                    id="file-input"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className='detail'>
+            <label htmlFor="detail-input">
+              内容详情
+            </label>
+            <div className='detail-input'>
+              <div className="textarea-wrapper">
+                <textarea
+                  id="detail-input"
+                  placeholder="请输入帖子详情"
+                  value={content}
+                  onChange={setContent}
+                  maxLength={500}
+                  className="native-textarea"
+                  style={{ height: px2rem(180) }}
+                />
+              </div>
             </div>
           </div>
         </div>

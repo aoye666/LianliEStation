@@ -10,7 +10,6 @@ import right from "../../assets/right-black.svg";
 import avatarDefault from "../../assets/logo.png";
 import bannerDefault from "../../assets/background-wide.jpg";
 import { useState, useEffect } from "react";
-import Cookies from "js-cookie";
 
 // 引入 idb  
 import { openDB } from "idb";
@@ -130,29 +129,29 @@ const User = () => {
   const [avatarFile, setAvatarFile] = useState<string | undefined>();
   const [bannerFile, setBannerFile] = useState<string | undefined>();
   const navigate = useNavigate();
-  const token = Cookies.get("token");
 
   const loadImage = async (key: string, defaultUrl: string, isAvatar: boolean) => {
+    // 先尝试从IndexedDB获取缓存
     let file = await getImageFromDB(key);
     if (file) {
       // 转成可用的Data URL  
       const base64 = await fetchImageAsBase64(URL.createObjectURL(file));
-      console.log("使用indexedDB中缓存的图片")
+      console.log("使用IndexedDB中缓存的图片:", key);
       return base64 as string;
     } else {
-      // 先请求后端  
+      // IndexedDB中没有，从后端请求
       const endpoint = `${process.env.REACT_APP_API_URL || "http://localhost:5000"}${defaultUrl}`;
+      console.log("从后端请求图片:", endpoint);
       const fetchedFile = await fetchImageFromBackend(endpoint);
-      console.log("从后端请求图片")
       if (fetchedFile) {
-        // 存入indexedDB  
+        // 存入IndexedDB作为缓存
         await storeImageInDB(key, fetchedFile);
-        // 转成Base64  
+        // 转成Base64
         const base64 = await fetchImageAsBase64(URL.createObjectURL(fetchedFile));
         return base64 as string;
       } else {
-        // 后端也失败，使用默认图片  
-        console.log("使用默认图片")
+        // 后端也失败，使用默认图片
+        console.log("使用默认图片");
         return isAvatar ? avatarDefault : bannerDefault;
       }
     }
@@ -166,24 +165,20 @@ const User = () => {
       resetDBStatus('userImagesDB');
     }
     
-    // 加载头像  
-    loadImage(
-      "avatar",
-      !isAuthenticated
-        ? "/uploads/default.png"
-        : (currentUser?.avatar || "/uploads/default.png"),
-      true
-    ).then((base64) => setAvatarFile(base64));
+    // 加载头像
+    const avatarUrl = !isAuthenticated
+      ? "/uploads/default.png"
+      : (currentUser?.avatar || "/uploads/default.png");
+    
+    loadImage("avatar", avatarUrl, true).then((base64) => setAvatarFile(base64));
 
-    // 加载背景  
-    loadImage(
-      "banner",
-      !isAuthenticated
-        ? "/uploads/default_banner.png"
-        : (currentUser?.banner_url || "/uploads/default_banner.png"),
-      false
-    ).then((base64) => setBannerFile(base64));
-  }, [currentUser, token, isAuthenticated]);
+    // 加载背景（banner）
+    const bannerUrl = !isAuthenticated
+      ? "/uploads/default_banner.png"
+      : (currentUser?.banner_url || "/uploads/default_banner.png");
+    
+    loadImage("banner", bannerUrl, false).then((base64) => setBannerFile(base64));
+  }, [currentUser, isAuthenticated]); // 移除token依赖，因为isAuthenticated已经包含了认证状态
 
   return (
     <div className="user-container">

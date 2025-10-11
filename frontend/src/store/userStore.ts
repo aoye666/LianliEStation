@@ -305,7 +305,27 @@ const useUserStore = create<UserState>()(
               },
             }));
 
-            // 更新 localStorage
+            // 上传成功后，将新图片存入 IndexedDB 缓存
+            try {
+              const { openDB } = await import('idb');
+              const db = await openDB('userImagesDB', 1, {
+                upgrade(db) {
+                  if (!db.objectStoreNames.contains('images')) {
+                    db.createObjectStore('images');
+                  }
+                },
+              });
+              const tx = db.transaction('images', 'readwrite');
+              const store = tx.objectStore('images');
+              await store.put(image, type); // 存入新图片，覆盖旧缓存
+              await tx.done;
+              db.close();
+              console.log(`已将新图片存入 IndexedDB 缓存: ${type}`);
+            } catch (idbError) {
+              console.error('存入 IndexedDB 缓存失败:', idbError);
+            }
+
+            // 更新 localStorage（保留原有逻辑）
             let localStorageKey = "";
             if (type === "background") {
               localStorageKey = "userBackground";

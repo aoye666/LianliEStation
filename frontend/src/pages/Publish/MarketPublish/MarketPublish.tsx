@@ -3,7 +3,6 @@ import { useRef, useState, useEffect, useCallback } from "react"; // 导入useCa
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../../../store";
 import { message } from "antd";
-import Cookies from "js-cookie";
 import api from "../../../api";
 import { px2rem } from "../../../utils/rem";
 import "./MarketPublish.scss";
@@ -58,7 +57,6 @@ const Publish: React.FC = () => {
   const [avatarFile, setAvatarFile] = useState<string | undefined>();
   const [backgroundFile, setBackgroundFile] = useState<string | undefined>();
 
-  const token = Cookies.get("auth-token");
   const { currentUser } = useUserStore();
 
   // 从URL获取Base64
@@ -99,21 +97,21 @@ const Publish: React.FC = () => {
     defaultUrl: string,
     isAvatar: boolean
   ): Promise<any> => {
-    // 先从 IndexedDB 获取
+    // 先从 IndexedDB 获取缓存
     const file = await getImageFromDB(key);
     if (file) {
       // 转为Base64
-      console.log("从 IndexedDB 获取图片");
+      console.log("从 IndexedDB 获取图片:", key);
       return await fetchImageAsBase64(URL.createObjectURL(file));
     } else {
-      // 从后端请求
-      console.log("从后端请求图片");
+      // IndexedDB中没有，从后端请求
+      console.log("从后端请求图片:", key);
       const endpoint = `${
         process.env.REACT_APP_API_URL || "http://localhost:5000"
       }${defaultUrl}`;
       const fetchedFile = await fetchImageFromBackend(endpoint);
       if (fetchedFile) {
-        // 存入IndexedDB
+        // 存入IndexedDB作为缓存
         await storeImageInDB(key, fetchedFile);
         // 转为Base64
         return await fetchImageAsBase64(URL.createObjectURL(fetchedFile));
@@ -126,17 +124,14 @@ const Publish: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadImage(
-      "background",
-      currentUser?.banner_url || "/uploads/default_background.png",
-      false
-    ).then((base64) => setBackgroundFile(base64));
-    loadImage(
-      "avatar",
-      currentUser?.avatar || "/uploads/default_avatar.png",
-      true
-    ).then((base64) => setAvatarFile(base64));
-  }, [currentUser, token, loadImage]);
+    // 加载发布页背景图（使用background_url）
+    const backgroundUrl = currentUser?.background_url || "/uploads/default_background.png";
+    loadImage("background", backgroundUrl, false).then((base64) => setBackgroundFile(base64));
+    
+    // 加载头像
+    const avatarUrl = currentUser?.avatar || "/uploads/default_avatar.png";
+    loadImage("avatar", avatarUrl, true).then((base64) => setAvatarFile(base64));
+  }, [currentUser, loadImage]); // 移除token依赖
 
   // 设置对话框自适应高度
   const handleHeight = () => {

@@ -23,10 +23,11 @@ $dropdown-orange-hover: #ffe0b2;
 .template-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    min-height: 100vh;
     width: 100vw;
     box-sizing: border-box;
     transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0.5s;
+    position: relative;
 
     input{
         outline: none;
@@ -91,12 +92,20 @@ $dropdown-orange-hover: #ffe0b2;
     .content{
         display: flex;
         flex-direction: column;
-        gap: px2rem(10);
-        justify-content: center;
         align-items: center;
-        height: calc(100vh - #{px2rem(140)});
-        margin-top: px2rem(55);
-        // background: #5f5454;
+        justify-content: flex-start;
+        padding: px2rem(75) 0 px2rem(20) 0; // 顶部留出 navbar 高度 (55px) + 额外间距 (20px)
+        overflow-y: auto;
+        flex: 1;
+        min-height: 0; // 允许flex子项收缩以支持滚动
+
+        .form-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: px2rem(10);
+            width: 100%;
+            max-width: px2rem(250);
+        }
 
         label{
             @include font-size(16);
@@ -107,7 +116,6 @@ $dropdown-orange-hover: #ffe0b2;
             display: flex;
             flex-direction: column;
             gap: px2rem(6);
-            margin-top: px2rem(10);
             width: px2rem(250);
 
             .title-input {
@@ -146,7 +154,6 @@ $dropdown-orange-hover: #ffe0b2;
             flex-direction: column;
             gap: px2rem(4);
             width: px2rem(250);
-            margin-top: px2rem(5);
 
             .antd-dropdown-container {
                 display: flex;
@@ -179,9 +186,7 @@ $dropdown-orange-hover: #ffe0b2;
             display: flex;
             flex-direction: column;
             width: px2rem(250);
-            margin-top: px2rem(5);
-            min-height: px2rem(84);
-            height: px2rem(84);
+            min-height: px2rem(84); // 只使用 min-height，允许内容自适应
 
             .img-upload-label {
                 @include font-size(16);
@@ -290,7 +295,7 @@ $dropdown-orange-hover: #ffe0b2;
             display: flex;
             flex-direction: column;
             width: px2rem(250);
-            margin-top: px2rem(20);
+            margin-bottom: px2rem(20);
 
             .detail-input{
                 margin-top: px2rem(5);
@@ -335,7 +340,11 @@ $dropdown-orange-hover: #ffe0b2;
         display: flex;
         justify-content: center;
         align-items: center;
-        @include padding(20, 0);
+        padding: px2rem(15) 0 px2rem(20) 0;
+        position: sticky;
+        bottom: 0;
+        background: white;
+        z-index: 10;
 
         button{
             width: 90%;

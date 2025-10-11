@@ -7,9 +7,7 @@ import Forget from "../Forget/Forget";
 import { Button, Input, Select } from "antd";
 import { UploadOutlined, CameraOutlined } from "@ant-design/icons";
 import NoticeModal from "../../../../components/NoticeModal/NoticeModal";
-
-// 引入 idb
-import { openDB } from "idb";
+import ImageCropper from "../../../../components/ImageCropper/ImageCropper";
 
 interface Profile {
   nickname: string | undefined;
@@ -20,40 +18,6 @@ interface Profile {
   background_url: File | undefined;
   banner_url: File | undefined;
 }
-
-// 创建数据库连接的函数
-const createDBConnection = async () => {
-  return await openDB('userImagesDB', 1, {
-    upgrade(db) {
-      if (!db.objectStoreNames.contains('images')) {
-        db.createObjectStore('images');
-      }
-    },
-  });
-};
-
-const storeImageInDB = async (key: string, file: File) => {
-  try {
-    const db = await createDBConnection();
-    const tx = db.transaction('images', 'readwrite');
-    const store = tx.objectStore('images');
-    await store.put(file, key);
-    await tx.done;
-    db.close(); // 立即关闭连接
-  } catch (error) {
-    console.error('存储图片到 IndexedDB 失败:', error);
-  }
-};
-
-// 从indexedDB中获取缓存的图片，此页面暂不需要
-// const getImageFromDB = async (key: string): Promise<File | undefined> => {
-//   const db = await dbPromise;
-//   const tx = db.transaction('images', 'readonly');
-//   const store = tx.objectStore('images');
-//   const file = await store.get(key);
-//   await tx.done;
-//   return file;
-// };
 
 const Reset = () => {
   const { currentUser, changeProfile, changeImage, isAuthenticated } = useUserStore();
@@ -70,6 +34,12 @@ const Reset = () => {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [backgroundPreview, setBackgroundPreview] = useState<string | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  
+  // 裁剪器状态
+  const [cropperVisible, setCropperVisible] = useState<boolean>(false);
+  const [currentImageFile, setCurrentImageFile] = useState<File | null>(null);
+  const [currentImageType, setCurrentImageType] = useState<'avatar' | 'background_url' | 'banner_url' | null>(null);
+  
   const { type } = useParams();
   const navigate = useNavigate();
 
@@ -86,28 +56,53 @@ const Reset = () => {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'background_url' | 'banner_url') => {
     const file = event.target.files?.[0];
     if (file) {
-      // 更新profile中的文件
-      setProfile((prev) => ({
-        ...prev,
-        [type]: file,
-      }));
-
-      // 创建预览URL
-      const previewUrl = URL.createObjectURL(file);
-      
-      // 根据类型设置对应的预览
-      switch (type) {
-        case 'avatar':
-          setAvatarPreview(previewUrl);
-          break;
-        case 'background_url':
-          setBackgroundPreview(previewUrl);
-          break;
-        case 'banner_url':
-          setBannerPreview(previewUrl);
-          break;
-      }
+      // 打开裁剪器
+      setCurrentImageFile(file);
+      setCurrentImageType(type);
+      setCropperVisible(true);
     }
+  };
+
+  // 裁剪确认回调
+  const handleCropConfirm = (croppedFile: File) => {
+    if (!currentImageType) return;
+
+    // 更新profile中的文件
+    setProfile((prev) => ({
+      ...prev,
+      [currentImageType]: croppedFile,
+    }));
+
+    // 创建预览URL
+    const previewUrl = URL.createObjectURL(croppedFile);
+    
+    // 根据类型设置对应的预览
+    switch (currentImageType) {
+      case 'avatar':
+        if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+        setAvatarPreview(previewUrl);
+        break;
+      case 'background_url':
+        if (backgroundPreview) URL.revokeObjectURL(backgroundPreview);
+        setBackgroundPreview(previewUrl);
+        break;
+      case 'banner_url':
+        if (bannerPreview) URL.revokeObjectURL(bannerPreview);
+        setBannerPreview(previewUrl);
+        break;
+    }
+
+    // 关闭裁剪器
+    setCropperVisible(false);
+    setCurrentImageFile(null);
+    setCurrentImageType(null);
+  };
+
+  // 裁剪取消回调
+  const handleCropCancel = () => {
+    setCropperVisible(false);
+    setCurrentImageFile(null);
+    setCurrentImageType(null);
   };
 
   // 清除图片预览
@@ -155,8 +150,9 @@ const Reset = () => {
   // 处理图片提交
   const handleImageSubmission = async (key: string, file?: File) => {
     if (file) {
-      await storeImageInDB(key, file); // 存储到IndexedDB
-      changeImage(key, file); // 调用修改图片的函数
+      // 直接调用修改图片的函数，不再存储到IndexedDB
+      // 上传成功后，changeImage会清除IndexedDB中的旧缓存
+      await changeImage(key, file);
     }
     navigate("/user/settings");
   };
@@ -325,6 +321,16 @@ const Reset = () => {
               保存头像
             </Button>
           </div>
+          <ImageCropper
+            visible={cropperVisible}
+            imageFile={currentImageFile}
+            aspectRatio={1}
+            circularCrop={true}
+            onConfirm={handleCropConfirm}
+            onCancel={handleCropCancel}
+            targetWidth={400}
+            targetHeight={400}
+          />
         </div>
       );
     case "theme_id":
@@ -402,6 +408,16 @@ const Reset = () => {
               保存发布页背景
             </Button>
           </div>
+          <ImageCropper
+            visible={cropperVisible}
+            imageFile={currentImageFile}
+            aspectRatio={9 / 16}
+            circularCrop={false}
+            onConfirm={handleCropConfirm}
+            onCancel={handleCropCancel}
+            targetWidth={720}
+            targetHeight={1280}
+          />
         </div>
       );
     case "banner":
@@ -449,6 +465,16 @@ const Reset = () => {
               保存资料卡背景
             </Button>
           </div>
+          <ImageCropper
+            visible={cropperVisible}
+            imageFile={currentImageFile}
+            aspectRatio={16 / 9}
+            circularCrop={false}
+            onConfirm={handleCropConfirm}
+            onCancel={handleCropCancel}
+            targetWidth={1280}
+            targetHeight={720}
+          />
         </div>
       );
     case "password":

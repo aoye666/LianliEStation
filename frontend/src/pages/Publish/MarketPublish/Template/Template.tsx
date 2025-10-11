@@ -516,79 +516,78 @@ const Template = () => {
 
   return (
     <div className='template-container'>
-      <div className='navbar'>
-        <Navbar 
-          backActive={true} 
-          backPath={
-            isEdit 
-              ? '/user/history' 
-              : fromAI 
-                ? '/publish/market-publish-ai' 
-                : '/publish/market-publish-choice'
-          } 
-          title='商品发布模板' 
-        />
-      </div>
+      <Navbar 
+        backActive={true} 
+        backPath={
+          isEdit 
+            ? '/user/history' 
+            : fromAI 
+              ? '/publish/market-publish-ai' 
+              : '/publish/market-publish-choice'
+        } 
+        title='商品发布模板' 
+      />
 
       <div className='content'>
-        <div className='title'>
-          <label htmlFor="title-input">标题</label>
-          <div className='title-input'>
-            <div className="input-wrapper">
-              <input 
-                id="title-input"
-                type="text"
-                placeholder='请输入商品标题' 
-                value={title} 
-                onChange={setTitle}
-                maxLength={50}
-                className="native-input"
-              />
+        <div className='form-wrapper'>
+          <div className='title'>
+            <label htmlFor="title-input">标题</label>
+            <div className='title-input'>
+              <div className="input-wrapper">
+                <input 
+                  id="title-input"
+                  type="text"
+                  placeholder='请输入商品标题' 
+                  value={title} 
+                  onChange={setTitle}
+                  maxLength={50}
+                  className="native-input"
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className='sort'>
-          <label htmlFor="sort-input">标签（请选择合适的标签）</label>
-          <div className='sort-input'>
-            <div className="antd-dropdown-container">
-              <Dropdown menu={{ items: postTypeItems }} placement="bottomLeft">
-                <Button className="dropdown-button dropdown-goodstype">{post_type === 'receive' ? '收' : '出'}</Button>
-              </Dropdown>
-              <Dropdown menu={{ items: categoryItems }} placement="bottomLeft">
-                <Button className="dropdown-button dropdown-category">{tag}</Button>
-              </Dropdown>
-              <Dropdown menu={{ items: campusItems }} placement="bottomLeft">
-                <Button className="dropdown-button dropdown-campus">{campus_name}</Button>
-              </Dropdown>
+          <div className='sort'>
+            <label htmlFor="sort-input">标签（请选择合适的标签）</label>
+            <div className='sort-input'>
+              <div className="antd-dropdown-container">
+                <Dropdown menu={{ items: postTypeItems }} placement="bottomLeft">
+                  <Button className="dropdown-button dropdown-goodstype">{post_type === 'receive' ? '收' : '出'}</Button>
+                </Dropdown>
+                <Dropdown menu={{ items: categoryItems }} placement="bottomLeft">
+                  <Button className="dropdown-button dropdown-category">{tag}</Button>
+                </Dropdown>
+                <Dropdown menu={{ items: campusItems }} placement="bottomLeft">
+                  <Button className="dropdown-button dropdown-campus">{campus_name}</Button>
+                </Dropdown>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className='price'>
-          <label htmlFor="price">价格</label>
-          <div className='price-num'>
-            <div className="input-number-wrapper">
-              <input 
-                id="price"
-                type="number"
-                placeholder='商品价格'
-                value={price ?? ''}
-                onChange={(e) => setPrice(e.target.value ? Number(e.target.value) : null)}
-                min={0}
-                max={999999}
-                step={0.01}
-                className="native-input-number"
-              />
-              <div className="input-addon">元</div>
+          <div className='price'>
+            <label htmlFor="price">价格</label>
+            <div className='price-num'>
+              <div className="input-number-wrapper">
+                <input 
+                  id="price"
+                  type="number"
+                  placeholder='商品价格'
+                  value={price ?? ''}
+                  onChange={(e) => setPrice(e.target.value ? Number(e.target.value) : null)}
+                  min={0}
+                  max={999999}
+                  step={0.01}
+                  className="native-input-number"
+                />
+                <div className="input-addon">元</div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className='img-upload'>
-          <div className='img-upload-label'>
-            上传图片（最多3张）
-          </div>
+          <div className='img-upload'>
+            <div className='img-upload-label'>
+              上传图片（最多3张）
+            </div>
           <div className={`template-upload ${previewImages.length >= 3 ? 'upload-max-reached' : ''}`}>
             {/* 统一显示所有图片预览（新上传的和已有的） */}
             {previewImages.map((url, index) => (
@@ -626,24 +625,25 @@ const Template = () => {
               </div>
             )}
           </div>
-        </div>
+          </div>
 
-        <div className='detail'>
-          <label htmlFor="detail-input">
-            商品详情
-          </label>
-          <div className='detail-input'>
-            <div className="textarea-wrapper">
-              <textarea
-                id="detail-input"
-                placeholder="请详细描述商品信息、规格、使用状况等"
-                value={content}
-                onChange={setContent}
-                maxLength={500}
-                rows={4}
-                className="native-textarea"
-                style={{ height: px2rem(130) }}
-              />
+          <div className='detail'>
+            <label htmlFor="detail-input">
+              商品详情
+            </label>
+            <div className='detail-input'>
+              <div className="textarea-wrapper">
+                <textarea
+                  id="detail-input"
+                  placeholder="请详细描述商品信息、规格、使用状况等"
+                  value={content}
+                  onChange={setContent}
+                  maxLength={500}
+                  rows={4}
+                  className="native-textarea"
+                  style={{ height: px2rem(130) }}
+                />
+              </div>
             </div>
           </div>
         </div>
