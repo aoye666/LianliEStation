@@ -9,7 +9,7 @@ import "./MarketPublish.scss";
 import Navbar from "../../../components/Navbar/Navbar";
 import logo from "../../../assets/logo.png";
 import accept from "../../../assets/accept.png";
-import refresh from "../../../assets/refresh.png";
+import refresh from "../../../assets/refresh.svg";
 
 export interface PublishProps {
   title: string;

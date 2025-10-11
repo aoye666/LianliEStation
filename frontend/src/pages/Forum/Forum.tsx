@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import {
-  FloatButton,
   Carousel,
 } from "antd";
 import "./Forum.scss";
@@ -8,14 +7,11 @@ import { useMainStore } from "../../store";
 import { useNavigate } from "react-router-dom";
 import Tabbar from "../../components/Tabbar/Tabbar";
 import Like from '../../assets/like.svg';
-import { PlusOutlined } from "@ant-design/icons";
-import close from "../../assets/close.png";
-import more from "../../assets/more.png";
 import logo from "../../assets/logo.png";
 import search from "../../assets/search-white.svg";
+import add from "../../assets/add-white.svg"
 import ForumBanner from "../../assets/banner2.png";
 import ADInviting from "../../assets/ad3.3-logo.png";
-import { px2rem } from "../../utils/rem";
 
 const Forum = () => {
   const navigate = useNavigate();
@@ -29,6 +25,7 @@ const Forum = () => {
   } = useMainStore();
   const [searchInputs, setSearchInputs] = useState("");
   const [showMore, setShowMore] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,8 +44,16 @@ const Forum = () => {
 
   const handleOnConfirm = async () => {
     clearPosts();
-    setShowMore(false);
+    handleCloseMore();
     await fetchPosts(); // 使用fetchPosts重新获取第一页
+  };
+
+  const handleCloseMore = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setShowMore(false);
+      setIsClosing(false);
+    }, 300); // 与动画时长一致
   };
 
   const handleScroll = () => {
@@ -65,6 +70,9 @@ const Forum = () => {
 
   return (
     <div className="forum-container">
+      {/* 蒙版层 */}
+      {showMore && <div className="overlay" onClick={handleCloseMore}></div>}
+      
       <div className="forum-navbar">
         <div className="logo">
           <img src={logo} alt="logo" />
@@ -107,6 +115,20 @@ const Forum = () => {
                 <div className="detail">
                   <div
                     className={
+                      filters.tag === "生活娱乐" ? "active-button" : "null"
+                    }
+                  >
+                    <button
+                      onClick={async () => {
+                        setFilters({ tag: "生活娱乐" });
+                        handleOnConfirm();
+                      }}
+                    >
+                      生活娱乐
+                    </button>
+                  </div>
+                  <div
+                    className={
                       filters.tag === "新闻通知" ? "active-button" : "null"
                     }
                   >
@@ -116,7 +138,7 @@ const Forum = () => {
                         handleOnConfirm();
                       }}
                     >
-                      通知
+                      新闻通知
                     </button>
                   </div>
                   <div
@@ -132,7 +154,7 @@ const Forum = () => {
                         handleOnConfirm();
                       }}
                     >
-                      吐槽
+                      吐槽倾诉
                     </button>
                   </div>
                   <div
@@ -148,7 +170,7 @@ const Forum = () => {
                         handleOnConfirm();
                       }}
                     >
-                      学习
+                      学习资料
                     </button>
                   </div>
                   <div
@@ -164,7 +186,7 @@ const Forum = () => {
                         handleOnConfirm();
                       }}
                     >
-                      咨询
+                      答疑咨询
                     </button>
                   </div>
                   <div
@@ -180,7 +202,7 @@ const Forum = () => {
                         handleOnConfirm();
                       }}
                     >
-                      交友
+                      交友组队
                     </button>
                   </div>
                   <div
@@ -201,18 +223,21 @@ const Forum = () => {
               </div>
             </div>
             <div className="more">
-              <img
-                src={showMore ? close : more}
-                alt="more"
+              <div 
+                className="hamburger-icon"
                 onClick={() => setShowMore(!showMore)}
-              />
+              >
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* 更多筛选弹窗 */}
         {showMore && (
-          <div className="forum-more">
+          <div className={`forum-more ${isClosing ? 'closing' : ''}`}>
             <div className="location">
               <div className="location-title">
                 <span>校区</span>
@@ -260,13 +285,13 @@ const Forum = () => {
               <div className="sort-list">
                 <div
                   className={
-                    filters.tag === "新闻通知" ? "item-active" : "item"
+                    filters.tag === "生活娱乐" ? "item-active" : "item"
                   }
                   onClick={() => {
-                    setFilters({ tag: "新闻通知" });
+                    setFilters({ tag: "生活娱乐" });
                   }}
                 >
-                  新闻通知
+                  生活娱乐
                 </div>
                 <div
                   className={
@@ -277,16 +302,6 @@ const Forum = () => {
                   }}
                 >
                   吐槽倾诉
-                </div>
-                <div
-                  className={
-                    filters.tag === "学习资料" ? "item-active" : "item"
-                  }
-                  onClick={() => {
-                    setFilters({ tag: "学习资料" });
-                  }}
-                >
-                  学习资料
                 </div>
                 <div
                   className={
@@ -307,6 +322,26 @@ const Forum = () => {
                   }}
                 >
                   交友组队
+                </div>
+                <div
+                  className={
+                    filters.tag === "学习资料" ? "item-active" : "item"
+                  }
+                  onClick={() => {
+                    setFilters({ tag: "学习资料" });
+                  }}
+                >
+                  学习资料
+                </div>
+                <div
+                  className={
+                    filters.tag === "新闻通知" ? "item-active" : "item"
+                  }
+                  onClick={() => {
+                    setFilters({ tag: "新闻通知" });
+                  }}
+                >
+                  新闻通知
                 </div>
                 <div
                   className={
@@ -432,18 +467,8 @@ const Forum = () => {
       </div>
 
       <div className="forum-tabbar">
-        <div className="float-button">
-          <FloatButton
-            style={{
-              marginBottom: px2rem(20),
-              right: px2rem(20),
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-            }}
-            icon={<PlusOutlined />}
-            onClick={() => {
-              navigate(`/publish/forum-publish`);
-            }}
-          />
+        <div className="custom-float-button" onClick={() => navigate(`/publish/forum-publish`)}>
+          <img className="plus-icon" src={add} alt="发布帖子"></img>
         </div>
         <Tabbar initialIndex={1} />
       </div>

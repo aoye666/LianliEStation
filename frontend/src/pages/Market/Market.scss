@@ -1,4 +1,4 @@
-@import '../../styles/mixins.scss';
+@import "../../styles/mixins.scss";
 
 $primary-color: #3498db;
 $hover-color: rgb(0, 86, 179);
@@ -20,19 +20,13 @@ $card-bg: #fff;
   border: none;
   color: #7b7777;
   @include font-size(16);
-  font-weight: 380;
+  font-weight: 500;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s;
   padding-left: px2rem(4);
   padding-right: px2rem(4);
-  background: $button-bg;
-
-  // &:hover {
-  //     background-color: #0056b3; /* 悬停时变为深蓝色 */
-  //     transform: translateY(-2px); /* 悬停时按钮稍微上移 */
-  //     box-shadow: 0 4px 10px rgba(0, 0, 255, 0.2); /* 增加阴影效果 */
-  //    }
+  background: inherit;
 
   &:active {
     //background-color: #003366; /* 按下时的颜色 */
@@ -48,15 +42,26 @@ $card-bg: #fff;
   width: 100vw;
   overflow: hidden; // 保持，防止横向滚动
   box-sizing: border-box;
+  position: relative;
 
-  .active-button {
-    button {
-      @extend.button-basic;
-      //transform: translateY(-3px);
-      //background-color: #4080bf;
-      color: #0674c1;
-      border: 1px solid #0674c1;
-      background: $button-active-bg;
+  // 蒙版层
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: px2rem(60);
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
     }
   }
 
@@ -112,12 +117,13 @@ $card-bg: #fff;
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    background: $list-bg;
 
     // 轮播图容器 - 会被滚动隐藏
     .carousel-wrapper {
       width: 100vw;
       flex-shrink: 0;
-      
+
       .carousel {
         width: 100%;
         background: #fff;
@@ -152,15 +158,19 @@ $card-bg: #fff;
           display: flex;
           justify-content: center;
           align-items: center;
-          
+          flex: 1;
+          overflow: hidden;
+
           .market-type {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: px2rem(10);
+            gap: px2rem(4);
             padding-right: px2rem(10);
             margin-right: px2rem(10);
+            margin-left: px2rem(10);
             border-right: 2px solid #656565;
+            flex-shrink: 0;
 
             .sell {
               button {
@@ -179,30 +189,48 @@ $card-bg: #fff;
                 @extend.button-basic;
               }
             }
+
+            .active-button {
+              button {
+                @extend.button-basic;
+                color: #0674c1;
+                white-space: nowrap;
+                font-weight: 600;
+              }
+            }
           }
 
           .commodity-type {
             display: flex;
-            justify-content: center;
             align-items: center;
             gap: px2rem(10);
+            overflow-x: auto;
+            overflow-y: hidden;
+            flex: 1;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            
+            &::-webkit-scrollbar {
+              display: none;
+            }
 
             .detail {
               display: flex;
               justify-content: center;
               align-items: center;
-              gap: px2rem(10);
+              gap: px2rem(4);
+              flex-shrink: 0;
 
               button {
                 @extend.button-basic;
+                white-space: nowrap;
               }
 
               .active-button {
                 button {
                   @extend.button-basic;
                   color: #0674c1;
-                  border: 1px solid #0674c1;
-                  background: $button-active-bg;
+                  white-space: nowrap;
                 }
               }
             }
@@ -213,9 +241,34 @@ $card-bg: #fff;
           display: flex;
           flex-shrink: 0;
           cursor: pointer;
+          padding: px2rem(5);
+          margin-right: px2rem(10);
           
-          img {
-            @include size(25);
+          .hamburger-icon {
+            width: px2rem(24);
+            height: px2rem(20);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            
+            span {
+              display: block;
+              width: 100%;
+              height: px2rem(3);
+              background-color: #333;
+              border-radius: px2rem(2);
+              transition: all 0.3s ease;
+            }
+            
+            &:hover span {
+              background-color: #0674c1;
+            }
+            
+            &:active {
+              transform: scale(0.9);
+            }
           }
         }
       }
@@ -224,14 +277,20 @@ $card-bg: #fff;
     .market-more {
       display: flex;
       position: fixed;
-      z-index: 10000;
+      z-index: 999;
       left: 0;
-      top: px2rem(60);
+      bottom: px2rem(60);
       width: 100vw;
-      height: calc(100vh - #{px2rem(60)} - #{px2rem(60)});
+      height: calc(100vh - #{px2rem(120)} - #{px2rem(150)});
       flex-direction: column;
       background-color: $panel-bg;
       overflow-y: auto;
+      animation: slideInFromBottom 0.3s ease;
+      transform-origin: bottom;
+      
+      &.closing {
+        animation: slideOutToBottom 0.3s ease;
+      }
 
       input {
         outline: none;
@@ -254,7 +313,7 @@ $card-bg: #fff;
           @include font-size(18);
           font-weight: bold;
           margin-bottom: px2rem(10);
-          margin-left: px2rem(10);
+          margin-left: px2rem(20);
         }
 
         .price-unit {
@@ -262,7 +321,7 @@ $card-bg: #fff;
           gap: px2rem(10);
           justify-content: center;
           input {
-            width: px2rem(80);
+            width: px2rem(90);
             height: px2rem(25);
             border: 1px solid #c4c2c2;
             @include border-radius(10);
@@ -282,12 +341,14 @@ $card-bg: #fff;
           @include font-size(18);
           font-weight: bold;
           margin-bottom: px2rem(10);
-          margin-left: px2rem(10);
+          margin-left: px2rem(20);
         }
 
         .location-list {
+          width: 80vw;
           display: flex;
           justify-content: center;
+          align-self: center;
           flex-wrap: wrap;
           gap: px2rem(15);
           .item {
@@ -329,23 +390,29 @@ $card-bg: #fff;
         height: 27%;
 
         button {
-          color: white;
-          margin-top: px2rem(20);
-          margin-bottom: px2rem(20);
-          width: px2rem(130);
-          height: px2rem(30);
+          width: 60vw;
+          height: px2rem(44);
+          @include margin(8, 0, 0, 0);
+          @include border-radius(26);
           @include font-size(16);
-          cursor: pointer;
-          background-color: $primary-color;
+          font-weight: 600;
+          background: linear-gradient(135deg, #3498db, #2980b9);
+          color: white;
           border: none;
-          @include border-radius(15);
-          //box-shadow: $primary-color 0px 2px 5px;
-          //transition: all 0.2s ease;
+          box-shadow: 0 #{px2rem(4)} #{px2rem(16)} rgba(52, 152, 219, 0.3);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          cursor: pointer;
 
-          //   &:active {
-          //     transform: translateY(2px);
-          //     background-color: $hover-color;
-          //   }
+          &:hover {
+            transform: translateY(#{px2rem(-2)});
+            box-shadow: 0 #{px2rem(8)} #{px2rem(24)} rgba(52, 152, 219, 0.4);
+            background: linear-gradient(135deg, #2980b9, #3498db);
+          }
+
+          &:active {
+            transform: translateY(0);
+            box-shadow: 0 #{px2rem(2)} #{px2rem(8)} rgba(52, 152, 219, 0.3);
+          }
         }
       }
 
@@ -359,15 +426,17 @@ $card-bg: #fff;
           @include font-size(18);
           font-weight: bold;
           margin-bottom: px2rem(10);
-          margin-left: px2rem(10);
+          margin-left: px2rem(20);
         }
 
         .sort-list {
+          width: 80vw;
           display: flex;
           justify-content: center;
-          width: 100%;
+          align-self: center;
           flex-wrap: wrap;
           gap: px2rem(15);
+
           .item {
             display: flex;
             align-items: center;
@@ -496,7 +565,7 @@ $card-bg: #fff;
             color: $hover-color;
             white-space: nowrap;
             flex-shrink: 0;
-            
+
             &::before {
               content: "¥";
             }
@@ -517,6 +586,64 @@ $card-bg: #fff;
             text-align: center;
           }
         }
+      }
+    }
+  }
+
+  @keyframes slideInFromBottom {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideOutToBottom {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(100%);
+    }
+  }
+
+  .market-tabbar {
+    display: flex;
+    width: 100%;
+    position: relative;
+    
+    .custom-float-button {
+      position: absolute;
+      bottom: px2rem(25);
+      right: px2rem(25);
+      width: px2rem(45);
+      height: px2rem(45);
+      border-radius: 50%;
+      background-color: #0674c1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+      z-index: 100;
+      
+      &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+      }
+      
+      &:active {
+        transform: scale(0.95);
+      }
+      
+      .plus-icon {
+        height: px2rem(24);
+        width: px2rem(24);
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     }
   }

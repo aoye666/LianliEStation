@@ -1,22 +1,20 @@
 import { useRef, useEffect, useState, useMemo } from "react";
-import { FloatButton, Carousel, Image, Skeleton } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { Carousel, Image, Skeleton } from "antd";
 import "./Market.scss";
 import Tabbar from "../../components/Tabbar/Tabbar";
-import more from "../../assets/more.png";
-import close from "../../assets/close.png";
 import MarketBanner from "../../assets/banner2.png";
 import ADInviting from "../../assets/ad3.3-logo.png";
 import logo from "../../assets/logo.png";
 import search from "../../assets/search-white.svg";
 import takePlace from "../../assets/takePlace.png";
+import add from "../../assets/add-white.svg"
 import { useMainStore } from "../../store";
 import { useNavigate } from "react-router-dom";
-import { px2rem } from "../../utils/rem";
 
 const Market = () => {
   const [searchInputs, setSearchInputs] = useState("");
   const [showMore, setShowMore] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const {
     goods,
     goodsFilters: filters,
@@ -152,12 +150,23 @@ const Market = () => {
 
   const handleOnConfirm = async () => {
     clearGoods();
-    setShowMore(false);
+    handleCloseMore();
     fetchGoods(); // 使用fetchGoods重新获取第一页
+  };
+
+  const handleCloseMore = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setShowMore(false);
+      setIsClosing(false);
+    }, 300); // 与动画时长一致
   };
 
   return (
     <div className="market-container">
+      {/* 蒙版层 */}
+      {showMore && <div className="overlay" onClick={handleCloseMore}></div>}
+      
       <div className="market-navbar">
         <div className="logo">
           <img src={logo} alt="logo" />
@@ -253,12 +262,92 @@ const Market = () => {
                         handleOnConfirm();
                       }}
                     >
-                      学习
+                      学习资料
                     </button>
                   </div>
                   <div
                     className={
-                      filters.tag === "数码电子"
+                      filters.tag === "生活用品"
+                        ? "active-button"
+                        : "null"
+                    }
+                  >
+                    <button
+                      onClick={async () => {
+                        setFilters({ tag: "生活用品" });
+                        handleOnConfirm();
+                      }}
+                    >
+                      生活用品
+                    </button>
+                  </div>
+                  <div
+                    className={
+                      filters.tag === "代办跑腿"
+                        ? "active-button"
+                        : "null"
+                    }
+                  >
+                    <button
+                      onClick={async () => {
+                        setFilters({ tag: "代办跑腿" });
+                        handleOnConfirm();
+                      }}
+                    >
+                      代办跑腿
+                    </button>
+                  </div>
+                  <div
+                    className={
+                      filters.tag === "零食"
+                        ? "active-button"
+                        : "null"
+                    }
+                  >
+                    <button
+                      onClick={async () => {
+                        setFilters({ tag: "零食" });
+                        handleOnConfirm();
+                      }}
+                    >
+                      零食
+                    </button>
+                  </div>
+                  <div
+                    className={
+                      filters.tag === "咨询答疑"
+                        ? "active-button"
+                        : "null"
+                    }
+                  >
+                    <button
+                      onClick={async () => {
+                        setFilters({ tag: "咨询答疑" });
+                        handleOnConfirm();
+                      }}
+                    >
+                      咨询答疑
+                    </button>
+                  </div>
+                  <div
+                    className={
+                      filters.tag === "账号会员"
+                        ? "active-button"
+                        : "null"
+                    }
+                  >
+                    <button
+                      onClick={async () => {
+                        setFilters({ tag: "账号会员" });
+                        handleOnConfirm();
+                      }}
+                    >
+                      账号会员
+                    </button>
+                  </div>
+                  <div
+                    className={
+                      filters.tag === "账号会员"
                         ? "active-button"
                         : "null"
                     }
@@ -269,7 +358,7 @@ const Market = () => {
                         handleOnConfirm();
                       }}
                     >
-                      数码
+                      数码电子
                     </button>
                   </div>
                   <div
@@ -290,17 +379,20 @@ const Market = () => {
               </div>
             </div>
             <div className="more">
-              <img
-                src={showMore ? close : more}
-                alt="more"
+              <div 
+                className="hamburger-icon"
                 onClick={() => setShowMore(!showMore)}
-              />
+              >
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
             </div>
           </div>
         </div>
 
         {showMore && (
-          <div className="market-more">
+          <div className={`market-more ${isClosing ? 'closing' : ''}`}>
             <div className="price">
               <div className="price-title">
                 <span>价格区间</span>
@@ -415,13 +507,23 @@ const Market = () => {
                 </div>
                 <div
                   className={
-                    filters.tag === "数码电子" ? "item-active" : "item"
+                    filters.tag === "零食" ? "item-active" : "item"
                   }
                   onClick={() => {
-                    setFilters({ tag: "数码电子" });
+                    setFilters({ tag: "零食" });
                   }}
                 >
-                  数码电子
+                  零食
+                </div>
+                <div
+                  className={
+                    filters.tag === "咨询答疑" ? "item-active" : "item"
+                  }
+                  onClick={() => {
+                    setFilters({ tag: "咨询答疑" });
+                  }}
+                >
+                  咨询答疑
                 </div>
                 <div
                   className={
@@ -435,13 +537,13 @@ const Market = () => {
                 </div>
                 <div
                   className={
-                    filters.tag === "咨询答疑" ? "item-active" : "item"
+                    filters.tag === "数码电子" ? "item-active" : "item"
                   }
                   onClick={() => {
-                    setFilters({ tag: "咨询答疑" });
+                    setFilters({ tag: "数码电子" });
                   }}
                 >
-                  咨询答疑
+                  数码电子
                 </div>
                 <div
                   className={
@@ -524,18 +626,8 @@ const Market = () => {
       </div>
 
       <div className="market-tabbar">
-        <div className="float-button">
-          <FloatButton
-            style={{
-              marginBottom: px2rem(20),
-              right: px2rem(20),
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-            }}
-            icon={<PlusOutlined />}
-            onClick={() => {
-              navigate("/publish/market-publish-choice");
-            }}
-          />
+        <div className="custom-float-button" onClick={() => navigate("/publish/market-publish-choice")}>
+          <img className="plus-icon" src={add} alt="发布商品"></img>
         </div>
         <Tabbar initialIndex={0} />
       </div>

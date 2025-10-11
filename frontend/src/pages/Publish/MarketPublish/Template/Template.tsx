@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from '../../../../components/Navbar/Navbar'
 import { Dropdown, Button, message, Modal } from 'antd'
 import type { MenuProps } from 'antd'
-import { aiAPI } from '../../../../api'
+// import { aiAPI } from '../../../../api'
 import { px2rem } from '../../../../utils/rem'
 
 const initialState = {
@@ -289,6 +289,11 @@ const Template = () => {
       onClick: () => dispatch({ type: 'SET_TAG', payload: '咨询答疑' })
     },
     {
+      key: '零食',
+      label: '零食',
+      onClick: () => dispatch({ type: 'SET_TAG', payload: '零食' })
+    },
+    {
       key: '账号会员',
       label: '账号会员',
       onClick: () => dispatch({ type: 'SET_TAG', payload: '账号会员' })
@@ -422,53 +427,53 @@ const Template = () => {
       return;
     }
 
-    // 敏感词检测
-    try {
-      const textToCheck = `${title} ${content}`.trim();
+    // // 敏感词检测
+    // try {
+    //   const textToCheck = `${title} ${content}`.trim();
       
-      if (textToCheck) {
-        message.loading({ content: '正在检测内容安全性...', key: 'sensitiveCheck' });
+    //   if (textToCheck) {
+    //     message.loading({ content: '正在检测内容安全性...', key: 'sensitiveCheck' });
         
-        const checkResult = await aiAPI.checkSensitive(textToCheck);
+    //     const checkResult = await aiAPI.checkSensitive(textToCheck);
         
-        message.destroy('sensitiveCheck');
+    //     message.destroy('sensitiveCheck');
         
-        if (!checkResult.isSafe) {
-          // 检测到敏感内容
-          const warningMessage = checkResult.words && checkResult.words.length > 0
-            ? `内容包含敏感词：${checkResult.words.join('、')}，请修改后再发布`
-            : `${checkResult.reason}，请修改后再发布`;
+    //     if (!checkResult.isSafe) {
+    //       // 检测到敏感内容
+    //       const warningMessage = checkResult.words && checkResult.words.length > 0
+    //         ? `内容包含敏感词：${checkResult.words.join('、')}，请修改后再发布`
+    //         : `${checkResult.reason}，请修改后再发布`;
           
-          Modal.warning({
-            title: '内容审核未通过',
-            content: warningMessage,
-            okText: '知道了',
-          });
-          return;
-        }
+    //       Modal.warning({
+    //         title: '内容审核未通过',
+    //         content: warningMessage,
+    //         okText: '知道了',
+    //       });
+    //       return;
+    //     }
         
-        message.success({ content: '内容安全检测通过', duration: 1 });
-      }
-    } catch (error: any) {
-      message.destroy('sensitiveCheck');
-      console.error('敏感词检测失败:', error);
+    //     message.success({ content: '内容安全检测通过', duration: 1 });
+    //   }
+    // } catch (error: any) {
+    //   message.destroy('sensitiveCheck');
+    //   console.error('敏感词检测失败:', error);
       
-      // 检测失败时询问用户是否继续
-      const confirmed = await new Promise<boolean>((resolve) => {
-        Modal.confirm({
-          title: '敏感词检测失败',
-          content: '无法完成内容安全检测，是否仍要继续发布？',
-          okText: '继续发布',
-          cancelText: '取消',
-          onOk: () => resolve(true),
-          onCancel: () => resolve(false),
-        });
-      });
+    //   // 检测失败时询问用户是否继续
+    //   const confirmed = await new Promise<boolean>((resolve) => {
+    //     Modal.confirm({
+    //       title: '敏感词检测失败',
+    //       content: '无法完成内容安全检测，是否仍要继续发布？',
+    //       okText: '继续发布',
+    //       cancelText: '取消',
+    //       onOk: () => resolve(true),
+    //       onCancel: () => resolve(false),
+    //     });
+    //   });
       
-      if (!confirmed) {
-        return;
-      }
-    }
+    //   if (!confirmed) {
+    //     return;
+    //   }
+    // }
 
     // 发布或更新商品
     try {
