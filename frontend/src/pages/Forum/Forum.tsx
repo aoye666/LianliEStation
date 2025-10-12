@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import {
   Carousel,
+  Empty,
 } from "antd";
 import "./Forum.scss";
 import { useMainStore } from "../../store";
@@ -22,14 +23,24 @@ const Forum = () => {
     postFilters: filters,
     setPostFilters: setFilters,
     clearPosts,
+    isForumLoadingMore,
+    hasMorePosts,
   } = useMainStore();
   const [searchInputs, setSearchInputs] = useState("");
   const [showMore, setShowMore] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetchPosts();
+    
+    // 清理函数：组件卸载时清除定时器
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
   }, [fetchPosts]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,22 +68,32 @@ const Forum = () => {
   };
 
   const handleScroll = () => {
-    // forum-body滚动到底部时加载更多
-    if (bodyRef.current) {
-      const { scrollHeight, scrollTop, clientHeight } = bodyRef.current;
-
-      // 判断是否滚动到底部（提前100px触发，确保更早加载）
-      if (scrollTop + clientHeight >= scrollHeight - 100) {
-        updatePosts();
-      }
+    // 如果正在加载或没有更多内容，直接返回
+    if (isForumLoadingMore || !hasMorePosts) {
+      return;
     }
+    
+    // 清除之前的定时器
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    
+    // 使用防抖，避免频繁触发
+    scrollTimeoutRef.current = setTimeout(() => {
+      // forum-body滚动到底部时加载更多
+      if (bodyRef.current) {
+        const { scrollHeight, scrollTop, clientHeight } = bodyRef.current;
+
+        // 判断是否滚动到底部（提前100px触发，确保更早加载）
+        if (scrollTop + clientHeight >= scrollHeight - 100) {
+          updatePosts();
+        }
+      }
+    }, 150); // 150ms 防抖延迟
   };
 
   return (
     <div className="forum-container">
-      {/* 蒙版层 */}
-      {showMore && <div className="overlay" onClick={handleCloseMore}></div>}
-      
       <div className="forum-navbar">
         <div className="logo">
           <img src={logo} alt="logo" />
@@ -89,6 +110,9 @@ const Forum = () => {
       </div>
 
       <div className="forum-body" ref={bodyRef} onScroll={handleScroll}>
+        {/* 蒙版层 - 移到 body 内部 */}
+        {showMore && <div className="overlay" onClick={handleCloseMore}></div>}
+        
         {/* 轮播图 - 会被滚动隐藏 */}
         <div className="carousel-wrapper">
           <Carousel autoplay className="carousel">
@@ -113,6 +137,20 @@ const Forum = () => {
             <div className="tag-item">
               <div className="post-type">
                 <div className="detail">
+                  <div
+                    className={
+                      filters.tag === null ? "active-button" : "null"
+                    }
+                  >
+                    <button
+                      onClick={async () => {
+                        setFilters({ tag: null });
+                        handleOnConfirm();
+                      }}
+                    >
+                      全部
+                    </button>
+                  </div>
                   <div
                     className={
                       filters.tag === "生活娱乐" ? "active-button" : "null"
@@ -203,20 +241,6 @@ const Forum = () => {
                       }}
                     >
                       交友组队
-                    </button>
-                  </div>
-                  <div
-                    className={
-                      filters.tag === null ? "active-button" : "null"
-                    }
-                  >
-                    <button
-                      onClick={async () => {
-                        setFilters({ tag: null });
-                        handleOnConfirm();
-                      }}
-                    >
-                      全部
                     </button>
                   </div>
                 </div>
@@ -374,37 +398,46 @@ const Forum = () => {
 
         {/* 帖子列表 */}
         <div className="content">
-          {posts.map((post, index) => {
-            // 格式化时间
-            const formatTime = (dateString: string) => {
-              const postDate = new Date(dateString);
-              const now = new Date();
-              const isToday = postDate.toDateString() === now.toDateString();
-              const isSameYear = postDate.getFullYear() === now.getFullYear();
+          {posts.length === 0 ? (
+            <div className="empty-container">
+              <Empty 
+                description="没有这一种类的帖子"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            </div>
+          ) : (
+            <>
+              {posts.map((post, index) => {
+                // 格式化时间
+                const formatTime = (dateString: string) => {
+                  const postDate = new Date(dateString);
+                  const now = new Date();
+                  const isToday = postDate.toDateString() === now.toDateString();
+                  const isSameYear = postDate.getFullYear() === now.getFullYear();
 
-              if (isToday) {
-                // 今天：显示"今天 HH:mm"
-                const hours = postDate.getHours().toString().padStart(2, '0');
-                const minutes = postDate.getMinutes().toString().padStart(2, '0');
-                return `今天 ${hours}:${minutes}`;
-              } else if (isSameYear) {
-                // 当年：显示"MM-DD"
-                const month = (postDate.getMonth() + 1).toString().padStart(2, '0');
-                const day = postDate.getDate().toString().padStart(2, '0');
-                return `${month}-${day}`;
-              } else {
-                // 非当年：显示"YYYY-MM-DD"
-                const year = postDate.getFullYear();
-                const month = (postDate.getMonth() + 1).toString().padStart(2, '0');
-                const day = postDate.getDate().toString().padStart(2, '0');
-                return `${year}-${month}-${day}`;
-              }
-            };
+                  if (isToday) {
+                    // 今天：显示"今天 HH:mm"
+                    const hours = postDate.getHours().toString().padStart(2, '0');
+                    const minutes = postDate.getMinutes().toString().padStart(2, '0');
+                    return `今天 ${hours}:${minutes}`;
+                  } else if (isSameYear) {
+                    // 当年：显示"MM-DD"
+                    const month = (postDate.getMonth() + 1).toString().padStart(2, '0');
+                    const day = postDate.getDate().toString().padStart(2, '0');
+                    return `${month}-${day}`;
+                  } else {
+                    // 非当年：显示"YYYY-MM-DD"
+                    const year = postDate.getFullYear();
+                    const month = (postDate.getMonth() + 1).toString().padStart(2, '0');
+                    const day = postDate.getDate().toString().padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                  }
+                };
 
-            return (
-              <div 
-                className={`post-card ${post.images.length > 0 ? 'has-images' : 'no-images'}`}
-                key={post.id} 
+                return (
+                  <div 
+                    className={`post-card ${post.images.length > 0 ? 'has-images' : 'no-images'}`}
+                    key={post.id} 
                 onClick={() => navigate(`/forum-detail?id=${post.id}`)}
               >
                 <div className="post-header">
@@ -463,6 +496,22 @@ const Forum = () => {
               </div>
             );
           })}
+          
+          {/* 加载状态提示 */}
+          {isForumLoadingMore && (
+            <div className="loading-more">
+              <span>加载中...</span>
+            </div>
+          )}
+          
+          {/* 没有更多内容提示 */}
+          {!hasMorePosts && posts.length > 0 && (
+            <div className="no-more">
+              <span>没有更多帖子了</span>
+            </div>
+          )}
+            </>
+          )}
         </div>
       </div>
 

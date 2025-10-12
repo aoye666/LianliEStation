@@ -96,6 +96,8 @@ interface MainState {
   isMarketLoadingMore: boolean; // 添加加载更多的标志
   isForumLoading: boolean;
   isForumLoadingMore: boolean; // 添加帖子加载更多的标志
+  hasMoreGoods: boolean; // 是否还有更多商品
+  hasMorePosts: boolean; // 是否还有更多帖子
   setMarketLoading: (loading: boolean) => void;
   setForumLoading: (loading: boolean) => void;
   
@@ -205,6 +207,8 @@ const useMainStore = create<MainState>()(
       isMarketLoadingMore: false, // 初始化加载更多状态
       isForumLoading: false,
       isForumLoadingMore: false, // 初始化帖子加载更多状态
+      hasMoreGoods: true, // 初始假设有更多商品
+      hasMorePosts: true, // 初始假设有更多帖子
       
       // 设置加载状态
       setMarketLoading: (loading) => set({ isMarketLoading: loading }),
@@ -217,6 +221,8 @@ const useMainStore = create<MainState>()(
           forumPage: 1,
           goods: [],
           posts: [],
+          hasMoreGoods: true,
+          hasMorePosts: true,
           goodsFilters: {
             searchTerm: null,
             goods_type: null,
@@ -239,6 +245,8 @@ const useMainStore = create<MainState>()(
           posts: [],
           marketPage: 1,
           forumPage: 1,
+          hasMoreGoods: true,
+          hasMorePosts: true,
           goodsFilters: {
             searchTerm: null,
             goods_type: null,
@@ -257,7 +265,7 @@ const useMainStore = create<MainState>()(
 
       // 获取帖子列表（首次加载）
       fetchPosts: async () => {
-        set({ isForumLoading: true, forumPage: 1 }); // 重置页码并开始加载
+        set({ isForumLoading: true, forumPage: 1, hasMorePosts: true }); // 重置页码和hasMore状态并开始加载
         
         try {
           const response = await api.get("/api/forum/posts", {
@@ -275,9 +283,11 @@ const useMainStore = create<MainState>()(
             set(() => ({
               posts: [...data], // 替换为新数据
               forumPage: 2, // 下次加载第2页
+              hasMorePosts: data.length >= 16, // 如果返回的数据少于limit，说明没有更多了
             }));
           } else {
             console.log("No posts available or unexpected response status");
+            set({ hasMorePosts: false });
           }
         } catch (error) {
           if (error instanceof Error) {
@@ -285,6 +295,7 @@ const useMainStore = create<MainState>()(
           } else {
             console.error("Error fetching posts:", error);
           }
+          set({ hasMorePosts: false });
         } finally {
           set({ isForumLoading: false }); // 加载完成
         }
@@ -292,9 +303,13 @@ const useMainStore = create<MainState>()(
 
       // 更新帖子列表（滚动加载更多）
       updatePosts: async () => {
-        // 如果正在加载更多，直接返回
-        if (get().isForumLoadingMore) {
-          console.log('正在加载帖子中，跳过重复请求');
+        // 如果正在加载更多或没有更多内容，直接返回
+        if (get().isForumLoadingMore || !get().hasMorePosts) {
+          if (!get().hasMorePosts) {
+            console.log('没有更多帖子了');
+          } else {
+            console.log('正在加载帖子中，跳过重复请求');
+          }
           return;
         }
         
@@ -319,9 +334,11 @@ const useMainStore = create<MainState>()(
             set((state) => ({
               posts: [...state.posts, ...data], // 追加新数据
               forumPage: state.forumPage + 1, // 页码+1
+              hasMorePosts: data.length >= 16, // 如果返回的数据少于limit，说明没有更多了
             }));
           } else {
             console.log("No more posts available");
+            set({ hasMorePosts: false });
           }
         } catch (error) {
           if (error instanceof Error) {
@@ -339,6 +356,7 @@ const useMainStore = create<MainState>()(
         set(() => ({
           posts: [],
           forumPage: 1,
+          hasMorePosts: true, // 重置hasMore状态
         })),
 
       // 设置帖子筛选器
@@ -590,7 +608,7 @@ const useMainStore = create<MainState>()(
 
       // 获取商品列表（首次加载）
       fetchGoods: async () => {
-        set({ isMarketLoading: true, marketPage: 1 }); // 重置页码并开始加载
+        set({ isMarketLoading: true, marketPage: 1, hasMoreGoods: true }); // 重置页码和hasMore状态并开始加载
         
         try {
           const response = await api.get("/api/goods", {
@@ -613,10 +631,12 @@ const useMainStore = create<MainState>()(
             set((state) => ({
               goods: [...data], // 替换为新数据
               marketPage: 2, // 下次加载第2页
+              hasMoreGoods: data.length >= 12, // 如果返回的数据少于limit，说明没有更多了
             }));
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
             console.log("No goods available or unexpected response status");
+            set({ hasMoreGoods: false });
           }
         } catch (error) {
           // 捕获请求失败的错误（如 404 或网络问题）
@@ -625,6 +645,7 @@ const useMainStore = create<MainState>()(
           } else {
             console.error("Error fetching posts:", error);
           }
+          set({ hasMoreGoods: false });
         } finally {
           set({ isMarketLoading: false }); // 加载完成
         }
@@ -635,6 +656,7 @@ const useMainStore = create<MainState>()(
         set(() => ({
           goods: [],
           marketPage: 1,
+          hasMoreGoods: true, // 重置hasMore状态
         })),
 
       // 设置商品筛选器
@@ -658,9 +680,13 @@ const useMainStore = create<MainState>()(
 
       // 更新商品列表（滚动加载更多）
       updateGoods: async () => {
-        // 如果正在加载更多，直接返回
-        if (get().isMarketLoadingMore) {
-          console.log('正在加载中，跳过重复请求');
+        // 如果正在加载更多或没有更多内容，直接返回
+        if (get().isMarketLoadingMore || !get().hasMoreGoods) {
+          if (!get().hasMoreGoods) {
+            console.log('没有更多商品了');
+          } else {
+            console.log('正在加载中，跳过重复请求');
+          }
           return;
         }
         
@@ -689,10 +715,12 @@ const useMainStore = create<MainState>()(
             set((state) => ({
               goods: [...state.goods, ...data], // 追加新数据
               marketPage: state.marketPage + 1, // 页码+1
+              hasMoreGoods: data.length >= 12, // 如果返回的数据少于limit，说明没有更多了
             }));
           } else {
             // 如果没有数据或者返回了非 200 状态码，可以添加逻辑处理
             console.log("No more goods available or unexpected response status");
+            set({ hasMoreGoods: false });
           }
         } catch (error) {
           // 捕获请求失败的错误（如 404 或网络问题）

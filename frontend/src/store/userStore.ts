@@ -139,7 +139,7 @@ const useUserStore = create<UserState>()(
         username: string;
       }) => {
         try {
-          const res = await api.post("/api/auth/register",  userData );
+          const res = await api.post("/api/auth/register", userData );
           console.log(res?.data.message); // 注册成功
         } catch (error: any) {
           throw error;

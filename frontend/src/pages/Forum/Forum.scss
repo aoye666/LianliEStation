@@ -33,25 +33,12 @@ $card-bg: #fff;
 
 .forum-container{
     display: flex;
-    position: relative;
     flex-direction: column;
     background-color: var(--bg-color);
     height: calc(100vh - #{px2rem(60)});
     width: 100vw;
     overflow: hidden;
     box-sizing: border-box;
-
-    // 蒙版层
-    .overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: px2rem(60);
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 998;
-        animation: fadeIn 0.3s ease;
-    }
 
     @keyframes fadeIn {
         from {
@@ -125,6 +112,18 @@ $card-bg: #fff;
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
         background: $list-bg;
+
+        // 蒙版层 - 覆盖整个 body
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 998;
+            animation: fadeIn 0.3s ease;
+        }
 
         // 轮播图容器 - 会被滚动隐藏
         .carousel-wrapper {
@@ -447,6 +446,16 @@ $card-bg: #fff;
             width: 100vw;
             box-sizing: border-box;
             flex-shrink: 0; // 不压缩，让forum-body滚动
+            
+            // 空状态容器
+            .empty-container {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: px2rem(60) 0;
+                min-height: px2rem(300);
+            }
 
             .post-card {
                 background: $card-bg;
@@ -612,6 +621,41 @@ $card-bg: #fff;
                 align-items: center;
                 justify-content: center;
             }
+        }
+    }
+    
+    // 加载状态和无更多内容提示
+    .loading-more,
+    .no-more {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: px2rem(20) 0;
+        color: #999;
+        font-size: px2rem(14);
+        
+        span {
+            position: relative;
+        }
+    }
+    
+    .loading-more {
+        span::after {
+            content: '';
+            display: inline-block;
+            width: px2rem(14);
+            height: px2rem(14);
+            margin-left: px2rem(8);
+            border: 2px solid #999;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+    }
+    
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
         }
     }
 }

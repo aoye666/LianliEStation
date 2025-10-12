@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useMemo } from "react";
-import { Carousel, Image, Skeleton } from "antd";
+import { Carousel, Image, Skeleton, Empty } from "antd";
 import "./Market.scss";
 import Tabbar from "../../components/Tabbar/Tabbar";
 import MarketBanner from "../../assets/banner2.png";
@@ -22,10 +22,13 @@ const Market = () => {
     updateGoods,
     clearGoods,
     fetchGoods,
+    isMarketLoadingMore,
+    hasMoreGoods,
   } = useMainStore();
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const bodyRef = useRef<HTMLDivElement | null>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
 
   // 获取当前的根字体大小（rem 基准值）
@@ -102,7 +105,13 @@ const Market = () => {
 
     window.addEventListener("resize", handleResize);
 
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      // 清理滚动定时器
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
   }, [fetchGoods]);
 
   // useEffect(() => {
@@ -122,15 +131,28 @@ const Market = () => {
   // }, []);
 
   const handleScroll = () => {
-    // market-body滚动到底部时加载更多
-    if (bodyRef.current) {
-      const { scrollHeight, scrollTop, clientHeight } = bodyRef.current;
-
-      // 判断是否滚动到底部（提前100px触发，确保更早加载）
-      if (scrollTop + clientHeight >= scrollHeight - 100) {
-        updateGoods();
-      }
+    // 如果正在加载或没有更多内容，直接返回
+    if (isMarketLoadingMore || !hasMoreGoods) {
+      return;
     }
+    
+    // 清除之前的定时器
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    
+    // 使用防抖，避免频繁触发
+    scrollTimeoutRef.current = setTimeout(() => {
+      // market-body滚动到底部时加载更多
+      if (bodyRef.current) {
+        const { scrollHeight, scrollTop, clientHeight } = bodyRef.current;
+
+        // 判断是否滚动到底部（提前100px触发，确保更早加载）
+        if (scrollTop + clientHeight >= scrollHeight - 100) {
+          updateGoods();
+        }
+      }
+    }, 150); // 150ms 防抖延迟
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -164,9 +186,6 @@ const Market = () => {
 
   return (
     <div className="market-container">
-      {/* 蒙版层 */}
-      {showMore && <div className="overlay" onClick={handleCloseMore}></div>}
-      
       <div className="market-navbar">
         <div className="logo">
           <img src={logo} alt="logo" />
@@ -183,6 +202,9 @@ const Market = () => {
       </div>
 
       <div className="market-body" ref={bodyRef} onScroll={handleScroll}>
+        {/* 蒙版层 - 移到 body 内部 */}
+        {showMore && <div className="overlay" onClick={handleCloseMore}></div>}
+        
         {/* 轮播图 - 会被滚动隐藏 */}
         <div className="carousel-wrapper">
           <Carousel autoplay className="carousel">
@@ -206,6 +228,20 @@ const Market = () => {
           <div className="tag">
             <div className="tag-item">
               <div className="market-type">
+                <div
+                  className={
+                    filters.goods_type === null ? "active-button" : "null"
+                  }
+                >
+                  <button
+                    onClick={async () => {
+                      setFilters({ goods_type: null });
+                      handleOnConfirm();
+                    }}
+                  >
+                    全部
+                  </button>
+                </div>
                 <div
                   className={
                     filters.goods_type === "sell" ? "active-button" : "sell"
@@ -234,23 +270,23 @@ const Market = () => {
                     收
                   </button>
                 </div>
-                <div
-                  className={
-                    filters.goods_type === null ? "active-button" : "null"
-                  }
-                >
-                  <button
-                    onClick={async () => {
-                      setFilters({ goods_type: null });
-                      handleOnConfirm();
-                    }}
-                  >
-                    全部
-                  </button>
-                </div>
               </div>
               <div className="commodity-type">
                 <div className="detail">
+                  <div
+                    className={
+                      filters.tag === null ? "active-button" : "null"
+                    }
+                  >
+                    <button
+                      onClick={async () => {
+                        setFilters({ tag: null });
+                        handleOnConfirm();
+                      }}
+                    >
+                      全部
+                    </button>
+                  </div>
                   <div
                     className={
                       filters.tag === "学习资料" ? "active-button" : "null"
@@ -359,20 +395,6 @@ const Market = () => {
                       }}
                     >
                       数码电子
-                    </button>
-                  </div>
-                  <div
-                    className={
-                      filters.tag === null ? "active-button" : "null"
-                    }
-                  >
-                    <button
-                      onClick={async () => {
-                        setFilters({ tag: null });
-                        handleOnConfirm();
-                      }}
-                    >
-                      全部
                     </button>
                   </div>
                 </div>
@@ -583,45 +605,70 @@ const Market = () => {
             { "--elements-per-row": elementsPerRow } as React.CSSProperties
           }
         >
-          {goods.map((item) => (
-            <div
-              className="commodity-item"
-              key={item.id}
-              onClick={() => {
-                navigate(`/market/${item.id}`);
-              }}
-              style={{
-                width: getItemWidth(elementsPerRow),
-                minHeight: 'fit-content',
-              }}
-            >
-              <div className="commodity-img">
-                <Image
-                  src={
-                    item.images[0]
-                      ? `${process.env.REACT_APP_API_URL ||
-                      "http://localhost:5000"
-                      }${item.images[0]}`
-                      : takePlace
-                  }
-                  alt="商品图片"
-                  preview={false}
-                  placeholder={
-                    <div style={{ width: '100%', aspectRatio: '1.3' }}>
-                      <Skeleton.Input active style={{ width: '100%', height: '100%' }} />
-                    </div>
-                  }
-                />
-              </div>
-              <div className="commodity-title">{item.title}</div>
-              <div className="commodity-bottom">
-                <div className="commodity-price">{item.price}</div>
-                {item.tag && item.tag !== "商品标签" && (
-                  <div className="commodity-tag">{item.tag}</div>
-                )}
-              </div>
+          {goods.length === 0 ? (
+            <div className="empty-container">
+              <Empty 
+                description="没有这一种类的商品"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
             </div>
-          ))}
+          ) : (
+            <>
+              {goods.map((item) => (
+                <div
+                  className="commodity-item"
+                  key={item.id}
+                  onClick={() => {
+                    navigate(`/market/${item.id}`);
+                  }}
+                  style={{
+                    width: getItemWidth(elementsPerRow),
+                    minHeight: 'fit-content',
+                  }}
+                >
+                  <div className="commodity-img">
+                    <Image
+                      src={
+                        item.images[0]
+                          ? `${process.env.REACT_APP_API_URL ||
+                          "http://localhost:5000"
+                          }${item.images[0]}`
+                          : takePlace
+                      }
+                      alt="商品图片"
+                      preview={false}
+                      placeholder={
+                        <div style={{ width: '100%', aspectRatio: '1.3' }}>
+                          <Skeleton.Input active style={{ width: '100%', height: '100%' }} />
+                        </div>
+                      }
+                    />
+                  </div>
+                  <div className="commodity-title">{item.title}</div>
+                  <div className="commodity-bottom">
+                    <div className="commodity-price">{item.price}</div>
+                    {item.tag && item.tag !== "商品标签" && (
+                      <div className="commodity-tag">{item.tag}</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+              
+              {/* 加载状态提示 */}
+              {isMarketLoadingMore && (
+                <div className="loading-more">
+                  <span>加载中...</span>
+                </div>
+              )}
+              
+              {/* 没有更多内容提示 */}
+              {!hasMoreGoods && goods.length > 0 && (
+                <div className="no-more">
+                  <span>没有更多商品了</span>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
 
