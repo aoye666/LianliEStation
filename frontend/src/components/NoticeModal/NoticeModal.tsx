@@ -47,7 +47,7 @@ const NoticeModal: React.FC<NoticeModalProps> = ({
           title: '绑定QQ',
           message: '您还未绑定QQ，请先绑定QQ以使用当前功能',
           buttonText: '去绑定',
-          buttonAction: () => navigate('/settings'), // 跳转到设置页面
+          buttonAction: () => navigate('/user/settings/reset/qq_id'), // 跳转到设置页面
           showCloseButton: true,
         };
       case 'custom':

@@ -24,7 +24,7 @@ const Reset = () => {
   const defaultProfile: Profile = {
     nickname: currentUser?.nickname || "",
     campus_id: currentUser?.campus_id || 1,
-    qq_id: currentUser?.qq || "",
+    qq_id: currentUser?.qq_id || "",
     avatar: undefined,
     theme_id: currentUser?.theme_id,
     background_url: undefined,
@@ -183,7 +183,7 @@ const Reset = () => {
     changeProfile(
       currentUser?.nickname || "",
       currentUser?.campus_id || 1,
-      currentUser?.qq || "",
+      currentUser?.qq_id || "",
       profile?.theme_id || 1
     );
     navigate("/user/settings");
@@ -259,7 +259,7 @@ const Reset = () => {
               <Input
                 className="modern-input"
                 placeholder="请输入要绑定的QQ号"
-                defaultValue={currentUser?.qq}
+                defaultValue={currentUser?.qq_id}
                 onChange={(e) => setProfile(prev => ({ ...prev, qq_id: e.target.value }))}
                 size="large"
               />

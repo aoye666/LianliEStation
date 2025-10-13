@@ -14,7 +14,7 @@ const MarketPublishChoice = () => {
       {!isAuthenticated ? (
         <NoticeModal type='login' />
       ) : (
-        !currentUser?.qq && <NoticeModal type='qq' />
+        !currentUser?.qq_id && <NoticeModal type='qq' />
       )}
 
       <Navbar backPath='/market' title='商品发布' backActive={true} />

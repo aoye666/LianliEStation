@@ -39,15 +39,15 @@ interface Goods {
   price: number;
   author_id: number;
   author_username: string;
-  author_nickname: string;
+  author_nickname: string;  // API返回的字段名
   campus_id: number;
   status: 'available' | 'sold' | 'unavailable' | 'deleted';
   goods_type: string;
   tag?: string;
   created_at: string;
   updated_at: string;
-  likes_count: number;
-  complaints_count: number;
+  likes: number;  // API返回的字段名
+  complaints: number;  // API返回的字段名
   images?: string[];
 }
 
@@ -262,12 +262,12 @@ const Market: React.FC = () => {
         <Space>
           <Tooltip title="点赞数">
             <span style={{ color: '#52c41a' }}>
-              <LikeOutlined /> {record.likes_count}
+              <LikeOutlined /> {record.likes || 0}
             </span>
           </Tooltip>
           <Tooltip title="投诉数">
             <span style={{ color: '#ff4d4f' }}>
-              <DislikeOutlined /> {record.complaints_count}
+              <DislikeOutlined /> {record.complaints || 0}
             </span>
           </Tooltip>
         </Space>
@@ -485,10 +485,10 @@ const Market: React.FC = () => {
             <div style={{ marginBottom: 16 }}>
               <h4>互动统计</h4>
               <Space>
-                <Badge count={selectedGoods.likes_count} showZero>
+                <Badge count={selectedGoods.likes || 0} showZero>
                   <Button icon={<LikeOutlined />}>点赞</Button>
                 </Badge>
-                <Badge count={selectedGoods.complaints_count} showZero>
+                <Badge count={selectedGoods.complaints || 0} showZero>
                   <Button icon={<DislikeOutlined />}>投诉</Button>
                 </Badge>
               </Space>

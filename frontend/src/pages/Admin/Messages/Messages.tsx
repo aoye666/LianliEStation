@@ -38,13 +38,16 @@ interface Appeal {
   type: 'post' | 'goods';
   target_id: number;
   target_title?: string;
-  user_id: number;
-  user_username: string;
-  user_nickname: string;
+  target_content?: string;
+  author_id: number;  // API返回的字段名
+  author_name: string;  // API返回的字段名
+  author_qq_id?: string;  // API返回的字段名
+  author_avatar?: string;  // API返回的字段名
+  author_credit?: number;  // API返回的字段名
   status: 'pending' | 'resolved' | 'deleted';
   read_status: 'unread' | 'read';
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
   images?: string[];
   response_content?: string;
 }
@@ -243,8 +246,10 @@ const Messages: React.FC = () => {
       width: 120,
       render: (record: Appeal) => (
         <div>
-          <div>{record.user_nickname}</div>
-          <div style={{ fontSize: '12px', color: '#666' }}>@{record.user_username}</div>
+          <div>{record.author_name || '未知用户'}</div>
+          <div style={{ fontSize: '12px', color: '#666' }}>
+            {record.author_qq_id ? `QQ: ${record.author_qq_id}` : ''}
+          </div>
         </div>
       )
     },
@@ -412,7 +417,7 @@ const Messages: React.FC = () => {
                   {selectedAppeal.read_status === 'unread' ? '未读' : '已读'}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="申诉人">{selectedAppeal.user_nickname}</Descriptions.Item>
+              <Descriptions.Item label="申诉人">{selectedAppeal.author_name || '未知用户'}</Descriptions.Item>
               <Descriptions.Item label="目标ID">{selectedAppeal.target_id}</Descriptions.Item>
               <Descriptions.Item label="申诉时间" span={2}>
                 {new Date(selectedAppeal.created_at).toLocaleString()}

@@ -1,6 +1,6 @@
 import './Dashboard.scss'
 import React, { useState } from 'react';
-import { Card, Spin, Row, Col, Statistic, DatePicker, Space, Table, Tag, Progress, Divider } from 'antd';
+import { Card, Spin, Row, Col, Statistic, DatePicker, Space, Table, Tag, Progress } from 'antd';
 import { Bar, Pie, Line, Doughnut } from 'react-chartjs-2';
 import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement } from 'chart.js';
 import { useRequest } from 'ahooks'
@@ -9,7 +9,6 @@ import {
   UserOutlined,
   TeamOutlined,
   EyeOutlined,
-  RobotOutlined,
   ThunderboltOutlined,
   BulbOutlined,
   ShoppingOutlined,
@@ -34,89 +33,82 @@ interface AdStat {
   clicks: number;
 }
 
+interface StatsData {
+  visit: number;
+  users: number;
+  posts: number;
+  goods: number;
+  banned_users: number;
+  violation: number;
+  publish_goods_tag: Record<string, number>;
+  favorite_goods_tag: Record<string, number>;
+  publish_post_tag: Record<string, number>;
+  favorite_post_tag: Record<string, number>;
+  completed_transaction: number;
+  membership: number;
+  ad_click: number;
+  ad_add: number;
+  recent_7_days: {
+    visit: number;
+    active_users: number;
+    completed_transaction: number;
+    membership: number;
+    ad_click: number;
+    ad_add: number;
+    register: number;
+    goods: number;
+    posts: number;
+    publish_goods_tag: Record<string, number>;
+    favorite_goods_tag: Record<string, number>;
+    publish_post_tag: Record<string, number>;
+    favorite_post_tag: Record<string, number>;
+    daily_records: Array<{
+      date: string;
+      visit: number;
+      ad_click: number;
+      completed_transaction: number;
+      register: number;
+      goods: number;
+      posts: number;
+      membership: number;
+    }>;
+  };
+}
+
 const Dashboard: React.FC = () => {
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
 
   // 获取基础统计数据
-  const { data: statsData, loading: statsLoading } = useRequest(
-    () => api.get('/api/admin/stats').then(res => res.data),
-    {
-      onError: () => {
-        // 使用模拟数据
-        return {
-          totalUsers: 1250,
-          activeUsers: 850,
-          totalPosts: 3200,
-          totalGoods: 1800,
-          todayVisits: 420,
-          todayRegistrations: 15
-        };
-      }
-    }
+  const { data: statsResponse, loading: statsLoading } = useRequest(
+    () => api.get('/api/admin/stats').then(res => res.data)
   );
 
-  // 获取AI调用统计
-  const { data: aiStats, loading: aiLoading } = useRequest(
-    () => api.get('/api/admin/ai/stats').then(res => res.data),
-    {
-      onError: () => ({
-        todayCalls: 45,
-        totalCalls: 1250
-      })
-    }
-  );
+  const stats = statsResponse?.data as StatsData | undefined;
+  const recent7Days = stats?.recent_7_days;
 
   // 获取搜索关键词
   const { data: keywordsData, loading: keywordsLoading } = useRequest(
-    () => api.get('/api/admin/search-keywords', { params: { limit: 10 } }).then(res => res.data),
-    {
-      onError: () => ({
-        keywords: [
-          { keyword: "笔记本电脑", search_count: 125, created_at: "2024-01-01", updated_at: "2024-01-02" },
-          { keyword: "教材", search_count: 89, created_at: "2024-01-01", updated_at: "2024-01-02" },
-          { keyword: "自行车", search_count: 76, created_at: "2024-01-01", updated_at: "2024-01-02" },
-          { keyword: "手机", search_count: 65, created_at: "2024-01-01", updated_at: "2024-01-02" },
-          { keyword: "课件", search_count: 54, created_at: "2024-01-01", updated_at: "2024-01-02" }
-        ]
-      })
-    }
+    () => api.get('/api/admin/search-keywords', { params: { limit: 10 } }).then(res => res.data)
   );
 
-  // 获取事件统计
-  const { data: eventStats, loading: eventLoading } = useRequest(
-    () => api.get('/api/admin/event-stats').then(res => res.data.data),
-    {
-      onError: () => ({
-        visit: { active_users: 150 },
-        publish_goods_tag: { total_count: 45 },
-        publish_post_tag: { total_count: 32 },
-        favorite_goods_tag: { total_count: 89 },
-        favorite_post_tag: { total_count: 67 },
-        completed_transaction: { total_count: 23 },
-        ad_click: { total_clicks: 234 },
-        total: { total_events: 657 }
-      })
-    }
+  // 获取广告列表（用于统计）
+  const { data: adListData, loading: adLoading } = useRequest(
+    () => api.get('/api/advertisements/list').then(res => res.data)
   );
 
-  // 获取广告统计
-  const { data: adStats, loading: adLoading } = useRequest(
-    () => api.get('/api/advertisements/stats').then(res => res.data),
-    {
-      onError: () => ([
-        { id: 1, title: "春季促销", clicks: 150 },
-        { id: 2, title: "新品发布", clicks: 89 },
-        { id: 3, title: "限时优惠", clicks: 45 }
-      ])
-    }
-  );
+  // 从广告列表中提取统计数据
+  const adStats = adListData?.advertisements?.map((ad: any) => ({
+    id: ad.id,
+    title: ad.title,
+    clicks: ad.clicks || 0
+  })).sort((a: any, b: any) => b.clicks - a.clicks) || [];
 
-  // 模拟趋势数据
+  // 近7天访问趋势数据
   const visitTrendData = {
-    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+    labels: recent7Days?.daily_records?.map(r => dayjs(r.date).format('MM-DD')) || [],
     datasets: [{
       label: '访问量',
-      data: [320, 450, 380, 420, 390, 280, 240],
+      data: recent7Days?.daily_records?.map(r => r.visit) || [],
       borderColor: 'rgb(75, 192, 192)',
       backgroundColor: 'rgba(75, 192, 192, 0.2)',
       tension: 0.3,
@@ -124,13 +116,15 @@ const Dashboard: React.FC = () => {
   };
 
   const userTypeData = {
-    labels: ['活跃用户', '普通用户', '新注册用户'],
+    labels: ['活跃用户', '普通用户'],
     datasets: [{
-      data: [statsData?.activeUsers || 850, (statsData?.totalUsers || 1250) - (statsData?.activeUsers || 850), statsData?.todayRegistrations || 15],
+      data: [
+        recent7Days?.active_users || 0,
+        (stats?.users || 0) - (recent7Days?.active_users || 0)
+      ],
       backgroundColor: [
         '#52c41a',
-        '#1890ff', 
-        '#faad14'
+        '#1890ff'
       ],
     }],
   };
@@ -138,7 +132,7 @@ const Dashboard: React.FC = () => {
   const contentDistributionData = {
     labels: ['校园墙帖子', '商品信息'],
     datasets: [{
-      data: [statsData?.totalPosts || 3200, statsData?.totalGoods || 1800],
+      data: [stats?.posts || 0, stats?.goods || 0],
       backgroundColor: [
         '#722ed1',
         '#13c2c2'
@@ -176,32 +170,26 @@ const Dashboard: React.FC = () => {
     }
   ];
 
-  // 用户活动数据
-  const userActivityData = {
-    labels: ['发布商品', '发布帖子', '收藏商品', '收藏帖子', '完成交易'],
+  // 发布商品标签统计
+  const publishGoodsTagData = {
+    labels: Object.keys(stats?.publish_goods_tag || {}),
     datasets: [{
-      label: '用户活动统计',
-      data: [
-        eventStats?.publish_goods_tag?.total_count || 0,
-        eventStats?.publish_post_tag?.total_count || 0,
-        eventStats?.favorite_goods_tag?.total_count || 0,
-        eventStats?.favorite_post_tag?.total_count || 0,
-        eventStats?.completed_transaction?.total_count || 0
-      ],
-      backgroundColor: [
-        'rgba(255, 99, 132, 0.6)',
-        'rgba(54, 162, 235, 0.6)',
-        'rgba(255, 206, 86, 0.6)',
-        'rgba(75, 192, 192, 0.6)',
-        'rgba(153, 102, 255, 0.6)'
-      ],
-      borderColor: [
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)'
-      ],
+      label: '发布商品标签',
+      data: Object.values(stats?.publish_goods_tag || {}),
+      backgroundColor: 'rgba(255, 99, 132, 0.6)',
+      borderColor: 'rgba(255, 99, 132, 1)',
+      borderWidth: 1
+    }]
+  };
+
+  // 发布帖子标签统计
+  const publishPostTagData = {
+    labels: Object.keys(stats?.publish_post_tag || {}),
+    datasets: [{
+      label: '发布帖子标签',
+      data: Object.values(stats?.publish_post_tag || {}),
+      backgroundColor: 'rgba(54, 162, 235, 0.6)',
+      borderColor: 'rgba(54, 162, 235, 1)',
       borderWidth: 1
     }]
   };
@@ -210,46 +198,35 @@ const Dashboard: React.FC = () => {
     <div className="dashboard-container">
       {/* 核心统计卡片 */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }} className="stats-row">
-        <Col xs={24} sm={12} md={6}>
+        <Col xs={24} sm={12} md={8}>
           <Card hoverable>
             <Statistic
               title="总用户数"
-              value={statsData?.totalUsers || 0}
+              value={stats?.users || 0}
               valueStyle={{ color: '#3f8600' }}
               prefix={<UserOutlined />}
               suffix="人"
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={6}>
+        <Col xs={24} sm={12} md={8}>
           <Card hoverable>
             <Statistic
-              title="活跃用户"
-              value={eventStats?.visit?.active_users || statsData?.activeUsers || 0}
+              title="近7天活跃用户"
+              value={recent7Days?.active_users || 0}
               valueStyle={{ color: '#1890ff' }}
               prefix={<TeamOutlined />}
               suffix="人"
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={6}>
+        <Col xs={24} sm={12} md={8}>
           <Card hoverable>
             <Statistic
-              title="今日访问"
-              value={statsData?.todayVisits || 0}
+              title="总访问量"
+              value={stats?.visit || 0}
               valueStyle={{ color: '#cf1322' }}
               prefix={<EyeOutlined />}
-              suffix="次"
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card hoverable>
-            <Statistic
-              title="AI调用(今日)"
-              value={aiStats?.todayCalls || 0}
-              valueStyle={{ color: '#722ed1' }}
-              prefix={<RobotOutlined />}
               suffix="次"
             />
           </Card>
@@ -262,7 +239,7 @@ const Dashboard: React.FC = () => {
           <Card hoverable>
             <Statistic
               title="校园墙帖子"
-              value={statsData?.totalPosts || 0}
+              value={stats?.posts || 0}
               valueStyle={{ color: '#722ed1' }}
               prefix={<MessageOutlined />}
               suffix="条"
@@ -273,7 +250,7 @@ const Dashboard: React.FC = () => {
           <Card hoverable>
             <Statistic
               title="商品信息"
-              value={statsData?.totalGoods || 0}
+              value={stats?.goods || 0}
               valueStyle={{ color: '#13c2c2' }}
               prefix={<ShoppingOutlined />}
               suffix="件"
@@ -284,7 +261,7 @@ const Dashboard: React.FC = () => {
           <Card hoverable>
             <Statistic
               title="广告点击量"
-              value={eventStats?.ad_click?.total_clicks || 0}
+              value={stats?.ad_click || 0}
               valueStyle={{ color: '#faad14' }}
               prefix={<BulbOutlined />}
               suffix="次"
@@ -295,7 +272,7 @@ const Dashboard: React.FC = () => {
           <Card hoverable>
             <Statistic
               title="完成交易"
-              value={eventStats?.completed_transaction?.total_count || 0}
+              value={stats?.completed_transaction || 0}
               valueStyle={{ color: '#52c41a' }}
               prefix={<ThunderboltOutlined />}
               suffix="笔"
@@ -389,37 +366,7 @@ const Dashboard: React.FC = () => {
           </Card>
         </Col>
 
-        <Col xs={24} lg={8}>
-          <Card title="用户活动统计">
-            {eventLoading ? (
-              <div style={{ textAlign: 'center', padding: '50px 0' }}>
-                <Spin size="large" />
-              </div>
-            ) : (
-              <div style={{ height: '280px' }}>
-                <Bar
-                  data={userActivityData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        display: false,
-                      },
-                    },
-                    scales: {
-                      y: {
-                        beginAtZero: true,
-                      },
-                    },
-                  }}
-                />
-              </div>
-            )}
-          </Card>
-        </Col>
-        
-        <Col xs={24} lg={8}>
+        <Col xs={24} lg={16}>
           <Card title="广告点击排行">
             {adLoading ? (
               <div style={{ textAlign: 'center', padding: '50px 0' }}>
@@ -428,7 +375,7 @@ const Dashboard: React.FC = () => {
             ) : (
               <div style={{ height: '280px', overflowY: 'auto' }}>
                 <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                  {(adStats || []).slice(0, 5).map((ad: AdStat, index: number) => {
+                  {(adStats || []).slice(0, 8).map((ad: AdStat, index: number) => {
                     const maxClicks = Math.max(...(adStats || []).map((a: AdStat) => a.clicks), 1);
                     const percent = (ad.clicks / maxClicks) * 100;
                     return (
@@ -457,6 +404,85 @@ const Dashboard: React.FC = () => {
                     </div>
                   )}
                 </Space>
+              </div>
+            )}
+          </Card>
+        </Col>
+      </Row>
+
+      {/* 图表区域 - 第三行：标签统计（并列布局）*/}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }} className="charts-row">
+        <Col xs={24} lg={12}>
+          <Card title="发布商品标签统计">
+            {statsLoading ? (
+              <div style={{ textAlign: 'center', padding: '50px 0' }}>
+                <Spin size="large" />
+              </div>
+            ) : (
+              <div style={{ height: '320px', overflowX: 'auto' }}>
+                <Bar
+                  data={publishGoodsTagData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'x' as const,
+                    plugins: {
+                      legend: {
+                        display: false,
+                      },
+                    },
+                    scales: {
+                      x: {
+                        ticks: {
+                          autoSkip: false,
+                          maxRotation: 45,
+                          minRotation: 45
+                        }
+                      },
+                      y: {
+                        beginAtZero: true,
+                      },
+                    },
+                  }}
+                />
+              </div>
+            )}
+          </Card>
+        </Col>
+
+        <Col xs={24} lg={12}>
+          <Card title="发布帖子标签统计">
+            {statsLoading ? (
+              <div style={{ textAlign: 'center', padding: '50px 0' }}>
+                <Spin size="large" />
+              </div>
+            ) : (
+              <div style={{ height: '320px', overflowX: 'auto' }}>
+                <Bar
+                  data={publishPostTagData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'x' as const,
+                    plugins: {
+                      legend: {
+                        display: false,
+                      },
+                    },
+                    scales: {
+                      x: {
+                        ticks: {
+                          autoSkip: false,
+                          maxRotation: 45,
+                          minRotation: 45
+                        }
+                      },
+                      y: {
+                        beginAtZero: true,
+                      },
+                    },
+                  }}
+                />
               </div>
             )}
           </Card>
@@ -497,67 +523,65 @@ const Dashboard: React.FC = () => {
         </Col>
 
         <Col xs={24} lg={12}>
-          <Card title="AI 服务统计">
-            {aiLoading ? (
+          <Card title="近7天统计概览">
+            {statsLoading ? (
               <div style={{ textAlign: 'center', padding: '50px 0' }}>
                 <Spin size="large" />
               </div>
             ) : (
-              <div style={{ padding: '20px 0' }}>
-                <Row gutter={[16, 16]}>
-                  <Col span={12}>
-                    <Statistic
-                      title="今日调用"
-                      value={aiStats?.todayCalls || 0}
-                      valueStyle={{ color: '#1890ff' }}
-                      prefix={<RobotOutlined />}
-                      suffix="次"
-                    />
-                    <Divider />
-                  </Col>
-                  <Col span={12}>
-                    <Statistic
-                      title="总调用量"
-                      value={aiStats?.totalCalls || 0}
-                      valueStyle={{ color: '#52c41a' }}
-                      prefix={<ThunderboltOutlined />}
-                      suffix="次"
-                    />
-                    <Divider />
-                  </Col>
-                </Row>
-                
-                <div style={{ marginTop: 24 }}>
-                  <h4 style={{ marginBottom: 16 }}>事件统计总览</h4>
-                  <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>总事件数</span>
-                      <Tag color="purple" style={{ fontSize: 14, padding: '4px 12px' }}>
-                        {eventStats?.total?.total_events || 0}
-                      </Tag>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>发布商品</span>
-                      <Tag color="blue">{eventStats?.publish_goods_tag?.total_count || 0}</Tag>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>发布帖子</span>
-                      <Tag color="cyan">{eventStats?.publish_post_tag?.total_count || 0}</Tag>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>收藏商品</span>
-                      <Tag color="orange">{eventStats?.favorite_goods_tag?.total_count || 0}</Tag>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>收藏帖子</span>
-                      <Tag color="gold">{eventStats?.favorite_post_tag?.total_count || 0}</Tag>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>完成交易</span>
-                      <Tag color="green">{eventStats?.completed_transaction?.total_count || 0}</Tag>
-                    </div>
-                  </Space>
-                </div>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid #f0f0f0' }}>
+                      <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600 }}>统计项</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 600 }}>数值</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{ borderBottom: '1px solid #f0f0f0' }}>
+                      <td style={{ padding: '12px 8px' }}>访问量</td>
+                      <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                        <Tag color="blue">{recent7Days?.visit || 0}</Tag>
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #f0f0f0' }}>
+                      <td style={{ padding: '12px 8px' }}>注册用户</td>
+                      <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                        <Tag color="green">{recent7Days?.register || 0}</Tag>
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #f0f0f0' }}>
+                      <td style={{ padding: '12px 8px' }}>发布商品</td>
+                      <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                        <Tag color="cyan">{recent7Days?.goods || 0}</Tag>
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #f0f0f0' }}>
+                      <td style={{ padding: '12px 8px' }}>发布帖子</td>
+                      <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                        <Tag color="purple">{recent7Days?.posts || 0}</Tag>
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #f0f0f0' }}>
+                      <td style={{ padding: '12px 8px' }}>完成交易</td>
+                      <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                        <Tag color="gold">{recent7Days?.completed_transaction || 0}</Tag>
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #f0f0f0' }}>
+                      <td style={{ padding: '12px 8px' }}>广告点击</td>
+                      <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                        <Tag color="orange">{recent7Days?.ad_click || 0}</Tag>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '12px 8px' }}>会员开通</td>
+                      <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                        <Tag color="magenta">{recent7Days?.membership || 0}</Tag>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             )}
           </Card>

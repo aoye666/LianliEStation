@@ -39,14 +39,14 @@ interface Post {
   content: string;
   author_id: number;
   author_username: string;
-  author_nickname: string;
+  author_name: string;  // API返回的字段名
   campus_id: number;
   status: 'active' | 'inactive' | 'deleted';
   created_at: string;
   updated_at: string;
-  likes_count: number;
-  complaints_count: number;
-  comments_count: number;
+  likes: number;  // API返回的字段名
+  complaints: number;  // API返回的字段名
+  comment_count: number;  // API返回的字段名
   images?: string[];
 }
 
@@ -216,7 +216,7 @@ const Forum: React.FC = () => {
       width: 120,
       render: (record: Post) => (
         <div>
-          <div>{record.author_nickname}</div>
+          <div>{record.author_name || '未知用户'}</div>
           <div style={{ fontSize: '12px', color: '#666' }}>@{record.author_username}</div>
         </div>
       )
@@ -242,12 +242,12 @@ const Forum: React.FC = () => {
         <Space direction="vertical" size={0}>
           <Space>
             <LikeOutlined style={{ color: '#52c41a' }} />
-            <span>{record.likes_count}</span>
+            <span>{record.likes || 0}</span>
             <DislikeOutlined style={{ color: '#ff4d4f' }} />
-            <span>{record.complaints_count}</span>
+            <span>{record.complaints || 0}</span>
           </Space>
           <div style={{ fontSize: '12px', color: '#666' }}>
-            评论: {record.comments_count}
+            评论: {record.comment_count || 0}
           </div>
         </Space>
       )
@@ -382,7 +382,7 @@ const Forum: React.FC = () => {
             <Descriptions column={2} bordered style={{ marginBottom: 16 }}>
               <Descriptions.Item label="帖子ID">{selectedPost.id}</Descriptions.Item>
               <Descriptions.Item label="状态">{getStatusTag(selectedPost.status)}</Descriptions.Item>
-              <Descriptions.Item label="作者">{selectedPost.author_nickname}</Descriptions.Item>
+              <Descriptions.Item label="作者">{selectedPost.author_name || '未知用户'}</Descriptions.Item>
               <Descriptions.Item label="校区ID">{selectedPost.campus_id}</Descriptions.Item>
               <Descriptions.Item label="发布时间" span={2}>
                 {new Date(selectedPost.created_at).toLocaleString()}
@@ -418,13 +418,13 @@ const Forum: React.FC = () => {
             <div style={{ marginBottom: 16 }}>
               <h4>互动统计</h4>
               <Space>
-                <Badge count={selectedPost.likes_count} showZero>
+                <Badge count={selectedPost.likes || 0} showZero>
                   <Button icon={<LikeOutlined />}>点赞</Button>
                 </Badge>
-                <Badge count={selectedPost.complaints_count} showZero>
+                <Badge count={selectedPost.complaints || 0} showZero>
                   <Button icon={<DislikeOutlined />}>投诉</Button>
                 </Badge>
-                <Badge count={selectedPost.comments_count} showZero>
+                <Badge count={selectedPost.comment_count || 0} showZero>
                   <Button>评论</Button>
                 </Badge>
               </Space>

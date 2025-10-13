@@ -23,7 +23,7 @@ interface User {
   nickname: string;
   username: string;
   campus_id: number;
-  qq: string;
+  qq_id: string;
   email: string;
   credit: number;
   theme_id: number;
@@ -41,7 +41,7 @@ interface AllUsers {
   nickname: string;
   username: string;
   campus_id: number | undefined;
-  qq: string | undefined;
+  qq_id: string | undefined;
   email: string;
   credit: number;
   theme_id: number;
@@ -61,7 +61,7 @@ interface UserState {
   isUserLoading: boolean;
   setUserLoading: (loading: boolean) => void;
 
-  // fetchByQQ: (qq: string) => Promise<void>;
+  // fetchByQQ: (qq_id: string) => Promise<void>;
   fetchUserProfile: () => Promise<void>;
   changeImage: (type: string, image: File) => Promise<void>;
   changeProfile: (
@@ -265,12 +265,12 @@ const useUserStore = create<UserState>()(
       },
 
       // 管理员通过QQ号搜索用户
-      // fetchByQQ: async (qq: string) => {
+      // fetchByQQ: async (qq_id: string) => {
       //   try {
       //     const res = await api.post(
       //       '/api/users/searchByQQ',
       //        {
-      //           qq_id: qq,
+      //           qq_id: qq_id,
       //         },
       //     );
       //     set({ searchedUser: res?.data });

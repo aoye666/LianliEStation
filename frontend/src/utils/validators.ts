@@ -16,9 +16,9 @@ export const isValidPhone = (phone: string): boolean => {
 };
 
 // QQ号验证
-export const isValidQQ = (qq: string): boolean => {
+export const isValidQQ = (qq_id: string): boolean => {
   const qqRegex = /^[1-9][0-9]{4,10}$/;
-  return qqRegex.test(qq);
+  return qqRegex.test(qq_id);
 };
 
 // 价格验证
