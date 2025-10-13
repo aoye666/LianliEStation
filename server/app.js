@@ -25,6 +25,9 @@ import membershipRouter from "./routes/membership.js";
 
 let app = express();
 
+// 信任代理，确保能正确获取真实IP（重要！）
+app.set('trust proxy', true);
+
 // 中间件
 app.use(logger("dev"));
 app.use(json());
