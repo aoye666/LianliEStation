@@ -279,7 +279,7 @@ router.get("/profile", async (req, res) => {
       nickname: decoded.nickname,
       username: decoded.username,
       campus_id: decoded.campus_id,
-      qq: decoded.qq,
+      qq_id: decoded.qq,
       email: userRows[0].email,
       credit: userRows[0].credit,
       theme_id: userRows[0].theme_id,

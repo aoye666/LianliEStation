@@ -666,7 +666,7 @@ Authorization: Bearer {token}
     "nickname": "测试用户",
     "username": "testuser",
     "campus_id": 1,
-    "qq": "123456789",
+    "qq_id": "123456789",
     "email": "test@example.com",
     "credit": 100,
     "theme_id": 1,
