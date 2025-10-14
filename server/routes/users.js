@@ -388,14 +388,20 @@ router.put("/profile", authToken, async (req, res) => {
   try {
     const { nickname, qq_id, campus_id, theme_id } = req.body;
 
-    // 验证必填参数 - nickname, qq_id, campus_id 是必填的
-    if (!nickname || !qq_id || !campus_id) {
+    // 验证必填参数 - 只有 nickname, campus_id 是必填的
+    if (!nickname || !campus_id) {
       return res.status(400).json({ message: "缺少必要参数" });
     }
 
     // 构建更新字段和参数
-    let updateFields = "nickname = ?, qq_id = ?, campus_id = ?";
-    let updateParams = [nickname, qq_id, campus_id];
+    let updateFields = "nickname = ?, campus_id = ?";
+    let updateParams = [nickname, campus_id];
+
+    // 如果提供了qq_id，也进行更新
+    if (qq_id !== undefined) {
+      updateFields += ", qq_id = ?";
+      updateParams.push(qq_id);
+    }
 
     // 如果提供了theme_id，也进行更新
     if (theme_id !== undefined) {

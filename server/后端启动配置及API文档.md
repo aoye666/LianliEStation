@@ -760,7 +760,7 @@ Authorization: Bearer {token}
 | 参数名 | 类型 | 必选 | 描述 |
 |-------|------|------|------|
 | nickname | String | 是 | 用户昵称 |
-| qq_id | String | 是 | QQ 号码 |
+| qq_id | String | 否 | QQ 号码 |
 | campus_id | Number | 是 | 校区 ID |
 | theme_id | Number | 否 | 主题 ID，不提供则保持原值 |
 
