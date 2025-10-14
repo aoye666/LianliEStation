@@ -57,22 +57,62 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
     
     // 根据纵横比自动设置初始裁剪区域
     const { width, height } = e.currentTarget;
+    
+    let initialCrop: Crop;
+    
     if (aspectRatio) {
-      const cropWidth = width > height ? (height * aspectRatio > width ? 90 : 90) : 90;
-      const cropHeight = cropWidth / aspectRatio;
-      setCrop({
+      // 计算适合图片的最大裁剪区域
+      const imgAspect = width / height;
+      let cropWidth, cropHeight, x, y;
+      
+      if (imgAspect > aspectRatio) {
+        // 图片更宽，以高度为基准
+        cropHeight = 90; // 90%的高度
+        cropWidth = (cropHeight * aspectRatio * height) / width;
+        x = (100 - cropWidth) / 2;
+        y = 5;
+      } else {
+        // 图片更高或相等，以宽度为基准
+        cropWidth = 90; // 90%的宽度
+        cropHeight = (cropWidth * width) / (aspectRatio * height);
+        x = 5;
+        y = (100 - cropHeight) / 2;
+      }
+      
+      initialCrop = {
         unit: '%',
         width: cropWidth,
         height: cropHeight,
-        x: (100 - cropWidth) / 2,
-        y: (100 - cropHeight) / 2,
-      });
+        x,
+        y,
+      };
+    } else {
+      // 没有固定比例，使用90%的图片区域
+      initialCrop = {
+        unit: '%',
+        width: 90,
+        height: 90,
+        x: 5,
+        y: 5,
+      };
     }
+    
+    setCrop(initialCrop);
+    
+    // 初始化completedCrop，这样即使用户不调整也能裁剪
+    const pixelCrop: PixelCrop = {
+      unit: 'px',
+      width: (width * initialCrop.width) / 100,
+      height: (height * initialCrop.height) / 100,
+      x: (width * initialCrop.x) / 100,
+      y: (height * initialCrop.y) / 100,
+    };
+    setCompletedCrop(pixelCrop);
   }, [aspectRatio]);
 
   // 生成裁剪后的图片
   const getCroppedImg = async (): Promise<File | null> => {
-    if (!completedCrop || !imgRef.current) {
+    if (!imgRef.current) {
       return null;
     }
 
@@ -87,8 +127,14 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
 
-    // 计算裁剪后的尺寸
-    const pixelCrop = completedCrop;
+    // 如果没有裁剪区域，使用整张图片
+    const pixelCrop = completedCrop || {
+      unit: 'px' as const,
+      x: 0,
+      y: 0,
+      width: image.width,
+      height: image.height,
+    };
     
     // 根据目标尺寸调整canvas大小
     let canvasWidth = pixelCrop.width * scaleX;
@@ -187,6 +233,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
       x: 5,
       y: 5,
     });
+    setCompletedCrop(null);
     setScale(1);
     setRotate(0);
     onCancel();

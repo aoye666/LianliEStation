@@ -1,7 +1,7 @@
 import Tabbar from "../../components/Tabbar/Tabbar";
 import "./User.scss";
 import { useUserStore } from "../../store";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import stars from "../../assets/favorites-black.svg";
 import history from "../../assets/history-black.svg";
 import messages from "../../assets/messages-unread.svg";
@@ -125,10 +125,33 @@ const fetchImageFromBackend = async (endpoint: string): Promise<File | null> => 
 };
 
 const User = () => {
-  const { currentUser, isAuthenticated } = useUserStore();
+  // ✅ 使用selector方式，确保state变化时组件重新渲染
+  const currentUser = useUserStore((state) => state.currentUser);
+  const isAuthenticated = useUserStore((state) => state.isAuthenticated);
+  const fetchUserProfile = useUserStore((state) => state.fetchUserProfile);
+  
   const [avatarFile, setAvatarFile] = useState<string | undefined>();
   const [bannerFile, setBannerFile] = useState<string | undefined>();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // ✅ 监听路由变化，每次进入User页面都刷新用户信息
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('🔄 User页面: 路由变化，触发刷新', location.pathname);
+      console.log('📊 User页面: 当前currentUser', currentUser);
+      
+      fetchUserProfile().catch(error => {
+        console.error('❌ User页面: 刷新用户信息失败', error);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, isAuthenticated]); // 监听路由变化
+  
+  // ✅ 监听currentUser变化
+  useEffect(() => {
+    console.log('📢 User页面: currentUser已更新', currentUser);
+  }, [currentUser]);
 
   const loadImage = async (key: string, defaultUrl: string, isAvatar: boolean) => {
     // 先尝试从IndexedDB获取缓存

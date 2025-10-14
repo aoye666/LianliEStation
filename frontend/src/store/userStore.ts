@@ -227,7 +227,10 @@ const useUserStore = create<UserState>()(
         set({ isUserLoading: true });
         
         try {
+          console.log('🔄 fetchUserProfile: 开始请求');
           const res = await api.get("/api/users/profile");
+          console.log('✅ fetchUserProfile: API响应', res?.data);
+          
           const { isAdmin } = get();
 
           // 一般用户获取自己的信息
@@ -240,6 +243,11 @@ const useUserStore = create<UserState>()(
               const likes = records?.likes || [];
               const complaints = records?.complaints || [];
 
+              console.log('📝 fetchUserProfile: 准备更新state', {
+                nickname: userInfo.nickname,
+                email: userInfo.email,
+                qq_id: userInfo.qq_id
+              });
               
               // 分别设置用户信息和记录
               set({ 
@@ -250,6 +258,8 @@ const useUserStore = create<UserState>()(
                   favorites,
                 }
               });
+              
+              console.log('✅ fetchUserProfile: state已更新', get().currentUser);
             }
           }
           // 管理员获取所有用户信息
@@ -257,6 +267,7 @@ const useUserStore = create<UserState>()(
             set({ users: res?.data });
           }
         } catch (error: any) {
+          console.error('❌ fetchUserProfile: 请求失败', error);
           throw error;
         } finally {
           // ========== 新增：加载完成 ==========
@@ -298,14 +309,7 @@ const useUserStore = create<UserState>()(
           const res = await api.put(`/api/users/profile/image?type=${type}`, formData);
 
           if (res?.data?.url) {
-            set((state: any) => ({
-              currentUser: {
-                ...state.currentUser,
-                [type === "avatar" ? "avatar" : `${type}_url`]: res.data.url,
-              },
-            }));
-
-            // 上传成功后，将新图片存入 IndexedDB 缓存
+            // 清除IndexedDB和localStorage中的旧缓存
             try {
               const { openDB } = await import('idb');
               const db = await openDB('userImagesDB', 1, {
@@ -317,15 +321,15 @@ const useUserStore = create<UserState>()(
               });
               const tx = db.transaction('images', 'readwrite');
               const store = tx.objectStore('images');
-              await store.put(image, type); // 存入新图片，覆盖旧缓存
+              await store.delete(type); // 删除旧缓存
               await tx.done;
               db.close();
-              console.log(`已将新图片存入 IndexedDB 缓存: ${type}`);
+              console.log(`已清除 IndexedDB 中的旧图片缓存: ${type}`);
             } catch (idbError) {
-              console.error('存入 IndexedDB 缓存失败:', idbError);
+              console.error('清除 IndexedDB 缓存失败:', idbError);
             }
 
-            // 更新 localStorage（保留原有逻辑）
+            // 清除 localStorage 中的旧缓存
             let localStorageKey = "";
             if (type === "background") {
               localStorageKey = "userBackground";
@@ -335,6 +339,9 @@ const useUserStore = create<UserState>()(
               localStorageKey = "userAvatar";
             }
             localStorage.removeItem(localStorageKey);
+
+            // 重新获取用户信息，确保URL是最新的
+            await get().fetchUserProfile();
 
             message.success(res.data.message || '图片上传成功');
             console.log('图片上传成功:', res.data);
@@ -374,6 +381,8 @@ const useUserStore = create<UserState>()(
         theme_id?: number
       ) => {
         try {
+          console.log('🔄 changeProfile: 开始更新', { nickname, campus_id, qq_id });
+          
           // 动态构建请求体
           const requestBody: any = {
             nickname,
@@ -384,22 +393,24 @@ const useUserStore = create<UserState>()(
           if (theme_id !== undefined) requestBody.theme_id = theme_id;
 
           const res = await api.put("/api/users/profile", requestBody);
-          // 动态更新 currentUser 状态
-          set(
-            (state: UserState) =>
-              ({
-                currentUser: {
-                  ...state.currentUser,
-                  nickname,
-                  campus_id,
-                  qq_id,
-                  ...(theme_id !== undefined ? { theme_id } : {}),
-                },
-              } as Partial<UserState>)
-          );
-
+          console.log('✅ changeProfile: API更新成功', res.data);
+          
+          // ✅ 关键修复：保存后端返回的新token到Cookie
+          if (res.data.token) {
+            console.log('🔑 changeProfile: 更新token到Cookie');
+            Cookies.set('auth-token', res.data.token, { expires: 7 });
+          }
+          
+          // 重新获取用户信息，确保数据同步
+          console.log('🔄 changeProfile: 调用fetchUserProfile刷新数据');
+          await get().fetchUserProfile();
+          console.log('✅ changeProfile: 数据刷新完成');
+          
+          message.success(res.data.message || '个人信息更新成功');
           console.log(res.data);
         } catch (error: any) {
+          console.error('❌ changeProfile: 更新失败', error);
+          message.error(error.response?.data?.message || '更新失败');
           throw error;
         }
       },
@@ -538,6 +549,12 @@ const useUserStore = create<UserState>()(
     }),
     {
       name: "userStore",
+      // 只持久化必要的状态，currentUser和users每次从服务器获取最新数据
+      partialize: (state) => ({
+        isAuthenticated: state.isAuthenticated,
+        isAdmin: state.isAdmin,
+        // currentUser、users不持久化，避免使用过期数据
+      }),
     }
   )
 );

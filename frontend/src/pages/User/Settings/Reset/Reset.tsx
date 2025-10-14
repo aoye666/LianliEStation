@@ -34,6 +34,7 @@ const Reset = () => {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [backgroundPreview, setBackgroundPreview] = useState<string | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false); // 添加loading状态
   
   // 裁剪器状态
   const [cropperVisible, setCropperVisible] = useState<boolean>(false);
@@ -60,6 +61,16 @@ const Reset = () => {
       setCurrentImageFile(file);
       setCurrentImageType(type);
       setCropperVisible(true);
+    }
+    // 重置input的value，这样选择相同文件时也能触发onChange
+    event.target.value = '';
+  };
+
+  // 触发文件选择（解决移动设备兼容性问题）
+  const triggerFileInput = (inputId: string) => {
+    const input = document.getElementById(inputId) as HTMLInputElement;
+    if (input) {
+      input.click();
     }
   };
 
@@ -138,23 +149,42 @@ const Reset = () => {
 
   // 处理个人信息提交
   const handleProfileSubmit = async () => {
-    // 提交个人信息
-    changeProfile(
-      profile?.nickname || "",
-      profile?.campus_id || 1,
-      profile?.qq_id || ""
-    );
-    navigate("/user/settings");
+    setLoading(true);
+    try {
+      // 等待API完成
+      await changeProfile(
+        profile?.nickname || "",
+        profile?.campus_id || 1,
+        profile?.qq_id || ""
+      );
+      // 延迟导航，让用户看到成功提示
+      setTimeout(() => {
+        navigate("/user/settings");
+      }, 500);
+    } catch (error) {
+      console.error("更新失败:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 处理图片提交
   const handleImageSubmission = async (key: string, file?: File) => {
     if (file) {
-      // 直接调用修改图片的函数，不再存储到IndexedDB
-      // 上传成功后，changeImage会清除IndexedDB中的旧缓存
-      await changeImage(key, file);
+      setLoading(true);
+      try {
+        // 等待上传完成
+        await changeImage(key, file);
+        // 延迟导航，让用户看到成功提示
+        setTimeout(() => {
+          navigate("/user/settings");
+        }, 500);
+      } catch (error) {
+        console.error("上传失败:", error);
+      } finally {
+        setLoading(false);
+      }
     }
-    navigate("/user/settings");
   };
 
   // 处理资料卡背景提交
@@ -179,14 +209,23 @@ const Reset = () => {
   };
 
   // 处理主题提交
-  const handleThemeSubmit = () => {
-    changeProfile(
-      currentUser?.nickname || "",
-      currentUser?.campus_id || 1,
-      currentUser?.qq_id || "",
-      profile?.theme_id || 1
-    );
-    navigate("/user/settings");
+  const handleThemeSubmit = async () => {
+    setLoading(true);
+    try {
+      await changeProfile(
+        currentUser?.nickname || "",
+        currentUser?.campus_id || 1,
+        currentUser?.qq_id || "",
+        profile?.theme_id || 1
+      );
+      setTimeout(() => {
+        navigate("/user/settings");
+      }, 500);
+    } catch (error) {
+      console.error("更新失败:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   switch (type) {
@@ -211,6 +250,7 @@ const Reset = () => {
               onClick={handleProfileSubmit}
               size="large"
               block
+              loading={loading}
             >
               保存昵称
             </Button>
@@ -243,6 +283,7 @@ const Reset = () => {
               onClick={handleProfileSubmit}
               size="large"
               block
+              loading={loading}
             >
               保存默认校区
             </Button>
@@ -270,6 +311,7 @@ const Reset = () => {
               onClick={handleProfileSubmit}
               size="large"
               block
+              loading={loading}
             >
               保存绑定QQ号
             </Button>
@@ -303,7 +345,16 @@ const Reset = () => {
                     </button>
                   </div>
                 ) : (
-                  <label htmlFor="avatar-upload-input" className="upload-label">
+                  <label 
+                    htmlFor="avatar-upload-input" 
+                    className="upload-label"
+                    onClick={(e) => {
+                      // 确保在所有设备上都能触发文件选择
+                      e.preventDefault();
+                      triggerFileInput('avatar-upload-input');
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <CameraOutlined className="upload-icon" />
                     <div>选择头像</div>
                   </label>
@@ -317,6 +368,7 @@ const Reset = () => {
               size="large"
               block
               disabled={!profile?.avatar}
+              loading={loading}
             >
               保存头像
             </Button>
@@ -357,6 +409,7 @@ const Reset = () => {
               onClick={handleThemeSubmit}
               size="large"
               block
+              loading={loading}
             >
               保存主题风格
             </Button>
@@ -390,7 +443,15 @@ const Reset = () => {
                     </button>
                   </div>
                 ) : (
-                  <label htmlFor="background-upload-input" className="upload-label">
+                  <label 
+                    htmlFor="background-upload-input" 
+                    className="upload-label"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      triggerFileInput('background-upload-input');
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <UploadOutlined className="upload-icon" />
                     <div>选择背景</div>
                   </label>
@@ -404,6 +465,7 @@ const Reset = () => {
               size="large"
               block
               disabled={!profile?.background_url}
+              loading={loading}
             >
               保存发布页背景
             </Button>
@@ -447,7 +509,15 @@ const Reset = () => {
                     </button>
                   </div>
                 ) : (
-                  <label htmlFor="banner-upload-input" className="upload-label">
+                  <label 
+                    htmlFor="banner-upload-input" 
+                    className="upload-label"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      triggerFileInput('banner-upload-input');
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <UploadOutlined className="upload-icon" />
                     <div>选择背景</div>
                   </label>
@@ -461,6 +531,7 @@ const Reset = () => {
               size="large"
               block
               disabled={!profile?.banner_url}
+              loading={loading}
             >
               保存资料卡背景
             </Button>

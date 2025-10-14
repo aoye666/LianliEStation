@@ -1,17 +1,38 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./Settings.scss";
 import { useUserStore } from "../../../store";
 import Navbar from "../../../components/Navbar/Navbar";
 import logoutIcon from "../../../assets/logout-black.svg"
 import right from "../../../assets/right-black.svg"
 import about from "../../../assets/about-black.svg"
+import { useEffect } from "react";
 
 const Settings = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   // 调用 useUserStore 来获取 logout 方法和认证状态
   const logout = useUserStore((state) => state.logout);
   const currentUser = useUserStore((state) => state.currentUser);
   const isAuthenticated = useUserStore((state) => state.isAuthenticated);
+  const fetchUserProfile = useUserStore((state) => state.fetchUserProfile);
+
+  // ✅ 监听路由变化，每次进入Settings页面都刷新用户信息
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('🔄 Settings页面: 路由变化，触发刷新', location.pathname);
+      console.log('📊 Settings页面: 当前currentUser', currentUser);
+      
+      fetchUserProfile().catch(error => {
+        console.error('❌ Settings页面: 刷新用户信息失败', error);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, isAuthenticated]); // 监听路由变化
+  
+  // ✅ 监听currentUser变化
+  useEffect(() => {
+    console.log('📢 Settings页面: currentUser已更新', currentUser);
+  }, [currentUser]);
 
   const handleLogout = () => {
     logout();
