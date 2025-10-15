@@ -67,7 +67,7 @@ interface UserState {
   changeProfile: (
     nickname: string,
     campus_id: number,
-    qq_id: string,
+    qq_id?: string,      // ✅ 改为可选参数
     theme_id?: number
   ) => Promise<void>;
   // updateCredit: (qq_id: string, credit: number) => Promise<void>;
@@ -374,23 +374,32 @@ const useUserStore = create<UserState>()(
       },
 
       // 更新用户的个人信息（图片除外）
+      // 更新用户的个人信息（图片除外）
       changeProfile: async (
         nickname: string,
         campus_id: number,
-        qq_id: string,
+        qq_id?: string,      // ✅ 改为可选参数
         theme_id?: number
       ) => {
         try {
-          console.log('🔄 changeProfile: 开始更新', { nickname, campus_id, qq_id });
+          console.log('🔄 changeProfile: 开始更新', { nickname, campus_id, qq_id, theme_id });
           
-          // 动态构建请求体
+          // ✅ 动态构建请求体，只包含提供的参数
           const requestBody: any = {
             nickname,
             campus_id,
-            qq_id,
           };
 
-          if (theme_id !== undefined) requestBody.theme_id = theme_id;
+          // qq_id改为可选，只在提供时才添加
+          if (qq_id !== undefined && qq_id !== null && qq_id.trim() !== '') {
+            requestBody.qq_id = qq_id.trim();
+          }
+
+          if (theme_id !== undefined) {
+            requestBody.theme_id = theme_id;
+          }
+
+          console.log('📤 changeProfile: 请求体', requestBody);
 
           const res = await api.put("/api/users/profile", requestBody);
           console.log('✅ changeProfile: API更新成功', res.data);

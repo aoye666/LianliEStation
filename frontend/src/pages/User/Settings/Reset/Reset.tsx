@@ -4,7 +4,7 @@ import { useParams, Navigate, useNavigate } from "react-router-dom";
 import { useUserStore } from "../../../../store";
 import { useState, useEffect } from "react";
 import Forget from "../Forget/Forget";
-import { Button, Input, Select } from "antd";
+import { Button, Input, Select, message } from "antd";
 import { UploadOutlined, CameraOutlined } from "@ant-design/icons";
 import NoticeModal from "../../../../components/NoticeModal/NoticeModal";
 import ImageCropper from "../../../../components/ImageCropper/ImageCropper";
@@ -43,6 +43,19 @@ const Reset = () => {
   
   const { type } = useParams();
   const navigate = useNavigate();
+
+  // ✅ 当currentUser更新时，同步更新profile的默认值
+  useEffect(() => {
+    if (currentUser) {
+      setProfile(prev => ({
+        ...prev,
+        nickname: prev.nickname || currentUser.nickname || "",
+        campus_id: prev.campus_id || currentUser.campus_id || 1,
+        qq_id: prev.qq_id || currentUser.qq_id || "",
+        theme_id: prev.theme_id !== undefined ? prev.theme_id : currentUser.theme_id,
+      }));
+    }
+  }, [currentUser]);
 
   // 清理预览URL，防止内存泄露
   useEffect(() => {
@@ -147,22 +160,50 @@ const Reset = () => {
     }
   };
 
-  // 处理个人信息提交
+  // 处理个人信息提交（支持昵称、校区、QQ、主题四个参数）
   const handleProfileSubmit = async () => {
     setLoading(true);
     try {
-      // 等待API完成
+      // ✅ 使用profile的值，如果没有则使用currentUser的值作为后备
+      const nickname = (profile?.nickname || currentUser?.nickname || "").trim();
+      const campus_id = Number(profile?.campus_id || currentUser?.campus_id || 1);
+      const qq_id = (profile?.qq_id || currentUser?.qq_id || "").trim();
+      const theme_id = profile?.theme_id !== undefined ? profile.theme_id : currentUser?.theme_id;
+
+      console.log('📤 提交前的数据:', { 
+        profile_nickname: profile?.nickname,
+        profile_campus_id: profile?.campus_id,
+        profile_qq_id: profile?.qq_id,
+        profile_theme_id: profile?.theme_id,
+        currentUser_nickname: currentUser?.nickname,
+        currentUser_campus_id: currentUser?.campus_id,
+        currentUser_qq_id: currentUser?.qq_id,
+        currentUser_theme_id: currentUser?.theme_id,
+      });
+
+      console.log('📤 最终提交参数:', { 
+        nickname, 
+        campus_id, 
+        qq_id: qq_id || '(未提供)',
+        theme_id: theme_id !== undefined ? theme_id : '(未提供)'
+      });
+
+      // ✅ 调用changeProfile，传入四个参数（qq_id和theme_id都是可选的）
       await changeProfile(
-        profile?.nickname || "",
-        profile?.campus_id || 1,
-        profile?.qq_id || ""
+        nickname, 
+        campus_id, 
+        qq_id || undefined,
+        theme_id
       );
+      
       // 延迟导航，让用户看到成功提示
       setTimeout(() => {
         navigate("/user/settings");
       }, 500);
-    } catch (error) {
-      console.error("更新失败:", error);
+    } catch (error: any) {
+      console.error("❌ 更新失败:", error);
+      const errorMsg = error.response?.data?.message || error.message || '更新失败';
+      message.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -205,26 +246,6 @@ const Reset = () => {
   const handleAvatarSubmit = () => {
     if (profile?.avatar) {
       handleImageSubmission("avatar", profile.avatar);
-    }
-  };
-
-  // 处理主题提交
-  const handleThemeSubmit = async () => {
-    setLoading(true);
-    try {
-      await changeProfile(
-        currentUser?.nickname || "",
-        currentUser?.campus_id || 1,
-        currentUser?.qq_id || "",
-        profile?.theme_id || 1
-      );
-      setTimeout(() => {
-        navigate("/user/settings");
-      }, 500);
-    } catch (error) {
-      console.error("更新失败:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -406,7 +427,7 @@ const Reset = () => {
             <Button 
               type="primary" 
               className="submit-button"
-              onClick={handleThemeSubmit}
+              onClick={handleProfileSubmit}
               size="large"
               block
               loading={loading}
